@@ -1,0 +1,15 @@
+dist: trusty
+language: python
+install:
+  - pip install --user -r ansible/pip-requirements.txt
+script:
+  - ansible-lint ansible/setup.yml
+deploy:
+  - provider: script
+    script: cd ansible && ansible-playbook setup.yml
+    on:
+      repo: aeternity/infra
+      branch: master
+cache:
+  directories:
+    - $HOME/.cache/pip
