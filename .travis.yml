@@ -6,7 +6,7 @@ script:
   - ansible-lint ansible/setup.yml
 deploy:
   - provider: script
-    script: cd ansible && ansible-playbook setup.yml
+    script: cd ansible && ansible-playbook --limit=epoch setup.yml
     on:
       repo: aeternity/infra
       branch: master
