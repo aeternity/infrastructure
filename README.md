@@ -2,6 +2,7 @@
 
 Infrastructure is automatically managed by Ansible playbooks run by Travis.
 When some changes are merged to master, after successful Travis build the changes are deployed to the infrastructure.
+Playbooks are run against dynamic hosts list handled by Ansible OpenStack plugin.
 
 ## Ansible Deploy
 
