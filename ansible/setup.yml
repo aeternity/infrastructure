@@ -20,6 +20,7 @@
       tags:
         - project-user
 
+    # Automatic cleanup is not supported. You must remove old keys manually.
     - name: "Setup root SSH authorized keys"
       authorized_key:
         user: "{{ ansible_user }}"
@@ -28,6 +29,7 @@
       tags:
         - master-ssh-keys
 
+    # Automatic cleanup is not supported. You must remove old keys manually.
     - name: "Setup {{ project_user }} SSH authorized keys"
       authorized_key:
         user: "{{ project_user }}"
@@ -36,6 +38,7 @@
       tags:
         - nodes-ssh-keys
 
+    # Automatic cleanup is not supported. You must remove old keys manually.
     - name: Add deploy@travis SSH key to authorized keys
       authorized_key:
         user: "{{ project_user }}"
