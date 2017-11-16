@@ -1,7 +1,5 @@
 dist: trusty
 language: python
-install:
-  - pip install --user -r ansible/pip-requirements.txt
 script:
   - ansible-lint ansible/setup.yml
 deploy:
