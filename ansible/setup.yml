@@ -10,6 +10,7 @@
       - dincho
     developers:
       - sennui
+      - velzevur
 
   tasks:
     - name: Create epoch daemon user
