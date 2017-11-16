@@ -44,7 +44,10 @@
         - deploy-ssh-keys
 
     - name: Install dev tools
-      apt: pkg={{ item }} state=installed
+      apt:
+        pkg: "{{ item }}"
+        state: installed
+        update_cache: yes
       with_items:
         - git
         - python-pip
