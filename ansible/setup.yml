@@ -11,6 +11,7 @@
     developers:
       - sennui
       - velzevur
+      - lucafavatella
 
   tasks:
     - name: Create epoch daemon user
