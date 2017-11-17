@@ -4,7 +4,7 @@ script:
   - ansible-lint ansible/setup.yml
 deploy:
   - provider: script
-    script: deploy.sh
+    script: ./deploy.sh
     on:
       repo: aeternity/infrastructure
       branch: master
