@@ -1,0 +1,66 @@
+---
+- name: Configure node servers
+  hosts: all
+  remote_user: master
+  become: yes
+
+  vars:
+    project_user: epoch
+    devops:
+      - dincho
+    developers:
+      - sennui
+      - velzevur
+
+  tasks:
+    - name: Create epoch daemon user
+      user:
+        name: "{{ project_user }}"
+        shell: /bin/bash
+      tags:
+        - project-user
+
+    # Automatic cleanup is not supported. You must remove old keys manually.
+    - name: "Setup root SSH authorized keys"
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: https://github.com/{{ item }}.keys
+      with_items: "{{ devops }}"
+      tags:
+        - master-ssh-keys
+
+    # Automatic cleanup is not supported. You must remove old keys manually.
+    - name: "Setup {{ project_user }} SSH authorized keys"
+      authorized_key:
+        user: "{{ project_user }}"
+        key: https://github.com/{{ item }}.keys
+      with_items: "{{ developers }} + {{ devops }}"
+      tags:
+        - nodes-ssh-keys
+
+    # Automatic cleanup is not supported. You must remove old keys manually.
+    - name: Add deploy@travis SSH key to authorized keys
+      authorized_key:
+        user: "{{ project_user }}"
+        key: "{{ lookup('file', 'files/travis/deploy_key.pub') }}"
+      tags:
+        - deploy-ssh-keys
+
+    - name: Install dev tools
+      apt:
+        pkg: "{{ item }}"
+        state: installed
+        update_cache: yes
+      with_items:
+        - git
+        - python-pip
+
+    # Temporary fix for https://github.com/aeternity/epoch/issues/270
+    - name: Add IP address of all hosts to all hosts
+      lineinfile:
+        dest: /etc/hosts
+        line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].ansible_nodename }}"
+        state: present
+      with_items: "{{ ansible_play_hosts }}"
+      tags:
+        - etc-hosts

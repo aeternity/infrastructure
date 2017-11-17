@@ -1,0 +1,6 @@
+# Ansible OpenStack dynamic inventory plugin
+# https://docs.ansible.com/ansible/devel/plugins/inventory/openstack.html
+# Fetch all instances from OpenStack cloud and group them based on criteria
+plugin: openstack
+inventory_hostname: 'name'
+fail_on_errors: true

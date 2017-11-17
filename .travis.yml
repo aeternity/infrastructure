@@ -1,0 +1,13 @@
+dist: trusty
+language: python
+script:
+  - ansible-lint ansible/setup.yml
+deploy:
+  - provider: script
+    script: deploy.sh
+    on:
+      repo: aeternity/infrastructure
+      branch: master
+cache:
+  directories:
+    - $HOME/.cache/pip
