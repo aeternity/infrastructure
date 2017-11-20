@@ -1,0 +1,27 @@
+---
+- name: Ensure aeternity network environments
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Ensure integration environment stack
+      os_stack:
+        name: ae-integration
+        state: present
+        template: "../openstack/ae-environment.yml"
+        parameters:
+          environment: integration
+          node_count: 3
+      tags:
+        - integration-env
+
+    - name: Ensure UAT environment stack
+      os_stack:
+        name: ae-uat
+        state: present
+        template: "../openstack/ae-environment.yml"
+        parameters:
+          environment: uat
+          node_count: 3
+      tags:
+        - uat-env

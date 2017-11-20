@@ -1,0 +1,89 @@
+heat_template_version: 2013-05-23
+description: Aeternity environment
+
+parameters:
+    environment:
+        type: string
+        label: Nodes Environment
+    node_count:
+        type: number
+        label: Nodes Count
+        description: Number of epoch nodes
+        default: 2
+        constraints:
+          - range: { min: 2 }
+            description: Nodes Count must be at least 2
+    node_flavor:
+        type: string
+        label: Node Instance Type
+        description: Type of instance (flavor) to deploy for the epoch node
+        default: c1.small
+        constraints:
+          - custom_constraint: nova.flavor
+    key_name:
+        type: string
+        label: Key Name
+        description: SSH key to be used for all instances
+        default: "Travis Master"
+        constraints:
+          - custom_constraint: nova.keypair
+    image_name:
+        type: string
+        label: Image Name
+        description: Image name to create node servers
+        default: "Ubuntu 16.04"
+
+resources:
+  management_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Allow node management from internet (ICMP, SSH, API)
+      name:
+        str_replace:
+          template: ae-%env%-management
+          params:
+            "%env%": { get_param: environment }
+      rules:
+        - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: tcp, port_range_min: 3013, port_range_max: 3013}
+        - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: tcp, port_range_min: 22, port_range_max: 22}
+        - { remote_ip_prefix: 0.0.0.0/0, protocol: icmp }
+
+  epoch_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Full access between epoch nodes in their environment
+      name:
+        str_replace:
+          template: ae-%env%-nodes
+          params:
+            "%env%": { get_param: environment }
+      rules:
+        - { direction: egress, remote_ip_prefix: 0.0.0.0/0}
+        - { direction: ingress, remote_mode: remote_group_id }
+
+  epoch_servers:
+      type: OS::Heat::ResourceGroup
+      properties:
+          count: { get_param: node_count }
+          resource_def:
+              type: OS::Nova::Server
+              properties:
+                name:
+                    str_replace:
+                        template: ae-%env%-epoch-n%index%
+                        params:
+                          "%env%": { get_param: environment }
+                image: { get_param: image_name }
+                flavor: { get_param: node_flavor }
+                key_name: { get_param: key_name }
+                metadata:
+                  groups:
+                    str_replace:
+                        template: epoch,%env%
+                        params:
+                          "%env%": { get_param: environment }
+                networks:
+                  - network: ext-net
+                security_groups:
+                  - {get_resource: management_security_group}
+                  - {get_resource: epoch_security_group}
