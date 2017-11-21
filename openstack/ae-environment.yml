@@ -17,7 +17,7 @@ parameters:
         type: string
         label: Node Instance Type
         description: Type of instance (flavor) to deploy for the epoch node
-        default: c1.small
+        default: c1.medium
         constraints:
           - custom_constraint: nova.flavor
     key_name:
@@ -32,6 +32,11 @@ parameters:
         label: Image Name
         description: Image name to create node servers
         default: "Ubuntu 16.04"
+    api_port:
+        type: number
+        label: API port number
+        description: Port number of epoch node API
+        default: 3013
 
 resources:
   management_security_group:
@@ -44,9 +49,13 @@ resources:
           params:
             "%env%": { get_param: environment }
       rules:
-        - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: tcp, port_range_min: 3013, port_range_max: 3013}
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: { get_param: api_port }
+          port_range_max: { get_param: api_port }
         - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: tcp, port_range_min: 22, port_range_max: 22}
-        - { remote_ip_prefix: 0.0.0.0/0, protocol: icmp }
+        - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: icmp }
 
   epoch_security_group:
     type: OS::Neutron::SecurityGroup
@@ -58,7 +67,9 @@ resources:
           params:
             "%env%": { get_param: environment }
       rules:
+        # Allow all outgoing connections to Internet
         - { direction: egress, remote_ip_prefix: 0.0.0.0/0}
+        # All all incoming connection from the same security group
         - { direction: ingress, remote_mode: remote_group_id }
 
   epoch_servers:
