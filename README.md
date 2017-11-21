@@ -8,7 +8,7 @@ Setup playbook is run against dynamic hosts list handled by Ansible OpenStack pl
 Below documentation is meant for manual testing and additional details. It's already integrated in Travis workflow.
 
 ## Dependencies
-This implementation is using Ansible and it's [Ansible 2.4 OpenStack inventory plugin](https://docs.ansible.com/ansible/devel/plugins/inventory/openstack.html).
+This implementation is using Ansible and its [Ansible 2.4 OpenStack inventory plugin](https://docs.ansible.com/ansible/devel/plugins/inventory/openstack.html).
 To install dependencies use `pip`:
 ```bash
 pip install -r requirements.txt
@@ -44,6 +44,6 @@ ansible-inventory -i inventory/openstack.yml --list
 Setup environments infrastructure by running:
 ```bash
 cd ansible
-ansible-playbook environemnts.yml
+ansible-playbook environments.yml
 ansible-playbook setup.yml
 ```
