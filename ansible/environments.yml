@@ -26,9 +26,12 @@
       os_stack:
         name: ae-integration
         state: present
+        wait: yes
+        rollback: yes
         template: "../openstack/ae-environment.yml"
         parameters:
-          environment: integration
+          name: integration
+          meta_groups: "epoch,integration"
           node_count: 3
           node_flavor: c1.medium
           image_name: "Ubuntu 16.04.3"
@@ -39,9 +42,12 @@
       os_stack:
         name: ae-uat
         state: present
+        wait: yes
+        rollback: yes
         template: "../openstack/ae-environment.yml"
         parameters:
-          environment: uat
+          name: uat
+          meta_groups: "epoch,uat"
           node_count: 3
           node_flavor: c1.large
           image_name: "Ubuntu 16.04"

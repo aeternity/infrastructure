@@ -1,10 +1,15 @@
 heat_template_version: 2013-05-23
-description: Aeternity environment
+description: Aeternity environment stack
 
 parameters:
-    environment:
+    name:
         type: string
-        label: Nodes Environment
+        label: Environment name
+    meta_groups:
+        type: string
+        label: Comma separataed list of metadata groups
+        description: Groups used do manage ansible dynamic inventory
+        default: "epoch"
     node_count:
         type: number
         label: Nodes Count
@@ -45,9 +50,9 @@ resources:
       description: Allow node management from internet (ICMP, SSH, API)
       name:
         str_replace:
-          template: ae-%env%-management
+          template: ae-%name%-management
           params:
-            "%env%": { get_param: environment }
+            "%name%": { get_param: name }
       rules:
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
@@ -63,9 +68,9 @@ resources:
       description: Full access between epoch nodes in their environment
       name:
         str_replace:
-          template: ae-%env%-nodes
+          template: ae-%name%-nodes
           params:
-            "%env%": { get_param: environment }
+            "%name%": { get_param: name }
       rules:
         # Allow all outgoing connections to Internet
         - { direction: egress, remote_ip_prefix: 0.0.0.0/0}
@@ -81,18 +86,14 @@ resources:
               properties:
                 name:
                     str_replace:
-                        template: ae-%env%-epoch-n%index%
+                        template: ae-%name%-epoch-n%index%
                         params:
-                          "%env%": { get_param: environment }
+                          "%name%": { get_param: name }
                 image: { get_param: image_name }
                 flavor: { get_param: node_flavor }
                 key_name: { get_param: key_name }
                 metadata:
-                  groups:
-                    str_replace:
-                        template: epoch,%env%
-                        params:
-                          "%env%": { get_param: environment }
+                  groups: { get_param: meta_groups }
                 networks:
                   - network: ext-net
                 security_groups:
