@@ -1,6 +1,7 @@
 dist: trusty
 language: python
 script:
+  - ansible-lint ansible/environments.yml
   - ansible-lint ansible/setup.yml
 deploy:
   - provider: script

@@ -1,0 +1,55 @@
+---
+# Flavor List
+#+-----------+-------+------+-------+
+#| Name      |   RAM | Disk | VCPUs |
+#+-----------+-------+------+-------+
+#| p1.tiny   |   128 |   10 |     1 |
+#| p1.medium |   512 |   10 |     1 |
+#| c1.tiny   |  1024 |   40 |     1 |
+#| c2.tiny   |  1024 |   40 |     2 |
+#| c1.small  |  2048 |   40 |     1 |
+#| c2.small  |  2048 |   40 |     2 |
+#| c1.medium |  4096 |   40 |     2 |
+#| c2.medium |  4096 |   40 |     4 |
+#| c3.medium |  4096 |   40 |     6 |
+#| c1.large  |  8192 |   40 |     4 |
+#| c2.large  |  8192 |   40 |     8 |
+#| m1.xlarge | 16384 |   40 |     8 |
+#+-----------+-------+------+-------+
+
+- name: Ensure aeternity network environments
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Ensure integration environment stack
+      os_stack:
+        name: ae-integration
+        state: present
+        wait: yes
+        rollback: yes
+        template: "../openstack/ae-environment.yml"
+        parameters:
+          name: integration
+          meta_groups: "epoch,integration"
+          node_count: 3
+          node_flavor: c1.medium
+          image_name: "Ubuntu 16.04.3"
+      tags:
+        - integration-env
+
+    - name: Ensure UAT environment stack
+      os_stack:
+        name: ae-uat
+        state: present
+        wait: yes
+        rollback: yes
+        template: "../openstack/ae-environment.yml"
+        parameters:
+          name: uat
+          meta_groups: "epoch,uat"
+          node_count: 3
+          node_flavor: c1.large
+          image_name: "Ubuntu 16.04.3"
+      tags:
+        - uat-env

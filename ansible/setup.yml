@@ -55,13 +55,3 @@
       with_items:
         - git
         - python-pip
-
-    # Temporary fix for https://github.com/aeternity/epoch/issues/270
-    - name: Add IP address of all hosts to all hosts
-      lineinfile:
-        dest: /etc/hosts
-        line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].ansible_nodename }}"
-        state: present
-      with_items: "{{ ansible_play_hosts }}"
-      tags:
-        - etc-hosts
