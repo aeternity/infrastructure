@@ -12,6 +12,13 @@
       - sennui
       - velzevur
       - lucafavatella
+      - uwiger
+      - zp-sd
+      - ThomasArts
+      - hanssv
+      - happi
+      - UlfNorell
+      - gorillainduction
 
   tasks:
     - name: Create epoch daemon user
