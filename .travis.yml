@@ -7,6 +7,7 @@ script:
   - openstack stack create test -e openstack/test/create.yml -t openstack/ae-environment.yml --enable-rollback --wait --dry-run
   - ansible-playbook --check -i localhost, -e 'ansible_python_interpreter="/usr/bin/env python"' ansible/environments.yml
   - ansible-lint ansible/setup.yml
+  - ansible-lint ansible/monitoring.yml
 deploy:
   - provider: script
     script: ./deploy.sh

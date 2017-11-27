@@ -1,0 +1,37 @@
+- name: Configure monitoring services (DataDog)
+  hosts: all
+  remote_user: master
+  become: yes
+  tags: [datadog]
+
+  vars:
+    datadog_config:
+      apm_enabled: false
+      use_dogstatsd: yes
+      process_agent_enabled: true
+      hostname: "{{ ansible_fqdn }}"
+      tags: "{{ group_names|join(',') }}"
+    datadog_checks:
+      system_core:
+        init_config:
+        instances:
+          # The Agent just needs one item in instances in order to enable the check.
+          # The content of the item doesn’t matter.
+          - foo: bar
+      process:
+        init_config:
+        instances:
+          - name: ssh
+            search_string: ['sshd']
+          - name: epoch
+            search_string: ['beam.smp']
+      http_check:
+        init_config:
+        instances:
+          - name: API
+            url: "http://localhost:3013/v1/top"
+            # Default is false, i.e. emit events instead of service checks.
+            # Recommend to set to true.
+            skip_event: true
+  roles:
+    - { role: Datadog.datadog }
