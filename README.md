@@ -14,13 +14,35 @@ To install dependencies use `pip`:
 pip install -r requirements.txt
 ```
 
+You also need to install the Ansible roles used in playbooks:
+```bash
+ansible-galaxy install -r ansible/requirements.yml
+```
+
 ## Credentials setup
 
+### OpenStack
 You should make sure [OpenStack credentials are set](https://docs.openstack.org/python-openstackclient/latest/configuration/index.html#environment-variables)
 either by environment variables or clouds.yml file.
 
 ```bash
 source ~/my/secrets/openstack.rc
+```
+
+### DataDog
+Ansible is feeding datadog via callback plugin on each run.
+You should create a callback configuration with your DataDog API key before running any playbook.
+
+```bash
+echo "api_key: my_datadog_api_key_woof" > ansible/callback_plugins/datadog_callback.yml
+```
+
+Also monitoring.yml requires `datadog_api_key` variable to be set.
+You can use any supported ansible method, for example you can use local vars (not tracked in .gitignore:
+
+```bash
+mkdir -p ansible/group_vars/all
+echo "datadog_api_key: my_datadog_api_key_woof" >> ansible/group_vars/all/vars.local.yml
 ```
 
 ## Infrastructure orchestration
@@ -46,4 +68,5 @@ Setup environments infrastructure by running:
 cd ansible
 ansible-playbook environments.yml
 ansible-playbook setup.yml
+ansible-playbook monitoring.yml
 ```
