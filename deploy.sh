@@ -17,4 +17,4 @@ cd ansible
 ansible-galaxy install -r requirements.yml
 ansible-playbook environments.yml
 ansible-playbook --limit=epoch setup.yml
-ansible-playbook --limit=epoch --extra-vars "datadog_api_key=${datadog_api_key:?}" monitoring.yml
+ansible-playbook --limit="integration:uat:&epoch" --extra-vars "datadog_api_key=${datadog_api_key:?}" monitoring.yml
