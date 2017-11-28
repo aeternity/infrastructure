@@ -2,7 +2,7 @@ heat_template_version: 2013-05-23
 description: Aeternity environment stack
 
 parameters:
-    name:
+    env_name:
         type: string
         label: Environment name
     meta_groups:
@@ -50,9 +50,9 @@ resources:
       description: Allow node management from internet (ICMP, SSH, API)
       name:
         str_replace:
-          template: ae-%name%-management
+          template: ae-%env_name%-management
           params:
-            "%name%": { get_param: name }
+            "%env_name%": { get_param: env_name }
       rules:
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
@@ -68,9 +68,9 @@ resources:
       description: Full access between epoch nodes in their environment
       name:
         str_replace:
-          template: ae-%name%-nodes
+          template: ae-%env_name%-nodes
           params:
-            "%name%": { get_param: name }
+            "%env_name%": { get_param: env_name }
       rules:
         # Allow all outgoing connections to Internet
         - { direction: egress, remote_ip_prefix: 0.0.0.0/0}
@@ -86,9 +86,9 @@ resources:
               properties:
                 name:
                     str_replace:
-                        template: ae-%name%-epoch-n%index%
+                        template: ae-%env_name%-epoch-n%index%
                         params:
-                          "%name%": { get_param: name }
+                          "%env_name%": { get_param: env_name }
                 image: { get_param: image_name }
                 flavor: { get_param: node_flavor }
                 key_name: { get_param: key_name }
