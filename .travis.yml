@@ -1,5 +1,7 @@
 dist: trusty
 language: python
+isntall:
+  - pip install --user -r requirements.txt
 before_script:
   - ansible --version
   - openstack --version
