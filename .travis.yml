@@ -1,13 +1,11 @@
 dist: trusty
 language: python
-isntall:
-  - pip install --user -r requirements.txt
 before_script:
   - ansible --version
   - openstack --version
 script:
   - openstack stack create test -e openstack/test/create.yml -t openstack/ae-environment.yml --enable-rollback --wait --dry-run
-  - ansible-playbook --check -i localhost, ansible/environments.yml
+  - ansible-playbook --check -i localhost, -e 'ansible_python_interpreter="/usr/bin/env python"' ansible/environments.yml
   - ansible-lint ansible/setup.yml
 deploy:
   - provider: script
