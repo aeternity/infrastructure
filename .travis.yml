@@ -1,7 +1,8 @@
 dist: trusty
 language: python
 script:
-  - ansible-lint ansible/environments.yml
+  - openstack stack create test -e openstack/test/create.yml -t openstack/ae-environment.yml --enable-rollback --wait --dry-run
+  - ansible-playbook --check -i localhost, ansible/environments.yml
   - ansible-lint ansible/setup.yml
 deploy:
   - provider: script
