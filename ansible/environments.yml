@@ -53,3 +53,35 @@
           image_name: "Ubuntu 16.04.3"
       tags:
         - uat-env
+
+    - name: Ensure dev1 environment stack
+      os_stack:
+        name: ae-dev1
+        state: present
+        wait: yes
+        rollback: yes
+        template: "../openstack/ae-environment.yml"
+        parameters:
+          name: dev1
+          meta_groups: "epoch,dev1"
+          node_count: 2
+          node_flavor: c1.medium
+          image_name: "Ubuntu 16.04.3"
+      tags:
+        - dev1-env
+
+    - name: Ensure dev2 environment stack
+      os_stack:
+        name: ae-dev2
+        state: present
+        wait: yes
+        rollback: yes
+        template: "../openstack/ae-environment.yml"
+        parameters:
+          name: dev2
+          meta_groups: "epoch,dev2"
+          node_count: 2
+          node_flavor: c1.medium
+          image_name: "Ubuntu 16.04.3"
+      tags:
+        - dev2-env
