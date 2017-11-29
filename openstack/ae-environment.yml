@@ -16,8 +16,8 @@ parameters:
         description: Number of epoch nodes
         default: 2
         constraints:
-          - range: { min: 2 }
-            description: Nodes Count must be at least 2
+          - range: { min: 1 }
+            description: Nodes Count must be at least 1
     node_flavor:
         type: string
         label: Node Instance Type
