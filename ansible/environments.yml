@@ -54,6 +54,22 @@
       tags:
         - uat-env
 
+    - name: Ensure tester environment stack
+      os_stack:
+        name: ae-tester
+        state: present
+        wait: yes
+        rollback: yes
+        template: "../openstack/ae-environment.yml"
+        parameters:
+          env_name: tester
+          meta_groups: "epoch,uat,tester"
+          node_count: 1
+          node_flavor: c1.large
+          image_name: "Ubuntu 16.04.3"
+      tags:
+        - tester-env
+
     - name: Ensure dev1 environment stack
       os_stack:
         name: ae-dev1
