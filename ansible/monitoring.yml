@@ -5,12 +5,17 @@
   tags: [datadog]
 
   vars:
+    # separate var joined below just for readability
+    datadog_tags:
+      - "env:{{ datadog_env }}"
+      - "lsb:{{ ansible_lsb.description }}"
+      - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
     datadog_config:
       apm_enabled: false
       use_dogstatsd: yes
       process_agent_enabled: true
       hostname: "{{ ansible_fqdn }}"
-      tags: "{{ group_names|join(',') }}"
+      tags: "{{ datadog_tags|join(',') }}"
     datadog_checks:
       system_core:
         init_config:
