@@ -38,7 +38,7 @@ echo "api_key: my_datadog_api_key_woof" > ansible/callback_plugins/datadog_callb
 ```
 
 Also monitoring.yml requires `datadog_api_key` variable to be set.
-You can use any supported ansible method, for example you can use local vars (not tracked in .gitignore:
+You can use any supported ansible method, for example you can use local vars (not tracked in .gitignore):
 
 ```bash
 mkdir -p ansible/group_vars/all
