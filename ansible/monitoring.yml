@@ -30,6 +30,10 @@
             search_string: ['sshd']
           - name: epoch
             search_string: ['beam.smp']
+          - name: epmd
+            search_string: ['epmd']
+            thresholds:
+              warning: [1, 1]
       http_check:
         init_config:
         instances:
