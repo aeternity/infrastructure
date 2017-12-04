@@ -29,10 +29,7 @@
           - name: ssh
             search_string: ['sshd']
           - name: epoch
-            search_string: ['epmd']
-            thresholds:
-              #warning if no epmd or more than 1 epmd are running
-              warning: [1, 1]
+            search_string: ['beam.smp']
       http_check:
         init_config:
         instances:
