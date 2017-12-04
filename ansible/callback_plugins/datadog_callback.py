@@ -1,5 +1,4 @@
-# Source: https://github.com/DataDog/ansible-datadog-callback
-# Tag: 1.0.1
+# Source: https://github.com/DataDog/ansible-datadog-callback/tree/1.0.1
 
 import getpass
 import os.path
