@@ -48,7 +48,7 @@
         parameters:
           env_name: uat
           meta_groups: "epoch,uat"
-          node_count: 3
+          node_count: 13
           node_flavor: c1.large
           image_name: "Ubuntu 16.04.3"
       tags:

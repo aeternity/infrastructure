@@ -35,7 +35,8 @@
         key: https://github.com/{{ item }}.keys
       with_items: "{{ devops }}"
       tags:
-        - master-ssh-keys
+        - ssh-keys
+        - devops-ssh-keys
 
     # Automatic cleanup is not supported. You must remove old keys manually.
     - name: "Setup {{ project_user }} SSH authorized keys"
@@ -44,7 +45,8 @@
         key: https://github.com/{{ item }}.keys
       with_items: "{{ developers }} + {{ devops }}"
       tags:
-        - nodes-ssh-keys
+        - ssh-keys
+        - developers-ssh-keys
 
     # Automatic cleanup is not supported. You must remove old keys manually.
     - name: Add deploy@travis SSH key to authorized keys
@@ -52,6 +54,7 @@
         user: "{{ project_user }}"
         key: "{{ lookup('file', 'files/travis/deploy_key.pub') }}"
       tags:
+        - ssh-keys
         - deploy-ssh-keys
 
     - name: Install dev tools
@@ -62,3 +65,5 @@
       with_items:
         - git
         - python-pip
+      tags:
+        - dev-tools
