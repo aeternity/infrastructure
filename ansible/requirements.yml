@@ -1,0 +1,2 @@
+- src: Datadog.datadog
+  version: "1.4.0"

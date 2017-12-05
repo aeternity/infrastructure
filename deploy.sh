@@ -11,5 +11,9 @@ ssh-add /tmp/master_rsa
 
 # Setup environments and all epoch nodes with Ansible
 cd ansible
+ansible-galaxy install -r requirements.yml
 ansible-playbook environments.yml
 ansible-playbook --limit=epoch setup.yml
+# split monitoring playbook by environment because Ansible group vars are merged otherwise
+ansible-playbook --limit='uat:&epoch:!tester' --extra-vars "datadog_api_key=${datadog_api_key:?}" monitoring.yml
+ansible-playbook --limit='integration:&epoch' --extra-vars "datadog_api_key=${datadog_api_key:?}" monitoring.yml
