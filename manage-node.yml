@@ -1,0 +1,22 @@
+- hosts: all
+  remote_user: master
+  become: yes
+  vars:
+    project_user: epoch
+    epoch_exec: "{{ ansible_env.HOME }}/node/bin"
+  tasks:
+  - name: start
+    user:
+      name: "{{ project_user }}"
+      shell: "{{ epoch_exec }}/epoch start"
+    tags: start
+  - name: stop
+    user:
+      name: "{{ project_user }}"
+      shell: "{{ epoch_exec }}/epoch stop"
+    tags: stop
+  - name: restart
+    user:
+      name: "{{ project_user }}"
+      shell: "{{ epoch_exec }}/epoch restart"
+    tags: restart
