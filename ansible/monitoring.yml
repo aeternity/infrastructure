@@ -5,17 +5,18 @@
   tags: [datadog]
 
   vars:
-    # separate var joined below just for readability
-    datadog_tags:
-      - "env:{{ datadog_env }}"
-      - "lsb:{{ ansible_lsb.description }}"
-      - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
+    project_user: epoch
+    datadog_agent6: true
     datadog_config:
       apm_enabled: false
-      use_dogstatsd: yes
+      use_dogstatsd: true
       process_agent_enabled: true
+      log_enabled: true
       hostname: "{{ ansible_fqdn }}"
-      tags: "{{ datadog_tags|join(',') }}"
+      tags:
+        - "env:{{ datadog_env }}"
+        - "lsb:{{ ansible_lsb.description }}"
+        - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
     datadog_checks:
       system_core:
         init_config:
@@ -42,5 +43,32 @@
             # Default is false, i.e. emit events instead of service checks.
             # Recommend to set to true.
             skip_event: true
+      logs_agent:
+        init_config:
+        instances: [{}]
+        logs:
+          - type: file
+            path: "/home/{{ project_user }}/node/log/epoch.log"
+            service: epoch
+            source: lager
+            sourcecategory: epoch
+          - type: file
+            path: "/home/{{ project_user }}/node/log/epoch_mining.log"
+            service: epoch
+            source: lager
+            sourcecategory: mining
+          - type: file
+            path: "/home/{{ project_user }}/node/log/epoch_pow_cuckoo.log"
+            service: epoch
+            source: lager
+            sourcecategory: pow
+
+  pre_tasks:
+    - name: "Add dd-agent to {{ project_user }} group"
+      user:
+        name: dd-agent
+        groups: "{{ project_user }}"
+        append: yes
+
   roles:
     - { role: Datadog.datadog }
