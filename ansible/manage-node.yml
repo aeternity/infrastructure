@@ -3,12 +3,19 @@
   vars:
     epoch_exec: "{{ ansible_env.HOME }}/node/bin"
   tasks:
-  - name: start
+  - name: Checking the epoch daemon state
+    shell: "{{ epoch_exec }}/epoch pid | cat"
+    register: out
+    tags: stop, start, restart
+  - name: Starting the epoch deamon
     command: "{{ epoch_exec }}/epoch start"
+    when: out.stdout | search("Node")
     tags: start
-  - name: stop
+  - name: Stoping the epoch deamon
     command: "{{ epoch_exec }}/epoch stop"
+    when: not out.stdout | search("Node")
     tags: stop
-  - name: restart
+  - name: Restarting the epoch deamon
     command: "{{ epoch_exec }}/epoch restart"
+    when: not out.stdout | search("Node")
     tags: restart
