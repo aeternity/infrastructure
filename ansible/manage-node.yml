@@ -4,38 +4,32 @@
   remote_user: epoch
   vars:
     project_root: "{{ ansible_env.HOME }}/node"
-    stopped: false
+    epoch_action: "{{ c | default('none') }}"
   tasks:
+  - name: Checking if the input in correct
+    debug:
+      msg: "Incorrect input! You must input either 'start', 'stop' or 'restart'"
+    when: epoch_action != "start" and epoch_action != "stop" and epoch_action != "restart"
+
   - name: Check if epoch binary exists
     stat:
       path: "{{ project_root }}/bin/epoch"
     register: epoch
-    tags: stop, start, restart
 
   - name: Checking the epoch daemon state
     command: "{{ project_root }}/bin/epoch ping"
     failed_when: no
     register: ping
     when: epoch.stat.exists == True
-    tags: stop, start, restart
 
   - name: Starting the epoch deamon
     command: "{{ project_root }}/bin/epoch start"
-    when: epoch.stat.exists == True and not ping.stdout == "pong"
-    tags: start
+    when: epoch.stat.exists == True and not ping.stdout == "pong" and epoch_action == "start"
 
   - name: Stoping the epoch deamon
     command: "{{ project_root }}/bin/epoch stop"
-    when: epoch.stat.exists == True and ping.stdout == "pong"
-    tags: stop
-    
-  - name: Setting varieble stopped to true
-    set_fact:
-      stopped: true
-    when: epoch.stat.exists == True and ping.stdout == "pong"
-    tags: stop
+    when: epoch.stat.exists == True and ping.stdout == "pong" and epoch_action == "stop"
 
   - name: Restarting the epoch deamon
     command: "{{ project_root }}/bin/epoch restart"
-    when: epoch.stat.exists == True and ping.stdout == "pong" and stopped == false
-    tags: restart
+    when: epoch.stat.exists == True and ping.stdout == "pong" and epoch_action == "restart"
