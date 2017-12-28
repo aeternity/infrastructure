@@ -15,7 +15,7 @@
     stat:
       path: "{{ project_root }}/bin/epoch"
     register: epoch
-
+which 
   - name: Checking the epoch daemon state
     command: "{{ project_root }}/bin/epoch ping"
     failed_when: no
@@ -26,7 +26,7 @@
     command: "{{ project_root }}/bin/epoch start"
     when: epoch.stat.exists == True and not ping.stdout == "pong" and epoch_action == "start"
 
-  - name: Stoping the epoch deamon
+  - name: Stopping the epoch deamon
     command: "{{ project_root }}/bin/epoch stop"
     when: epoch.stat.exists == True and ping.stdout == "pong" and epoch_action == "stop"
 
