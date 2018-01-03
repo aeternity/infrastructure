@@ -70,3 +70,20 @@ ansible-playbook environments.yml
 ansible-playbook setup.yml
 ansible-playbook monitoring.yml
 ```
+## Manage nodes
+
+Start, stop and restart nodes by running:
+```bash
+cd ansible
+ansible-playbook manage-node.yml --extra-vars="c=start"
+ansible-playbook manage-node.yml --extra-vars="c=stop"
+ansible-playbook manage-node.yml --extra-vars="c=reset"
+```
+## Reset test-net nodes
+
+Clear the chain and log files on nodes by running:
+```bash
+cd ansible
+ansible-playbook reset-net.yml
+```
+
