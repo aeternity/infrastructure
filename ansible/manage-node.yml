@@ -15,7 +15,7 @@
     stat:
       path: "{{ project_root }}/bin/epoch"
     register: epoch
-which 
+
   - name: Checking the epoch daemon state
     command: "{{ project_root }}/bin/epoch ping"
     failed_when: no
