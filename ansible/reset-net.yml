@@ -9,6 +9,8 @@
       stat:
         path: "{{ project_root }}/bin/epoch"
       register: epoch
+      changed_when: false
+      failed_when: epoch.stat.exists != True
       tags: [daemon]
 
     - name: Checking the epoch daemon state
