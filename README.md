@@ -72,14 +72,15 @@ ansible-playbook monitoring.yml
 ```
 ## Manage nodes
 
-Start, stop and restart nodes by running:
+Start, stop, restart and ping nodes by running:
 ```bash
 cd ansible
-ansible-playbook manage-node.yml --extra-vars="c=start"
-ansible-playbook manage-node.yml --extra-vars="c=stop"
-ansible-playbook manage-node.yml --extra-vars="c=reset"
+ansible-playbook manage-node.yml --extra-vars="cmd=start"
+ansible-playbook manage-node.yml --extra-vars="cmd=stop"
+ansible-playbook manage-node.yml --extra-vars="cmd=restart"
+ansible-playbook manage-node.yml --extra-vars="cmd=ping"
 ```
-## Reset test-net nodes
+## Reset nodes
 
 Clear the chain and log files on nodes by running:
 ```bash
