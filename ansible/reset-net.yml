@@ -1,0 +1,67 @@
+---
+- name: Reset epoch test-net
+  hosts: all
+  remote_user: epoch
+
+  vars:
+    project_root: "{{ ansible_env.HOME }}/node"
+    epoch_bin: "{{ project_root }}/bin/epoch"
+
+  tasks:
+    - name: Epoch binary exists
+      stat:
+        path: "{{ epoch_bin }}"
+      register: epoch
+      failed_when: epoch.stat.exists != True
+      changed_when: false
+      tags: [daemon]
+
+    - name: Ping epoch daemon
+      command: "{{ epoch_bin }} ping"
+      register: ping
+      failed_when: no
+      changed_when: false
+      tags: [daemon]
+
+    - name: Stop epoch deamon
+      command: "{{ epoch_bin }} stop"
+      when: epoch.stat.exists == True and ping.stdout == "pong"
+      tags: [daemon]
+
+    - name: Read epoch.yaml contents
+      command: "cat {{ project_root }}/epoch.yaml"
+      register: cat_output
+      tags: [config]
+
+    - name: Parse YAML configuration
+      set_fact:
+        epoch_vars: "{{ cat_output.stdout | from_yaml }}"
+      tags: [config]
+
+    - name: Deleting old blockchain
+      file:
+        path: "{{ project_root }}/{{ epoch_vars.chain.db_path }}/"
+        state: absent
+      tags: [config]
+
+    - name: Creating new blockchain folder
+      file:
+        path: "{{ project_root }}/{{ epoch_vars.chain.db_path }}/"
+        state: directory
+      tags: [config]
+
+    - name: Deleting old log files
+      file:
+        path: "{{ project_root }}/log/"
+        state: absent
+      tags: [config]
+
+    - name: Creating new log folder
+      file:
+        path: "{{ project_root }}/log/"
+        state: directory
+      tags: [config]
+
+    - name: Start epoch deamon
+      command: "{{ epoch_bin }} start"
+      tags: [daemon]

@@ -11,6 +11,7 @@ script:
   - ansible-lint ansible/setup.yml
   - ansible-lint ansible/monitoring.yml
   - ansible-lint ansible/manage-node.yml
+  - ansible-lint ansible/reset-net.yml
 deploy:
   - provider: script
     script: ./deploy.sh

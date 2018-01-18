@@ -81,3 +81,16 @@ ansible-playbook manage-node.yml --extra-vars="cmd=stop"
 ansible-playbook manage-node.yml --extra-vars="cmd=restart"
 ansible-playbook manage-node.yml --extra-vars="cmd=ping"
 ```
+
+## Reset network of nodes
+
+To reset a network of nodes run:
+```bash
+cd ansible
+ansible-playbook reset-net.yml
+```
+
+This playbook simply does:
+
+- deletes blockchain data
+- deletes logs
