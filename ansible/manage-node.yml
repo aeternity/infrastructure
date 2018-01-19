@@ -4,7 +4,7 @@
   remote_user: epoch
 
   vars:
-    epoch_bin: "{{ ansible_env.HOME }}/node//bin/epoch"
+    epoch_bin: "{{ ansible_env.HOME }}/node/bin/epoch"
     epoch_action: "{{ cmd | default('ping') }}"
     epoch_running: false
 
@@ -62,3 +62,8 @@
       when:
         - epoch_running
         - epoch_action == "restart"
+
+  post_tasks:
+    - name: Prepare health checks
+      include_tasks: tasks/health_check.yml
+      when: epoch_action != "stop"

@@ -65,3 +65,7 @@
     - name: Start epoch deamon
       command: "{{ epoch_bin }} start"
       tags: [daemon]
+
+  post_tasks:
+    - name: Prepare health checks
+      include_tasks: tasks/health_check.yml
