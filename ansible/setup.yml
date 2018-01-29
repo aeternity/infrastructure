@@ -52,7 +52,10 @@
     - name: Add deploy@travis SSH key to authorized keys
       authorized_key:
         user: "{{ project_user }}"
-        key: "{{ lookup('file', 'files/travis/deploy_key.pub') }}"
+        key: "{{ lookup('file', item) }}"
+      with_items:
+        - files/travis/deploy_key.pub
+        - files/circleci/deploy_key.pub
       tags:
         - ssh-keys
         - deploy-ssh-keys
