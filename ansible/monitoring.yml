@@ -39,7 +39,7 @@
         init_config:
         instances:
           - name: API
-            url: "http://localhost:3013/v2/top"
+            url: "{{ api_base_uri }}/top"
             # Default is false, i.e. emit events instead of service checks.
             # Recommend to set to true.
             skip_event: true
