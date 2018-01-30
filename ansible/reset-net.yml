@@ -25,29 +25,40 @@
 
     - name: Stop epoch deamon
       command: "{{ epoch_bin }} stop"
-      when: epoch.stat.exists == True and ping.stdout == "pong"
+      when:
+        - epoch.stat.exists
+        - ping.stdout == "pong"
       tags: [daemon]
+
+    - name: Stat epoch.yaml
+      stat:
+        path: "{{ project_root }}/epoch.yaml"
+      register: config_file
 
     - name: Read epoch.yaml contents
       command: "cat {{ project_root }}/epoch.yaml"
       register: cat_output
+      when: config_file.stat.exists
       tags: [config]
 
     - name: Parse YAML configuration
       set_fact:
         epoch_vars: "{{ cat_output.stdout | from_yaml }}"
+      when: config_file.stat.exists
       tags: [config]
 
     - name: Deleting old blockchain
       file:
         path: "{{ project_root }}/{{ epoch_vars.chain.db_path }}/"
         state: absent
+      when: config_file.stat.exists
       tags: [config]
 
     - name: Creating new blockchain folder
       file:
         path: "{{ project_root }}/{{ epoch_vars.chain.db_path }}/"
         state: directory
+      when: config_file.stat.exists
       tags: [config]
 
     - name: Deleting old log files
@@ -64,6 +75,7 @@
 
     - name: Start epoch deamon
       command: "{{ epoch_bin }} start"
+      when: epoch.stat.exists
       tags: [daemon]
 
   post_tasks:
