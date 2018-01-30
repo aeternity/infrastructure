@@ -1,0 +1,69 @@
+---
+- name: Manage epoch nodes
+  hosts: all
+  remote_user: epoch
+
+  vars:
+    epoch_bin: "{{ ansible_env.HOME }}/node/bin/epoch"
+    epoch_action: "{{ cmd | default('ping') }}"
+    epoch_running: false
+
+  tasks:
+    - name: Fail on unsupported command
+      fail:
+        msg: "Invalid command. Supported commands are: ping, start, stop, restart"
+      when:
+        - epoch_action != "ping"
+        - epoch_action != "start"
+        - epoch_action != "stop"
+        - epoch_action != "restart"
+      connection: local
+
+    - name: Epoch binary exists
+      stat:
+        path: "{{ epoch_bin }}"
+      register: epoch
+      changed_when: false
+      failed_when: epoch.stat.exists != True
+
+    - name: Ping epoch daemon
+      command: "{{ epoch_bin }} ping"
+      register: ping
+      failed_when: no
+      changed_when: false
+      when: epoch.stat.exists == True
+
+    - name: Register running epoch daemon
+      set_fact:
+        epoch_running: true
+      when: ping.stdout == "pong"
+
+    - name: Fail if not running
+      fail:
+        msg: "Ping failed"
+      when:
+        - not epoch_running
+        - epoch_action == "ping"
+
+    - name: Start epoch deamon
+      command: "{{ epoch_bin }} start"
+      when:
+        - not epoch_running
+        - epoch_action == "start" or epoch_action == "restart"
+
+    - name: Stop epoch deamon
+      command: "{{ epoch_bin }} stop"
+      when:
+        - epoch_running
+        - epoch_action == "stop"
+
+    - name: Restart epoch deamon
+      command: "{{ epoch_bin }} restart"
+      when:
+        - epoch_running
+        - epoch_action == "restart"
+
+  post_tasks:
+    - name: Prepare health checks
+      include_tasks: tasks/health_check.yml
+      when: epoch_action != "stop"

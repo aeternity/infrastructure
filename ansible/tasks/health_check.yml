@@ -1,0 +1,13 @@
+---
+- name: Wait epoch node API to boot
+  wait_for:
+    port: "{{ config.http.external.port }}"
+    host: "{{ ansible_ssh_host }}"
+    timeout: 30
+  connection: local
+
+- name: API health check
+  uri:
+    url: "{{ api_base_uri }}/top"
+    timeout: 30
+  connection: local

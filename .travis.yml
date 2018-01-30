@@ -10,6 +10,8 @@ script:
   - ansible-playbook --check -i localhost, -e 'ansible_python_interpreter="/usr/bin/env python"' ansible/environments.yml
   - ansible-lint ansible/setup.yml
   - ansible-lint ansible/monitoring.yml
+  - ansible-lint ansible/manage-node.yml
+  - ansible-lint ansible/reset-net.yml
 deploy:
   - provider: script
     script: ./deploy.sh
