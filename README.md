@@ -29,6 +29,16 @@ either by environment variables or clouds.yml file.
 source ~/my/secrets/openstack.rc
 ```
 
+### Secrets
+
+Secrets are managed with [Ansible Vault](docs.ansible.com/ansible/2.4/vault.html).
+There is a tiny bridge vault file `vault-env` that bridges the `ANSIBLE_VAULT_PASSWORD` environment variable as Ansible vault password.
+
+```
+export ANSIBLE_VAULT_PASSWORD="top secret"
+ansible-playbook setup.yml
+```
+
 ## Infrastructure orchestration
 New environment stacks can be created by running:
 ```bash
