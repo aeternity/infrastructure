@@ -6,6 +6,7 @@
 
   vars:
     project_user: epoch
+    datadog_api_key: "{{ vault_datadog_api_key }}"
     datadog_agent6: true
     datadog_config:
       apm_enabled: false

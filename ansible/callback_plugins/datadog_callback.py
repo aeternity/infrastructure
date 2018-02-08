@@ -1,27 +1,32 @@
-# Source: https://github.com/DataDog/ansible-datadog-callback/tree/1.0.1
+# Source: https://github.com/DataDog/ansible-datadog-callback/tree/2.3.0
 
 import getpass
-import os.path
+import logging
+import os
 import time
 
-import datadog
-import yaml
-
 try:
-    # Ansible v2
-    from ansible.plugins.callback import CallbackBase
-    from __main__ import cli
+    import datadog
+    import yaml
+    HAS_MODULES = True
 except ImportError:
-    # Ansible v1
-    CallbackBase = object
-    cli = None
+    HAS_MODULES = False
+
+
+from ansible.plugins.callback import CallbackBase
+from __main__ import cli
 
 
 class CallbackModule(CallbackBase):
     def __init__(self):
-        # Read config and set up API client
-        api_key, url = self._load_conf(os.path.join(os.path.dirname(__file__), "datadog_callback.yml"))
-        datadog.initialize(api_key=api_key, api_host=url)
+        if not HAS_MODULES:
+            self.disabled = True
+            print 'Datadog callback disabled.\nMake sure you call all required libraries: "datadog" and "yaml".'
+        else:
+            self.disabled = False
+            # Set logger level - datadog api and urllib3
+            for log_name in ['requests.packages.urllib3', 'datadog.api']:
+                self._set_logger_level(log_name)
 
         self._playbook_name = None
         self._start_time = time.time()
@@ -29,18 +34,35 @@ class CallbackModule(CallbackBase):
         if cli:
             self._options = cli.options
 
-        # self.playbook is either set by Ansible (v1), or by us in the `playbook_start` callback method (v2)
+        # self.playbook is set in the `v2_playbook_on_start` callback method
         self.playbook = None
-        # self.play is either set by Ansible (v1), or by us in the `playbook_on_play_start` callback method (v2)
+        # self.play is set in the `playbook_on_play_start` callback method
         self.play = None
 
-    # Load parameters from conf file
-    def _load_conf(self, file_path):
-        conf_dict = {}
-        with open(file_path, 'r') as conf_file:
-            conf_dict = yaml.load(conf_file)
+    # Set logger level
+    def _set_logger_level(self, name, level=logging.WARNING):
+        try:
+            log = logging.getLogger(name)
+            log.setLevel(level)
+            log.propagate = False
+        except Exception, e:
+            # We don't want Ansible to fail on an API error
+            print 'Couldn\'t get logger - %s' % name
+            print e
 
-        return conf_dict.get('api_key', ''), conf_dict.get('url', 'https://app.datadoghq.com')
+    # Load parameters from conf file
+    def _load_conf(self):
+        file_path = os.environ.get('ANSIBLE_DATADOG_CALLBACK_CONF_FILE', os.path.join(os.path.dirname(__file__), "datadog_callback.yml"))
+
+        conf_dict = {}
+        if os.path.isfile(file_path):
+            with open(file_path, 'r') as conf_file:
+                conf_dict = yaml.load(conf_file)
+        else:
+            print "Could not load configuration, invalid file: {}".format(file_path)
+
+        return os.environ.get('DATADOG_API_KEY', conf_dict.get('api_key', '')), conf_dict.get('url', 'https://app.datadoghq.com')
+
 
     # Send event to Datadog
     def _send_event(self, title, alert_type=None, text=None, tags=None, host=None, event_type=None, event_object=None):
@@ -117,23 +139,6 @@ class CallbackModule(CallbackBase):
     def get_elapsed_time(self):
         return time.time() - self._start_time
 
-    # Handle `playbook_on_start` callback, common to Ansible v1 & v2
-    def _handle_playbook_on_start(self, playbook_file_name, inventory):
-        self.start_timer()
-
-        # Set the playbook name from its filename
-        self._playbook_name, _ = os.path.splitext(
-            os.path.basename(playbook_file_name))
-        inventory_name = os.path.basename(os.path.realpath(inventory))
-
-        self.send_playbook_event(
-            'Ansible playbook "{0}" started by "{1}" against "{2}"'.format(
-                self._playbook_name,
-                getpass.getuser(),
-                inventory_name),
-            event_type='start',
-        )
-
     # Default tags sent with events and metrics
     @property
     def default_tags(self):
@@ -173,6 +178,10 @@ class CallbackModule(CallbackBase):
 
     ### Ansible callbacks ###
     def runner_on_failed(self, host, res, ignore_errors=False):
+        # don't post anything if user asked to ignore errors
+        if ignore_errors:
+            return
+
         event_text, module_name_tag = self.format_result(res)
         self.send_task_event(
             'Ansible task failed on "{0}"'.format(host),
@@ -203,13 +212,6 @@ class CallbackModule(CallbackBase):
             host=host,
         )
 
-    # Implementation compatible with Ansible v1 only
-    def playbook_on_start(self):
-        playbook_file_name = self.playbook.filename
-        inventory = self.playbook.inventory.host_list
-
-        self._handle_playbook_on_start(playbook_file_name, inventory)
-
     # Implementation compatible with Ansible v2 only
     def v2_playbook_on_start(self, playbook):
         # On Ansible v2, Ansible doesn't set `self.playbook` automatically
@@ -218,11 +220,49 @@ class CallbackModule(CallbackBase):
         playbook_file_name = self.playbook._file_name
         inventory = self._options.inventory
 
-        self._handle_playbook_on_start(playbook_file_name, inventory)
+        self.start_timer()
+
+        # Set the playbook name from its filename
+        self._playbook_name, _ = os.path.splitext(
+            os.path.basename(playbook_file_name))
+        if isinstance(inventory, list):
+            inventory = ','.join(inventory)
+        self._inventory_name = ','.join([os.path.basename(os.path.realpath(name)) for name in inventory.split(',') if name])
 
     def v2_playbook_on_play_start(self, play):
         # On Ansible v2, Ansible doesn't set `self.play` automatically
         self.play = play
+        if self.disabled:
+            return
+
+        # Read config and hostvars
+        api_key, url = self._load_conf()
+        # If there is no api key defined in config file, try to get it from hostvars
+        if api_key == '':
+            hostvars = self.play.get_variable_manager()._hostvars
+
+            if not hostvars:
+                print "No api_key found in the config file and hostvars aren't set: disabling Datadog callback plugin"
+                self.disabled = True
+            else:
+                try:
+                    api_key = hostvars['localhost']['datadog_api_key']
+                except Exception, e:
+                    print 'No "api_key" found in the config file and {0} is not set in the hostvars: disabling Datadog callback plugin'.format(e)
+                    self.disabled = True
+
+        # Set up API client and send a start event
+        if not self.disabled:
+            datadog.initialize(api_key=api_key, api_host=url)
+
+            self.send_playbook_event(
+                'Ansible play "{0}" started in playbook "{1}" by "{2}" against "{3}"'.format(
+                    self.play.name,
+                    self._playbook_name,
+                    getpass.getuser(),
+                    self._inventory_name),
+                event_type='start',
+            )
 
     def playbook_on_stats(self, stats):
         total_tasks = 0

@@ -29,20 +29,14 @@ either by environment variables or clouds.yml file.
 source ~/my/secrets/openstack.rc
 ```
 
-### DataDog
-Ansible is feeding datadog via callback plugin on each run.
-You should create a callback configuration with your DataDog API key before running any playbook.
+### Secrets
 
-```bash
-echo "api_key: my_datadog_api_key_woof" > ansible/callback_plugins/datadog_callback.yml
+Secrets are managed with [Ansible Vault](docs.ansible.com/ansible/2.4/vault.html).
+There is a tiny bridge vault file `vault-env` that bridges the `ANSIBLE_VAULT_PASSWORD` environment variable as Ansible vault password.
+
 ```
-
-Also monitoring.yml requires `datadog_api_key` variable to be set.
-You can use any supported ansible method, for example you can use local vars (not tracked in .gitignore):
-
-```bash
-mkdir -p ansible/group_vars/all
-echo "datadog_api_key: my_datadog_api_key_woof" >> ansible/group_vars/all/vars.local.yml
+export ANSIBLE_VAULT_PASSWORD="top secret"
+ansible-playbook setup.yml
 ```
 
 ## Infrastructure orchestration

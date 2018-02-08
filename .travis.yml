@@ -4,10 +4,8 @@ before_script:
   - ansible --version
   - openstack --version
 script:
-  # Unfortunately the callback does not support environment vars but only config
-  - 'echo "api_key: ${datadog_api_key:?}" > ansible/callback_plugins/datadog_callback.yml'
   - openstack stack create test -e openstack/test/create.yml -t openstack/ae-environment.yml --enable-rollback --wait --dry-run
-  - ansible-playbook --check -i localhost, -e 'ansible_python_interpreter="/usr/bin/env python"' ansible/environments.yml
+  - cd ansible && ansible-playbook --check -i localhost, -e 'ansible_python_interpreter="/usr/bin/env python"' environments.yml
   - ansible-lint ansible/setup.yml
   - ansible-lint ansible/monitoring.yml
   - ansible-lint ansible/manage-node.yml
