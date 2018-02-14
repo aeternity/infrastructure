@@ -4,6 +4,7 @@ before_script:
   - ansible --version
   - openstack --version
 script:
+  - set -e
   - openstack stack create test -e openstack/test/create.yml -t openstack/ae-environment.yml --enable-rollback --wait --dry-run
   - cd ansible && ansible-playbook --check -i localhost, -e 'ansible_python_interpreter="/usr/bin/env python"' environments.yml
   - ansible-lint ansible/setup.yml
