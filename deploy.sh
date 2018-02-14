@@ -9,6 +9,9 @@ chmod 600 /tmp/master_rsa
 eval "$(ssh-agent -s)"
 ssh-add /tmp/master_rsa
 
+printenv
+python -c "import shade"
+
 # Setup environments and all epoch nodes with Ansible
 cd ansible
 ansible-galaxy install -r requirements.yml
