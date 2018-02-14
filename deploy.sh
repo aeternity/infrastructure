@@ -11,6 +11,7 @@ ssh-add /tmp/master_rsa
 
 printenv
 python -c "import shade"
+/usr/bin/pip freeze
 
 # Setup environments and all epoch nodes with Ansible
 cd ansible
