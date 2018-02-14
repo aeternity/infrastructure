@@ -12,5 +12,5 @@ ssh-add /tmp/master_rsa
 # Setup environments and all epoch nodes with Ansible
 cd ansible
 ansible-galaxy install -r requirements.yml
-ansible-playbook environments.yml
-ansible-playbook --limit=epoch setup.yml
+ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' environments.yml
+ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' --limit=epoch setup.yml
