@@ -78,8 +78,6 @@
         src: https://github.com/jedisct1/libsodium/releases/download/{{ libsodium_version }}/libsodium-{{ libsodium_version }}.tar.gz
         dest: /usr/local/src/
         remote_src: yes
-      args:
-        creates: /usr/local/src/libsodium-{{ libsodium_version }}.tar.gz
       tags:
         - libsodium
 
