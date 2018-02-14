@@ -19,6 +19,8 @@
       - happi
       - UlfNorell
       - gorillainduction
+    libsodium_version: "1.0.16"
+    libsodium_module_version: "23.1.0"
 
   tasks:
     - name: Create epoch daemon user
@@ -70,3 +72,24 @@
         - python-pip
       tags:
         - dev-tools
+
+    - name: Download libsodium
+      unarchive:
+        src: https://github.com/jedisct1/libsodium/releases/download/{{ libsodium_version }}/libsodium-{{ libsodium_version }}.tar.gz
+        dest: /usr/local/src/
+        remote_src: yes
+      tags:
+        - libsodium
+
+    - name: Install libsodium
+      command: "{{ item }}"
+      with_items:
+        - ./configure
+        - make
+        - make install
+        - ldconfig
+      args:
+        chdir: "/usr/local/src/libsodium-{{ libsodium_version }}"
+        creates: "/usr/local/lib/libsodium.so.{{ libsodium_module_version }}"
+      tags:
+        - libsodium
