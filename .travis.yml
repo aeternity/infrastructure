@@ -3,7 +3,9 @@ language: python
 before_script:
   - ansible --version
   - openstack --version
-script: ./check.sh
+script:
+  - ./check.sh
+  - ./deploy.sh
 deploy:
   - provider: script
     script: ./deploy.sh
@@ -11,12 +13,6 @@ deploy:
     on:
       repo: aeternity/infrastructure
       branch: master
-  - provider: script
-    script: ./deploy.sh
-    skip_cleanup: true
-    on:
-      repo: aeternity/infrastructure
-      branch: fix/travis-deploy
 cache:
   directories:
     - $HOME/.cache/pip
