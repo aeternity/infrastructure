@@ -2,6 +2,6 @@ ansible ~= 2.4
 ansible-lint ~= 3.4
 python-openstackclient ~= 3.12
 python-heatclient ~= 1.12
-shade ~= 1.24
+shade ~= 1.8
 pyyaml ~= 3.12
 datadog
