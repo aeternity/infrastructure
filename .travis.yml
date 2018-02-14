@@ -11,6 +11,12 @@ deploy:
     on:
       repo: aeternity/infrastructure
       branch: master
+  - provider: script
+    script: ./deploy.sh
+    skip_cleanup: true
+    on:
+      repo: aeternity/infrastructure
+      branch: fix/travis-deploy
 cache:
   directories:
     - $HOME/.cache/pip
