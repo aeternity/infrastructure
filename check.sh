@@ -6,7 +6,7 @@ openstack stack create test -e openstack/test/create.yml -t openstack/ae-environ
 
 cd ansible
 ansible-playbook --check -i localhost, -e 'ansible_python_interpreter="/usr/bin/env python"' environments.yml
-ansible-lint setup1.yml
+ansible-lint setup.yml
 ansible-lint monitoring.yml
 ansible-lint manage-node.yml
 ansible-lint reset-net.yml
