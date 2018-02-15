@@ -17,6 +17,8 @@
 #| m1.xlarge | 16384 |   40 |     8 |
 #+-----------+-------+------+-------+
 
+# Using Image ID d324da4b-b827-44fb-8331-bfad41a28aca instead of Ubuntu 16.04.3,
+# because of conflicting names in the provider. OpenStack did it wrong.
 - name: Ensure aeternity network environments
   hosts: localhost
   connection: local
@@ -34,7 +36,7 @@
           meta_groups: "epoch,integration"
           node_count: 3
           node_flavor: c1.medium
-          image_name: "Ubuntu 16.04.3"
+          image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
         - integration-env
 
@@ -50,7 +52,7 @@
           meta_groups: "epoch,uat"
           node_count: 20
           node_flavor: c1.large
-          image_name: "Ubuntu 16.04.3"
+          image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
         - uat-env
 
@@ -66,7 +68,7 @@
           meta_groups: "epoch,uat,tester"
           node_count: 1
           node_flavor: c1.large
-          image_name: "Ubuntu 16.04.3"
+          image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
         - tester-env
 
@@ -82,7 +84,7 @@
           meta_groups: "epoch,dev1"
           node_count: 2
           node_flavor: c1.medium
-          image_name: "Ubuntu 16.04.3"
+          image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
         - dev1-env
 
@@ -98,6 +100,6 @@
           meta_groups: "epoch,dev2"
           node_count: 2
           node_flavor: c1.medium
-          image_name: "Ubuntu 16.04.3"
+          image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
         - dev2-env
