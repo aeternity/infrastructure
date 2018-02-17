@@ -120,17 +120,17 @@ workflows:
       - deploy:
           requires:
             - check
-          # filters:
-          #   branches:
-          #     only: master
+          filters:
+            branches:
+              only: master
 
-  # daily_deploy:
-  #   triggers:
-  #     - schedule:
-  #         cron: "0 12 * * *"
-  #         filters:
-  #           branches:
-  #             only:
-  #               - master
-  #   jobs:
-  #     - deploy
+  daily_deploy:
+    triggers:
+      - schedule:
+          cron: "0 12 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - deploy
