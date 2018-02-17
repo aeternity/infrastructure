@@ -86,11 +86,12 @@ jobs:
       - *restore_venv
       - *activate_venv
       - *restore_roles
+      # Don't run on UAT until we're sure it won't cause changes
       - run:
           name: Setup infrastructure
           command: |
             cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
-              environments.yml
+              --skip-tags "uat-env" environments.yml
       - run:
           name: Setup environments
           command: |
