@@ -78,8 +78,7 @@
         state: installed
         update_cache: yes
       with_items:
-        - git
-        - python-pip
+        - build-essential
       tags:
         - dev-tools
 
