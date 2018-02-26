@@ -41,6 +41,17 @@
         - devops-ssh-keys
 
     # Automatic cleanup is not supported. You must remove old keys manually.
+    - name: "Add CI master keys"
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ lookup('file', item) }}"
+      with_items:
+        - files/circleci/master_key.pub
+      tags:
+        - ssh-keys
+        - master-ssh-keys
+
+    # Automatic cleanup is not supported. You must remove old keys manually.
     - name: "Setup {{ project_user }} SSH authorized keys"
       authorized_key:
         user: "{{ project_user }}"
@@ -51,12 +62,11 @@
         - developers-ssh-keys
 
     # Automatic cleanup is not supported. You must remove old keys manually.
-    - name: Add deploy@travis SSH key to authorized keys
+    - name: Add CI deploy key to authorized keys
       authorized_key:
         user: "{{ project_user }}"
         key: "{{ lookup('file', item) }}"
       with_items:
-        - files/travis/deploy_key.pub
         - files/circleci/deploy_key.pub
       tags:
         - ssh-keys

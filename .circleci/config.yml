@@ -1,0 +1,136 @@
+version: 2
+
+references:
+  container_config: &container_config
+    setup_remote_docker:
+      docker_layer_caching: true
+    docker:
+      - image: aetrnty/builder
+        user: builder
+    working_directory: ~/infrastructure
+
+  venv_cache_key: &venv_cache_key v2-venv-cache-{{ checksum "requirements.txt" }}
+  restore_venv: &restore_venv
+    restore_cache:
+      key: *venv_cache_key
+
+  roles_cache_key: &roles_cache_key v1-ansible-roles-{{ checksum "ansible/requirements.yml" }}
+  restore_roles: &restore_roles
+    restore_cache:
+      key: *roles_cache_key
+
+  install_pip: &install_pip
+    run:
+      name: Install PIP dependancies
+      command: pip install -r requirements.txt
+
+  activate_venv: &activate_venv
+    run:
+      name: Activate python virtual environment
+      command: |
+        source ~/infrastructure/venv/ansible/bin/activate
+        echo "source ~/infrastructure/venv/ansible/bin/activate" >> $BASH_ENV
+
+jobs:
+  build:
+    <<: *container_config
+    steps:
+      - checkout
+      - *restore_venv
+      - run:
+          name: Create python virtual environment
+          command: |
+            virtualenv venv/ansible
+      - *activate_venv
+      - *install_pip
+      - save_cache:
+          key: *venv_cache_key
+          paths:
+            - venv/ansible
+      - run:
+          name: Install ansible roles
+          command: |
+            cd ansible && ansible-galaxy install -r requirements.yml -p roles
+      - save_cache:
+          key: *roles_cache_key
+          paths:
+            ansible/roles
+  check:
+    <<: *container_config
+    steps:
+      - checkout
+      - *restore_venv
+      - *activate_venv
+      - run:
+          name: Lint ansible playbooks
+          command: |
+            ansible-lint ansible/setup.yml
+            ansible-lint ansible/monitoring.yml
+            ansible-lint ansible/manage-node.yml
+            ansible-lint ansible/reset-net.yml
+      - run:
+          name: Dry run OpenStack heat template
+          command: |
+            openstack stack create test -e openstack/test/create.yml \
+              -t openstack/ae-environment.yml --enable-rollback --wait --dry-run
+      - run:
+          name: Dry run environments playbooks
+          command: |
+            cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
+              --check -i localhost, environments.yml
+
+  deploy:
+    <<: *container_config
+    steps:
+      - checkout
+      - *restore_venv
+      - *activate_venv
+      - *restore_roles
+      # Don't run on UAT until we're sure it won't cause changes
+      - run:
+          name: Setup infrastructure
+          command: |
+            cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
+              --skip-tags "uat-env" environments.yml
+      - run:
+          name: Setup environments
+          command: |
+            cd ansible && ansible-playbook --limit='epoch' setup.yml
+      # split monitoring playbook by environment because Ansible group vars are merged otherwise
+      - run:
+          name: Install monitoring tools (Integration)
+          command: |
+            cd ansible && ansible-playbook --limit='integration:&epoch' monitoring.yml
+      - run:
+          name: Install monitoring tools (UAT)
+          command: |
+            cd ansible && ansible-playbook --limit='uat:&epoch' monitoring.yml
+
+workflows:
+  version: 2
+  check_deploy:
+    jobs:
+      - build:
+          requires: []
+
+      - check:
+          requires:
+            - build
+
+      - deploy:
+          requires:
+            - check
+          filters:
+            branches:
+              only: master
+
+  daily_deploy:
+    triggers:
+      - schedule:
+          cron: "0 12 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - deploy
