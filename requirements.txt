@@ -5,3 +5,5 @@ python-heatclient ~= 1.12
 shade ~= 1.24
 pyyaml ~= 3.12
 datadog
+boto
+boto3
