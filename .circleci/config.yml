@@ -40,7 +40,7 @@ jobs:
       - run:
           name: Create python virtual environment
           command: |
-            virtualenv venv/ansible
+            virtualenv -p python3 venv/ansible
       - *activate_venv
       - *install_pip
       - save_cache:
