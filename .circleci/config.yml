@@ -9,12 +9,12 @@ references:
         user: builder
     working_directory: ~/infrastructure
 
-  venv_cache_key: &venv_cache_key v2-venv-cache-{{ checksum "requirements.txt" }}
+  venv_cache_key: &venv_cache_key v3-venv-cache-{{ checksum "requirements.txt" }}
   restore_venv: &restore_venv
     restore_cache:
       key: *venv_cache_key
 
-  roles_cache_key: &roles_cache_key v1-ansible-roles-{{ checksum "ansible/requirements.yml" }}
+  roles_cache_key: &roles_cache_key v2-ansible-roles-{{ checksum "ansible/requirements.yml" }}
   restore_roles: &restore_roles
     restore_cache:
       key: *roles_cache_key
