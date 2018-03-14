@@ -33,7 +33,7 @@
         template: "../openstack/ae-environment.yml"
         parameters:
           env_name: integration
-          meta_groups: "epoch,integration"
+          meta_groups: "epoch,integration,tag_role_epoch,tag_env_integration"
           node_count: 3
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
@@ -49,7 +49,7 @@
         template: "../openstack/ae-environment.yml"
         parameters:
           env_name: uat
-          meta_groups: "epoch,uat"
+          meta_groups: "epoch,uat,tag_role_epoch,tag_env_uat"
           node_count: 20
           node_flavor: c1.large
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
@@ -65,7 +65,7 @@
         template: "../openstack/ae-environment.yml"
         parameters:
           env_name: tester
-          meta_groups: "epoch,uat,tester"
+          meta_groups: "epoch,uat,tester,tag_role_epoch,tag_env_uat,tag_env_tester"
           node_count: 1
           node_flavor: c1.large
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
@@ -81,7 +81,7 @@
         template: "../openstack/ae-environment.yml"
         parameters:
           env_name: dev1
-          meta_groups: "epoch,dev1"
+          meta_groups: "epoch,dev1,tag_role_epoch,tag_env_dev1"
           node_count: 2
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
@@ -97,7 +97,7 @@
         template: "../openstack/ae-environment.yml"
         parameters:
           env_name: dev2
-          meta_groups: "epoch,dev2"
+          meta_groups: "epoch,dev2,tag_role_epoch,tag_env_dev2"
           node_count: 2
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"

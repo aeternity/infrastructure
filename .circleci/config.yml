@@ -95,16 +95,16 @@ jobs:
       - run:
           name: Setup environments
           command: |
-            cd ansible && ansible-playbook --limit='epoch' setup.yml
+            cd ansible && ansible-playbook --limit='tag_kind_epoch' setup.yml
       # split monitoring playbook by environment because Ansible group vars are merged otherwise
       - run:
           name: Install monitoring tools (Integration)
           command: |
-            cd ansible && ansible-playbook --limit='integration:&epoch' monitoring.yml
+            cd ansible && ansible-playbook --limit='tag_env_integration:&tag_kind_epoch' monitoring.yml
       - run:
           name: Install monitoring tools (UAT)
           command: |
-            cd ansible && ansible-playbook --limit='uat:&epoch' monitoring.yml
+            cd ansible && ansible-playbook --limit='tag_env_uat:&tag_kind_epoch' monitoring.yml
 
 workflows:
   version: 2
