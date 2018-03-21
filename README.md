@@ -32,10 +32,10 @@ source ~/my/secrets/openstack.rc
 ### Secrets
 
 Secrets are managed with [Ansible Vault](docs.ansible.com/ansible/2.4/vault.html).
-There is a tiny bridge vault file `vault-env` that bridges the `ANSIBLE_VAULT_PASSWORD` environment variable as Ansible vault password.
+There is a tiny bridge vault file `vault-env` that bridges the `INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD` environment variable as Ansible vault password.
 
 ```
-export ANSIBLE_VAULT_PASSWORD="top secret"
+export INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD="top secret"
 ansible-playbook setup.yml
 ```
 
