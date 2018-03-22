@@ -86,7 +86,7 @@
 
     - name: Increase ulimit
       pam_limits:
-        domain: {{ project_user }}
+        domain: "{{ project_user }}"
         limit_type: soft
         limit_item: nofile
         value: 24576
