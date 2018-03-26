@@ -105,9 +105,15 @@
         - ./configure
         - make
         - make install
-        - ldconfig
       args:
         chdir: "/usr/local/src/libsodium-{{ libsodium_version }}"
         creates: "/usr/local/lib/libsodium.so.{{ libsodium_module_version }}"
       tags:
         - libsodium
+      register: installed
+
+    - name: Run ldconfig
+      command: ldconfig
+      tags:
+        - libsodium
+      when: installed.rc == 0 #workaround for ansible-lint [ANSIBLE0012] Commands should not change things if nothing needs doing ansible/setup.yml:114
