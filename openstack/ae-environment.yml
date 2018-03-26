@@ -1,4 +1,4 @@
-heat_template_version: 2013-05-23
+heat_template_version: 2015-10-15
 description: Aeternity environment stack
 
 parameters:
@@ -29,7 +29,7 @@ parameters:
         type: string
         label: Key Name
         description: SSH key to be used for all instances
-        default: "Travis Master"
+        default: "CircleCI Master"
         constraints:
           - custom_constraint: nova.keypair
     image_name:
@@ -37,11 +37,21 @@ parameters:
         label: Image Name
         description: Image name to create node servers
         default: "Ubuntu 16.04"
-    api_port:
+    external_api_port:
         type: number
-        label: API port number
-        description: Port number of epoch node API
+        label: External (public) API port number
+        description: Port number of epoch node external (public) API
         default: 3013
+    internal_ports:
+        type: comma_delimited_list
+        label: Internal port numbers
+        description: Internal port numbers (WS, API) used to grant access to internal_access_prefixes
+        default: "3113,3114"
+    internal_access_prefixes:
+        type: comma_delimited_list
+        label: Internal access IP addresses
+        description: IP addresses to allow access to internal_ports
+        default: ""
 
 resources:
   management_security_group:
@@ -57,8 +67,8 @@ resources:
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
-          port_range_min: { get_param: api_port }
-          port_range_max: { get_param: api_port }
+          port_range_min: { get_param: external_api_port }
+          port_range_max: { get_param: external_api_port }
         - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: tcp, port_range_min: 22, port_range_max: 22}
         - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: icmp }
 
@@ -76,6 +86,27 @@ resources:
         - { direction: egress, remote_ip_prefix: 0.0.0.0/0}
         # All all incoming connection from the same security group
         - { direction: ingress, remote_mode: remote_group_id }
+
+  internal_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Allow access to internal ports
+      name:
+        str_replace:
+          template: ae-%env_name%-internal
+          params:
+            "%env_name%": { get_param: env_name }
+      rules:
+        repeat:
+          for_each:
+            <%port%>: { get_param: internal_ports }
+            <%prefix%>: { get_param: internal_access_prefixes }
+          template:
+            direction: ingress
+            protocol: tcp
+            remote_ip_prefix: <%prefix%>
+            port_range_min: <%port%>
+            port_range_max: <%port%>
 
   epoch_servers:
       type: OS::Heat::ResourceGroup
@@ -99,3 +130,4 @@ resources:
                 security_groups:
                   - {get_resource: management_security_group}
                   - {get_resource: epoch_security_group}
+                  - {get_resource: internal_security_group}

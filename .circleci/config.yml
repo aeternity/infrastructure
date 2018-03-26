@@ -98,6 +98,10 @@ jobs:
             cd ansible && ansible-playbook --limit='tag_role_epoch' setup.yml
       # split monitoring playbook by environment because Ansible group vars are merged otherwise
       - run:
+          name: Install monitoring tools (Fast Integration)
+          command: |
+            cd ansible && ansible-playbook --limit='tag_env_fast_integration:&tag_role_epoch' monitoring.yml
+      - run:
           name: Install monitoring tools (Integration)
           command: |
             cd ansible && ansible-playbook --limit='tag_env_integration:&tag_role_epoch' monitoring.yml
