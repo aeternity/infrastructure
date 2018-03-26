@@ -84,6 +84,13 @@
       tags:
         - dev-tools
 
+    - name: Increase ulimit
+      pam_limits:
+        domain: "{{ project_user }}"
+        limit_type: soft
+        limit_item: nofile
+        value: 24576
+
     - name: Download libsodium
       unarchive:
         src: https://github.com/jedisct1/libsodium/releases/download/{{ libsodium_version }}/libsodium-{{ libsodium_version }}.tar.gz
