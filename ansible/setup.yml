@@ -116,4 +116,4 @@
       command: ldconfig
       tags:
         - libsodium
-      when: installed.results[2].rc == 0 #workaround for ansible-lint [ANSIBLE0012] Commands should not change things if nothing needs doing ansible/setup.yml:114. results[2] point to resuld from "Install libsodium -> make install`
+      when: installed.results[2].rc == 0 #workaround for ansible-lint [ANSIBLE0012] Commands should not change things if nothing needs doing ansible/setup.yml:114. results[2] point to results from "Install libsodium -> make install`
