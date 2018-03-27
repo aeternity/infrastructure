@@ -118,3 +118,33 @@
           NodeCount: 10
           AmiId: "ami-34a9364c" # AMI  ubuntu 16.04.3 with master user + python added.
           InstanceType: "m4.large"
+
+    - name: Ensure ae-uat-eucentral1 environment stack
+      cloudformation:
+        stack_name: "ae-uat"
+        state: "present"
+        region: "eu-central-1"
+        disable_rollback: true
+        template: "../aws/ae-environment.yml"
+      args:
+        template_parameters:
+          EnvName: "uat"
+          ApiPort: 3013
+          NodeCount: 10
+          AmiId: "ami-8c076ce3" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c
+          InstanceType: "m4.large"
+
+    - name: Ensure ae-uat-apsoutheast1 environment stack
+      cloudformation:
+        stack_name: "ae-uat"
+        state: "present"
+        region: "ap-southeast-1"
+        disable_rollback: true
+        template: "../aws/ae-environment.yml"
+      args:
+        template_parameters:
+          EnvName: "uat"
+          ApiPort: 3013
+          NodeCount: 10
+          AmiId: "ami-7f461803" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c
+          InstanceType: "m4.large"
