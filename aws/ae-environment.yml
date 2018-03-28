@@ -97,3 +97,6 @@ Resources:
         AvailabilityZones:
           Fn::GetAZs:
             Ref: "AWS::Region"
+
+    EpochElasticIP:
+      Type: "AWS::EC2::EIP"
