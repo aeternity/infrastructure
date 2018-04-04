@@ -119,8 +119,8 @@
           node_count: 3
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
-          # Dincho's office and John (devtools) office
-          internal_access_prefixes: "84.43.189.112/32,87.140.31.183/32"
+          # Dincho's office and devtools integration proxy
+          internal_access_prefixes: "84.43.189.112/32,18.195.115.82/32"
       tags:
         - fast_integration-env
 
