@@ -179,7 +179,7 @@
         template: "../aws/ae-environment.yml"
       args:
         template_parameters:
-          EnvName: "uat"
+          EnvName: "uat-test"
           ApiPort: 3013
           NodeCount: 20
           AmiId: "ami-954298ea" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c
