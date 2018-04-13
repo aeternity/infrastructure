@@ -174,7 +174,7 @@
       cloudformation:
         stack_name: "ae-uat-test"
         state: "present"
-        region: "ap-southeast-1"
+        region: "us-east-1"
         disable_rollback: true
         template: "../aws/ae-environment.yml"
       args:
