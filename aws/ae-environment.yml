@@ -12,6 +12,10 @@ Parameters:
         Type: Number
         Description: Port number of epoch node API
         Default: 3013
+    SyncPort:
+        Type: Number
+        Description: Sync port number of epoch nodes (external)
+        Default: 3015
     NodeCount:
         Type: Number
         Description: Number of epoch nodes
@@ -30,6 +34,10 @@ Resources:
           SecurityGroupIngress:
           - FromPort: !Ref ApiPort
             ToPort: !Ref ApiPort
+            CidrIp: 0.0.0.0/0
+            IpProtocol: "tcp"
+          - FromPort: !Ref SyncPort
+            ToPort: !Ref SyncPort
             CidrIp: 0.0.0.0/0
             IpProtocol: "tcp"
           - FromPort: 22
