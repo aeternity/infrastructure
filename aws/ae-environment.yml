@@ -97,6 +97,7 @@ Resources:
         - Key: platform
           Value: aws
           PropagateAtLaunch: 'true'
+
         AvailabilityZones:
           Fn::GetAZs:
             Ref: "AWS::Region"
