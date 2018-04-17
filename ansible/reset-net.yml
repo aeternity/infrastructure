@@ -61,6 +61,20 @@
       when: config_file.stat.exists
       tags: [config]
 
+    - name: Deleting old keys dir
+      file:
+        path: "{{ project_root }}/{{ epoch_vars.keys.dir|default('keys') }}/"
+        state: absent
+      when: config_file.stat.exists
+      tags: [config]
+
+    - name: Creating new keys dir
+      file:
+        path: "{{ project_root }}/{{ epoch_vars.keys.dir|default('keys') }}/"
+        state: directory
+      when: config_file.stat.exists
+      tags: [config]
+
     - name: Deleting old log files
       file:
         path: "{{ project_root }}/log/"
