@@ -13,7 +13,7 @@ ansible-inventory --list | ./dump_inventory.py
 import sys, json, re
 
 env_group_prefix = 'tag_env_'
-skip_env_groups = ['tag_env_static_uat', 'tag_env_tester']
+skip_env_groups = ['tag_env_static_uat']
 
 data = json.load(sys.stdin)
 all_groups = data['all']['children']
