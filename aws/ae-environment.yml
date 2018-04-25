@@ -102,6 +102,14 @@ Resources:
           Value: !Ref EnvName
           PropagateAtLaunch: 'true'
 
+        - Key: platform
+          Value: aws
+          PropagateAtLaunch: 'true'
+
+        - Key: region
+          Value: !Ref "AWS::Region"
+          PropagateAtLaunch: 'true'
+
         AvailabilityZones:
           Fn::GetAZs:
             Ref: "AWS::Region"
