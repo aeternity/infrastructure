@@ -118,7 +118,6 @@
         template: "../aws/ae-environment.yml"
       args:
         template_parameters:
-          Region: "us-west-2"
           EnvName: "uat"
           ApiPort: 3013
           NodeCount: 10
@@ -134,7 +133,6 @@
         template: "../aws/ae-environment.yml"
       args:
         template_parameters:
-          Region: "eu-central-1"
           EnvName: "uat"
           ApiPort: 3013
           NodeCount: 10
@@ -150,7 +148,6 @@
         template: "../aws/ae-environment.yml"
       args:
         template_parameters:
-          Region: "ap-southeast-1"
           EnvName: "uat"
           ApiPort: 3013
           NodeCount: 10

@@ -107,7 +107,7 @@ Resources:
           PropagateAtLaunch: 'true'
 
         - Key: region
-          Value: aws
+          Value: !Ref "AWS::Region"
           PropagateAtLaunch: 'true'
 
         AvailabilityZones:
