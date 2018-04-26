@@ -87,6 +87,8 @@ Resources:
     EpochServerAutoScalingGroup:
       Type: "AWS::AutoScaling::AutoScalingGroup"
       Properties:
+        TerminationPolicies:
+          - OldestInstance
         AutoScalingGroupName:
           Fn::Sub:
             - "ae-${EnvName}-auto-scaling-group"
