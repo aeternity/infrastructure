@@ -16,8 +16,8 @@ parameters:
         description: Number of epoch nodes
         default: 2
         constraints:
-          - range: { min: 1 }
-            description: Nodes Count must be at least 1
+          - range: { min: 0 }
+            description: Only positive node count is accepted. Allow 0 for edge cases e.g. only static nodes.
     node_flavor:
         type: string
         label: Node Instance Type
@@ -57,6 +57,27 @@ parameters:
         label: Internal access IP addresses
         description: IP addresses to allow access to internal_ports
         default: ""
+    static_node_count:
+        type: number
+        label: Static (IP) Nodes Count
+        description: Number of epoch nodes with floating (static) IP addresses
+        default: 0
+        constraints:
+          - range: { min: 0, max: 1 }
+            description: Either one or zero nodes. On/off switch.
+    subnet_cidr:
+      type: string
+      label: Local network subnet CIDR
+      description: Local network to connect all hosts attached to a router
+      constraints:
+        - custom_constraint: net_cidr
+    ext_net_id:
+      type: string
+      label: External network ID
+      description: ID of the external network to which the private network should be uplinked.
+      default: ext-net
+      constraints:
+        - custom_constraint: nova.network
 
 resources:
   management_security_group:
@@ -117,6 +138,76 @@ resources:
             remote_ip_prefix: <%prefix%>
             port_range_min: <%port%>
             port_range_max: <%port%>
+
+  localnet:
+    type: OS::Neutron::Net
+    properties:
+      admin_state_up: true
+      name:
+        str_replace:
+          template: ae-%env_name%-net
+          params:
+            "%env_name%": { get_param: env_name }
+
+  subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: ae-%env_name%-subnet
+          params:
+            "%env_name%": { get_param: env_name }
+      cidr: { get_param: subnet_cidr }
+      enable_dhcp: true
+      dns_nameservers: ["1.1.1.1", "1.0.0.1"]
+      network_id: { get_resource: localnet }
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      admin_state_up: true
+      name:
+        str_replace:
+          template: ae-%env_name%-router
+          params:
+            "%env_name%": { get_param: env_name }
+      external_gateway_info: { "network": { get_param: ext_net_id }}
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: subnet }
+
+  instance_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: localnet }
+      security_groups:
+        - {get_resource: management_security_group}
+        - {get_resource: epoch_security_group}
+
+  # Kind of hack because the OS provider does not support conditions because of OLD versions
+  # Support is added in https://docs.openstack.org/heat/latest/template_guide/hot_spec.html#newton
+  static_epoch_servers:
+      type: OS::Heat::ResourceGroup
+      properties:
+          count: { get_param: static_node_count }
+          resource_def:
+              type: OS::Nova::Server
+              properties:
+                name:
+                    str_replace:
+                        template: ae-%env_name%-epoch-st-n%index%
+                        params:
+                          "%env_name%": { get_param: env_name }
+                image: { get_param: image_name }
+                flavor: { get_param: node_flavor }
+                key_name: { get_param: key_name }
+                metadata:
+                  groups: { get_param: meta_groups }
+                networks:
+                  - port: { get_resource: instance_port }
 
   epoch_servers:
       type: OS::Heat::ResourceGroup
