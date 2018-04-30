@@ -81,6 +81,7 @@ jobs:
 
   deploy:
     <<: *container_config
+    parallelism: 4
     steps:
       - checkout
       - *restore_venv
