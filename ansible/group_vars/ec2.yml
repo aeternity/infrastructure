@@ -1,2 +1,2 @@
 datadog_platform: aws
-datadog_region: {{ ec2_region }}
+datadog_region: "{{ ec2_region }}"
