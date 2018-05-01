@@ -31,6 +31,25 @@ references:
         source ~/infrastructure/venv/ansible/bin/activate
         echo "source ~/infrastructure/venv/ansible/bin/activate" >> $BASH_ENV
 
+  setup_infra: &setup_infra
+    run:
+      name: Setup infrastructure
+      command: |
+        cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
+          --tags "${DEPLOY_ENV:?}" environments.yml
+
+  setup_node: &setup_node
+    run:
+      name: Setup environment
+      command: |
+        cd ansible && ansible-playbook --limit="tag_env_${DEPLOY_ENV:?}:&tag_role_epoch" setup.yml
+
+  setup_monitoring: &setup_monitoring
+    run:
+      name: Install monitoring tools
+      command: |
+        cd ansible && ansible-playbook --limit="tag_env_${DEPLOY_ENV:?}:&tag_role_epoch" monitoring.yml
+
 jobs:
   build:
     <<: *container_config
@@ -79,36 +98,69 @@ jobs:
             cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
               --check -i localhost, environments.yml
 
-  deploy:
+  setup_uat:
     <<: *container_config
+    environment:
+      - DEPLOY_ENV: uat
     steps:
       - checkout
       - *restore_venv
       - *activate_venv
       - *restore_roles
-      # Don't run on UAT until we're sure it won't cause changes
-      - run:
-          name: Setup infrastructure
-          command: |
-            cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
-              --skip-tags "uat-env" environments.yml
-      - run:
-          name: Setup environments
-          command: |
-            cd ansible && ansible-playbook --limit='tag_role_epoch' setup.yml
-      # split monitoring playbook by environment because Ansible group vars are merged otherwise
-      - run:
-          name: Install monitoring tools (Fast Integration)
-          command: |
-            cd ansible && ansible-playbook --limit='tag_env_fast_integration:&tag_role_epoch' monitoring.yml
-      - run:
-          name: Install monitoring tools (Integration)
-          command: |
-            cd ansible && ansible-playbook --limit='tag_env_integration:&tag_role_epoch' monitoring.yml
-      - run:
-          name: Install monitoring tools (UAT)
-          command: |
-            cd ansible && ansible-playbook --limit='tag_env_uat:&tag_role_epoch' monitoring.yml
+      # Don't run infrastructure setup on UAT until we're sure it won't cause changes
+      # - *setup_infra
+      - *setup_node
+      - *setup_monitoring
+
+  setup_integration:
+    <<: *container_config
+    environment:
+      - DEPLOY_ENV: integration
+    steps:
+      - checkout
+      - *restore_venv
+      - *activate_venv
+      - *restore_roles
+      - *setup_infra
+      - *setup_node
+      - *setup_monitoring
+
+  setup_fast_integration:
+    <<: *container_config
+    environment:
+      - DEPLOY_ENV: fast_integration
+    steps:
+      - checkout
+      - *restore_venv
+      - *activate_venv
+      - *restore_roles
+      - *setup_infra
+      - *setup_node
+      - *setup_monitoring
+
+  setup_dev1:
+    <<: *container_config
+    environment:
+      - DEPLOY_ENV: dev1
+    steps:
+      - checkout
+      - *restore_venv
+      - *activate_venv
+      - *restore_roles
+      - *setup_infra
+      - *setup_node
+
+  setup_dev2:
+    <<: *container_config
+    environment:
+      - DEPLOY_ENV: dev2
+    steps:
+      - checkout
+      - *restore_venv
+      - *activate_venv
+      - *restore_roles
+      - *setup_infra
+      - *setup_node
 
 workflows:
   version: 2
@@ -121,7 +173,35 @@ workflows:
           requires:
             - build
 
-      - deploy:
+      - setup_uat:
+          requires:
+            - check
+          filters:
+            branches:
+              only: master
+
+      - setup_integration:
+          requires:
+            - check
+          filters:
+            branches:
+              only: master
+
+      - setup_fast_integration:
+          requires:
+            - check
+          filters:
+            branches:
+              only: master
+
+      - setup_dev1:
+          requires:
+            - check
+          filters:
+            branches:
+              only: master
+
+      - setup_dev2:
           requires:
             - check
           filters:
@@ -137,4 +217,8 @@ workflows:
               only:
                 - master
     jobs:
-      - deploy
+      - setup_uat
+      - setup_integration
+      - setup_fast_integration
+      - setup_dev1
+      - setup_dev2
