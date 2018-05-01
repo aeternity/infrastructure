@@ -75,10 +75,20 @@ Resources:
         SecurityGroups:
         - !Ref EpochSecurityGroup
         - !Ref ManagementSecurityGroup
+        UserData:
+          Fn::Base64:
+            |+
+            #!/bin/bash
+            REGION=`curl -s http://169.254.169.254/latest/meta-data/public-hostname | awk -F . '{print $2}'`
+            IP=`curl -s http://169.254.169.254/latest/meta-data/public-ipv4`
+            echo "aws-$REGION-$IP" > /etc/hostname
+            hostname "aws-$REGION-$IP"
 
     EpochServerAutoScalingGroup:
       Type: "AWS::AutoScaling::AutoScalingGroup"
       Properties:
+        TerminationPolicies:
+          - OldestInstance
         AutoScalingGroupName:
           Fn::Sub:
             - "ae-${EnvName}-auto-scaling-group"
