@@ -46,7 +46,7 @@
             skip_event: true
       logs_agent:
         init_config:
-        instances: [{}]
+        instances:
         logs:
           - type: file
             path: "/home/{{ project_user }}/node/log/epoch.log"
