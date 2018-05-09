@@ -40,7 +40,8 @@
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
-        - integration-env
+        - integration
+        - os
 
     - name: Ensure UAT environment stack
       os_stack:
@@ -56,7 +57,8 @@
           node_flavor: c1.large
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
-        - uat-env
+        - uat
+        - os
 
     - name: Ensure dev1 environment stack
       os_stack:
@@ -72,7 +74,8 @@
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
-        - dev1-env
+        - dev1
+        - os
 
     - name: Ensure dev2 environment stack
       os_stack:
@@ -88,7 +91,8 @@
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
       tags:
-        - dev2-env
+        - dev2
+        - os
 
     - name: Ensure fast_integration environment stack
       os_stack:
@@ -106,7 +110,8 @@
           # Dincho's office and devtools integration proxy
           internal_access_prefixes: "84.43.189.112/32,18.195.115.82/32"
       tags:
-        - fast_integration-env
+        - fast_integration
+        - os
 
     ### AWS Platform
     - name: Ensure ae-uat-uswest2 environment stack
@@ -123,6 +128,9 @@
           NodeCount: 10
           AmiId: "ami-34a9364c" # AMI  ubuntu 16.04.3 with master user + python added.
           InstanceType: "m4.large"
+      tags:
+        - uat
+        - aws
 
     - name: Ensure ae-uat-eucentral1 environment stack
       cloudformation:
@@ -138,6 +146,9 @@
           NodeCount: 10
           AmiId: "ami-8c076ce3" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c
           InstanceType: "m4.large"
+      tags:
+        - uat
+        - aws
 
     - name: Ensure ae-uat-apsoutheast1 environment stack
       cloudformation:
@@ -153,3 +164,6 @@
           NodeCount: 10
           AmiId: "ami-7f461803" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c
           InstanceType: "m4.large"
+      tags:
+        - uat
+        - aws
