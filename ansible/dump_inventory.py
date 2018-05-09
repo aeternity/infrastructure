@@ -13,11 +13,10 @@ ansible-inventory --list | ./dump_inventory.py
 import sys, json, re
 
 env_group_prefix = 'tag_env_'
-skip_env_groups = ['tag_env_static_uat']
 
 data = json.load(sys.stdin)
 all_groups = data['all']['children']
-filtered_groups = [g for g in all_groups if g not in skip_env_groups]
+filtered_groups = [g for g in all_groups]
 env_groups = [g for g in filtered_groups if g.startswith(env_group_prefix)]
 
 # source https://stackoverflow.com/a/16090640/3967231
