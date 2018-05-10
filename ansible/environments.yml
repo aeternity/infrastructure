@@ -39,6 +39,7 @@
           node_count: 3
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
+          subnet_cidr: 192.168.20.0/24
       tags:
         - integration
         - os
@@ -53,9 +54,11 @@
         parameters:
           env_name: uat
           meta_groups: "tag_role_epoch,tag_env_uat"
-          node_count: 20
+          node_count: 19
+          static_node_count: 1
           node_flavor: c1.large
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
+          subnet_cidr: 192.168.10.0/24
       tags:
         - uat
         - os
@@ -73,6 +76,7 @@
           node_count: 2
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
+          subnet_cidr: 192.168.30.0/24
       tags:
         - dev1
         - os
@@ -90,6 +94,7 @@
           node_count: 2
           node_flavor: c1.medium
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
+          subnet_cidr: 192.168.40.0/24
       tags:
         - dev2
         - os
