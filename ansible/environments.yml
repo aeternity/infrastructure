@@ -114,6 +114,7 @@
           image_name: "d324da4b-b827-44fb-8331-bfad41a28aca"
           # Dincho's office and devtools integration proxy
           internal_access_prefixes: "84.43.189.112/32,18.195.115.82/32"
+          subnet_cidr: 192.168.50.0/24
       tags:
         - fast_integration
         - os
