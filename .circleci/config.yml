@@ -107,8 +107,7 @@ jobs:
       - *restore_venv
       - *activate_venv
       - *restore_roles
-      # Don't run infrastructure setup on UAT until we're sure it won't cause changes
-      # - *setup_infra
+      - *setup_infra
       - *setup_node
       - *setup_monitoring
 

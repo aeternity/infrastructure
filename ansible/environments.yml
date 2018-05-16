@@ -62,6 +62,7 @@
       tags:
         - uat
         - os
+        - os-uat
 
     - name: Ensure dev1 environment stack
       os_stack:
