@@ -65,6 +65,11 @@
             service: epoch
             source: lager
             sourcecategory: pow
+          - type: file
+            path: "/home/{{ project_user }}/node/log/epoch_sync.log"
+            service: epoch
+            source: lager
+            sourcecategory: sync
 
   pre_tasks:
     - name: "Add dd-agent to {{ project_user }} group"
