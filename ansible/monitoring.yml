@@ -11,8 +11,9 @@
     datadog_config:
       apm_enabled: false
       use_dogstatsd: true
-      process_agent_enabled: true
-      log_enabled: true
+      process_config:
+        enabled: "true" # has to be set as a string
+      logs_enabled: true
       hostname: "{{ ansible_fqdn }}"
       tags:
         - "platform:{{ datadog_platform }}"
