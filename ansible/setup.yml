@@ -81,8 +81,20 @@
         update_cache: yes
       with_items:
         - build-essential
+        - python-yaml
       tags:
         - dev-tools
+
+    - name: "Create custom fact directory"
+      file:
+        path: "/etc/ansible/facts.d"
+        state: "directory"
+
+    - name: "Install epoch fact file"
+      copy:
+        src: files/epoch.fact
+        dest: /etc/ansible/facts.d/epoch.fact
+        mode: 0755
 
     - name: Increase ulimit
       pam_limits:
