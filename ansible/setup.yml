@@ -89,12 +89,16 @@
       file:
         path: "/etc/ansible/facts.d"
         state: "directory"
+      tags:
+        - ansible-facts
 
     - name: "Install epoch fact file"
       copy:
         src: files/epoch.fact
         dest: /etc/ansible/facts.d/epoch.fact
         mode: 0755
+      tags:
+        - ansible-facts
 
     - name: Increase ulimit
       pam_limits:
