@@ -61,7 +61,7 @@ jobs:
       - save_cache:
           key: *venv_cache_key
           paths:
-            - .venv/py3
+            - ~/.venv/py3
             - ~/.cache/pip
       - run:
           name: Install ansible roles
