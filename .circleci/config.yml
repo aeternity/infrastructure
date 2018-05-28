@@ -22,33 +22,29 @@ references:
   install_pip: &install_pip
     run:
       name: Install PIP dependancies
-      command: pip install -r requirements.txt
+      command: make pip
 
   activate_venv: &activate_venv
     run:
       name: Activate python virtual environment
       command: |
-        source ~/infrastructure/venv/ansible/bin/activate
-        echo "source ~/infrastructure/venv/ansible/bin/activate" >> $BASH_ENV
+        source ~/infrastructure/.venv/py3/bin/activate
+        echo "source ~/infrastructure/.venv/py3/bin/activate" >> $BASH_ENV
 
   setup_infra: &setup_infra
     run:
       name: Setup infrastructure
-      command: |
-        cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
-          --tags "${DEPLOY_ENV:?}" environments.yml
+      command: make setup-infrastructure
 
   setup_node: &setup_node
     run:
-      name: Setup environment
-      command: |
-        cd ansible && ansible-playbook --limit="tag_env_${DEPLOY_ENV:?}:&tag_role_epoch" setup.yml
+      name: Setup node
+      command: make setup-node
 
   setup_monitoring: &setup_monitoring
     run:
       name: Install monitoring tools
-      command: |
-        cd ansible && ansible-playbook --limit="tag_env_${DEPLOY_ENV:?}:&tag_role_epoch" monitoring.yml
+      command: make setup-monitoring
 
 jobs:
   build:
@@ -59,21 +55,22 @@ jobs:
       - run:
           name: Create python virtual environment
           command: |
-            virtualenv -p python3 venv/ansible
+            virtualenv -p python3 .venv/py3
       - *activate_venv
       - *install_pip
       - save_cache:
           key: *venv_cache_key
           paths:
-            - venv/ansible
+            - .venv/py3
       - run:
           name: Install ansible roles
           command: |
-            cd ansible && ansible-galaxy install -r requirements.yml -p roles
+            make ansible/roles
       - save_cache:
           key: *roles_cache_key
           paths:
             ansible/roles
+
   check:
     <<: *container_config
     steps:
@@ -82,21 +79,13 @@ jobs:
       - *activate_venv
       - run:
           name: Lint ansible playbooks
-          command: |
-            ansible-lint ansible/setup.yml
-            ansible-lint ansible/monitoring.yml
-            ansible-lint ansible/manage-node.yml
-            ansible-lint ansible/reset-net.yml
+          command: make lint
       - run:
           name: Dry run OpenStack heat template
-          command: |
-            openstack stack create test -e openstack/test/create.yml \
-              -t openstack/ae-environment.yml --enable-rollback --wait --dry-run
+          command: make test-openstack
       - run:
           name: Dry run environments playbooks
-          command: |
-            cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
-              --check -i localhost, environments.yml
+          command: make test-setup-environments
 
   setup_uat:
     <<: *container_config

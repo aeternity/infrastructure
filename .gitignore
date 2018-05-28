@@ -2,6 +2,8 @@
 ansible/group_vars/**/*.local.*
 ansible/inventory/*.rc.sh
 ansible/callback_plugins/datadog_callback.yml
+ansible/roles
 .virtualenv/
 .DS_Store
 *.pyc
+.venv
