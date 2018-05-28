@@ -62,6 +62,7 @@ jobs:
           key: *venv_cache_key
           paths:
             - .venv/py3
+            - ~/.cache/pip
       - run:
           name: Install ansible roles
           command: |
@@ -77,6 +78,7 @@ jobs:
       - checkout
       - *restore_venv
       - *activate_venv
+      - *install_pip
       - run:
           name: Lint ansible playbooks
           command: make lint
