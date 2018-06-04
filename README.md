@@ -1,22 +1,28 @@
 # Infrastructure management automation for æternity nodes
 
-Infrastructure is automatically created and managed by Ansible playbooks run by Travis.
+Infrastructure is automatically created and managed by Ansible playbooks run by CircleCI.
 Only changes to master branch are deployed.
-Infrastructure is orchestrated with [OpenStack Heat](https://docs.openstack.org/heat/latest/).
-Setup playbook is run against dynamic hosts list handled by Ansible OpenStack plugin.
+Infrastructure is orchestrated with [OpenStack Heat](https://docs.openstack.org/heat/latest/) and [AWS CloudFormation](https://aws.amazon.com/cloudformation/).
+Ansible playbooks are run against [dynamic host inventories](http://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html).
 
-Below documentation is meant for manual testing and additional details. It's already integrated in Travis workflow.
+Below documentation is meant for manual testing and additional details. It's already integrated in CircleCI workflow.
 
-## Dependencies
-This implementation is using Ansible and its [Ansible 2.4 OpenStack inventory plugin](https://docs.ansible.com/ansible/devel/plugins/inventory/openstack.html).
-To install dependencies use `pip`:
+## Requirements
+
+- Python3
+- [Virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
+- [GNU Make](https://www.gnu.org/software/make/)
+
+The commands below assume already installed dependancies and python3 virtual environment setup in `.venv/py3`.
+To setup and activate the virtual environment run:
+
 ```bash
-pip install -r requirements.txt
+virtualenv -p python3 .venv/py3 && source .venv/py3/bin/activate
 ```
 
-You also need to install the Ansible roles used in playbooks:
+To install pip dependancies and ansible roles run:
 ```bash
-ansible-galaxy install -r ansible/requirements.yml
+make
 ```
 
 ## Credentials setup
@@ -29,62 +35,64 @@ either by environment variables or clouds.yml file.
 source ~/my/secrets/openstack.rc
 ```
 
-### Secrets
+### Amazon Web Services
+
+Yous should make sure [AWS CommandLine interface credentials are set](http://docs.ansible.com/ansible/latest/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
+either by environment variables or `~/.aws/credentials` file.
+
+If you have configured multiple AWS credentials you can pass AWS_PROFILE variable before the commands:
+
+```bash
+AWS_PROFILE=aeternity ansible-inventory --list
+```
+
+### Ansible Secrets
 
 Secrets are managed with [Ansible Vault](docs.ansible.com/ansible/2.4/vault.html).
 There is a tiny bridge vault file `vault-env` that bridges the `INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD` environment variable as Ansible vault password.
 
 ```
 export INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD="top secret"
-ansible-playbook setup.yml
 ```
 
-## Infrastructure orchestration
-New environment stacks can be created by running:
+## Ansible playbooks
+
+### Ansible dynamic inventory
+
+Check that your OpenStack and AWS credentials are setup and dynamic inventory is working as excepted:
 ```bash
-openstack stack create my-env -t openstack/ae-environment.yml --parameter "environment=my_env"
+cd ansible && ansible-inventory --list
 ```
 
-Also already running environment can be updated by:
+### Infrastructure setup
+
+An environment infrastructure can be setup with `make setup`,
+for example to setup `integration` environment infrastructure run:
 ```bash
-openstack stack update my-env -t openstack/ae-environment.yml --parameter "environment=my_env"
+make setup DEPLOY_ENV=integration
 ```
 
-## Ansible Deploy
+To create new environment edit the `ansible/environments.yml` playbook.
 
-Check that your OpenStack credentials are setup and dynamic inventory is working as excepted:
-```bash
-ansible-inventory -i inventory/openstack.yml --list
-```
-
-Setup environments infrastructure by running:
-```bash
-cd ansible
-ansible-playbook environments.yml
-ansible-playbook setup.yml
-ansible-playbook monitoring.yml
-```
-
-## Manage nodes
+### Manage nodes
 
 Start, stop, restart or ping nodes by running:
 ```bash
-cd ansible
-ansible-playbook manage-node.yml --extra-vars="cmd=start"
-ansible-playbook manage-node.yml --extra-vars="cmd=stop"
-ansible-playbook manage-node.yml --extra-vars="cmd=restart"
-ansible-playbook manage-node.yml --extra-vars="cmd=ping"
+make manage-node DEPLOY_ENV=integration CMD=start
+make manage-node DEPLOY_ENV=integration CMD=stop
+make manage-node DEPLOY_ENV=integration CMD=restart
+make manage-node DEPLOY_ENV=integration CMD=ping
 ```
 
-## Reset network of nodes
+### Reset network of nodes
 
 To reset a network of nodes run:
 ```bash
-cd ansible
-ansible-playbook reset-net.yml
+make reset-net DEPLOY_ENV=integration
 ```
 
-This playbook simply does:
+The playbook does:
 
-- deletes blockchain data
-- deletes logs
+- delete blockchain data
+- delete logs
+- delete chain keys
