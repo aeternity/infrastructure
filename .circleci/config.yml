@@ -166,10 +166,18 @@ workflows:
     jobs:
       - build:
           requires: []
+          filters:
+            branches:
+              ignore:
+                - packer
 
       - check:
           requires:
             - build
+          filters:
+            branches:
+              ignore:
+                - packer
 
       - setup_uat:
           requires:
