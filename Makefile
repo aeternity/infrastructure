@@ -16,7 +16,7 @@ ansible/roles: pip
 	cd ansible && ansible-galaxy install -r requirements.yml -p roles
 	touch ansible/roles
 
-images:
+images: ansible/roles
 	packer build packer/epoch.json
 
 setup-infrastructure: ansible/roles check-deploy-env

@@ -156,6 +156,9 @@ jobs:
     <<: *container_config
     steps:
       - checkout
+      - *restore_venv
+      - *activate_venv
+      - *install_pip
       - run:
           name: Build images
           command: make images
