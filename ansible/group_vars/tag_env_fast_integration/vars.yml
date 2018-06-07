@@ -1,1 +1,2 @@
 datadog_env: fast_integration
+datadog_enabled: yes

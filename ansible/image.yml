@@ -1,0 +1,19 @@
+---
+- import_playbook: setup.yml
+- import_playbook: monitoring.yml
+
+- hosts: all
+  remote_user: master
+  become: yes
+  vars:
+    datadog_enabled: false
+  tasks:
+    - name: "Stop and disable datadog services"
+      service:
+        name: "{{ item }}"
+        enabled: false
+        state: stopped
+      with_items:
+        - datadog-agent
+        - datadog-agent-trace
+        - datadog-agent-process

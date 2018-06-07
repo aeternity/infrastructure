@@ -80,7 +80,7 @@ jobs:
       - *activate_venv
       - *install_pip
       - run:
-          name: Lint ansible playbooks
+          name: Configuration lint
           command: make lint
       - run:
           name: Dry run OpenStack heat template
@@ -152,6 +152,14 @@ jobs:
       - *setup_infra
       - *setup_node
 
+  build_images:
+    <<: *container_config
+    steps:
+      - checkout
+      - run:
+          name: Build images
+          command: make images
+
 workflows:
   version: 2
   check_deploy:
@@ -197,6 +205,11 @@ workflows:
           filters:
             branches:
               only: master
+
+      - build_images:
+          filters:
+            branches:
+              only: packer
 
   daily_deploy:
     triggers:
