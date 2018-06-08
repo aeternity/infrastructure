@@ -28,7 +28,7 @@
       "type": "openstack",
       "ssh_username": "master",
       "image_name": "epoch-ubuntu-16.04-v{{timestamp}}",
-      "source_image": "5566886d-0d9d-4d86-94ff-55597169e15a",
+      "source_image": "7fb6305f-179f-4709-8b5c-7d2cf3c594d1",
       "flavor": "c1.tiny",
       "networks": ["a07d7f52-0eed-4242-91fd-368dea025cc7"]
     }
