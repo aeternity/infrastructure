@@ -38,18 +38,16 @@
     {
       "type": "shell",
       "inline": [
-        "sleep 30",
-        "sudo apt-get update",
-        "sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade -o Dpkg::Options::='--force-confnew'"
+        "sleep 30"
       ]
     },
     {
       "type": "shell",
-      "inline": [
-        "sudo adduser --disabled-password --gecos '' master",
-        "sudo usermod -aG sudo master",
-        "echo 'master ALL=(ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers.d/master"
-      ],
+      "script": "{{ template_dir }}/apt-upgrade.sh"
+    },
+    {
+      "type": "shell",
+      "script": "{{ template_dir }}/add-master-user.sh",
       "only": ["amazon-ebs"]
     },
     {
