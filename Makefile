@@ -16,6 +16,9 @@ ansible/roles: pip
 	cd ansible && ansible-galaxy install -r requirements.yml -p roles
 	touch ansible/roles
 
+images: ansible/roles
+	packer build packer/epoch.json
+
 setup-infrastructure: ansible/roles check-deploy-env
 	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
 		--tags "$(DEPLOY_ENV)" environments.yml
@@ -51,6 +54,7 @@ lint:
 	ansible-lint ansible/monitoring.yml --exclude ansible/roles
 	ansible-lint ansible/manage-node.yml
 	ansible-lint ansible/reset-net.yml
+	packer validate packer/epoch.json
 
 check-deploy-env:
 ifndef DEPLOY_ENV
@@ -65,6 +69,6 @@ endif
 
 .PHONY: \
 	all pip \
-	setup-infrastructure setup-node setup-monitoring setup \
+	images setup-infrastructure setup-node setup-monitoring setup \
 	manage-node reset-net lint test-openstack test-setup-environments \
 	check-deploy-env clean

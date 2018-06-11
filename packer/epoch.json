@@ -1,0 +1,72 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
+  "builders":
+  [
+    {
+      "type": "amazon-ebs",
+      "region": "us-west-2",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+      },
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "epoch-ubuntu-16.04-v{{timestamp}}",
+      "ami_regions": ["eu-central-1", "ap-southeast-1"],
+      "force_deregister": true,
+      "force_delete_snapshot": true
+    },
+    {
+      "type": "openstack",
+      "ssh_username": "master",
+      "image_name": "epoch-ubuntu-16.04-v{{timestamp}}",
+      "source_image": "50673009-6d9d-4036-80a0-6bf627f03bc8",
+      "flavor": "c1.tiny",
+      "networks": ["a07d7f52-0eed-4242-91fd-368dea025cc7"]
+    }
+  ],
+  "provisioners":
+  [
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 30"
+      ]
+    },
+    {
+      "type": "shell",
+      "script": "{{ template_dir }}/apt-upgrade.sh"
+    },
+    {
+      "type": "shell",
+      "script": "{{ template_dir }}/add-master-user.sh",
+      "only": ["amazon-ebs"]
+    },
+    {
+      "type": "ansible",
+      "user": "master",
+      "playbook_file": "{{ template_dir }}/../ansible/image.yml",
+      "extra_arguments": [
+        "-e ansible_python_interpreter='/usr/bin/env python3' datadog_platform=aws"
+      ],
+      "only": ["amazon-ebs"]
+    },
+    {
+      "type": "ansible",
+      "user": "master",
+      "playbook_file": "{{ template_dir }}/../ansible/image.yml",
+      "extra_arguments": [
+        "-e datadog_platform=os"
+      ],
+      "only": ["openstack"]
+    }
+  ]
+}

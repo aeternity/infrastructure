@@ -1,1 +1,2 @@
 datadog_env: integration
+datadog_enabled: yes

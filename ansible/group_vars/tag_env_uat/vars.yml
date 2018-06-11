@@ -1,1 +1,2 @@
 datadog_env: uat
+datadog_enabled: yes

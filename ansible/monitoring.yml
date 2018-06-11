@@ -6,7 +6,7 @@
 
   vars:
     project_user: epoch
-    datadog_api_key: "{{ vault_datadog_api_key }}"
+    datadog_api_key: "{{ vault_datadog_api_key|default('DATADOG_API_KEY') }}"
     datadog_agent6: true
     datadog_config:
       apm_enabled: false
@@ -16,9 +16,9 @@
       logs_enabled: true
       hostname: "{{ ansible_fqdn }}"
       tags:
-        - "platform:{{ datadog_platform }}"
-        - "region:{{ datadog_region }}"
-        - "env:{{ datadog_env }}"
+        - "platform:{{ datadog_platform|default('unknown') }}"
+        - "region:{{ datadog_region|default('unknown') }}"
+        - "env:{{ datadog_env|default('unknown') }}"
         - "lsb:{{ ansible_lsb.description }}"
         - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
     datadog_checks:
@@ -43,7 +43,7 @@
         init_config:
         instances:
           - name: API
-            url: "{{ api_base_uri }}/top"
+            url: "{{ api_base_uri|default('127.0.0.1') }}/top"
             # Default is false, i.e. emit events instead of service checks.
             # Recommend to set to true.
             skip_event: true
