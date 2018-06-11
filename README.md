@@ -12,15 +12,16 @@ Below documentation is meant for manual testing and additional details. It's alr
 - Python3
 - [Virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
 - [GNU Make](https://www.gnu.org/software/make/)
+- [Packer](https://www.packer.io/downloads.html)
 
-The commands below assume already installed dependancies and python3 virtual environment setup in `.venv/py3`.
+The commands below assume already installed dependencies and python3 virtual environment setup in `.venv/py3`.
 To setup and activate the virtual environment run:
 
 ```bash
 virtualenv -p python3 .venv/py3 && source .venv/py3/bin/activate
 ```
 
-To install pip dependancies and ansible roles run:
+To install pip dependencies and ansible roles run:
 ```bash
 make
 ```
@@ -96,3 +97,20 @@ The playbook does:
 - delete blockchain data
 - delete logs
 - delete chain keys
+
+## Base images
+
+Pre-built base images are used to speedup initial provisioning of node instances. It does not have a functional impact on node setups as the same Ansible playbooks are used.
+
+Base images can be build manually on local environments by running:
+```bash
+packer build packer/epoch.json
+```
+
+In case local environment is not (or cannot be) setup with [cloud credentials](#credentials-setup), a CI trigger branch `packer` can be used by pushing to it:
+
+```bash
+git push origin master:packer
+```
+
+That will trigger CI workflow which will run the packer command for you with all required credentials already setup.
