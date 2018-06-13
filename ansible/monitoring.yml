@@ -19,6 +19,7 @@
         - "platform:{{ datadog_platform|default('unknown') }}"
         - "region:{{ datadog_region|default('unknown') }}"
         - "env:{{ datadog_env|default('unknown') }}"
+        - "color:{{ datadog_color|default('unknown') }}"
         - "lsb:{{ ansible_lsb.description }}"
         - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
     datadog_checks:
