@@ -46,7 +46,7 @@ test-openstack: pip
 		-t openstack/ae-environment.yml --enable-rollback --wait --dry-run
 
 test-setup-environments: pip
-	cd terraform && terraform plan
+	cd terraform && terraform init && terraform plan
 #	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
 #		--check -i localhost, environments.yml
 
