@@ -7,3 +7,4 @@ ansible/roles
 .DS_Store
 *.pyc
 .venv
+.terraform
