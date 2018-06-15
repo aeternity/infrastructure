@@ -1,17 +1,15 @@
 provider "aws" {
   version                 = "1.22"
-  region                  = "us-west-2"
+  region                  = "eu-west-1"
   shared_credentials_file = "/aws/credentials"
   profile                 = "aeternity"
 }
 
-
-resource "aws_instance" "web" {
-  count = 2
-  ami           = "ami-5ea58927"
-  instance_type = "t2.micro"
-
-  tags {
-    Name = "HelloWorld-n${count.index}"
-  }
+module "fleet" {
+    source = "fleet"
+    static = 1
+    spot = 1
+    ami_id = "${var.ami_id}"
+    env = "spot"
+    subnets = ["subnet-aa989ef1","subnet-25d11543","subnet-0c7bb044"]
 }
