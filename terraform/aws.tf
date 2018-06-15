@@ -1,8 +1,16 @@
+terraform {
+  backend "s3" {
+    bucket = "aeternity-terraform-states"
+    key    = "aeternity-test-state.tfstate"
+    region = "us-east-1"
+  }
+}
+
 provider "aws" {
   version                 = "1.22"
   region                  = "eu-west-1"
   shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
+#  profile                 = "aeternity"
 }
 
 module "fleet" {
