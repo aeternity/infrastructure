@@ -7,19 +7,40 @@ terraform {
 #        shared_credentials_file = "/aws/credentials"
     }
 }
-
+#IRELAND
 provider "aws" {
-  version                 = "1.22"
-  region                  = "eu-west-1"
+    version                 = "1.22"
+    region                  = "eu-west-1"
+    alias = "eu-west-1"
+#  shared_credentials_file = "/aws/credentials"
+#  profile                 = "aeternity"
+}
+
+#LONDON
+provider "aws" {
+    version                 = "1.22"
+    region                  = "eu-west-2"
+    alias = "eu-west-2"
 #  shared_credentials_file = "/aws/credentials"
 #  profile                 = "aeternity"
 }
 
 module "fleet" {
+    provider = "aws.eu-west-1"
     source = "fleet"
     static = 1
     spot = 1
     ami_id = "${var.ami_id}"
-    env = "${var.env}"
+    env = "dev3"
     subnets = ["subnet-aa989ef1","subnet-25d11543","subnet-0c7bb044"]
+}
+
+module "fleet" {
+    provider = "aws.eu-west-2"
+    source = "fleet"
+    static = 1
+    spot = 1
+    ami_id = "${var.ami_id}"
+    env = "dev3"
+    subnets = ["subnet-5979d830","subnet-a79d83dc","subnet-7cf1de31"]
 }
