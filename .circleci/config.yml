@@ -39,7 +39,7 @@ references:
   setup_infra_terraform: &setup_infra_terraform
     run:
       name: Setup infrastructure
-      command: make setup-infrastructure
+      command: make setup-infrastructure-terraform
 
   setup_node: &setup_node
     run:
