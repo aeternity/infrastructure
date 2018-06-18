@@ -35,7 +35,7 @@ module "fleet" {
     subnets = ["subnet-aa989ef1","subnet-25d11543","subnet-0c7bb044"]
 }
 
-module "fleet" {
+module "fleet-eu-west-2" {
     provider = "aws.eu-west-2"
     source = "fleet"
     static = 1
