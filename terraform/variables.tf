@@ -3,7 +3,7 @@ variable  "instance_type" {
 }
 
 variable "spot_nodes" {
-    default = "1"
+    default = "2"
 }
 variable "ami_id" {
     type ="map"

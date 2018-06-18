@@ -17,7 +17,6 @@ provider "aws" {
 }
 
 #LONDON
-
 provider "aws" {
     version                 = "1.22"
     region                  = "eu-west-2"

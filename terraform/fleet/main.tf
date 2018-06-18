@@ -10,6 +10,8 @@ resource "aws_instance" "static_node" {
     instance_type = "${var.instance_type}"
     tags {
         Name = "ae-${var.env}-static-node"
+        env = "${var.env}"
+        role = "epoch"
     }
 }
 
@@ -40,6 +42,16 @@ resource "aws_autoscaling_group" "spot_fleet" {
         {
             key                 = "Name"
             value               = "ae-${var.env}-nodes"
+            propagate_at_launch = true
+        },
+        {
+            key                 = "env"
+            value               = "${var.env}"
+            propagate_at_launch = true
+        },
+        {
+            key                 = "role"
+            value               = "epoch"
             propagate_at_launch = true
         }
     ]
