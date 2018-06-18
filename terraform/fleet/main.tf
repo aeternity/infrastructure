@@ -13,6 +13,7 @@ resource "aws_instance" "static_node" {
         env = "${var.env}"
         role = "epoch"
     }
+    security_groups = ["${aws_security_group.ae-nodes.id}","${aws_security_group.ae-nodes-management.id}"]
 }
 
 resource "aws_eip" "ip" {
@@ -24,6 +25,7 @@ resource "aws_launch_configuration" "spot" {
     image_id = "${lookup(var.ami_id, data.aws_region.current.name)}"
     instance_type = "${var.instance_type}"
     spot_price    = "${var.spot_price}"
+    security_groups = ["${aws_security_group.ae-nodes.id}","${aws_security_group.ae-nodes-management.id}"]
     lifecycle {
         create_before_destroy = true
     }
