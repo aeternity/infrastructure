@@ -20,7 +20,7 @@ images: ansible/roles
 	packer build packer/epoch.json
 
 setup-infrastructure-terraform:
-	cd terraform && teraform apply --auto-approve
+	cd terraform &&  && terraform init && teraform apply --auto-approve -e "env=dev3"
 
 setup-infrastructure: ansible/roles check-deploy-env
 	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
