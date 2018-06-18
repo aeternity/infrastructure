@@ -32,7 +32,7 @@ module "fleet" {
     source = "fleet"
     static = 1
     spot = 1
-    ami_id = "${var.ami_id}"
+    ami_id = "ami-5ea58927"
     env = "dev3"
     subnets = ["subnet-aa989ef1","subnet-25d11543","subnet-0c7bb044"]
     providers = {
@@ -45,7 +45,7 @@ module "fleet-eu-west-2" {
     source = "fleet"
     static = 1
     spot = 1
-    ami_id = "${var.ami_id}"
+    ami_id = "ami-a133ddc6"
     env = "dev3"
     subnets = ["subnet-5979d830","subnet-a79d83dc","subnet-7cf1de31"]
     providers = {
