@@ -53,7 +53,7 @@
         template: "../openstack/ae-environment.yml"
         parameters:
           env_name: uat
-          meta_groups: "tag_role_epoch,tag_env_uat"
+          meta_groups: "tag_role_epoch,tag_env_uat,tag_color_green"
           node_count: 19
           static_node_count: 1
           node_flavor: c1.large
@@ -131,6 +131,7 @@
       args:
         template_parameters:
           EnvName: "uat"
+          Color: "green"
           ApiPort: 3013
           NodeCount: 10
           AmiId: "ami-34a9364c" # AMI  ubuntu 16.04.3 with master user + python added.
@@ -149,6 +150,7 @@
       args:
         template_parameters:
           EnvName: "uat"
+          Color: "blue"
           ApiPort: 3013
           NodeCount: 10
           AmiId: "ami-8c076ce3" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c
@@ -167,6 +169,7 @@
       args:
         template_parameters:
           EnvName: "uat"
+          Color: "blue"
           ApiPort: 3013
           NodeCount: 10
           AmiId: "ami-7f461803" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c

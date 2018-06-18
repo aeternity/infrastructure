@@ -8,6 +8,9 @@ Parameters:
     EnvName:
         Type: String
         Description: Environment name
+    Color:
+        Type: String
+        Description: Environment color e.g. blue/green
     ApiPort:
         Type: Number
         Description: Port number of epoch node API
@@ -110,6 +113,10 @@ Resources:
 
         - Key: env
           Value: !Ref EnvName
+          PropagateAtLaunch: 'true'
+
+        - Key: color
+          Value: !Ref Color
           PropagateAtLaunch: 'true'
 
         AvailabilityZones:
