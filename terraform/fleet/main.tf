@@ -13,7 +13,7 @@ resource "aws_instance" "static_node" {
         env = "${var.env}"
         role = "epoch"
     }
-    security_groups = ["${aws_security_group.ae-nodes.id}","${aws_security_group.ae-nodes-management.id}"]
+    vpc_security_group_ids = ["${aws_security_group.ae-nodes.id}","${aws_security_group.ae-nodes-management.id}"]
 }
 
 resource "aws_eip" "ip" {
