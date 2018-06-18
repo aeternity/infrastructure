@@ -8,7 +8,10 @@ resource "aws_instance" "static_node" {
     count = "${var.static}"
     ami = "${var.ami_id}"
     instance_type = "${var.instance_type}"
+}
 
+resource "aws_eip" "ip" {
+  instance = "${aws_instance.static_node.id}"
 }
 
 resource "aws_launch_configuration" "spot" {
