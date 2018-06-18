@@ -1,3 +1,6 @@
+provider "aws" {
+
+}
 data "aws_region" "current" {}
 
 
@@ -5,6 +8,7 @@ resource "aws_instance" "static_node" {
     count = "${var.static}"
     ami = "${var.ami_id}"
     instance_type = "${var.instance_type}"
+
 }
 
 resource "aws_launch_configuration" "spot" {
