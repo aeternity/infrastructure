@@ -27,27 +27,31 @@ provider "aws" {
 }
 
 module "fleet" {
-    #    provider = "aws.eu-west-1"
-#    provider = "aws.eu-west-2"
     source = "fleet"
     static = 1
-    spot = 1
-    ami_id = "ami-5ea58927"
+    spot = "${var.spot_nodes}"
+
     env = "dev3"
-    subnets = ["subnet-aa989ef1","subnet-25d11543","subnet-0c7bb044"]
+    ami_id = "${var.ami_id}"
+    subnets = "${var.subnets}"
+    instance_type = "${var.instance_type}"
+
     providers = {
         aws = "aws.eu-west-1"
     }
+
 }
 
 module "fleet-eu-west-2" {
-#    provider = "aws.eu-west-2"
     source = "fleet"
     static = 1
-    spot = 1
-    ami_id = "ami-a133ddc6"
+    spot = "${var.spot_nodes}"
+
     env = "dev3"
-    subnets = ["subnet-5979d830","subnet-a79d83dc","subnet-7cf1de31"]
+    ami_id = "${var.ami_id}"
+    subnets = "${var.subnets}"
+    instance_type = "${var.instance_type}"
+
     providers = {
         aws = "aws.eu-west-2"
     }
