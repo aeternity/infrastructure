@@ -36,6 +36,11 @@ references:
       name: Setup infrastructure
       command: make setup-infrastructure
 
+  setup_infra_terraform: &setup_infra_terraform
+    run:
+      name: Setup infrastructure
+      command: make setup-infrastructure
+
   setup_node: &setup_node
     run:
       name: Setup node
@@ -152,6 +157,18 @@ jobs:
       - *setup_infra
       - *setup_node
 
+  setup_dev3:
+    <<: *container_config
+    environment:
+      - DEPLOY_ENV: dev3
+    steps:
+      - checkout
+      - *restore_venv
+      - *activate_venv
+      - *restore_roles
+      - *setup_infra_terraform
+      - *setup_node
+
   build_images:
     <<: *container_config
     steps:
@@ -217,6 +234,13 @@ workflows:
             branches:
               only: master
 
+      - setup_dev3:
+          requires:
+            - check
+          filters:
+            branches:
+              only: PT-157219023-terraform
+
       - build_images:
           filters:
             branches:
@@ -236,3 +260,4 @@ workflows:
       - setup_fast_integration
       - setup_dev1
       - setup_dev2
+      - setup_dev3
