@@ -84,12 +84,12 @@ jobs:
       - *restore_venv
       - *activate_venv
       - *install_pip
-#      - run:
-#          name: Configuration lint
-#          command: make lint
-#      - run:
-#          name: Dry run OpenStack heat template
-#          command: make test-openstack
+      - run:
+          name: Configuration lint
+          command: make lint
+      - run:
+          name: Dry run OpenStack heat template
+          command: make test-openstack
       - run:
           name: Dry run environments playbooks
           command: make test-setup-environments
