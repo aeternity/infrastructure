@@ -3,10 +3,32 @@ terraform {
         bucket = "aeternity-terraform-states"
         key    = "aeternitystate.tfstate"
         region = "us-east-1"
-        profile                 = "aeternity"
-        shared_credentials_file = "/aws/credentials"
     }
 }
+
+provider "aws" {
+    version                 = "1.22"
+    region                  = "ap-southeast-1"
+    alias = "ap-southeast-1"
+}
+
+module "fleet" {
+    source = "fleet"
+    static = 1
+    spot = "${var.spot_nodes}"
+
+    env = "ap-southeast-1"
+    ami_id = "${var.ami_id}"
+    subnets = "${var.subnets}"
+    instance_type = "${var.instance_type}"
+
+    providers = {
+        aws = "aws.ap-southeast-1"
+    }
+
+    static_ip = o
+}
+
 
 #test stack
 /*

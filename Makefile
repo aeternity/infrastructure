@@ -19,12 +19,10 @@ ansible/roles: pip
 images: ansible/roles
 	packer build packer/epoch.json
 
-setup-infrastructure-terraform:
-	cd terraform && terraform init && terraform apply --auto-approve
-
 setup-infrastructure: ansible/roles check-deploy-env
 	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
 		--tags "$(DEPLOY_ENV)" environments.yml
+	cd terraform && terraform init && terraform apply --auto-approve
 
 setup-node: ansible/roles check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" setup.yml
@@ -47,11 +45,7 @@ reset-net: ansible/roles check-deploy-env
 test-openstack: pip
 	openstack stack create test -e openstack/test/create.yml \
 		-t openstack/ae-environment.yml --enable-rollback --wait --dry-run
-
-test-setup-environments: pip
 	cd terraform && terraform init && terraform plan
-#	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
-#		--check -i localhost, environments.yml
 
 lint:
 	ansible-lint ansible/setup.yml
