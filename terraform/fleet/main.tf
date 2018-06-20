@@ -12,6 +12,7 @@ resource "aws_instance" "static_node" {
         Name = "ae-${var.env}-static-node"
         env = "${var.env}"
         role = "epoch"
+        color = "${var.color}"
     }
     vpc_security_group_ids = ["${aws_security_group.ae-nodes.id}","${aws_security_group.ae-nodes-management.id}"]
 }
@@ -50,6 +51,12 @@ resource "aws_autoscaling_group" "spot_fleet" {
         {
             key                 = "role"
             value               = "epoch"
+            propagate_at_launch = true
+        },
+,
+        {
+            key                 = "color"
+            value               = "${var.color}"
             propagate_at_launch = true
         }
     ]

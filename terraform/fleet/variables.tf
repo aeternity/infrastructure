@@ -2,6 +2,10 @@ variable "static" {
     default = 0
 }
 
+variable "color" {
+
+}
+
 variable "spot" {
     default = 0
 }

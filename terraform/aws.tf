@@ -16,7 +16,7 @@ module "fleet" {
     source = "fleet"
     static = 1
     spot = "${var.spot_nodes}"
-
+    color = "blue"
     env = "uat"
     ami_id = "${var.ami_id}"
     subnets = "${var.subnets}"
