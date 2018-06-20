@@ -42,14 +42,14 @@ endif
 reset-net: ansible/roles check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" reset-net.yml
 
+test-openstack: pip
+	openstack stack create test -e openstack/test/create.yml \
+		-t openstack/ae-environment.yml --enable-rollback --wait --dry-run
+
 test-setup-environments: pip
 	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
 		--check -i localhost, environments.yml
 	cd terraform && terraform init && terraform plan
-
-test-openstack: pip
-	openstack stack create test -e openstack/test/create.yml \
-		-t openstack/ae-environment.yml --enable-rollback --wait --dry-run
 
 lint:
 	ansible-lint ansible/setup.yml
