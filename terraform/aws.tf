@@ -7,6 +7,9 @@ terraform {
         shared_credentials_file = "/aws/credentials"
     }
 }
+
+#test stack
+/*
 #IRELAND
 provider "aws" {
     version                 = "1.22"
@@ -58,3 +61,4 @@ module "fleet-eu-west-2" {
 
     static_ip = 1
 }
+*/

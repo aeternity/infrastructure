@@ -1,5 +1,8 @@
 resource "aws_security_group" "ae-nodes" {
     name = "ae-${var.env}-nodes-terraform" #postfix with terraform to avoid issues with current setup
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
 resource "aws_security_group_rule" "allow_all_internal" {
@@ -23,6 +26,9 @@ resource "aws_security_group_rule" "allow_outgoing-node" {
 
 resource "aws_security_group" "ae-nodes-management" {
     name = "ae-${var.env}-management-terraform"
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
 resource "aws_security_group_rule" "allow_ssh" {
