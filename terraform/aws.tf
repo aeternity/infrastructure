@@ -1,7 +1,7 @@
 terraform {
     backend "s3" {
         bucket = "aeternity-terraform-states"
-        key    = "aeternity-test-state.tfstate"
+        key    = "aeternitystate.tfstate"
         region = "us-east-1"
         profile                 = "aeternity"
         shared_credentials_file = "/aws/credentials"
