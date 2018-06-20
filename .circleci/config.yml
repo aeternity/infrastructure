@@ -5,7 +5,7 @@ references:
     setup_remote_docker:
       docker_layer_caching: true
     docker:
-      - image: aeternity/builder:latest
+      - image: aeternity/builder
         user: builder
     working_directory: ~/infrastructure
 
