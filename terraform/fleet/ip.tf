@@ -1,6 +1,5 @@
 resource "aws_eip" "ip" {
     count = "${var.static_ip}"
-#  instance = "${aws_instance.static_node.id}"
 }
 
 resource "aws_eip_association" "ip_associate" {
