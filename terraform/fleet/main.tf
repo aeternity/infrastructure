@@ -53,7 +53,6 @@ resource "aws_autoscaling_group" "spot_fleet" {
             value               = "epoch"
             propagate_at_launch = true
         },
-,
         {
             key                 = "color"
             value               = "${var.color}"
