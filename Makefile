@@ -57,6 +57,7 @@ lint:
 	ansible-lint ansible/manage-node.yml
 	ansible-lint ansible/reset-net.yml
 	packer validate packer/epoch.json
+	cd terraform && terraform validate
 
 check-deploy-env:
 ifndef DEPLOY_ENV
