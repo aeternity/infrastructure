@@ -17,7 +17,13 @@ resource "aws_instance" "static_node" {
 }
 
 resource "aws_eip" "ip" {
-  instance = "${aws_instance.static_node.id}"
+#  instance = "${aws_instance.static_node.id}"
+}
+
+resource "aws_eip_association" "ip_associate" {
+    instance_id = "${aws_instance.static_node.id}"
+    allocation_id = "${aws_eip.ip.id}"
+
 }
 
 resource "aws_launch_configuration" "spot" {
