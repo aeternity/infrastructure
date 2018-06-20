@@ -22,3 +22,8 @@ variable "spot_price" {
 variable "subnets" {
     type = "map"
 }
+
+
+variable "static_ip" {
+    default = 1
+}

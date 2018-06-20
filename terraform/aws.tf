@@ -12,8 +12,8 @@ provider "aws" {
     version                 = "1.22"
     region                  = "eu-west-1"
     alias = "eu-west-1"
-  shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
+    shared_credentials_file = "/aws/credentials"
+    profile                 = "aeternity"
 }
 
 #LONDON
@@ -21,8 +21,8 @@ provider "aws" {
     version                 = "1.22"
     region                  = "eu-west-2"
     alias = "eu-west-2"
-  shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
+    shared_credentials_file = "/aws/credentials"
+    profile                 = "aeternity"
 }
 
 module "fleet" {
@@ -39,6 +39,7 @@ module "fleet" {
         aws = "aws.eu-west-1"
     }
 
+    static_ip = 1
 }
 
 module "fleet-eu-west-2" {
@@ -55,4 +56,5 @@ module "fleet-eu-west-2" {
         aws = "aws.eu-west-2"
     }
 
+    static_ip = 1
 }

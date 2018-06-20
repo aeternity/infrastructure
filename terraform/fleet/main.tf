@@ -16,16 +16,6 @@ resource "aws_instance" "static_node" {
     vpc_security_group_ids = ["${aws_security_group.ae-nodes.id}","${aws_security_group.ae-nodes-management.id}"]
 }
 
-resource "aws_eip" "ip" {
-#  instance = "${aws_instance.static_node.id}"
-}
-
-resource "aws_eip_association" "ip_associate" {
-    instance_id = "${aws_instance.static_node.id}"
-    allocation_id = "${aws_eip.ip.id}"
-
-}
-
 resource "aws_launch_configuration" "spot" {
     name_prefix = "ae-${var.env}-spot-nodes_"
     image_id = "${lookup(var.ami_id, data.aws_region.current.name)}"
