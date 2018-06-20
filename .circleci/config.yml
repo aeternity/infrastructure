@@ -236,4 +236,3 @@ workflows:
       - setup_fast_integration
       - setup_dev1
       - setup_dev2
-      - setup_dev3
