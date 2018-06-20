@@ -1,5 +1,5 @@
 resource "aws_security_group" "ae-nodes" {
-    name = "ae-${var.env}-nodes"
+    name = "ae-${var.env}-nodes-terraform" #postfix with terraform to avoid issues with current setup
 }
 
 resource "aws_security_group_rule" "allow_all_internal" {
@@ -22,7 +22,7 @@ resource "aws_security_group_rule" "allow_outgoing-node" {
 }
 
 resource "aws_security_group" "ae-nodes-management" {
-    name = "ae-${var.env}-management"
+    name = "ae-${var.env}-management-terraform"
 }
 
 resource "aws_security_group_rule" "allow_ssh" {
