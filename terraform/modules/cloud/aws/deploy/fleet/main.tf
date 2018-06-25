@@ -13,8 +13,6 @@ data "aws_ami" "ami" {
 
 resource "aws_instance" "static_node" {
   count = "${var.static}"
-
-  #  ami           = "${lookup(var.ami_id, data.aws_region.current.name)}"
   ami           = "${data.aws_ami.ami.id}"
   instance_type = "${var.instance_type}"
 
