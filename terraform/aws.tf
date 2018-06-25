@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 module "fleet" {
-    source = "fleet/aws"
+    source = "fleet"
     static = 1
     spot = "${var.spot_nodes}"
     color = "blue"
