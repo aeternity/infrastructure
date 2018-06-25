@@ -1,8 +1,20 @@
 data "aws_region" "current" {}
 
+data "aws_ami" "ami" {
+  most_recent      = true
+
+  filter {
+    name   = "name"
+    values = ["epoch-ubuntu*"]
+  }
+
+  owners     = ["self"]
+}
+
 resource "aws_instance" "static_node" {
   count         = "${var.static}"
-  ami           = "${lookup(var.ami_id, data.aws_region.current.name)}"
+    #  ami           = "${lookup(var.ami_id, data.aws_region.current.name)}"
+  ami = "${data.aws_ami.ami.id}"
   instance_type = "${var.instance_type}"
 
   tags {
@@ -17,7 +29,7 @@ resource "aws_instance" "static_node" {
 
 resource "aws_launch_configuration" "spot" {
   name_prefix     = "ae-${var.env}-spot-nodes_"
-  image_id        = "${lookup(var.ami_id, data.aws_region.current.name)}"
+  image_id        = "${data.aws_ami.ami.id}"
   instance_type   = "${var.instance_type}"
   spot_price      = "${var.spot_price}"
   security_groups = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]

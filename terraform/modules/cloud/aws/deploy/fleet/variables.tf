@@ -8,10 +8,6 @@ variable "spot" {
   default = 0
 }
 
-variable "ami_id" {
-  type = "map"
-}
-
 variable "env" {}
 
 variable "instance_type" {
