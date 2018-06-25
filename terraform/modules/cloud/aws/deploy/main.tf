@@ -1,5 +1,5 @@
 module "aws_vpc" {
-  source = "../vpc"
+  source = "vpc"
 }
 
 module "aws_config" {
@@ -7,7 +7,7 @@ module "aws_config" {
 }
 
 module "aws_fleet" {
-  source        = "../fleet"
+  source        = "fleet"
   static        = 1
   spot          = "${module.aws_config.spot_nodes}"
   color         = "${var.color}"
