@@ -18,7 +18,6 @@ resource "aws_security_group_rule" "allow_all_internal" {
   source_security_group_id = "${aws_security_group.ae-nodes.id}"
 }
 
-
 resource "aws_security_group_rule" "allow_outgoing-node" {
   type              = "egress"
   from_port         = 0
@@ -27,7 +26,6 @@ resource "aws_security_group_rule" "allow_outgoing-node" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = "${aws_security_group.ae-nodes.id}"
 }
-
 
 resource "aws_security_group" "ae-nodes-management" {
   name = "ae-${var.env}-management-terraform"
@@ -48,7 +46,7 @@ resource "aws_security_group_rule" "allow_ssh" {
   security_group_id = "${aws_security_group.ae-nodes-management.id}"
 }
 
-resource "aws_security_group_rule" "allow_epoch_1" {
+resource "aws_security_group_rule" "external_api_port" {
   type              = "ingress"
   from_port         = 3013
   to_port           = 3015
@@ -57,7 +55,7 @@ resource "aws_security_group_rule" "allow_epoch_1" {
   security_group_id = "${aws_security_group.ae-nodes-management.id}"
 }
 
-resource "aws_security_group_rule" "allow_epoch_2" {
+resource "aws_security_group_rule" "sync_protocol_port" {
   type              = "ingress"
   from_port         = 3015
   to_port           = 3015
@@ -75,7 +73,6 @@ resource "aws_security_group_rule" "allow_epoch_icmp" {
   security_group_id = "${aws_security_group.ae-nodes-management.id}"
 }
 
-/*
 resource "aws_security_group_rule" "allow_outgoing-management" {
   type              = "egress"
   from_port         = 0
@@ -84,4 +81,3 @@ resource "aws_security_group_rule" "allow_outgoing-management" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = "${aws_security_group.ae-nodes-management.id}"
 }
-*/

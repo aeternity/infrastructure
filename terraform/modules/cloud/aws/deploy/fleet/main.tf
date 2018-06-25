@@ -1,20 +1,21 @@
 data "aws_region" "current" {}
 
 data "aws_ami" "ami" {
-  most_recent      = true
+  most_recent = true
 
   filter {
     name   = "name"
     values = ["epoch-ubuntu*"]
   }
 
-  owners     = ["self"]
+  owners = ["self"]
 }
 
 resource "aws_instance" "static_node" {
-  count         = "${var.static}"
-    #  ami           = "${lookup(var.ami_id, data.aws_region.current.name)}"
-  ami = "${data.aws_ami.ami.id}"
+  count = "${var.static}"
+
+  #  ami           = "${lookup(var.ami_id, data.aws_region.current.name)}"
+  ami           = "${data.aws_ami.ami.id}"
   instance_type = "${var.instance_type}"
 
   tags {
@@ -23,7 +24,8 @@ resource "aws_instance" "static_node" {
     role  = "epoch"
     color = "${var.color}"
   }
-  subnet_id = "${element( var.subnets, 1)}"
+
+  subnet_id              = "${element( var.subnets, 1)}"
   vpc_security_group_ids = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
 }
 
@@ -45,7 +47,8 @@ resource "aws_autoscaling_group" "spot_fleet" {
   max_size             = "${var.spot}"
   launch_configuration = "${aws_launch_configuration.spot.id}"
   vpc_zone_identifier  = ["${var.subnets}"]
-#  suspended_processes  = ["Terminate"]
+
+  #  suspended_processes  = ["Terminate"]
   termination_policies = ["OldestInstance"]
 
   tags = [
