@@ -28,6 +28,7 @@ resource "aws_security_group_rule" "allow_outgoing-node" {
   security_group_id = "${aws_security_group.ae-nodes.id}"
 }
 */
+
 resource "aws_security_group" "ae-nodes-management" {
   name = "ae-${var.env}-management-terraform"
 
@@ -84,4 +85,3 @@ resource "aws_security_group_rule" "allow_outgoing-management" {
   security_group_id = "${aws_security_group.ae-nodes-management.id}"
 }
 */
-

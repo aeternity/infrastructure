@@ -11,8 +11,8 @@ resource "aws_instance" "static_node" {
     role  = "epoch"
     color = "${var.color}"
   }
-
-  security_groups = ["${aws_security_group.ae-nodes.name}", "${aws_security_group.ae-nodes-management.name}"]
+  subnet_id = "${element( var.subnets, 1)}"
+  vpc_security_group_ids = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
 }
 
 resource "aws_launch_configuration" "spot" {

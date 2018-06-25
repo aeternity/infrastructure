@@ -15,5 +15,6 @@ module "aws_fleet" {
   ami_id        = "${module.aws_config.ami_id}"
   vpc_id        = "${module.aws_vpc.vpc_id}"
   subnets       = "${module.aws_vpc.subnets}"
-  instance_type = "${module.aws_config.instance_type}"
+    instance_type = "${module.aws_config.instance_type}"
+    static_ip = 0
 }
