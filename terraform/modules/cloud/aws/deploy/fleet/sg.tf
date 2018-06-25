@@ -18,7 +18,7 @@ resource "aws_security_group_rule" "allow_all_internal" {
   source_security_group_id = "${aws_security_group.ae-nodes.id}"
 }
 
-/*
+
 resource "aws_security_group_rule" "allow_outgoing-node" {
   type              = "egress"
   from_port         = 0
@@ -27,7 +27,7 @@ resource "aws_security_group_rule" "allow_outgoing-node" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = "${aws_security_group.ae-nodes.id}"
 }
-*/
+
 
 resource "aws_security_group" "ae-nodes-management" {
   name = "ae-${var.env}-management-terraform"
