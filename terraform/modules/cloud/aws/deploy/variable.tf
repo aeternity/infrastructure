@@ -9,3 +9,7 @@ variable "spot_nodes" {
 variable "instance_type" {
   default = "m4.large"
 }
+
+variable "static_ip" {
+  default = 1
+}
