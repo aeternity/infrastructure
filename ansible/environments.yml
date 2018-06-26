@@ -159,7 +159,7 @@
         - uat
         - aws
 
-#    - name: Ensure ae-uat-apsoutheast1 environment stack
+    - name: Ensure ae-uat-apsoutheast1 environment stack
       cloudformation:
         stack_name: "ae-uat"
         state: "present"
