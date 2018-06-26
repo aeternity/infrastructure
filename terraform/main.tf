@@ -56,7 +56,7 @@ module "aws_deploy-us-west-2" {
   source = "modules/cloud/aws/deploy"
   env    = "uat"
   color  = "blue"
-  static_ip = 0
+  static_ip = 1
   providers = {
     aws = "aws.us-west-2"
   }
