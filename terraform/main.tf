@@ -46,7 +46,7 @@ module "aws_deploy-eu-central-1" {
   source = "modules/cloud/aws/deploy"
   env    = "uat"
   color  = "blue"
-  static_ip = 1
+
   providers = {
     aws = "aws.eu-central-1"
   }
@@ -56,8 +56,27 @@ module "aws_deploy-us-west-2" {
   source = "modules/cloud/aws/deploy"
   env    = "uat"
   color  = "blue"
-  static_ip = 1
+
   providers = {
     aws = "aws.us-west-2"
   }
+}
+
+module "aws_deploy-eu-west-1" {
+  source = "modules/cloud/aws/deploy"
+  env    = "uat"
+  color  = "blue"
+  spot_nodes = 1
+  static_nodes = 0
+  providers = {
+    aws = "aws.eu-west-1"
+  }
+}
+
+provider "aws" {
+  version                 = "1.24"
+  region                  = "eu-west-1"
+  alias                   = "eu-west-1"
+  shared_credentials_file = "/aws/credentials"
+  profile                 = "aeternity"
 }

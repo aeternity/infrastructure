@@ -33,7 +33,7 @@ resource "aws_route_table" "rt" {
 }
 
 resource "aws_route_table_association" "demo" {
-  count                   = "${length(data.aws_availability_zones.available.names)}"
+  count          = "${length(data.aws_availability_zones.available.names)}"
   subnet_id      = "${aws_subnet.subnet.*.id[count.index]}"
   route_table_id = "${aws_route_table.rt.id}"
 }

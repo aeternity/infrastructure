@@ -1,12 +1,12 @@
-variable "static" {
-  default = 0
+variable "static_nodes" {
+  default = 1
+}
+
+variable "spot_nodes" {
+  default = 9
 }
 
 variable "color" {}
-
-variable "spot" {
-  default = 0
-}
 
 variable "env" {}
 
@@ -22,8 +22,4 @@ variable "vpc_id" {}
 
 variable "subnets" {
   type = "list"
-}
-
-variable "static_ip" {
-  default = 1
 }

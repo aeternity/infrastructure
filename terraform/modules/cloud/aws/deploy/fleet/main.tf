@@ -12,7 +12,7 @@ data "aws_ami" "ami" {
 }
 
 resource "aws_instance" "static_node" {
-  count = "${var.static}"
+  count         = "${var.static_nodes}"
   ami           = "${data.aws_ami.ami.id}"
   instance_type = "${var.instance_type}"
 
@@ -41,8 +41,8 @@ resource "aws_launch_configuration" "spot" {
 
 resource "aws_autoscaling_group" "spot_fleet" {
   name                 = "ae-${var.env}-spot-nodes"
-  min_size             = "${var.spot}"
-  max_size             = "${var.spot}"
+  min_size             = "${var.spot_nodes}"
+  max_size             = "${var.spot_nodes}"
   launch_configuration = "${aws_launch_configuration.spot.id}"
   vpc_zone_identifier  = ["${var.subnets}"]
 
