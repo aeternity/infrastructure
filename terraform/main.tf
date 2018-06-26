@@ -61,11 +61,3 @@ module "aws_deploy-us-west-2" {
     aws = "aws.us-west-2"
   }
 }
-
-provider "aws" {
-  version                 = "1.24"
-  region                  = "eu-west-1"
-  alias                   = "eu-west-1"
-  shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
-}
