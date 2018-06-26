@@ -24,6 +24,14 @@ provider "aws" {
   profile                 = "aeternity"
 }
 
+provider "aws" {
+  version                 = "1.24"
+  region                  = "us-west-1"
+  alias                   = "us-west-1"
+  shared_credentials_file = "/aws/credentials"
+  profile                 = "aeternity"
+}
+
 module "aws_deploy-ap-southeast-1" {
   source = "modules/cloud/aws/deploy"
   env    = "uat"
@@ -38,8 +46,18 @@ module "aws_deploy-eu-central-1" {
   source = "modules/cloud/aws/deploy"
   env    = "uat"
   color  = "blue"
-  static_ip = 0
+  static_ip = 1
   providers = {
     aws = "aws.eu-central-1"
   }
 }
+/*
+module "aws_deploy-us-west-1" {
+  source = "modules/cloud/aws/deploy"
+  env    = "uat"
+  color  = "green"
+  static_ip = 0
+  providers = {
+    aws = "aws.us-west-1"
+  }
+}*/
