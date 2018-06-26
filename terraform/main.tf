@@ -62,17 +62,6 @@ module "aws_deploy-us-west-2" {
   }
 }
 
-module "aws_deploy-eu-west-1" {
-  source = "modules/cloud/aws/deploy"
-  env    = "uat"
-  color  = "blue"
-  spot_nodes = 1
-  static_nodes = 0
-  providers = {
-    aws = "aws.eu-west-1"
-  }
-}
-
 provider "aws" {
   version                 = "1.24"
   region                  = "eu-west-1"
