@@ -55,7 +55,7 @@ module "aws_deploy-eu-central-1" {
 module "aws_deploy-us-west-2" {
   source = "modules/cloud/aws/deploy"
   env    = "uat"
-  color  = "blue"
+  color  = "green"
 
   providers = {
     aws = "aws.us-west-2"
