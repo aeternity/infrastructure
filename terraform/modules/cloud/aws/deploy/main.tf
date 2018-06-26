@@ -13,8 +13,3 @@ module "aws_fleet" {
   instance_type = "${var.instance_type}"
   static_ip     = 0
 }
-
-
-module "aws"{
-
-}
