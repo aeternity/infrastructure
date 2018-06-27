@@ -19,15 +19,23 @@ provider "aws" {
 }
 
 provider "aws" {
-  version = "1.24"
-  region  = "us-west-2"
-  alias   = "us-west-2"
+  version                 = "1.24"
+  region                  = "us-west-2"
+  alias                   = "us-west-2"
+  shared_credentials_file = "/aws/credentials"
+  profile                 = "aeternity"
 }
 
 module "aws_deploy-ap-southeast-1" {
   source = "modules/cloud/aws/deploy"
   env    = "uat"
   color  = "blue"
+
+  static_nodes = 1
+  spot_nodes   = 9
+
+  spot_price    = "0.125"
+  instance_type = "m4.large"
 
   providers = {
     aws = "aws.ap-southeast-1"
@@ -39,6 +47,12 @@ module "aws_deploy-eu-central-1" {
   env    = "uat"
   color  = "blue"
 
+  static_nodes = 1
+  spot_nodes   = 9
+
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
   providers = {
     aws = "aws.eu-central-1"
   }
@@ -48,6 +62,12 @@ module "aws_deploy-us-west-2" {
   source = "modules/cloud/aws/deploy"
   env    = "uat"
   color  = "green"
+
+  static_nodes = 1
+  spot_nodes   = 9
+
+  spot_price    = "0.125"
+  instance_type = "m4.large"
 
   providers = {
     aws = "aws.us-west-2"

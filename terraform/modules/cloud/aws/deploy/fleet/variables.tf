@@ -1,22 +1,14 @@
-variable "static_nodes" {
-  default = 1
-}
+variable "static_nodes" {}
 
-variable "spot_nodes" {
-  default = 9
-}
+variable "spot_nodes" {}
 
 variable "color" {}
 
 variable "env" {}
 
-variable "instance_type" {
-  default = "t2.micro"
-}
+variable "instance_type" {}
 
-variable "spot_price" {
-  default = "1"
-}
+variable "spot_price" {}
 
 variable "vpc_id" {}
 

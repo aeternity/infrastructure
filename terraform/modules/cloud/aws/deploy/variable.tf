@@ -2,14 +2,10 @@ variable "env" {}
 
 variable "color" {}
 
-variable "spot_nodes" {
-  default = "9"
-}
+variable "spot_nodes" {}
 
-variable "static_nodes" {
-  default = "1"
-}
+variable "static_nodes" {}
 
-variable "instance_type" {
-  default = "m4.large"
-}
+variable "instance_type" {}
+
+variable "spot_price" {}
