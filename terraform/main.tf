@@ -73,3 +73,51 @@ module "aws_deploy-us-west-2" {
     aws = "aws.us-west-2"
   }
 }
+
+module "aws_deploy-us-west-2-uat2" {
+  source = "modules/cloud/aws/deploy"
+  env    = "uat2"
+  color  = "green"
+
+  static_nodes = 1
+  spot_nodes   = 9
+
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
+  providers = {
+    aws = "aws.us-west-2"
+  }
+}
+
+module "aws_deploy-eu-central-1-uat2" {
+  source = "modules/cloud/aws/deploy"
+  env    = "uat2"
+  color  = "green"
+
+  static_nodes = 1
+  spot_nodes   = 9
+
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
+  providers = {
+    aws = "aws.eu-central-1"
+  }
+}
+
+module "aws_deploy-ap-southeast-1-uat2" {
+  source = "modules/cloud/aws/deploy"
+  env    = "uat2"
+  color  = "green"
+
+  static_nodes = 1
+  spot_nodes   = 9
+
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
+  providers = {
+    aws = "aws.ap-southeast-1"
+  }
+}

@@ -1,5 +1,6 @@
 module "aws_vpc" {
   source = "vpc"
+  env           = "${var.env}"
 }
 
 module "aws_fleet" {
