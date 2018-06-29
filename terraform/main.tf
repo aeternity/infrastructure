@@ -80,7 +80,7 @@ module "aws_deploy-us-west-2-uat2" {
   color  = "green"
 
   static_nodes = 1
-  spot_nodes   = 9
+  spot_nodes   = 7
 
   spot_price    = "0.125"
   instance_type = "m4.large"
@@ -93,10 +93,10 @@ module "aws_deploy-us-west-2-uat2" {
 module "aws_deploy-eu-central-1-uat2" {
   source = "modules/cloud/aws/deploy"
   env    = "uat2"
-  color  = "green"
+  color  = "blue"
 
   static_nodes = 1
-  spot_nodes   = 9
+  spot_nodes   = 7
 
   spot_price    = "0.125"
   instance_type = "m4.large"
@@ -109,10 +109,10 @@ module "aws_deploy-eu-central-1-uat2" {
 module "aws_deploy-ap-southeast-1-uat2" {
   source = "modules/cloud/aws/deploy"
   env    = "uat2"
-  color  = "green"
+  color  = "blue"
 
   static_nodes = 1
-  spot_nodes   = 9
+  spot_nodes   = 7
 
   spot_price    = "0.125"
   instance_type = "m4.large"

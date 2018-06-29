@@ -46,7 +46,7 @@ resource "aws_autoscaling_group" "spot_fleet" {
   launch_configuration = "${aws_launch_configuration.spot.id}"
   vpc_zone_identifier  = ["${var.subnets}"]
 
-  suspended_processes  = ["Terminate"]
+  #  suspended_processes  = ["Terminate"]
   termination_policies = ["OldestInstance"]
 
   tags = [
