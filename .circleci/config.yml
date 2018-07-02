@@ -26,6 +26,11 @@ references:
       name: Setup infrastructure
       command: make setup-infrastructure
 
+  setup_terraform: &setup_terraform
+    run:
+      name: Setup Terraform
+      command: make setup-terraform
+
   setup_node: &setup_node
     run:
       name: Setup node
@@ -61,6 +66,11 @@ jobs:
       - run:
           name: Dry run environments playbooks
           command: .circleci/docker-run.sh make test-setup-environments
+
+  setup_terraform:
+    <<: *container_config
+    steps:
+      - *setup_terraform
 
   setup_uat:
     <<: *container_config
@@ -132,9 +142,17 @@ workflows:
               ignore:
                 - packer
 
+      - setup_terraform:
+          requires:
+            - build_check
+          filters:
+            branches:
+              only: master
+
       - setup_uat:
           requires:
             - build_check
+            - setup_terraform
           filters:
             branches:
               only: master
@@ -188,7 +206,10 @@ workflows:
               only:
                 - master
     jobs:
-      - setup_uat
+      - setup_terraform
+      - setup_uat:
+          requires:
+            - setup-terraform
       - setup_integration
       - setup_fast_integration
       - setup_dev1

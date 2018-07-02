@@ -8,6 +8,8 @@ images:
 
 setup-infrastructure: check-deploy-env
 	cd ansible && ansible-playbook --tags "$(DEPLOY_ENV)" environments.yml
+
+setup-terraform:
 	cd terraform && terraform init && terraform apply --auto-approve
 
 setup-node: check-deploy-env
@@ -74,6 +76,6 @@ ifndef DEPLOY_ENV
 endif
 
 .PHONY: \
-	images setup-infrastructure setup-node setup-monitoring setup \
+	images setup-infrastructure setup-terraform setup-node setup-monitoring setup \
 	manage-node reset-net lint test-openstack test-setup-environments \
 	check-deploy-env

@@ -9,3 +9,7 @@ variable "static_nodes" {}
 variable "instance_type" {}
 
 variable "spot_price" {}
+
+variable "epoch" {
+  type = "map"
+}

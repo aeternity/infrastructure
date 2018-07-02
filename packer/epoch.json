@@ -52,7 +52,7 @@
     },
     {
       "type": "ansible",
-      "user": "master",
+      "user": "ubuntu",
       "playbook_file": "{{ template_dir }}/../ansible/image.yml",
       "extra_arguments": [
         "-e ansible_python_interpreter='/usr/bin/env python3' datadog_platform=aws"

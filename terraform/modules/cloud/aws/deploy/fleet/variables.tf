@@ -15,3 +15,7 @@ variable "vpc_id" {}
 variable "subnets" {
   type = "list"
 }
+
+variable "epoch" {
+  type = "map"
+}
