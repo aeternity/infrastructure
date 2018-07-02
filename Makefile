@@ -22,6 +22,7 @@ images: ansible/roles
 setup-infrastructure: ansible/roles check-deploy-env
 	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
 		--tags "$(DEPLOY_ENV)" environments.yml
+	cd terraform && terraform init && terraform apply --auto-approve
 
 setup-node: ansible/roles check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" setup.yml
@@ -48,6 +49,7 @@ test-openstack: pip
 test-setup-environments: pip
 	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
 		--check -i localhost, environments.yml
+	cd terraform && terraform init && terraform plan
 
 lint:
 	ansible-lint ansible/setup.yml
@@ -55,6 +57,7 @@ lint:
 	ansible-lint ansible/manage-node.yml
 	ansible-lint ansible/reset-net.yml
 	packer validate packer/epoch.json
+	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
 check-deploy-env:
 ifndef DEPLOY_ENV

@@ -133,7 +133,7 @@
           EnvName: "uat"
           Color: "green"
           ApiPort: 3013
-          NodeCount: 10
+          NodeCount: 0
           AmiId: "ami-34a9364c" # AMI  ubuntu 16.04.3 with master user + python added.
           InstanceType: "m4.large"
       tags:
@@ -152,7 +152,7 @@
           EnvName: "uat"
           Color: "blue"
           ApiPort: 3013
-          NodeCount: 10
+          NodeCount: 0
           AmiId: "ami-8c076ce3" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c
           InstanceType: "m4.large"
       tags:
@@ -169,9 +169,9 @@
       args:
         template_parameters:
           EnvName: "uat"
-          Color: "blue"
           ApiPort: 3013
-          NodeCount: 10
+          Color: "blue"
+          NodeCount: 0
           AmiId: "ami-7f461803" # AMI  ubuntu 16.04.3 with master user + python added. same as above, copy of ami-34a9364c
           InstanceType: "m4.large"
       tags:
