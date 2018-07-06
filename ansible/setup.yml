@@ -21,6 +21,7 @@
       - happi
       - UlfNorell
       - gorillainduction
+      - sylane
     libsodium_version: "1.0.16"
     libsodium_module_version: "23.1.0"
 
