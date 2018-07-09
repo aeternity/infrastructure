@@ -1,4 +1,5 @@
 .DEFAULT_GOAL := lint
+DEPLOY_DOWNTIME ?= 0
 
 images:
 	packer build packer/epoch.json
@@ -15,6 +16,19 @@ setup-monitoring: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" monitoring.yml
 
 setup: setup-infrastructure setup-node setup-monitoring
+
+deploy: check-deploy-env
+	$(eval LIMIT=tag_role_epoch:&tag_env_$(DEPLOY_ENV))
+ifneq ($(DEPLOY_COLOR),)
+	$(eval LIMIT=$(LIMIT):&tag_color_$(DEPLOY_COLOR))
+endif
+	cd ansible && ansible-playbook \
+		--limit="$(LIMIT)" \
+		-e package=$(PACKAGE) \
+		-e hosts_group=tag_env_$(DEPLOY_ENV) \
+		-e env=$(DEPLOY_ENV) \
+		-e downtime=$(DEPLOY_DOWNTIME) \
+		deploy.yml
 
 manage-node: check-deploy-env
 ifndef CMD
