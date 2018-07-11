@@ -44,25 +44,10 @@ export INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD="top secret"
 
 ## Docker image
 
-A Docker image `aeternity/infrastructure` is build and published to DockerHub. To use the image one should configure all the required credentials as documented above and run:
+A Docker image `aeternity/infrastructure` is build and published to DockerHub. To use the image one should configure all the required credentials as documented above and run the container:
 
 ```bash
-docker run -it \
-    -v  ~/.ssh/:/root/.ssh/ \
-    -e INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD \
-    -e AWS_ACCESS_KEY_ID \
-    -e AWS_SECRET_ACCESS_KEY \
-    -e OS_AUTH_URL \
-    -e OS_DOMAIN_ID \
-    -e OS_IDENTITY_API_VERSION \
-    -e OS_INTERFACE \
-    -e OS_PASSWORD \
-    -e OS_PROJECT_ID \
-    -e OS_PROJECT_NAME \
-    -e OS_REGION_NAME \
-    -e OS_USER_DOMAIN_NAME \
-    -e OS_USERNAME \
-    aeternity/infrastructure
+docker run -it --env-file env.list -v ~/.ssh/:/root/.ssh/ aeternity/infrastructure
 ```
 
 Then in the container shell setup your private SSH key:
