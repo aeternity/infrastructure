@@ -1,4 +1,13 @@
-# Make sure to copy the modifications to .dockerignore
+*
+!ansible
+!aws
+!openstack
+!packer
+!terraform
+terraform/.terraform
+!Makefile
+!requirements.txt
+# Copy from .gitignore
 *.retry
 ansible/group_vars/**/*.local.*
 ansible/inventory/*.rc.sh
@@ -8,4 +17,3 @@ ansible/roles
 .DS_Store
 *.pyc
 .venv
-.terraform

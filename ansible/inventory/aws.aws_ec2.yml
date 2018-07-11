@@ -1,0 +1,9 @@
+# Ansible AWS EC2 dynamic inventory plugin
+# https://docs.ansible.com/ansible/2.6/plugins/inventory/aws_ec2.html
+plugin: aws_ec2
+regions:
+  - eu-central-1
+  - us-west-2
+  - ap-southeast-1
+hostnames:
+  - ip-address

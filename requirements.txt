@@ -1,4 +1,4 @@
-ansible ~= 2.4.4
+ansible ~= 2.5
 ansible-lint ~= 3.4
 python-openstackclient ~= 3.12
 python-heatclient ~= 1.12
