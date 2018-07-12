@@ -42,7 +42,7 @@ references:
       command: make images
 
 jobs:
-  build:
+  build_check:
     <<: *machine_config
     steps:
       - checkout
@@ -52,12 +52,6 @@ jobs:
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
-
-  check:
-    <<: *machine_config
-    steps:
-      - checkout
-      - *pull_current_image
       - run:
           name: Configuration lint
           command: .circleci/docker-run.sh make lint
@@ -131,16 +125,8 @@ workflows:
   version: 2
   check_deploy:
     jobs:
-      - build:
+      - build_check:
           requires: []
-          filters:
-            branches:
-              ignore:
-                - packer
-
-      - check:
-          requires:
-            - build
           filters:
             branches:
               ignore:
@@ -148,42 +134,42 @@ workflows:
 
       - setup_uat:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - setup_integration:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - setup_fast_integration:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - setup_dev1:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - setup_dev2:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - docker_push_latest:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
