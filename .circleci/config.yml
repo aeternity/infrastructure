@@ -2,34 +2,24 @@ version: 2
 
 references:
   container_config: &container_config
-    setup_remote_docker:
-      docker_layer_caching: true
     docker:
-      - image: aeternity/builder
-        user: builder
+      - image: aeternity/infrastructure:master
     working_directory: ~/infrastructure
+    environment:
+      DOCKERHUB_REPO: aeternity/infrastructure
 
-  venv_cache_key: &venv_cache_key v6-venv-cache-{{ checksum "requirements.txt" }}
-  restore_venv: &restore_venv
-    restore_cache:
-      key: *venv_cache_key
+  machine_config: &machine_config
+    machine:
+      docker_layer_caching: true
+    working_directory: /home/circleci/infrastructure
+    environment:
+      DOCKERHUB_REPO: aeternity/infrastructure
 
-  roles_cache_key: &roles_cache_key v3-ansible-roles-{{ checksum "ansible/requirements.yml" }}
-  restore_roles: &restore_roles
-    restore_cache:
-      key: *roles_cache_key
-
-  install_pip: &install_pip
+  pull_current_image: &pull_current_image
     run:
-      name: Install PIP dependancies
-      command: make pip
-
-  activate_venv: &activate_venv
-    run:
-      name: Activate python virtual environment
+      name: Pull current branch Docker image
       command: |
-        source ~/infrastructure/.venv/py3/bin/activate
-        echo "source ~/infrastructure/.venv/py3/bin/activate" >> $BASH_ENV
+        docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
 
   setup_infra: &setup_infra
     run:
@@ -46,58 +36,37 @@ references:
       name: Install monitoring tools
       command: make setup-monitoring
 
-jobs:
-  build:
-    <<: *container_config
-    steps:
-      - checkout
-      - *restore_venv
-      - run:
-          name: Create python virtual environment
-          command: |
-            virtualenv -p python3 .venv/py3
-      - *activate_venv
-      - *install_pip
-      - save_cache:
-          key: *venv_cache_key
-          paths:
-            - ~/.venv/py3
-            - ~/.cache/pip
-      - run:
-          name: Install ansible roles
-          command: |
-            make ansible/roles
-      - save_cache:
-          key: *roles_cache_key
-          paths:
-            ansible/roles
+  build_images: &build_images
+    run:
+      name: Build images
+      command: make images
 
-  check:
-    <<: *container_config
+jobs:
+  build_check:
+    <<: *machine_config
     steps:
       - checkout
-      - *restore_venv
-      - *activate_venv
-      - *install_pip
+      - run:
+          name: Build and push Docker image to DockerHub
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} .
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
       - run:
           name: Configuration lint
-          command: make lint
+          command: .circleci/docker-run.sh make lint
       - run:
           name: Dry run OpenStack heat template
-          command: make test-openstack
+          command: .circleci/docker-run.sh make test-openstack
       - run:
           name: Dry run environments playbooks
-          command: make test-setup-environments
+          command: .circleci/docker-run.sh make test-setup-environments
 
   setup_uat:
     <<: *container_config
     environment:
       - DEPLOY_ENV: uat
     steps:
-      - checkout
-      - *restore_venv
-      - *activate_venv
-      - *restore_roles
       - *setup_infra
       - *setup_node
       - *setup_monitoring
@@ -107,10 +76,6 @@ jobs:
     environment:
       - DEPLOY_ENV: integration
     steps:
-      - checkout
-      - *restore_venv
-      - *activate_venv
-      - *restore_roles
       - *setup_infra
       - *setup_node
       - *setup_monitoring
@@ -120,10 +85,6 @@ jobs:
     environment:
       - DEPLOY_ENV: fast_integration
     steps:
-      - checkout
-      - *restore_venv
-      - *activate_venv
-      - *restore_roles
       - *setup_infra
       - *setup_node
       - *setup_monitoring
@@ -133,10 +94,6 @@ jobs:
     environment:
       - DEPLOY_ENV: dev1
     steps:
-      - checkout
-      - *restore_venv
-      - *activate_venv
-      - *restore_roles
       - *setup_infra
       - *setup_node
 
@@ -145,38 +102,31 @@ jobs:
     environment:
       - DEPLOY_ENV: dev2
     steps:
-      - checkout
-      - *restore_venv
-      - *activate_venv
-      - *restore_roles
       - *setup_infra
       - *setup_node
 
   build_images:
     <<: *container_config
     steps:
-      - checkout
-      - *restore_venv
-      - *activate_venv
-      - *install_pip
+      - *build_images
+
+  docker_push_latest:
+    <<: *machine_config
+    steps:
+      - *pull_current_image
       - run:
-          name: Build images
-          command: make images
+          name: Tag and push Docker "latest" image to DockerHub
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} ${DOCKERHUB_REPO:?}:latest
+            docker push ${DOCKERHUB_REPO:?}:latest
 
 workflows:
   version: 2
   check_deploy:
     jobs:
-      - build:
+      - build_check:
           requires: []
-          filters:
-            branches:
-              ignore:
-                - packer
-
-      - check:
-          requires:
-            - build
           filters:
             branches:
               ignore:
@@ -184,35 +134,42 @@ workflows:
 
       - setup_uat:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - setup_integration:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - setup_fast_integration:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - setup_dev1:
           requires:
-            - check
+            - build_check
           filters:
             branches:
               only: master
 
       - setup_dev2:
           requires:
-            - check
+            - build_check
+          filters:
+            branches:
+              only: master
+
+      - docker_push_latest:
+          requires:
+            - build_check
           filters:
             branches:
               only: master

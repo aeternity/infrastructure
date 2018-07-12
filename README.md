@@ -9,22 +9,8 @@ Below documentation is meant for manual testing and additional details. It's alr
 
 ## Requirements
 
-- Python3
-- [Virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
-- [GNU Make](https://www.gnu.org/software/make/)
-- [Packer](https://www.packer.io/downloads.html)
-
-The commands below assume already installed dependencies and python3 virtual environment setup in `.venv/py3`.
-To setup and activate the virtual environment run:
-
-```bash
-virtualenv -p python3 .venv/py3 && source .venv/py3/bin/activate
-```
-
-To install pip dependencies and ansible roles run:
-```bash
-make
-```
+The only requirement is Docker. All the libraries and packages are built in the docker image.
+If for some reason one needs to setup the requirements on the host system see the Dockerfile.
 
 ## Credentials setup
 
@@ -54,6 +40,21 @@ There is a tiny bridge vault file `vault-env` that bridges the `INFRASTRUCTURE_A
 
 ```
 export INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD="top secret"
+```
+
+## Docker image
+
+A Docker image `aeternity/infrastructure` is build and published to DockerHub. To use the image one should configure all the required credentials as documented above and run the container:
+
+```bash
+docker run -it --env-file env.list -v ~/.ssh/:/root/.ssh/ aeternity/infrastructure
+```
+
+Then in the container shell setup your private SSH key:
+
+```bash
+eval $(ssh-agent)
+ssh-add -k ~/.ssh/id_rsa
 ```
 
 ## Ansible playbooks

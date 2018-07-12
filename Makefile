@@ -1,59 +1,43 @@
-SITE_PACKAGES := $(shell python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
-VIRTUAL_ENV_ERR = Python Virtual environment is not active. Run `virtualenv -p python3 .venv/py3 && source .venv/py3/bin/activate`
+.DEFAULT_GOAL := lint
 
-all: ansible/roles
-
-$(SITE_PACKAGES): requirements.txt
-ifndef VIRTUAL_ENV
-	$(error $(VIRTUAL_ENV_ERR))
-endif
-	pip install -r requirements.txt
-	touch $(SITE_PACKAGES)
-
-pip: $(SITE_PACKAGES)
-
-ansible/roles: pip
-	cd ansible && ansible-galaxy install -r requirements.yml -p roles
-	touch ansible/roles
-
-images: ansible/roles
+images:
 	packer build packer/epoch.json
 
-setup-infrastructure: ansible/roles check-deploy-env
-	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
+setup-infrastructure: check-deploy-env
+	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python3"' \
 		--tags "$(DEPLOY_ENV)" environments.yml
 	cd terraform && terraform init && terraform apply --auto-approve
 
-setup-node: ansible/roles check-deploy-env
+setup-node: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" setup.yml
 
-setup-monitoring: ansible/roles check-deploy-env
+setup-monitoring: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" monitoring.yml
 
 setup: setup-infrastructure setup-node setup-monitoring
 
-manage-node: ansible/roles check-deploy-env
+manage-node: check-deploy-env
 ifndef CMD
 	$(error CMD is undefined, supported commands: start, stop, restart, ping)
 endif
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
 		--extra-vars="cmd=$(CMD)" manage-node.yml
 
-reset-net: ansible/roles check-deploy-env
+reset-net: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" reset-net.yml
 
-test-openstack: pip
+test-openstack:
 	openstack stack create test -e openstack/test/create.yml \
 		-t openstack/ae-environment.yml --enable-rollback --wait --dry-run
 
-test-setup-environments: pip
-	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' \
+test-setup-environments:
+	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python3"' \
 		--check -i localhost, environments.yml
 	cd terraform && terraform init && terraform plan
 
 lint:
 	ansible-lint ansible/setup.yml
-	ansible-lint ansible/monitoring.yml --exclude ansible/roles
+	ansible-lint ansible/monitoring.yml --exclude ~/.ansible/roles
 	ansible-lint ansible/manage-node.yml
 	ansible-lint ansible/reset-net.yml
 	packer validate packer/epoch.json
@@ -64,14 +48,7 @@ ifndef DEPLOY_ENV
 	$(error DEPLOY_ENV is undefined)
 endif
 
-clean:
-	rm -rf ansible/roles
-ifdef VIRTUAL_ENV
-	$(info Don't forget to deactivate virtualenv by calling `deactivate` bash function)
-endif
-
 .PHONY: \
-	all pip \
 	images setup-infrastructure setup-node setup-monitoring setup \
 	manage-node reset-net lint test-openstack test-setup-environments \
-	check-deploy-env clean
+	check-deploy-env
