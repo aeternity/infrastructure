@@ -37,6 +37,7 @@
     local_peer_keys_dir: "files/peer_keys/{{ public_ip }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ vault_datadog_api_key }}&application_key={{ vault_datadog_app_key }}
     downtime: "0"
+    db_version: ""
 
     # Label used for datadog tagging and ENV file planting
     env: unknown
@@ -58,7 +59,7 @@
           port: 3114
       chain:
         persist: true
-        db_path: "./db"
+        db_path: "./db{{ db_version }}"
       keypair:
         dir: "keys"
         password: "{{ vault_keys_password|default('secret') }}"

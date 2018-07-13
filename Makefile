@@ -1,5 +1,6 @@
 .DEFAULT_GOAL := lint
 DEPLOY_DOWNTIME ?= 0
+DEPLOY_DB_VERSION ?= ""
 
 images:
 	packer build packer/epoch.json
@@ -27,6 +28,7 @@ endif
 		-e hosts_group=tag_env_$(DEPLOY_ENV) \
 		-e env=$(DEPLOY_ENV) \
 		-e downtime=$(DEPLOY_DOWNTIME) \
+		-e db_version=$(DEPLOY_DB_VERSION) \
 		deploy.yml
 
 manage-node: check-deploy-env
