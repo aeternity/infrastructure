@@ -1,0 +1,2 @@
+datadog_platform: aws
+datadog_region: "{{ region }}"
