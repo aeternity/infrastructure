@@ -5,8 +5,7 @@ images:
 	packer build packer/epoch.json
 
 setup-infrastructure: check-deploy-env
-	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python3"' \
-		--tags "$(DEPLOY_ENV)" environments.yml
+	cd ansible && ansible-playbook --tags "$(DEPLOY_ENV)" environments.yml
 	cd terraform && terraform init && terraform apply --auto-approve
 
 setup-node: check-deploy-env
@@ -45,8 +44,7 @@ test-openstack:
 		-t openstack/ae-environment.yml --enable-rollback --wait --dry-run
 
 test-setup-environments:
-	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python3"' \
-		--check -i localhost, environments.yml
+	cd ansible && ansible-playbook --check -i localhost, environments.yml
 	cd terraform && terraform init && terraform plan
 
 lint:
