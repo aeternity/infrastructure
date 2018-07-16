@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := lint
 DEPLOY_DOWNTIME ?= 0
+BACKUP_SUFFIX ?= backup
+BACKUP_DIR ?= /tmp/mnesia_backups
 
 images:
 	packer build packer/epoch.json
@@ -39,6 +41,13 @@ endif
 
 reset-net: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" reset-net.yml
+
+mnesia_backup:
+	cd ansible && ansible-playbook \
+		--limit="tag_role_epoch:&tag_env_$(BACKUP_ENV)" \
+		-e download_dir=$(BACKUP_DIR) \
+		-e backup_suffix=$(BACKUP_SUFFIX) \
+		mnesia_backup.yml
 
 test-openstack:
 	openstack stack create test -e openstack/test/create.yml \

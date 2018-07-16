@@ -111,6 +111,17 @@ The playbook does:
 - delete logs
 - delete chain keys
 
+### Mnesia backups
+
+To backup a Mnesia database (snapshot) run:
+```bash
+make mnesia_backup BACKUP_ENV=integration
+```
+
+Additional parameters:
+- BACKUP_SUFFIX - backup filename suffix, by default the destination file is overwritten (per host), suffix can be used to set unique filename
+- BACKUP_DIR - destination directory of backup files
+
 ## Base images
 
 Pre-built base images are used to speedup initial provisioning of node instances. It does not have a functional impact on node setups as the same Ansible playbooks are used.
