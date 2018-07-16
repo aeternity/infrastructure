@@ -1,11 +1,11 @@
 .DEFAULT_GOAL := lint
+DEPLOY_DOWNTIME ?= 0
 
 images:
 	packer build packer/epoch.json
 
 setup-infrastructure: check-deploy-env
-	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python3"' \
-		--tags "$(DEPLOY_ENV)" environments.yml
+	cd ansible && ansible-playbook --tags "$(DEPLOY_ENV)" environments.yml
 	cd terraform && terraform init && terraform apply --auto-approve
 
 setup-node: check-deploy-env
@@ -15,6 +15,20 @@ setup-monitoring: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" monitoring.yml
 
 setup: setup-infrastructure setup-node setup-monitoring
+
+deploy: check-deploy-env
+	$(eval LIMIT=tag_role_epoch:&tag_env_$(DEPLOY_ENV))
+ifneq ($(DEPLOY_COLOR),)
+	$(eval LIMIT=$(LIMIT):&tag_color_$(DEPLOY_COLOR))
+endif
+	cd ansible && ansible-playbook \
+		--limit="$(LIMIT)" \
+		-e package=$(PACKAGE) \
+		-e hosts_group=tag_env_$(DEPLOY_ENV) \
+		-e env=$(DEPLOY_ENV) \
+		-e downtime=$(DEPLOY_DOWNTIME) \
+		-e db_version=$(DEPLOY_DB_VERSION) \
+		deploy.yml
 
 manage-node: check-deploy-env
 ifndef CMD
@@ -31,8 +45,7 @@ test-openstack:
 		-t openstack/ae-environment.yml --enable-rollback --wait --dry-run
 
 test-setup-environments:
-	cd ansible && ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python3"' \
-		--check -i localhost, environments.yml
+	cd ansible && ansible-playbook --check -i localhost, environments.yml
 	cd terraform && terraform init && terraform plan
 
 lint:

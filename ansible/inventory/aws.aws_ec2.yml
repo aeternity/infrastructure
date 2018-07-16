@@ -7,3 +7,7 @@ regions:
   - ap-southeast-1
 hostnames:
   - ip-address
+keyed_groups:
+  # add hosts to tag_Name_Value groups for each Name/Value tag pair
+  - prefix: tag
+    key: tags
