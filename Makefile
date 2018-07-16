@@ -1,6 +1,5 @@
 .DEFAULT_GOAL := lint
 DEPLOY_DOWNTIME ?= 0
-DEPLOY_DB_VERSION ?= ""
 
 images:
 	packer build packer/epoch.json
