@@ -2,4 +2,4 @@ config:
   http:
     external:
       port: 3013
-api_base_uri: http://{{ ansible_ssh_host|default(ansible_host) }}:{{ config.http.external.port }}/v2
+api_base_uri: http://{{ ansible_ssh_host|default(ansible_host)|default(inventory_hostname) }}:{{ config.http.external.port }}/v2
