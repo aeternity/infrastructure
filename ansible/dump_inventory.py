@@ -27,8 +27,10 @@ def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
 for group_name in env_groups:
     print("#### %s\n" % group_name[len(env_group_prefix):])
     hosts = data[group_name]['hosts'].sort(key=natural_sort_key)
+    hostvars = data['_meta']['hostvars']
     for host in data[group_name]['hosts']:
-        host_ip = data['_meta']['hostvars'][host]['ansible_host']
+        host_ip = host
+        if 'ansible_host' in hostvars[host]:
+            host_ip = hostvars[host]['ansible_host']
         print("- [%s](http://%s:3013/v2/top) %s" % (host, host_ip, host_ip))
     print("\n")
-
