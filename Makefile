@@ -19,6 +19,9 @@ setup-monitoring: check-deploy-env
 setup: setup-infrastructure setup-node setup-monitoring
 
 deploy: check-deploy-env
+ifeq ($(DEPLOY_DB_VERSION),)
+	$(error DEPLOY_DB_VERSION should be provided)
+endif
 	$(eval LIMIT=tag_role_epoch:&tag_env_$(DEPLOY_ENV))
 ifneq ($(DEPLOY_COLOR),)
 	$(eval LIMIT=$(LIMIT):&tag_color_$(DEPLOY_COLOR))
