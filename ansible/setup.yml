@@ -34,9 +34,9 @@
         - project-user
 
     # Automatic cleanup is not supported. You must remove old keys manually.
-    - name: "Setup root SSH authorized keys"
+    - name: "Setup master SSH authorized keys"
       authorized_key:
-        user: "{{ ansible_user }}"
+        user: master
         key: https://github.com/{{ item }}.keys
       with_items: "{{ devops }}"
       tags:
@@ -46,7 +46,7 @@
     # Automatic cleanup is not supported. You must remove old keys manually.
     - name: "Add CI master keys"
       authorized_key:
-        user: "{{ ansible_user }}"
+        user: master
         key: "{{ lookup('file', item) }}"
       with_items:
         - files/circleci/master_key.pub
@@ -78,11 +78,22 @@
     - name: Install dev tools
       apt:
         pkg: "{{ item }}"
-        state: installed
+        state: present
         update_cache: yes
       with_items:
         - build-essential
         - python-yaml
+        - python-pip
+        - python3-pip
+        - jq
+      tags:
+        - dev-tools
+
+    - name: Install pip tools
+      pip:
+        name: "{{ item }}"
+      with_items:
+        - awscli
       tags:
         - dev-tools
 

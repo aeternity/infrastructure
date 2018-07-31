@@ -73,7 +73,12 @@ for example to setup `integration` environment infrastructure run:
 make setup DEPLOY_ENV=integration
 ```
 
-To create new environment edit the `ansible/environments.yml` playbook.
+Also the configuration is in process of migration to Terraform, thus it should be run as well:
+```bash
+make setup-terraform
+```
+
+To create new environment edit the `ansible/environments.yml` playbook and `terraform/main.tf`.
 
 ### Manage nodes
 
@@ -138,3 +143,4 @@ git push origin master:packer
 ```
 
 That will trigger CI workflow which will run the packer command for you with all required credentials already setup.
+Please note that it always build from master docker image, regardless what's pushed to the branch.
