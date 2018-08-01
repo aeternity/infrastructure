@@ -209,7 +209,7 @@ workflows:
       - setup_terraform
       - setup_uat:
           requires:
-            - setup-terraform
+            - setup_terraform
       - setup_integration
       - setup_fast_integration
       - setup_dev1
