@@ -69,9 +69,9 @@
         expected_mine_rate: "{{ expected_mine_rate|default(300000) }}"
         cuckoo:
           miner:
-            executable: "{{ miner_executable|default('mean28s-generic') }}"
+            executable: "{{ miner_executable|default('mean30s-generic') }}"
             extra_args: "{{ miner_extra_args|default('-t 5') }}"
-            node_bits: "{{ miner_node_bits|default(28) }}"
+            node_bits: "{{ miner_node_bits|default(30) }}"
     api_base_uri: http://{{ public_ip }}:{{ config.http.external.port }}/v2
 
   tasks:
