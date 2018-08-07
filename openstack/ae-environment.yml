@@ -102,6 +102,7 @@ resources:
           port_range_max: { get_param: external_sync_port }
         - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: tcp, port_range_min: 22, port_range_max: 22}
         - { direction: ingress, remote_ip_prefix: 0.0.0.0/0, protocol: icmp }
+        - { direction: egress, remote_ip_prefix: 0.0.0.0/0, protocol: udp, port_range_min: 123, port_range_max: 123}
 
   epoch_security_group:
     type: OS::Neutron::SecurityGroup
