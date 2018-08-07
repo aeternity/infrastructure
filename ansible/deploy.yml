@@ -183,8 +183,10 @@
       # Workaround to deploy peer keys even with --limits that does not include seed groups
       # Also workarounds an issue with hostname/IP of inventory items, as the keys are bound to IP
       - name: Check if peer keys directory exists
-        local_action: stat path={{ local_peer_keys_dir }}
+        stat:
+          path: "{{ local_peer_keys_dir }}"
         register: stat_peer_dir
+        connection: local
         tags: [config, peer_keys]
 
       - name: "Copy node peer keys to {{ project_root }}/{{ config.keypair.dir }}"
