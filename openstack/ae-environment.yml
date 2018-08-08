@@ -205,7 +205,8 @@ resources:
                 flavor: { get_param: node_flavor }
                 key_name: { get_param: key_name }
                 metadata:
-                  groups: { get_param: meta_groups }
+                  groups:
+                    list_join: [',', [{ get_param: meta_groups }, 'tag_kind_seed']]
                 networks:
                   - port: { get_resource: instance_port }
 
