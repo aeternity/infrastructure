@@ -22,10 +22,7 @@ sudo service datadog-agent start
 
 #INSTALL EPOCH
 
-VERSION="${epoch_version}"
-
-FILE="epoch-$VERSION-ubuntu-x86_64.tar.gz"
-URL="https://github.com/aeternity/epoch/releases/download/v$VERSION/$FILE"
+URL="${epoch_package}"
 
 wget -q $URL -O /home/epoch/$FILE
 
