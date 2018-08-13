@@ -37,6 +37,7 @@ resource "aws_instance" "static_node" {
     env   = "${var.env}"
     role  = "epoch"
     color = "${var.color}"
+    kind  = "seed"
   }
 
   user_data = "${data.template_file.user_data.rendered}"

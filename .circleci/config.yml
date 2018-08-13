@@ -46,6 +46,11 @@ references:
       name: Build images
       command: make images
 
+  check_seed_peers: &check_seed_peers
+    run:
+      name: Check seed peers
+      command: make check-seed-peers
+
 jobs:
   build_check:
     <<: *machine_config
@@ -80,6 +85,7 @@ jobs:
       - *setup_infra
       - *setup_node
       - *setup_monitoring
+      - *check_seed_peers
 
   setup_integration:
     <<: *container_config
@@ -130,6 +136,11 @@ jobs:
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} ${DOCKERHUB_REPO:?}:latest
             docker push ${DOCKERHUB_REPO:?}:latest
+
+  check_seed_peers:
+    <<: *container_config
+    steps:
+      - *check_seed_peers
 
 workflows:
   version: 2
@@ -214,3 +225,14 @@ workflows:
       - setup_fast_integration
       - setup_dev1
       - setup_dev2
+
+  hourly_seeds_check:
+    triggers:
+      - schedule:
+          cron: "0 * * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - check_seed_peers

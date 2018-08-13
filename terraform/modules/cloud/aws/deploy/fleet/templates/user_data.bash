@@ -11,12 +11,16 @@ hostname "aws-$REGION-$IP"
 
 #SETUP DATADOG
 
+MEM=$(awk '/MemTotal/ {printf("%.0f\n", $2 / 1024 / 1024)}' /proc/meminfo)
+FLAVOR="c$(nproc).m$MEM"
 DATADOG_API_KEY=`aws --region ${region} secretsmanager get-secret-value --secret-id datadog_api_key  | jq '.SecretString | fromjson | .datadog_api_key'`
 
 sed -i -- "s/DATADOG_API_KEY/$DATADOG_API_KEY/g" /etc/datadog-agent/datadog.yaml
 sed -i -- "s/region:unknown/region:${region}/g" /etc/datadog-agent/datadog.yaml
 sed -i -- "s/color:unknown/color:${color}/g" /etc/datadog-agent/datadog.yaml
 sed -i -- "s/env:unknown/env:${env}/g" /etc/datadog-agent/datadog.yaml
+sed -i -- "s/flavor:.*$/flavor:$FLAVOR/g" /etc/datadog-agent/datadog.yaml
+sed -i -- "s/127.0.0.1:3013/$IP:3013/g" /etc/datadog-agent/conf.d/http_check.d/conf.yaml
 
 sudo service datadog-agent start
 
