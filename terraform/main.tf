@@ -38,7 +38,6 @@ module "aws_deploy-ap-southeast-1" {
   instance_type = "m4.large"
 
   epoch = {
-    version = "0.18.0"
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
 
     # The string must be bash escaped
