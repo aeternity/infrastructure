@@ -24,10 +24,10 @@ sudo service datadog-agent start
 
 URL="${epoch_package}"
 
-wget -q $URL -O /home/epoch/$FILE
+wget -q $URL -O /home/epoch/epoch.tar.gz
 
 mkdir /home/epoch/node
-tar -xf /home/epoch/$FILE -C /home/epoch/node
+tar -xf /home/epoch/epoch.tar.gz -C /home/epoch/node
 chown -R epoch:epoch /home/epoch/node
 
 cat > /home/epoch/node/epoch.yaml << EOF
