@@ -84,16 +84,30 @@
         - build-essential
         - python-yaml
         - python-pip
-        - python3-pip
         - jq
+      tags:
+        - dev-tools
+
+    - name: Remove conflicting or obsolete packages
+      apt:
+        pkg: "{{ item }}"
+        state: absent
+      with_items:
+        # Ansible paramico has dependency on newer cryptography version which is installed as pip module
+        # The OS package is older and once installed the pip version is not
+        - python-cryptography
       tags:
         - dev-tools
 
     - name: Install pip tools
       pip:
         name: "{{ item }}"
+        executable: pip2
       with_items:
         - awscli
+        - ansible
+        - boto
+        - datadog
       tags:
         - dev-tools
 

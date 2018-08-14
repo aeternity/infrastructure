@@ -224,7 +224,7 @@
 
       - name: Send Datadog event
         datadog_event:
-          host: "{{ inventory_hostname }}"
+          host: "{{ public_ipv4 }}"
           alert_type: success
           title: Deploy
           text: |
@@ -242,7 +242,7 @@
       rescue:
         - name: Send Datadog event
           datadog_event:
-            host: "{{ inventory_hostname }}"
+            host: "{{ public_ipv4 }}"
             alert_type: error
             title: Deploy
             text: "Package: {{ package }}"

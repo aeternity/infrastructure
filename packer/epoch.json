@@ -17,6 +17,7 @@
         "owners": ["099720109477"],
         "most_recent": true
       },
+      "iam_instance_profile": "epoch-packer-build",
       "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
       "ami_name": "epoch-ubuntu-16.04-v{{timestamp}}",
@@ -47,25 +48,22 @@
     },
     {
       "type": "shell",
-      "script": "{{ template_dir }}/add-master-user.sh",
+      "scripts": [
+        "{{ template_dir }}/add-master-user.sh",
+        "{{ template_dir }}/install-python2.sh"
+      ],
       "only": ["amazon-ebs"]
     },
     {
       "type": "ansible",
       "user": "ubuntu",
-      "playbook_file": "{{ template_dir }}/../ansible/image.yml",
-      "extra_arguments": [
-        "-e ansible_python_interpreter='/usr/bin/env python3' datadog_platform=aws"
-      ],
+      "playbook_file": "{{ template_dir }}/../ansible/image-build.yml",
       "only": ["amazon-ebs"]
     },
     {
       "type": "ansible",
       "user": "master",
-      "playbook_file": "{{ template_dir }}/../ansible/image.yml",
-      "extra_arguments": [
-        "-e datadog_platform=os"
-      ],
+      "playbook_file": "{{ template_dir }}/../ansible/image-build.yml",
       "only": ["openstack"]
     }
   ]
