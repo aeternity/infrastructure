@@ -3,8 +3,8 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
+#	packer build packer/epoch.json
 images:
-	packer build packer/epoch.json
 	python packer/cleanup-ami-and-snapshots.py
 
 cleanup-snaps:
