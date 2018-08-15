@@ -68,7 +68,7 @@ data "template_file" "user_data" {
     region            = "${data.aws_region.current.name}"
     color             = "${var.color}"
     env               = "${var.env}"
-    epoch_version     = "${var.epoch["version"]}"
+    epoch_package     = "${var.epoch["package"]}"
     epoch_beneficiary = "${var.epoch["beneficiary"]}"
   }
 }
