@@ -1,5 +1,0 @@
-config:
-  http:
-    external:
-      port: 3013
-api_base_uri: http://{{ public_ipv4 }}:{{ config.http.external.port }}/v2
