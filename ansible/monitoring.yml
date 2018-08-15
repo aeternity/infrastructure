@@ -15,7 +15,7 @@
     - name: Define ec2 dynamic variables
       set_fact:
         platform: aws
-        region: ansible_ec2_placement_region
+        region: "{{ ansible_ec2_placement_region }}"
       when: '"amazon" in ansible_bios_version'
 
     - name: Get instance tags
@@ -57,6 +57,7 @@
         - "color:{{ color|default('unknown') }}"
         - "lsb:{{ ansible_lsb.description }}"
         - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
+        - "public_ipv4:{{ public_ipv4 }}"
     datadog_checks:
       system_core:
         init_config:
