@@ -6,7 +6,7 @@ data "aws_ami" "ami" {
 
   filter {
     name   = "name"
-    values = ["epoch-ubuntu-16.04-v1532694619"]
+    values = ["epoch-ubuntu-16.04-v1534406182"]
   }
 
   owners = ["self"]
@@ -37,6 +37,7 @@ resource "aws_instance" "static_node" {
     env   = "${var.env}"
     role  = "epoch"
     color = "${var.color}"
+    kind  = "seed"
   }
 
   user_data = "${data.template_file.user_data.rendered}"
@@ -67,7 +68,7 @@ data "template_file" "user_data" {
     region            = "${data.aws_region.current.name}"
     color             = "${var.color}"
     env               = "${var.env}"
-    epoch_version     = "${var.epoch["version"]}"
+    epoch_package     = "${var.epoch["package"]}"
     epoch_beneficiary = "${var.epoch["beneficiary"]}"
   }
 }
