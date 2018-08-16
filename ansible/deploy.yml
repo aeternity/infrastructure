@@ -34,9 +34,9 @@
   max_fail_percentage: 25
 
   vars:
-    project_root: "/home/epoch/node"
+    project_root: "{{ ansible_env.HOME }}/node"
+    packages_path: "{{ ansible_env.HOME }}"
     genesis_accounts_path: "{{ project_root }}/data/aecore/.genesis/accounts.json"
-    is_remote_package: false
     local_peer_keys_dir: "files/peer_keys/{{ public_ipv4 }}"
     datadog_api_key: "{{ vault_datadog_api_key }}"
     datadog_app_key: "{{ vault_datadog_app_key }}"
@@ -77,6 +77,21 @@
         when: package is not defined
         tags: [package]
 
+      - name: Download remote package
+        get_url:
+          url: "{{ package }}"
+          dest: "{{ packages_path }}/{{ package|basename }}"
+          checksum: "{{ package_checksum|default(omit) }}"
+        when: "'http' in package"
+        register: remote_package
+
+      - name: Upload local package
+        copy:
+          src: "{{ package }}"
+          dest: "{{ packages_path }}/{{ package|basename }}"
+        when: "'http' not in package"
+        register: local_package
+
       - name: "Make sure {{ project_root }} exists"
         file:
             path: "{{ project_root }}"
@@ -102,19 +117,13 @@
         when: epoch.stat.exists == True and ping.stdout == "pong"
         tags: [daemon]
 
-      - name: Register remote package
-        set_fact:
-          is_remote_package: true
-        when: "'http' in package"
-        tags: [package]
-
       - name: Extract epoch package into {{ project_root }}
         unarchive:
-          remote_src: "{{ is_remote_package | bool }}"
+          remote_src: true
           keep_newer: true
-          src: "{{ package }}"
+          src: "{{ packages_path }}/{{ package|basename }}"
           dest: "{{ project_root }}"
-        when: package is defined
+        when: remote_package.changed or local_package.changed
         tags: [package]
 
       - name: Plant ENV file
