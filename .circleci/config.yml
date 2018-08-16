@@ -63,9 +63,9 @@ jobs:
       - run:
           name: Dry run OpenStack heat template
           command: .circleci/docker-run.sh make test-openstack
-#      - run:
-#          name: Dry run environments playbooks
-#          command: .circleci/docker-run.sh make test-setup-environments
+      - run:
+          name: Dry run environments playbooks
+          command: .circleci/docker-run.sh make test-setup-environments
 
   setup_terraform:
     <<: *container_config
