@@ -195,7 +195,7 @@ workflows:
       - build_images:
           filters:
             branches:
-              only: auto-cleanup-ami-PT159733781
+              only: packer
 
   daily_deploy:
     triggers:

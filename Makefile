@@ -3,13 +3,9 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
-#	packer build packer/epoch.json
 images:
+	packer build packer/epoch.json
 	python packer/cleanup-ami-and-snapshots.py
-
-cleanup-snaps:
-	aws ec2 --region ap-southeast-1 describe-snapshots --owner-ids 106102538874
-
 
 setup-infrastructure: check-deploy-env
 	cd ansible && ansible-playbook --tags "$(DEPLOY_ENV)" environments.yml

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import boto3
-region="us-west-2"
-ec2_client = boto3.client('ec2',region_name=region)
+from botocore.exceptions import ClientError
 
-epoch_image_name = "epoch-ubuntu-16.04"
+regions=["us-west-2","eu-west-1","ap-southeast-1"]
+
 
 def get_account_id():
     sts = boto3.client("sts")
@@ -47,4 +47,25 @@ def get_used_amis(ec2_client):
             used_amis.append(instance["ImageId"])
     return list(set(used_amis))
 
-print(get_amis_to_remove(ec2_client, epoch_image_name))
+def deregister(ec2_client, ids):
+    for i in ids:
+        try:
+            ec2_client.deregister_image(
+                ImageId = i["ImageId"]
+            )
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'InvalidAMIID.Unavailable':
+                print("Already deleted")
+            else:
+                print("Unexpected error: %s" % e)
+        for snap in i["Snapshoots"]:
+            ec2_client.delete_snapshot(
+                SnapshotId = snap
+            )
+
+
+
+for region in regions:
+    ec2_client = boto3.client('ec2',region_name=region)
+    epoch_image_name = "epoch-ubuntu-16.04"
+    deregister(ec2_client, get_amis_to_remove(ec2_client, epoch_image_name))
