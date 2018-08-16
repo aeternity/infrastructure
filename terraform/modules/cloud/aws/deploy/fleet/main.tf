@@ -6,7 +6,7 @@ data "aws_ami" "ami" {
 
   filter {
     name   = "name"
-    values = ["epoch-ubuntu-16.04-v1532694619"]
+    values = ["epoch-ubuntu-16.04-v1534406182"]
   }
 
   owners = ["self"]
