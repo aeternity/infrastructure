@@ -2,9 +2,6 @@
 import boto3
 from botocore.exceptions import ClientError
 
-regions=["us-west-2","eu-west-1","ap-southeast-1"]
-
-
 def get_account_id():
     sts = boto3.client("sts")
     return sts.get_caller_identity()["Account"]
@@ -34,8 +31,9 @@ def get_amis_to_remove(ec2_client, epoch_image_name):
                     snaps.append(block["Ebs"]["SnapshotId"])
             amis.append({"ImageId": image["ImageId"],"CreationDate": image["CreationDate"],"Snapshoots": snaps})
 
-    amis.sort(key=lambda image: image["CreationDate"])
-    return amis[:3]
+    amis.sort(key=lambda image: image["CreationDate"], reverse = True)
+
+    return amis[3:]
 
 
 def get_used_amis(ec2_client):
@@ -49,6 +47,7 @@ def get_used_amis(ec2_client):
 
 def deregister(ec2_client, ids):
     for i in ids:
+        print(i)
         try:
             ec2_client.deregister_image(
                 ImageId = i["ImageId"]
@@ -58,14 +57,19 @@ def deregister(ec2_client, ids):
                 print("Already deleted")
             else:
                 print("Unexpected error: %s" % e)
-        for snap in i["Snapshoots"]:
-            ec2_client.delete_snapshot(
-                SnapshotId = snap
-            )
+        try:
+            for snap in i["Snapshoots"]:
+                ec2_client.delete_snapshot(
+                    SnapshotId = snap
+                )
+        except ClientError as e:
+            print("Unexpected error: %s" % e)
 
 
-
+regions=["us-west-2","eu-central-1","ap-southeast-1"]
+regions=["ap-southeast-1"]
 for region in regions:
+    print(region)
     ec2_client = boto3.client('ec2',region_name=region)
     epoch_image_name = "epoch-ubuntu-16.04"
     deregister(ec2_client, get_amis_to_remove(ec2_client, epoch_image_name))
