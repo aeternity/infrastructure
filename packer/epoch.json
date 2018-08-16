@@ -20,7 +20,7 @@
       "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
       "ami_name": "epoch-ubuntu-16.04-v{{timestamp}}",
-        "ami_regions": ["eu-central-1", "ap-southeast-1", "eu-west-1"],
+       "ami_regions": ["eu-central-1", "ap-southeast-1", "eu-west-1"],
       "force_deregister": true,
       "force_delete_snapshot": true
     },
