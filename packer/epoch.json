@@ -6,6 +6,15 @@
   "builders":
   [
     {
+      "type": "googlecompute",
+      "account_file": "/tmp/epoch-p2p.json",
+      "project_id": "epoch-p2p",
+      "source_image": "ubuntu-1604-xenial-v20180814",
+      "ssh_username": "ubuntu",
+      "zone": "us-central1-a",
+      "image_name": "epoch-ubuntu-16-04-v{{timestamp}}"
+    },
+    {
       "type": "amazon-ebs",
       "region": "us-west-2",
       "source_ami_filter": {
@@ -52,13 +61,22 @@
         "{{ template_dir }}/add-master-user.sh",
         "{{ template_dir }}/install-python2.sh"
       ],
-      "only": ["amazon-ebs"]
+      "only": ["amazon-ebs","googlecompute"]
     },
     {
       "type": "ansible",
       "user": "ubuntu",
       "playbook_file": "{{ template_dir }}/../ansible/image-build.yml",
       "only": ["amazon-ebs"]
+    },
+    {
+      "type": "ansible",
+      "user": "ubuntu",
+      "playbook_file": "{{ template_dir }}/../ansible/image.yml",
+      "extra_arguments": [
+        "-e ansible_python_interpreter='/usr/bin/env python3' datadog_platform=gcp"
+      ],
+      "only": ["googlecompute"]
     },
     {
       "type": "ansible",
