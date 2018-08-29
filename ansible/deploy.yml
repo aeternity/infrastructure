@@ -213,7 +213,7 @@
 
       - name: API health check
         uri:
-          url: "{{ api_base_uri }}/top"
+          url: "{{ api_base_uri }}/blocks/top"
           timeout: 30
         connection: local
         tags: [health-check]
