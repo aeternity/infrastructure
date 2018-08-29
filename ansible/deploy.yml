@@ -84,6 +84,7 @@
           checksum: "{{ package_checksum|default(omit) }}"
         when: "'http' in package"
         register: remote_package
+        notify: "stop epoch daemon"
 
       - name: Upload local package
         copy:
@@ -91,6 +92,7 @@
           dest: "{{ packages_path }}/{{ package|basename }}"
         when: "'http' not in package"
         register: local_package
+        notify: "stop epoch daemon"
 
       - name: "Make sure {{ project_root }} exists"
         file:
@@ -99,23 +101,7 @@
             # allow group read for integration purposes  (e.g. logs)
             mode: 0750
 
-      - name: Check if epoch binary exists
-        stat:
-          path: "{{ project_root }}/bin/epoch"
-        register: epoch
-        tags: [daemon]
-
-      - name: Ping epoch daemon
-        command: "{{ project_root }}/bin/epoch ping"
-        failed_when: no
-        register: ping
-        when: epoch.stat.exists == True
-        tags: [daemon]
-
-      - name: Stop epoch daemon
-        command: "{{ project_root }}/bin/epoch stop"
-        when: epoch.stat.exists == True and ping.stdout == "pong"
-        tags: [daemon]
+      - meta: flush_handlers
 
       - name: Extract epoch package into {{ project_root }}
         unarchive:
@@ -124,12 +110,14 @@
           src: "{{ packages_path }}/{{ package|basename }}"
           dest: "{{ project_root }}"
         when: remote_package.changed or local_package.changed
+        notify: "start epoch daemon"
         tags: [package]
 
       - name: Plant ENV file
         copy:
           content: "{{ env }}\n"
           dest: "{{ project_root }}/ENV"
+        notify: "restart epoch daemon"
         tags: [package]
 
       - name: "Make sure chain path ( {{ epoch_config.chain.db_path }} ) exists"
@@ -152,6 +140,7 @@
           mode: 0600
         with_items: "{{ keypair }}"
         when: keypair is defined
+        notify: "restart epoch daemon"
         tags: [config]
 
       - name: Update epoch configuration
@@ -159,6 +148,7 @@
           src: templates/epoch.yaml
           dest: "{{ project_root }}/epoch.yaml"
           mode: '0600'
+        notify: "restart epoch daemon"
         tags: [config]
 
       - name: Update accounts configuration
@@ -186,11 +176,10 @@
           - "{{ local_peer_keys_dir }}/peer_key"
           - "{{ local_peer_keys_dir }}/peer_key.pub"
         when: stat_peer_dir.stat.exists
+        notify: "restart epoch daemon"
         tags: [config, peer_keys]
 
-      - name: Start epoch daemon
-        command: "{{ project_root }}/bin/epoch start"
-        tags: [daemon]
+      - meta: flush_handlers
 
       - name: Wait epoch node API to boot
         wait_for:
@@ -244,3 +233,38 @@
         - fail:
             msg: "Failed deploy"
             when: true
+
+  handlers:
+    - name: Check epoch binary
+      stat:
+        path: "{{ project_root }}/bin/epoch"
+      register: epoch
+      tags: [daemon]
+      listen:
+        - "stop epoch daemon"
+        - "restart epoch daemon"
+
+    - name: Ping epoch
+      command: "{{ project_root }}/bin/epoch ping"
+      failed_when: no
+      register: ping
+      when: epoch.stat.exists == True
+      tags: [daemon]
+      listen:
+        - "stop epoch daemon"
+        - "restart epoch daemon"
+
+    - name: Stop epoch
+      command: "{{ project_root }}/bin/epoch stop"
+      when: epoch.stat.exists == True and ping.stdout == "pong"
+      tags: [daemon]
+      listen:
+        - "stop epoch daemon"
+        - "restart epoch daemon"
+
+    - name: Start epoch
+      command: "{{ project_root }}/bin/epoch start"
+      tags: [daemon]
+      listen:
+        - "start epoch daemon"
+        - "restart epoch daemon"
