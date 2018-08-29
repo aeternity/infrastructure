@@ -2,6 +2,15 @@
 import boto3
 from botocore.exceptions import ClientError
 
+REGIONS = [
+    "us-west-2",
+    "eu-central-1",
+    "ap-southeast-1",
+    "eu-west-2"
+]
+
+EPOCH_IMAGE_NAME = "epoch-ubuntu-16.04"
+
 def get_account_id():
     sts = boto3.client("sts")
     return sts.get_caller_identity()["Account"]
@@ -35,7 +44,6 @@ def get_amis_to_remove(ec2_client, epoch_image_name):
 
     return amis[3:]
 
-
 def get_used_amis(ec2_client):
     used_amis = []
     response = ec2_client.describe_instances()
@@ -66,10 +74,7 @@ def deregister(ec2_client, ids):
             print("Unexpected error: %s" % e)
 
 
-regions=["us-west-2","eu-central-1","ap-southeast-1"]
-regions=["ap-southeast-1"]
-for region in regions:
-    print(region)
+
+for region in REGIONS:
     ec2_client = boto3.client('ec2',region_name=region)
-    epoch_image_name = "epoch-ubuntu-16.04"
-    deregister(ec2_client, get_amis_to_remove(ec2_client, epoch_image_name))
+    deregister(ec2_client, get_amis_to_remove(ec2_client, EPOCH_IMAGE_NAME))
