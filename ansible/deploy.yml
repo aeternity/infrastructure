@@ -65,7 +65,7 @@
         level: "{{ log_level|default('error') }}"
       mining:
         beneficiary: "{{ mining_beneficiary }}"
-        expected_mine_rate: "{{ expected_mine_rate|default(300000) }}"
+        expected_mine_rate: "{{ expected_mine_rate|default(180000) }}"
         cuckoo:
           miner:
             executable: "{{ miner_executable|default('mean30s-generic') }}"
