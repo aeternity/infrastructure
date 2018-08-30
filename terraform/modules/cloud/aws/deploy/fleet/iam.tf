@@ -39,6 +39,13 @@ resource "aws_iam_role_policy" "epoch_policy" {
     },
     {
       "Action": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:ansible_vault_password*"
+    },
+    {
+      "Action": [
         "ec2:DescribeTags"
       ],
       "Effect": "Allow",
