@@ -63,8 +63,6 @@ def deregister(ec2_client, ids):
         except ClientError as e:
             if e.response['Error']['Code'] == 'InvalidAMIID.Unavailable':
                 print("Already deleted")
-            else:
-                print("Unexpected error: %s" % e)
         try:
             for snap in i["Snapshots"]:
                 ec2_client.delete_snapshot(
