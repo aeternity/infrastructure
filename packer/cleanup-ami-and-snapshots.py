@@ -74,7 +74,7 @@ def deregister(ec2_client, ids):
             print("Unexpected error: %s" % e)
 
 try:
-3    for region in REGIONS:
+    for region in REGIONS:
         ec2_client = boto3.client('ec2',region_name=region)
         deregister(ec2_client, get_stale_amis(ec2_client, EPOCH_IMAGE_NAME))
 
