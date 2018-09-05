@@ -73,8 +73,11 @@ def deregister(ec2_client, ids):
         except ClientError as e:
             print("Unexpected error: %s" % e)
 
+try:
+    for region in REGIONS:
+        ec2_client = boto3.client('ec2',region_name=region)
+        deregister(ec2_client, get_amis_to_remove(ec2_client, EPOCH_IMAGE_NAME))
 
-
-for region in REGIONS:
-    ec2_client = boto3.client('ec2',region_name=region)
-    deregister(ec2_client, get_amis_to_remove(ec2_client, EPOCH_IMAGE_NAME))
+except:
+    print("Unexpected error:", sys.exc_info()[0])
+    exit 1
