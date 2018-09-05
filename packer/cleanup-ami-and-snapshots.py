@@ -38,7 +38,7 @@ def get_amis_to_remove(ec2_client, epoch_image_name):
             for block in image["BlockDeviceMappings"]:
                 if "Ebs" in block:
                     snaps.append(block["Ebs"]["SnapshotId"])
-            amis.append({"ImageId": image["ImageId"],"CreationDate": image["CreationDate"],"Snapshoots": snaps})
+            amis.append({"ImageId": image["ImageId"],"CreationDate": image["CreationDate"],"Snapshots": snaps})
 
     amis.sort(key=lambda image: image["CreationDate"], reverse = True)
 
@@ -66,7 +66,7 @@ def deregister(ec2_client, ids):
             else:
                 print("Unexpected error: %s" % e)
         try:
-            for snap in i["Snapshoots"]:
+            for snap in i["Snapshots"]:
                 ec2_client.delete_snapshot(
                     SnapshotId = snap
                 )
