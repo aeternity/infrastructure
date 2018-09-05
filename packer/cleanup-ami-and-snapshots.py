@@ -15,7 +15,7 @@ def get_account_id():
     sts = boto3.client("sts")
     return sts.get_caller_identity()["Account"]
 
-def get_amis_to_remove(ec2_client, epoch_image_name):
+def get_stale_amis(ec2_client, epoch_image_name):
     amis = []
     images = ec2_client.describe_images(
         Filters = [
@@ -74,9 +74,9 @@ def deregister(ec2_client, ids):
             print("Unexpected error: %s" % e)
 
 try:
-    for region in REGIONS:
+3    for region in REGIONS:
         ec2_client = boto3.client('ec2',region_name=region)
-        deregister(ec2_client, get_amis_to_remove(ec2_client, EPOCH_IMAGE_NAME))
+        deregister(ec2_client, get_stale_amis(ec2_client, EPOCH_IMAGE_NAME))
 
 except:
     print("Unexpected error:", sys.exc_info()[0])
