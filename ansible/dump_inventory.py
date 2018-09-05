@@ -32,5 +32,5 @@ for group_name in env_groups:
         host_ip = host
         if 'ansible_host' in hostvars[host]:
             host_ip = hostvars[host]['ansible_host']
-        print("- [%s](http://%s:3013/v2/blocks/top) %s" % (host, host_ip, host_ip))
+        print("- %s (%s) [status](http://%s:3013/v2/status) [top](http://%s:3013/v2/blocks/top)" % (host, host_ip, host_ip, host_ip))
     print("\n")
