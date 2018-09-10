@@ -72,10 +72,10 @@ lint:
 
 # Keep in sync from https://github.com/aeternity/epoch/blob/master/config/sys.config
 check-seed-peers:
-	curl -fs -m 5 http://52.10.46.160:3013/v2/peer/key | grep -q 'QU9CvhAQH56a2kA15tCnWPRJ2srMJW8ZmfbbFTAy7eG4o16Bf'
-	curl -fs -m 5 http://18.195.109.60:3013/v2/peer/key | grep -q '2vhFb3HtHd1S7ynbpbFnEdph1tnDXFSfu4NGtq46S2eM5HCdbC'
-	curl -fs -m 5 http://13.250.162.250:3013/v2/peer/key | grep -q '27xmgQ4N1E3QwHyoutLtZsHW5DSW4zneQJ3CxT5JbUejxtFuAu'
-	curl -fs -m 5 http://31.13.249.70:3013/v2/peer/key | grep -q '2i8N6XsjCGe1wkdMhDRs7t7xzijrjJDN4xA22RoNGCgt6ay9QB'
+	curl -fs -m 5 http://52.10.46.160:3013/v2/peers/pubkey | grep -q 'QU9CvhAQH56a2kA15tCnWPRJ2srMJW8ZmfbbFTAy7eG4o16Bf'
+	curl -fs -m 5 http://18.195.109.60:3013/v2/peers/pubkey | grep -q '2vhFb3HtHd1S7ynbpbFnEdph1tnDXFSfu4NGtq46S2eM5HCdbC'
+	curl -fs -m 5 http://13.250.162.250:3013/v2/peers/pubkey | grep -q '27xmgQ4N1E3QwHyoutLtZsHW5DSW4zneQJ3CxT5JbUejxtFuAu'
+	curl -fs -m 5 http://31.13.249.70:3013/v2/peers/pubkey | grep -q '2i8N6XsjCGe1wkdMhDRs7t7xzijrjJDN4xA22RoNGCgt6ay9QB'
 
 check-deploy-env:
 ifndef DEPLOY_ENV
