@@ -1,6 +1,6 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
 genesis_accounts:
-  "ak$UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
+  "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
 
 epoch_config:
   sync:
@@ -21,7 +21,7 @@ epoch_config:
     db_path: "./db{{ db_version|mandatory }}"
 
   mining:
-    beneficiary: "ak$2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
+    beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
 
   logging:
     level: debug
