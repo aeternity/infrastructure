@@ -20,7 +20,7 @@ epoch_config:
     db_path: "./db{{ db_version|mandatory }}"
 
   mining:
-    beneficiary: "ak$tjnw1KcmnwfqXvhtGa9GRjanbHM3t6PmEWEWtNMM3ouvNKRu5"
+    beneficiary: "ak_tjnw1KcmnwfqXvhtGa9GRjanbHM3t6PmEWEWtNMM3ouvNKRu5"
 
   logging:
     level: warning

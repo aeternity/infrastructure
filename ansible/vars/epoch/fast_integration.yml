@@ -28,7 +28,7 @@ epoch_config:
     db_path: "./db{{ db_version|mandatory }}"
 
   mining:
-    beneficiary: "ak$2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
+    beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
     expected_mine_rate: 15000
     cuckoo:
       miner:
