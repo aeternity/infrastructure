@@ -9,7 +9,7 @@ peers:
 {% if hostvars[host]['ansible_local']['epoch']['peer_key'] %}
     - "aenode://{{ hostvars[host]['ansible_local']['epoch']['peer_key'] }}@{{ public_ip }}:{{ config.sync.port }}"
 {% else %}
-    - "aenode://pp$nokeyfoundpeerwillbeignored@{{ public_ip }}:{{ config.sync.port }}"
+    - "aenode://pp_nokeyfoundpeerwillbeignored@{{ public_ip }}:{{ config.sync.port }}"
 {% endif %}
 {% endfor %}
 {% endif %}
