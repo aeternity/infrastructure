@@ -5,6 +5,7 @@ BACKUP_DIR ?= /tmp/mnesia_backups
 
 images:
 	packer build packer/epoch.json
+	python packer/cleanup-ami-and-snapshots.py
 
 setup-infrastructure: check-deploy-env
 	cd ansible && ansible-playbook --tags "$(DEPLOY_ENV)" environments.yml
