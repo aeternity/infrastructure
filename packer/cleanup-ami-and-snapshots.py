@@ -55,21 +55,15 @@ def get_used_amis(ec2_client):
 
 def deregister(ec2_client, ids):
     for i in ids:
-        print(i)
-        try:
-            ec2_client.deregister_image(
-                ImageId = i["ImageId"]
-            )
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'InvalidAMIID.Unavailable':
-                print("Already deleted")
-        try:
-            for snap in i["Snapshots"]:
-                ec2_client.delete_snapshot(
-                    SnapshotId = snap
-                )
-        except ClientError as e:
-            print("Unexpected error: %s" % e)
+
+        ec2_client.deregister_image(
+            ImageId = i["ImageId"]
+        )
+
+        for snap in i["Snapshots"]:
+            ec2_client.delete_snapshot(
+                SnapshotId = snap
+        )
 
 try:
     for region in REGIONS:
