@@ -9,8 +9,8 @@
 - name: Facts setup
   hosts: all
   remote_user: epoch
-  # Executor facts will be gathered anyway in the task below
-  gather_facts: no
+  # Gather fact the usual way when hosts_group is not defined for delegated way
+  gather_facts: "{{ (hosts_group is not defined) }}"
   tasks:
     - name: Gather facts from all hosts in {{ hosts_group }} group
       setup:
@@ -20,6 +20,11 @@
       with_items: "{{ groups[hosts_group] }}"
       # http://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html#special-tags
       tags: [always]
+      when: hosts_group is defined
+    - name: Gather instance metadata facts
+      ec2_metadata_facts:
+      tags: [always]
+      when: '"amazon" in ansible_bios_version'
 
 - name: Deploy epoch package
   hosts: all
@@ -30,48 +35,16 @@
 
   vars:
     project_root: "{{ ansible_env.HOME }}/node"
+    packages_path: "{{ ansible_env.HOME }}"
     genesis_accounts_path: "{{ project_root }}/data/aecore/.genesis/accounts.json"
-    is_remote_package: false
-    public_ip: "{{ ansible_ssh_host|default(ansible_host)|default(inventory_hostname) }}"
-    local_peer_keys_dir: "files/peer_keys/{{ public_ip }}"
-    datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ vault_datadog_api_key }}&application_key={{ vault_datadog_app_key }}
+    local_peer_keys_dir: "files/peer_keys/{{ public_ipv4 }}"
+    datadog_api_key: "{{ vault_datadog_api_key }}"
+    datadog_app_key: "{{ vault_datadog_app_key }}"
+    datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
 
     # Label used for datadog tagging and ENV file planting
     env: unknown
-    # Group of the hosts used to configure node peers
-    hosts_group: unknown
-    config:
-      sync:
-        port: 3015
-      http:
-        external:
-          port: 3013
-        internal:
-          listen_address: "{{ api_internal_listen_address|default('127.0.0.1') }}"
-          port: 3113
-        debug: "{{ http_debug|default(false) }}"
-      websocket:
-        internal:
-          listen_address: "{{ ws_internal_listen_address|default('127.0.0.1') }}"
-          port: 3114
-      chain:
-        persist: true
-        db_path: "./db{{ db_version }}"
-      keypair:
-        dir: "keys"
-        password: "{{ vault_keys_password|default('secret') }}"
-      logging:
-        level: "{{ log_level|default('error') }}"
-      mining:
-        beneficiary: "{{ mining_beneficiary }}"
-        expected_mine_rate: "{{ expected_mine_rate|default(180000) }}"
-        cuckoo:
-          miner:
-            executable: "{{ miner_executable|default('mean30s-generic') }}"
-            extra_args: "{{ miner_extra_args|default('-t 5') }}"
-            node_bits: "{{ miner_node_bits|default(30) }}"
-    api_base_uri: http://{{ public_ip }}:{{ config.http.external.port }}/v2
 
   tasks:
     - block:
@@ -91,11 +64,35 @@
           - downtime is defined
           - downtime != "0"
 
+      - name: "Load a variable files for environment: {{ env }}"
+        include_vars: "{{ item }}"
+        with_first_found:
+          - "vars/epoch/{{ env }}.yml"
+          - "vars/epoch/default.yml"
+        tags: [config, peer_keys, health-check]
+
       - name: Fail on missing package variable
         fail:
           msg: '"package" variable must be defined'
         when: package is not defined
         tags: [package]
+
+      - name: Download remote package
+        get_url:
+          url: "{{ package }}"
+          dest: "{{ packages_path }}/{{ package|basename }}"
+          checksum: "{{ package_checksum|default(omit) }}"
+        when: "'http' in package"
+        register: remote_package
+        notify: "stop epoch daemon"
+
+      - name: Upload local package
+        copy:
+          src: "{{ package }}"
+          dest: "{{ packages_path }}/{{ package|basename }}"
+        when: "'http' not in package"
+        register: local_package
+        notify: "stop epoch daemon"
 
       - name: "Make sure {{ project_root }} exists"
         file:
@@ -104,65 +101,46 @@
             # allow group read for integration purposes  (e.g. logs)
             mode: 0750
 
-      - name: Check if epoch binary exists
-        stat:
-          path: "{{ project_root }}/bin/epoch"
-        register: epoch
-        tags: [daemon]
-
-      - name: Ping epoch daemon
-        command: "{{ project_root }}/bin/epoch ping"
-        failed_when: no
-        register: ping
-        when: epoch.stat.exists == True
-        tags: [daemon]
-
-      - name: Stop epoch daemon
-        command: "{{ project_root }}/bin/epoch stop"
-        when: epoch.stat.exists == True and ping.stdout == "pong"
-        tags: [daemon]
-
-      - name: Register remote package
-        set_fact:
-          is_remote_package: true
-        when: "'http' in package"
-        tags: [package]
+      - meta: flush_handlers
 
       - name: Extract epoch package into {{ project_root }}
         unarchive:
-          remote_src: "{{ is_remote_package | bool }}"
+          remote_src: true
           keep_newer: true
-          src: "{{ package }}"
+          src: "{{ packages_path }}/{{ package|basename }}"
           dest: "{{ project_root }}"
-        when: package is defined
+        when: remote_package.changed or local_package.changed
+        notify: "start epoch daemon"
         tags: [package]
 
       - name: Plant ENV file
         copy:
           content: "{{ env }}\n"
           dest: "{{ project_root }}/ENV"
+        notify: "restart epoch daemon"
         tags: [package]
 
-      - name: "Make sure chain path ( {{ config.chain.db_path }} ) exists"
+      - name: "Make sure chain path ( {{ epoch_config.chain.db_path }} ) exists"
         file:
-          path: "{{ project_root }}/{{ config.chain.db_path }}"
+          path: "{{ project_root }}/{{ epoch_config.chain.db_path }}"
           state: directory
         tags: [config]
 
-      - name: "Make sure keys dir ( {{ config.keypair.dir }} ) exists"
+      - name: "Make sure keys dir ( {{ epoch_config['keys']['dir'] }} ) exists"
         file:
-          path: "{{ project_root }}/{{ config.keypair.dir }}"
+          path: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}"
           state: directory
           mode: 0700
         tags: [config]
 
-      - name: "Copy node keys to {{ project_root }}/{{ config.keypair.dir }}"
+      - name: "Copy node keys to {{ project_root }}/{{ epoch_config['keys']['dir'] }}"
         copy:
           src: "{{ item }}"
-          dest: "{{ project_root }}/{{ config.keypair.dir }}"
+          dest: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}"
           mode: 0600
         with_items: "{{ keypair }}"
         when: keypair is defined
+        notify: "restart epoch daemon"
         tags: [config]
 
       - name: Update epoch configuration
@@ -170,6 +148,7 @@
           src: templates/epoch.yaml
           dest: "{{ project_root }}/epoch.yaml"
           mode: '0600'
+        notify: "restart epoch daemon"
         tags: [config]
 
       - name: Update accounts configuration
@@ -188,25 +167,24 @@
         connection: local
         tags: [config, peer_keys]
 
-      - name: "Copy node peer keys to {{ project_root }}/{{ config.keypair.dir }}"
+      - name: "Copy node peer keys to {{ project_root }}/{{ epoch_config['keys']['dir'] }}"
         copy:
           src: "{{ item }}"
-          dest: "{{ project_root }}/{{ config.keypair.dir }}"
+          dest: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}"
           mode: 0600
         with_items:
           - "{{ local_peer_keys_dir }}/peer_key"
           - "{{ local_peer_keys_dir }}/peer_key.pub"
         when: stat_peer_dir.stat.exists
+        notify: "restart epoch daemon"
         tags: [config, peer_keys]
 
-      - name: Start epoch daemon
-        command: "{{ project_root }}/bin/epoch start"
-        tags: [daemon]
+      - meta: flush_handlers
 
       - name: Wait epoch node API to boot
         wait_for:
-          port: "{{ config.http.external.port }}"
-          host: "{{ public_ip }}"
+          port: "{{ epoch_config.http.external.port }}"
+          host: "{{ public_ipv4 }}"
           timeout: 300
         connection: local
         tags: [health-check]
@@ -224,7 +202,7 @@
 
       - name: Send Datadog event
         datadog_event:
-          host: "{{ inventory_hostname }}"
+          host: "{{ public_ipv4 }}"
           alert_type: success
           title: Deploy
           text: |
@@ -232,8 +210,8 @@
             Revision: [{{ ansible_local.epoch.revision }}](https://github.com/aeternity/epoch/commit/{{ ansible_local.epoch.revision }})
             Package: {{ package }}
             %%%
-          api_key: "{{ vault_datadog_api_key }}"
-          app_key: "{{ vault_datadog_app_key }}"
+          api_key: "{{ datadog_api_key }}"
+          app_key: "{{ datadog_app_key }}"
           tags:
             - "env:{{ env }}"
             - "version:{{ ansible_local.epoch.version }}"
@@ -242,12 +220,12 @@
       rescue:
         - name: Send Datadog event
           datadog_event:
-            host: "{{ inventory_hostname }}"
+            host: "{{ public_ipv4 }}"
             alert_type: error
             title: Deploy
             text: "Package: {{ package }}"
-            api_key: "{{ vault_datadog_api_key }}"
-            app_key: "{{ vault_datadog_app_key }}"
+            api_key: "{{ datadog_api_key }}"
+            app_key: "{{ datadog_app_key }}"
             tags:
               - "env:{{ env }}"
           connection: local
@@ -255,3 +233,38 @@
         - fail:
             msg: "Failed deploy"
             when: true
+
+  handlers:
+    - name: Check epoch binary
+      stat:
+        path: "{{ project_root }}/bin/epoch"
+      register: epoch
+      tags: [daemon]
+      listen:
+        - "stop epoch daemon"
+        - "restart epoch daemon"
+
+    - name: Ping epoch
+      command: "{{ project_root }}/bin/epoch ping"
+      failed_when: no
+      register: ping
+      when: epoch.stat.exists == True
+      tags: [daemon]
+      listen:
+        - "stop epoch daemon"
+        - "restart epoch daemon"
+
+    - name: Stop epoch
+      command: "{{ project_root }}/bin/epoch stop"
+      when: epoch.stat.exists == True and ping.stdout == "pong"
+      tags: [daemon]
+      listen:
+        - "stop epoch daemon"
+        - "restart epoch daemon"
+
+    - name: Start epoch
+      command: "{{ project_root }}/bin/epoch start"
+      tags: [daemon]
+      listen:
+        - "start epoch daemon"
+        - "restart epoch daemon"

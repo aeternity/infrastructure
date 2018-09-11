@@ -1,7 +1,42 @@
+# Collect and prepare datadog tags from instance metadata and tags on AWS
+# Couple of the tags defaults to OS values,
+# still color and env must be passed externally for that platform
+- name: Collect cloud instance metadata
+  hosts: all
+  remote_user: master
+  become: yes
+  gather_facts: yes
+  tags: [datadog]
+  tasks:
+    - name: Get instance metadata facts
+      ec2_metadata_facts:
+      when: '"amazon" in ansible_bios_version'
+
+    - name: Define ec2 dynamic variables
+      set_fact:
+        platform: aws
+        region: "{{ ansible_ec2_placement_region }}"
+      when: '"amazon" in ansible_bios_version'
+
+    - name: Get instance tags
+      ec2_tag:
+        resource: "{{ ansible_ec2_instance_id }}"
+        state: list
+        region: "{{ ansible_ec2_placement_region }}"
+      register: instance_tags
+      when: ansible_ec2_instance_id is defined
+
+    - name: Define ec2 dynamic variables based on tags
+      set_fact:
+        env: "{{ instance_tags['tags']['env'] | default('unknown') }}"
+        color: "{{ instance_tags['tags']['color'] | default('unknown') }}"
+      when: ansible_ec2_instance_id is defined
+
 - name: Configure monitoring services (DataDog)
   hosts: all
   remote_user: master
   become: yes
+  gather_facts: no
   tags: [datadog]
 
   vars:
@@ -16,12 +51,13 @@
       logs_enabled: true
       hostname: "{{ ansible_fqdn }}"
       tags:
-        - "platform:{{ datadog_platform|default('unknown') }}"
-        - "region:{{ datadog_region|default('unknown') }}"
-        - "env:{{ datadog_env|default('unknown') }}"
-        - "color:{{ datadog_color|default('unknown') }}"
+        - "platform:{{ platform|default('os') }}"
+        - "region:{{ region|default('eu-east') }}"
+        - "env:{{ env|default('unknown') }}"
+        - "color:{{ color|default('unknown') }}"
         - "lsb:{{ ansible_lsb.description }}"
         - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
+        - "public_ipv4:{{ public_ipv4 }}"
     datadog_checks:
       system_core:
         init_config:

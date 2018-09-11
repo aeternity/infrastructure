@@ -1,0 +1,45 @@
+datadog_enabled: yes
+api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
+
+configure_peers: true
+epoch_config:
+  sync:
+    port: 3015
+
+  http:
+    external:
+      port: 3013
+    internal:
+      listen_address: 0.0.0.0
+      port: 3113
+    debug: true
+
+  websocket:
+    internal:
+      listen_address: 0.0.0.0
+      port: 3114
+
+  keys:
+    dir: keys
+    password: secret
+
+  chain:
+    persist: true
+    db_path: "./db{{ db_version|mandatory }}"
+
+  mining:
+    beneficiary: "ak$2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
+    expected_mine_rate: 15000
+    cuckoo:
+      miner:
+        executable: mean16s-generic
+        extra_args: "-t 5"
+        node_bits: 16
+
+  logging:
+    level: warning
+
+  metrics:
+      # StatsD server and port
+      host: 127.0.0.1
+      port: 8125

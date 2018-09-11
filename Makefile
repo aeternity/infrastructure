@@ -16,7 +16,10 @@ setup-node: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" setup.yml
 
 setup-monitoring: check-deploy-env
-	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" monitoring.yml
+	cd ansible && ansible-playbook \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		-e env=$(DEPLOY_ENV) \
+		monitoring.yml
 
 setup: setup-infrastructure setup-node setup-monitoring
 

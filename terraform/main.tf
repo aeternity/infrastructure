@@ -39,9 +39,6 @@ module "aws_deploy-ap-southeast-1" {
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
-
-    # The string must be bash escaped
-    beneficiary = "ak\\$tjnw1KcmnwfqXvhtGa9GRjanbHM3t6PmEWEWtNMM3ouvNKRu5"
   }
 
   providers = {
@@ -62,9 +59,6 @@ module "aws_deploy-eu-central-1" {
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
-
-    # The string must be bash escaped
-    beneficiary = "ak\\$tjnw1KcmnwfqXvhtGa9GRjanbHM3t6PmEWEWtNMM3ouvNKRu5"
   }
 
   providers = {
@@ -85,9 +79,6 @@ module "aws_deploy-us-west-2" {
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
-
-    # The string must be bash escaped
-    beneficiary = "ak\\$tjnw1KcmnwfqXvhtGa9GRjanbHM3t6PmEWEWtNMM3ouvNKRu5"
   }
 
   providers = {

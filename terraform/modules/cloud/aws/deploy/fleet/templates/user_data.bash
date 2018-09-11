@@ -1,51 +1,41 @@
 #!/bin/bash
-set -x
+
+# Don't enable debug mode in this script if secrets are managed as it ends-up in the logs
+# set -x
 exec > >(tee /tmp/user-data.log|logger -t user-data ) 2>&1
 
-#SETTING UP HOSTNAME
+export INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD=`aws --region ${region} secretsmanager get-secret-value --secret-id ansible_vault_password --output text --query 'SecretString'`
 
-REGION="${region}"
-IP=`curl -s http://169.254.169.254/latest/meta-data/public-ipv4`
-echo "aws-$REGION-$IP" > /etc/hostname
-hostname "aws-$REGION-$IP"
+git clone -b master --single-branch https://github.com/aeternity/infrastructure.git /infrastructure
+cd /infrastructure/ansible
 
-#SETUP DATADOG
+# Install ansible roles
+ansible-galaxy install -r requirements.yml
 
-MEM=$(awk '/MemTotal/ {printf("%.0f\n", $2 / 1024 / 1024)}' /proc/meminfo)
-FLAVOR="c$(nproc).m$MEM"
-DATADOG_API_KEY=`aws --region ${region} secretsmanager get-secret-value --secret-id datadog_api_key  | jq '.SecretString | fromjson | .datadog_api_key'`
+# Create temporary inventory just because of the group_vars
+cat > /tmp/local_inventory << EOF
+[local]
+localhost ansible_connection=local
 
-sed -i -- "s/DATADOG_API_KEY/$DATADOG_API_KEY/g" /etc/datadog-agent/datadog.yaml
-sed -i -- "s/region:unknown/region:${region}/g" /etc/datadog-agent/datadog.yaml
-sed -i -- "s/color:unknown/color:${color}/g" /etc/datadog-agent/datadog.yaml
-sed -i -- "s/env:unknown/env:${env}/g" /etc/datadog-agent/datadog.yaml
-sed -i -- "s/flavor:.*$/flavor:$FLAVOR/g" /etc/datadog-agent/datadog.yaml
-sed -i -- "s/127.0.0.1:3013/$IP:3013/g" /etc/datadog-agent/conf.d/http_check.d/conf.yaml
+[tag_role_epoch:children]
+local
 
-sudo service datadog-agent start
-
-#INSTALL EPOCH
-
-URL="${epoch_package}"
-
-wget -q $URL -O /home/epoch/epoch.tar.gz
-
-mkdir /home/epoch/node
-tar -xf /home/epoch/epoch.tar.gz -C /home/epoch/node
-chown -R epoch:epoch /home/epoch/node
-
-cat > /home/epoch/node/epoch.yaml << EOF
----
-chain:
-    persist: true
-
-mining:
-    autostart: true
-    beneficiary: "${epoch_beneficiary}"
-
-logging:
-    level: warning
+[tag_env_${env}:children]
+local
 
 EOF
 
-sudo su -c "/home/epoch/node/bin/epoch start" epoch
+ansible-playbook \
+    -i inventory/vault.yml \
+    -i /tmp/local_inventory \
+    -e env=${env} \
+    monitoring.yml
+
+ansible-playbook \
+    -i inventory/vault.yml \
+    -i /tmp/local_inventory \
+    --become-user epoch -b \
+    -e package=${epoch_package} \
+    -e env=${env} \
+    -e db_version=0 \
+    deploy.yml
