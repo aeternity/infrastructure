@@ -206,7 +206,7 @@ workflows:
       - build_images:
           filters:
             branches:
-              only: packer
+              only: build-gcloud-image
 
   daily_deploy:
     triggers:
