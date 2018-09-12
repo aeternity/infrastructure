@@ -32,8 +32,8 @@ epoch_config:
     expected_mine_rate: 15000
     cuckoo:
       miner:
-        executable: mean16s-generic
-        extra_args: "-t 5"
+        executable: "{{ ('amazon' in ansible_bios_version) | ternary('mean16s-avx2', 'mean16s-generic')  }}"
+        extra_args: "-t {{ ansible_processor_vcpus }}"
         node_bits: 16
 
   logging:
