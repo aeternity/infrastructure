@@ -6,7 +6,7 @@ exec > >(tee /tmp/user-data.log|logger -t user-data ) 2>&1
 
 export INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD=`aws --region ${region} secretsmanager get-secret-value --secret-id ansible_vault_password --output text --query 'SecretString'`
 
-git clone -b v1.0 --single-branch https://github.com/aeternity/infrastructure.git /infrastructure
+git clone -b v1.1 --single-branch https://github.com/aeternity/infrastructure.git /infrastructure
 cd /infrastructure/ansible
 
 # Install ansible roles
