@@ -5,6 +5,7 @@ regions:
   - eu-central-1
   - us-west-2
   - ap-southeast-1
+  - eu-west-2
 hostnames:
   - ip-address
 keyed_groups:
