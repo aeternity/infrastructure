@@ -27,9 +27,10 @@ provider "aws" {
 }
 
 module "aws_deploy-ap-southeast-1" {
-  source = "modules/cloud/aws/deploy"
-  env    = "uat"
-  color  = "blue"
+  source            = "modules/cloud/aws/deploy"
+  env               = "uat"
+  color             = "blue"
+  bootstrap_version = "v1.1"
 
   static_nodes = 1
   spot_nodes   = 9
@@ -47,9 +48,10 @@ module "aws_deploy-ap-southeast-1" {
 }
 
 module "aws_deploy-eu-central-1" {
-  source = "modules/cloud/aws/deploy"
-  env    = "uat"
-  color  = "blue"
+  source            = "modules/cloud/aws/deploy"
+  env               = "uat"
+  color             = "blue"
+  bootstrap_version = "v1.1"
 
   static_nodes = 1
   spot_nodes   = 9
@@ -67,9 +69,10 @@ module "aws_deploy-eu-central-1" {
 }
 
 module "aws_deploy-us-west-2" {
-  source = "modules/cloud/aws/deploy"
-  env    = "uat"
-  color  = "green"
+  source            = "modules/cloud/aws/deploy"
+  env               = "uat"
+  color             = "green"
+  bootstrap_version = "v1.1"
 
   static_nodes = 1
   spot_nodes   = 9
