@@ -49,7 +49,6 @@
       process_config:
         enabled: "true" # has to be set as a string
       logs_enabled: true
-      hostname: "{{ ansible_fqdn }}"
       tags:
         - "platform:{{ platform|default('os') }}"
         - "region:{{ region|default('eu-east') }}"
