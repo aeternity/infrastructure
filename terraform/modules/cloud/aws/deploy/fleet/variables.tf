@@ -6,6 +6,8 @@ variable "color" {}
 
 variable "env" {}
 
+variable "bootstrap_version" {}
+
 variable "instance_type" {}
 
 variable "spot_price" {}

@@ -65,10 +65,10 @@ data "template_file" "user_data" {
   template = "${file("${path.module}/templates/user_data.bash")}"
 
   vars = {
-    region        = "${data.aws_region.current.name}"
-    color         = "${var.color}"
-    env           = "${var.env}"
-    epoch_package = "${var.epoch["package"]}"
+    region            = "${data.aws_region.current.name}"
+    env               = "${var.env}"
+    bootstrap_version = "${var.bootstrap_version}"
+    epoch_package     = "${var.epoch["package"]}"
   }
 }
 
