@@ -1,7 +1,10 @@
 datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
 
+# Auto-discover and configure all other peers in this environment
 configure_peers: true
+hosts_group: fast_integration
+
 epoch_config:
   sync:
     port: 3015
