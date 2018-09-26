@@ -30,6 +30,7 @@
       set_fact:
         env: "{{ instance_tags['tags']['env'] | default('unknown') }}"
         color: "{{ instance_tags['tags']['color'] | default('unknown') }}"
+        kind: "{{ instance_tags['tags']['kind'] | default('peer') }}"
       when: ansible_ec2_instance_id is defined
 
 - name: Configure monitoring services (DataDog)
@@ -54,6 +55,7 @@
         - "region:{{ region|default('eu-east') }}"
         - "env:{{ env|default('unknown') }}"
         - "color:{{ color|default('unknown') }}"
+        - "kind:{{ kind|default('peer') }}"
         - "lsb:{{ ansible_lsb.description }}"
         - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
         - "public_ipv4:{{ public_ipv4 }}"
