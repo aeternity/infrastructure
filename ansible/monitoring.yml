@@ -138,7 +138,7 @@
   handlers:
     - name: Restart rsyslogd
       service:
-        name: httpd
+        name: rsyslog
         state: restarted
       listen:
         - restart rsyslogd
