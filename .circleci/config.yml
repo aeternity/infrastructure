@@ -51,6 +51,29 @@ references:
       name: Check seed peers
       command: make check-seed-peers
 
+  fail_notification: &fail_notification
+    run:
+      name: Send failure notification
+      environment:
+        NOTIFY_BRANCH: master
+        HOOK_TEMPLATE: |
+          {
+            "text": "CircleCI job **%s** failed on branch **%s** by @%s",
+            "attachments": [
+              {
+                "title": "Build Link",
+                "title_link": "%s",
+                "color": "#FAD6D6"
+              }
+            ]
+          }
+      command: |
+        if [ -n "$CIRCLE_BRANCH" -a "$CIRCLE_BRANCH" = "${NOTIFY_BRANCH:?}" ]; then
+          HOOK_DATA=$(printf "$HOOK_TEMPLATE" "${CIRCLE_JOB:?}" "${CIRCLE_BRANCH:?}" "${CIRCLE_USERNAME:-unknown}" "${CIRCLE_BUILD_URL:?}")
+          curl -X POST -H 'Content-Type: application/json' ${ROCKET_HOOK_URL:?} --data "${HOOK_DATA:?}"
+        fi
+      when: on_fail
+
 jobs:
   build_check:
     <<: *machine_config
@@ -71,11 +94,13 @@ jobs:
       - run:
           name: Dry run environments playbooks
           command: .circleci/docker-run.sh make test-setup-environments
+      - *fail_notification
 
   setup_terraform:
     <<: *container_config
     steps:
       - *setup_terraform
+      - *fail_notification
 
   setup_uat:
     <<: *container_config
@@ -86,6 +111,7 @@ jobs:
       - *setup_node
       - *setup_monitoring
       - *check_seed_peers
+      - *fail_notification
 
   setup_integration:
     <<: *container_config
@@ -95,6 +121,7 @@ jobs:
       - *setup_infra
       - *setup_node
       - *setup_monitoring
+      - *fail_notification
 
   setup_fast_integration:
     <<: *container_config
@@ -104,6 +131,7 @@ jobs:
       - *setup_infra
       - *setup_node
       - *setup_monitoring
+      - *fail_notification
 
   setup_dev1:
     <<: *container_config
@@ -112,6 +140,7 @@ jobs:
     steps:
       - *setup_infra
       - *setup_node
+      - *fail_notification
 
   setup_dev2:
     <<: *container_config
@@ -120,6 +149,7 @@ jobs:
     steps:
       - *setup_infra
       - *setup_node
+      - *fail_notification
 
   build_images:
     <<: *container_config
@@ -136,11 +166,13 @@ jobs:
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} ${DOCKERHUB_REPO:?}:latest
             docker push ${DOCKERHUB_REPO:?}:latest
+      - *fail_notification
 
   check_seed_peers:
     <<: *container_config
     steps:
       - *check_seed_peers
+      - *fail_notification
 
 workflows:
   version: 2
