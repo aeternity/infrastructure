@@ -185,6 +185,7 @@ workflows:
       - setup_dev1:
           requires:
             - build_check
+            - setup_terraform
           filters:
             branches:
               only: master
@@ -192,6 +193,7 @@ workflows:
       - setup_dev2:
           requires:
             - build_check
+            - setup_terraform
           filters:
             branches:
               only: master
@@ -223,8 +225,12 @@ workflows:
             - setup_terraform
       - setup_integration
       - setup_fast_integration
-      - setup_dev1
-      - setup_dev2
+      - setup_dev1:
+          requires:
+            - setup_terraform
+      - setup_dev2:
+          requires:
+            - setup_terraform
 
   hourly_seeds_check:
     triggers:
