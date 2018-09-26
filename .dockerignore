@@ -1,7 +1,6 @@
 *
 !ansible
 !aws
-!openstack
 !terraform
 terraform/.terraform
 !Makefile

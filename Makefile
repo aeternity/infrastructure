@@ -3,8 +3,6 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
-setup-infrastructure: check-deploy-env
-	cd ansible && ansible-playbook --tags "$(DEPLOY_ENV)" environments.yml
 
 setup-terraform:
 	cd terraform && terraform init && terraform apply --auto-approve
@@ -18,7 +16,7 @@ setup-monitoring: check-deploy-env
 		-e env=$(DEPLOY_ENV) \
 		monitoring.yml
 
-setup: setup-infrastructure setup-node setup-monitoring
+setup: setup-node setup-monitoring
 
 deploy: check-deploy-env
 ifeq ($(DEPLOY_DB_VERSION),)
@@ -54,12 +52,7 @@ mnesia_backup:
 		-e backup_suffix=$(BACKUP_SUFFIX) \
 		mnesia_backup.yml
 
-test-openstack:
-	openstack stack create test -e openstack/test/create.yml \
-		-t openstack/ae-environment.yml --enable-rollback --wait --dry-run
-
 test-setup-environments:
-	cd ansible && ansible-playbook --check -i localhost, environments.yml
 	cd terraform && terraform init && terraform plan
 
 lint:
@@ -82,6 +75,6 @@ ifndef DEPLOY_ENV
 endif
 
 .PHONY: \
-	images setup-infrastructure setup-terraform setup-node setup-monitoring setup \
-	manage-node reset-net lint test-openstack test-setup-environments \
+	images setup-terraform setup-node setup-monitoring setup \
+	manage-node reset-net lint \
 	check-seed-peers check-deploy-env
