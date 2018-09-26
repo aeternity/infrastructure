@@ -130,3 +130,41 @@ module "aws_deploy-dev2-eu-west-2" {
     aws = "aws.eu-west-2"
   }
 }
+
+module "aws_deploy-integration-eu-west-2" {
+  source            = "modules/cloud/aws/deploy"
+  env               = "integration"
+  bootstrap_version = "master"
+
+  static_nodes  = 1
+  spot_nodes    = 2
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
+  epoch = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    aws = "aws.eu-west-2"
+  }
+}
+
+module "aws_deploy-fast_integration-eu-west-2" {
+  source            = "modules/cloud/aws/deploy"
+  env               = "fast_integration"
+  bootstrap_version = "master"
+
+  static_nodes  = 1
+  spot_nodes    = 2
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
+  epoch = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    aws = "aws.eu-west-2"
+  }
+}

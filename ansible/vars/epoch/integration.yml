@@ -1,12 +1,14 @@
 datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
+genesis_accounts:
+  "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
 configure_peers: false
 
 epoch_config:
   peers:
-    - "aenode://pp_2FZr4K4QzbmfBnH8XonUL7A5xR8ChHudSBDnCaPpC5rZAZQAz2@31.13.249.3:3015"
-    - "aenode://pp_2R3XW8C5MCTULnHjcPiWDwLMLT51B4CCgNvHwK9m41Pa3KF3h9@31.13.249.4:3015"
-    - "aenode://pp_ttZZwTS2nzxg7pnEeFMWeRCfdvdxeRu6SgVyeALZX3LbdeWiS@31.13.249.5:3015"
+    - "aenode://pp_PVNHha6SBXQBdh8XsiAma2auMjyDodZAY7BGjd8xir6g6JPBM@31.13.249.71:3015"
+    - "aenode://pp_Hj8oJx1oESu6QNEVLc1K63jezfj61B4SmuyhF5RWfJACaZgry@31.13.249.72:3015"
+    - "aenode://pp_2Jx7N2qDUqu3ZNfd831Byiq4WofebBsSRHNTD79Tcsr9VTTt54@31.13.249.73:3015"
 
   sync:
     port: 3015
@@ -15,14 +17,7 @@ epoch_config:
     external:
       port: 3013
     internal:
-      listen_address: 0.0.0.0
       port: 3113
-    debug: true
-
-  websocket:
-    internal:
-      listen_address: 0.0.0.0
-      port: 3114
 
   keys:
     dir: keys
@@ -34,15 +29,14 @@ epoch_config:
 
   mining:
     beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
-    expected_mine_rate: 15000
     cuckoo:
       miner:
-        executable: "{{ ('amazon' in ansible_bios_version) | ternary('mean16s-avx2', 'mean16s-generic')  }}"
+        executable: "{{ ('amazon' in ansible_bios_version) | ternary('mean30s-avx2', 'mean30s-generic')  }}"
         extra_args: "-t {{ ansible_processor_vcpus }}"
-        node_bits: 16
+        node_bits: 30
 
   logging:
-    level: warning
+    level: debug
 
   metrics:
       # StatsD server and port
