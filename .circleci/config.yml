@@ -180,10 +180,6 @@ workflows:
     jobs:
       - build_check:
           requires: []
-          filters:
-            branches:
-              ignore:
-                - packer
 
       - setup_terraform:
           requires:
@@ -234,11 +230,6 @@ workflows:
           filters:
             branches:
               only: master
-
-      - build_images:
-          filters:
-            branches:
-              only: packer
 
   daily_deploy:
     triggers:
