@@ -118,7 +118,6 @@ jobs:
     environment:
       - DEPLOY_ENV: integration
     steps:
-      - *setup_infra
       - *setup_node
       - *setup_monitoring
       - *fail_notification
@@ -128,7 +127,6 @@ jobs:
     environment:
       - DEPLOY_ENV: fast_integration
     steps:
-      - *setup_infra
       - *setup_node
       - *setup_monitoring
       - *fail_notification
@@ -203,6 +201,7 @@ workflows:
       - setup_integration:
           requires:
             - build_check
+            - setup_terraform
           filters:
             branches:
               only: master
@@ -210,6 +209,7 @@ workflows:
       - setup_fast_integration:
           requires:
             - build_check
+            - setup_terraform
           filters:
             branches:
               only: master
@@ -255,12 +255,16 @@ workflows:
       - setup_uat:
           requires:
             - setup_terraform
-      - setup_integration
-      - setup_fast_integration
       - setup_dev1:
           requires:
             - setup_terraform
       - setup_dev2:
+          requires:
+            - setup_terraform
+      - setup_integration:
+          requires:
+            - setup_terraform
+      - setup_fast_integration:
           requires:
             - setup_terraform
 
