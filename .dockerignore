@@ -2,7 +2,6 @@
 !ansible
 !aws
 !openstack
-!packer
 !terraform
 terraform/.terraform
 !Makefile

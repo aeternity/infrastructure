@@ -3,13 +3,6 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
-prepare-authentication-file-for-gcp:
-	@echo "$(GOOGLE_AUTH)" | base64 -d > /tmp/epoch-p2p.json
-
-images: prepare-authentication-file-for-gcp
-	packer build packer/epoch.json
-	python packer/cleanup-ami-and-snapshots.py
-
 setup-infrastructure: check-deploy-env
 	cd ansible && ansible-playbook --tags "$(DEPLOY_ENV)" environments.yml
 
@@ -69,12 +62,11 @@ test-setup-environments:
 	cd ansible && ansible-playbook --check -i localhost, environments.yml
 	cd terraform && terraform init && terraform plan
 
-lint: prepare-authentication-file-for-gcp
+lint:
 	ansible-lint ansible/setup.yml
 	ansible-lint ansible/monitoring.yml --exclude ~/.ansible/roles
 	ansible-lint ansible/manage-node.yml
 	ansible-lint ansible/reset-net.yml
-	packer validate packer/epoch.json
 	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
 # Keep in sync from https://github.com/aeternity/epoch/blob/master/config/sys.config
