@@ -19,6 +19,12 @@ provider "aws" {
 }
 
 provider "aws" {
+  version = "1.24"
+  region  = "eu-west-2"
+  alias   = "eu-west-2"
+}
+
+provider "aws" {
   version                 = "1.24"
   region                  = "us-west-2"
   alias                   = "us-west-2"
@@ -86,5 +92,41 @@ module "aws_deploy-us-west-2" {
 
   providers = {
     aws = "aws.us-west-2"
+  }
+}
+
+module "aws_deploy-dev1-eu-west-2" {
+  source            = "modules/cloud/aws/deploy"
+  env               = "dev1"
+  bootstrap_version = "master"
+
+  spot_nodes    = 2
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
+  epoch = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    aws = "aws.eu-west-2"
+  }
+}
+
+module "aws_deploy-dev2-eu-west-2" {
+  source            = "modules/cloud/aws/deploy"
+  env               = "dev2"
+  bootstrap_version = "master"
+
+  spot_nodes    = 2
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
+  epoch = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    aws = "aws.eu-west-2"
   }
 }
