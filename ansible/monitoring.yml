@@ -45,10 +45,14 @@
     datadog_api_key: "{{ vault_datadog_api_key|default('DATADOG_API_KEY') }}"
     datadog_agent6: true
     datadog_config:
+      log_level: warning
+      log_to_console: false
       apm_enabled: false
       use_dogstatsd: true
       process_config:
         enabled: "true" # has to be set as a string
+      apm_config:
+        enabled: false
       logs_enabled: true
       tags:
         - "platform:{{ platform|default('os') }}"
@@ -89,6 +93,10 @@
         init_config:
         instances:
         logs:
+          - type: tcp
+            port: 10518
+            service: epoch
+            source: syslog
           - type: file
             path: "/home/{{ project_user }}/node/log/epoch.log"
             service: epoch
@@ -119,3 +127,20 @@
 
   roles:
     - { role: Datadog.datadog }
+
+  post_tasks:
+    - name: Copy datadog.conf to rsyslog
+      copy:
+        src: files/rsyslog/datadog.conf
+        dest: /etc/rsyslog.d/datadog.conf
+        mode: 0600
+      notify: restart rsyslogd
+
+  handlers:
+    - name: Restart rsyslogd
+      service:
+        name: rsyslog
+        state: restarted
+      listen:
+        - restart rsyslogd
+
