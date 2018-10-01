@@ -39,7 +39,7 @@ module "aws_deploy-ap-southeast-1" {
   bootstrap_version = "v1.1"
 
   static_nodes = 1
-  spot_nodes   = 9
+  spot_nodes   = 14
 
   spot_price    = "0.125"
   instance_type = "m4.large"
@@ -81,7 +81,7 @@ module "aws_deploy-us-west-2" {
   bootstrap_version = "v1.1"
 
   static_nodes = 1
-  spot_nodes   = 9
+  spot_nodes   = 14
 
   spot_price    = "0.125"
   instance_type = "m4.large"
@@ -92,6 +92,27 @@ module "aws_deploy-us-west-2" {
 
   providers = {
     aws = "aws.us-west-2"
+  }
+}
+
+module "aws_deploy-uat-eu-west-2" {
+  source            = "modules/cloud/aws/deploy"
+  env               = "uat"
+  color             = "green"
+  bootstrap_version = "v1.1"
+
+  static_nodes = 1
+  spot_nodes   = 9
+
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+
+  epoch = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    aws = "aws.eu-west-2"
   }
 }
 
