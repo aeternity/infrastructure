@@ -20,6 +20,7 @@ RUN curl -sSO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terr
 ADD requirements.txt /infrastructure/
 RUN apk add --no-cache --virtual build-deps \
         gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers \
+    && pip3 install --upgrade pip==18.0 \
     && pip3 install --no-cache-dir -r /infrastructure/requirements.txt \
     && apk del build-deps
 

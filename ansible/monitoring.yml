@@ -55,8 +55,8 @@
         enabled: false
       logs_enabled: true
       tags:
-        - "platform:{{ platform|default('os') }}"
-        - "region:{{ region|default('eu-east') }}"
+        - "platform:{{ platform|default('unknown') }}"
+        - "region:{{ region|default('unknown') }}"
         - "env:{{ env|default('unknown') }}"
         - "color:{{ color|default('unknown') }}"
         - "kind:{{ kind|default('peer') }}"

@@ -2,7 +2,7 @@
 
 Infrastructure is automatically created and managed by Ansible playbooks run by CircleCI.
 Only changes to master branch are deployed.
-Infrastructure is orchestrated with [OpenStack Heat](https://docs.openstack.org/heat/latest/) and [AWS CloudFormation](https://aws.amazon.com/cloudformation/).
+Infrastructure is orchestrated with [Terraform](https://www.terraform.io).
 Ansible playbooks are run against [dynamic host inventories](http://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html).
 
 Below documentation is meant for manual testing and additional details. It's already integrated in CircleCI workflow.
@@ -13,14 +13,6 @@ The only requirement is Docker. All the libraries and packages are built in the 
 If for some reason one needs to setup the requirements on the host system see the Dockerfile.
 
 ## Credentials setup
-
-### OpenStack
-You should make sure [OpenStack credentials are set](https://docs.openstack.org/python-openstackclient/latest/configuration/index.html#environment-variables)
-either by environment variables or clouds.yml file.
-
-```bash
-source ~/my/secrets/openstack.rc
-```
 
 ### Amazon Web Services
 
@@ -60,7 +52,7 @@ eval $(ssh-agent) && ssh-add -k ~/.ssh/id_rsa
 
 ### Ansible dynamic inventory
 
-Check that your OpenStack and AWS credentials are setup and dynamic inventory is working as excepted:
+Check that your AWS credentials are setup and dynamic inventory is working as excepted:
 ```bash
 cd ansible && ansible-inventory --list
 ```

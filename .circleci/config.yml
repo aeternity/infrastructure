@@ -21,11 +21,6 @@ references:
       command: |
         docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
 
-  setup_infra: &setup_infra
-    run:
-      name: Setup infrastructure
-      command: make setup-infrastructure
-
   setup_terraform: &setup_terraform
     run:
       name: Setup Terraform
@@ -88,12 +83,6 @@ jobs:
       - run:
           name: Configuration lint
           command: .circleci/docker-run.sh make lint
-      - run:
-          name: Dry run OpenStack heat template
-          command: .circleci/docker-run.sh make test-openstack
-      - run:
-          name: Dry run environments playbooks
-          command: .circleci/docker-run.sh make test-setup-environments
       - *fail_notification
 
   setup_terraform:
@@ -107,7 +96,6 @@ jobs:
     environment:
       - DEPLOY_ENV: uat
     steps:
-      - *setup_infra
       - *setup_node
       - *setup_monitoring
       - *check_seed_peers
@@ -136,7 +124,6 @@ jobs:
     environment:
       - DEPLOY_ENV: dev1
     steps:
-      - *setup_infra
       - *setup_node
       - *fail_notification
 
@@ -145,7 +132,6 @@ jobs:
     environment:
       - DEPLOY_ENV: dev2
     steps:
-      - *setup_infra
       - *setup_node
       - *fail_notification
 

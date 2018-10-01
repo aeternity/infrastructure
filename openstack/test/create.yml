@@ -1,8 +1,0 @@
-parameters:
-  env_name: uat
-  meta_groups: "epoch,uat"
-  node_count: 3
-  node_flavor: c1.large
-  # Ubuntu 16.04.3 custom image
-  image_name: d324da4b-b827-44fb-8331-bfad41a28aca
-  subnet_cidr: 192.168.0.0/24
