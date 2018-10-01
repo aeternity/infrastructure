@@ -6,9 +6,7 @@ configure_peers: false
 
 epoch_config:
   peers:
-    - "aenode://pp_PVNHha6SBXQBdh8XsiAma2auMjyDodZAY7BGjd8xir6g6JPBM@31.13.249.71:3015"
-    - "aenode://pp_Hj8oJx1oESu6QNEVLc1K63jezfj61B4SmuyhF5RWfJACaZgry@31.13.249.72:3015"
-    - "aenode://pp_2Jx7N2qDUqu3ZNfd831Byiq4WofebBsSRHNTD79Tcsr9VTTt54@31.13.249.73:3015"
+    - "aenode://pp_2SmwgNAp8zgHqNfCJEu5xLp7rN281ocnomAeEuJ5UPnkavroDs@18.130.142.111:3015"
 
   sync:
     port: 3015
