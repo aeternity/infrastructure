@@ -19,6 +19,12 @@
         - epoch_action != "restart"
       connection: local
 
+    - name: "Load a variable files for environment: {{ env }}"
+      include_vars: "{{ item }}"
+      with_first_found:
+        - "vars/epoch/{{ env }}.yml"
+        - "vars/epoch/default.yml"
+
     - name: Epoch binary exists
       stat:
         path: "{{ epoch_bin }}"
