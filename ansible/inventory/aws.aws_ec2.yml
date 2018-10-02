@@ -12,3 +12,6 @@ keyed_groups:
   # add hosts to tag_Name_Value groups for each Name/Value tag pair
   - prefix: tag
     key: tags
+  # create a group per region e.g. us_east_2
+  - key: placement.region
+    prefix: region
