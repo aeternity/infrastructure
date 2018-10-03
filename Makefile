@@ -39,8 +39,12 @@ manage-node: check-deploy-env
 ifndef CMD
 	$(error CMD is undefined, supported commands: start, stop, restart, ping)
 endif
-	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
-		--extra-vars="cmd=$(CMD)" manage-node.yml
+	cd ansible && ansible-playbook \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		-e env=$(DEPLOY_ENV) \
+		-e db_version=0 \
+		-e cmd=$(CMD) \
+		manage-node.yml
 
 reset-net: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" reset-net.yml

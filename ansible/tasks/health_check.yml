@@ -1,8 +1,8 @@
 ---
 - name: Wait epoch node API to boot
   wait_for:
-    port: "{{ config.http.external.port }}"
-    host: "{{ ansible_ssh_host|default(ansible_host)|default(inventory_hostname) }}"
+    port: "{{ epoch_config.http.external.port }}"
+    host: "{{ public_ipv4 }}"
     timeout: 30
   connection: local
 
