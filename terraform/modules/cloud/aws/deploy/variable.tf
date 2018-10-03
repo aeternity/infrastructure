@@ -29,3 +29,5 @@ variable "depends_on" {
 
   type = "list"
 }
+
+variable "ami_name" {}

@@ -6,21 +6,7 @@ data "aws_ami" "ami" {
 
   filter {
     name   = "name"
-    values = ["epoch-ubuntu-16.04-v1536651794"]
-  }
-
-  owners = ["self"]
-}
-
-# Different not hardcoded image for spots.
-# There is option that env will be rotated when new image will be created
-# but spot will install latest epoch version there.
-data "aws_ami" "ami_spot" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["epoch-ubuntu-16.04-*"]
+    values = ["${var.ami_name}"]
   }
 
   owners = ["self"]
@@ -49,7 +35,7 @@ resource "aws_instance" "static_node" {
 resource "aws_launch_configuration" "spot" {
   name_prefix          = "ae-${var.env}-spot-nodes_"
   iam_instance_profile = "${aws_iam_instance_profile.epoch.name}"
-  image_id             = "${data.aws_ami.ami_spot.id}"
+  image_id             = "${data.aws_ami.ami.id}"
   instance_type        = "${var.instance_type}"
   spot_price           = "${var.spot_price}"
   security_groups      = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
