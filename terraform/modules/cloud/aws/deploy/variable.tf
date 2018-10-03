@@ -19,3 +19,13 @@ variable "spot_price" {}
 variable "epoch" {
   type = "map"
 }
+
+# Module to module depens_on workaround
+# See https://github.com/hashicorp/terraform/issues/1178#issuecomment-105613781
+# See https://github.com/hashicorp/terraform/issues/10462#issuecomment-285751349
+# See https://github.com/hashicorp/terraform/issues/17101
+variable "depends_on" {
+  default = []
+
+  type = "list"
+}

@@ -72,6 +72,8 @@ module "aws_deploy-eu-central-1" {
   providers = {
     aws = "aws.eu-central-1"
   }
+
+  depends_on = ["${module.aws_deploy-ap-southeast-1.static_node_ips}"]
 }
 
 module "aws_deploy-us-west-2" {
@@ -114,6 +116,8 @@ module "aws_deploy-uat-eu-west-2" {
   providers = {
     aws = "aws.eu-west-2"
   }
+
+  depends_on = ["${module.aws_deploy-us-west-2.static_node_ips}"]
 }
 
 module "aws_deploy-dev1-eu-west-2" {
