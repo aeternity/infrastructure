@@ -104,7 +104,7 @@ jobs:
       - run:
           name: Test ansible deploy playbook
           command: |
-            .circleci/test-ansible-playbook.sh ansible/setup.yml -e env=test
+            .circleci/test-ansible-playbook.sh ansible/deploy.yml -e env=test
       - *fail_notification
 
   setup_terraform:
