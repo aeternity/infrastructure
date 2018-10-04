@@ -42,6 +42,7 @@
     datadog_app_key: "{{ vault_datadog_app_key }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
+    health_check: yes
 
     # Label used for datadog tagging and ENV file planting
     env: unknown
@@ -186,6 +187,7 @@
           port: "{{ epoch_config.http.external.port }}"
           host: "{{ public_ipv4 }}"
           timeout: 300
+        when: health_check
         connection: local
         tags: [health-check]
 
@@ -193,6 +195,7 @@
         uri:
           url: "{{ api_base_uri }}/blocks/top"
           timeout: 30
+        when: health_check
         connection: local
         tags: [health-check]
 

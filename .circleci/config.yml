@@ -83,6 +83,28 @@ jobs:
       - run:
           name: Configuration lint
           command: .circleci/docker-run.sh make lint
+      - run:
+          name: Prepare Ansible test environment
+          command: |
+            # Cleanup ansible environment on "remote" host. Order is important.
+            sudo apt-get remove python-urllib3 python-setuptools
+            sudo apt-get update && sudo apt-get install -y python-dev python-pip
+            sudo /usr/bin/pip2 install -U setuptools
+            # Allow ansible runs from "controller" host
+            pip install -r requirements.txt
+            ansible-galaxy install -r ansible/requirements.yml
+      - run:
+          name: Test ansible setup playbook
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/setup.yml
+      - run:
+          name: Test ansible monitoring playbook
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/monitoring.yml
+      - run:
+          name: Test ansible deploy playbook
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/setup.yml -e env=test
       - *fail_notification
 
   setup_terraform:
