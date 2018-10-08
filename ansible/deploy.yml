@@ -38,10 +38,11 @@
     packages_path: "{{ ansible_env.HOME }}"
     genesis_accounts_path: "{{ project_root }}/data/aecore/.genesis/accounts.json"
     local_peer_keys_dir: "files/peer_keys/{{ public_ipv4 }}"
-    datadog_api_key: "{{ vault_datadog_api_key }}"
-    datadog_app_key: "{{ vault_datadog_app_key }}"
+    datadog_api_key: "{{ vault_datadog_api_key|default('') }}"
+    datadog_app_key: "{{ vault_datadog_app_key|default('') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
+    health_check: yes
 
     # Label used for datadog tagging and ENV file planting
     env: unknown
@@ -186,6 +187,7 @@
           port: "{{ epoch_config.http.external.port }}"
           host: "{{ public_ipv4 }}"
           timeout: 300
+        when: health_check
         connection: local
         tags: [health-check]
 
@@ -193,6 +195,7 @@
         uri:
           url: "{{ api_base_uri }}/blocks/top"
           timeout: 30
+        when: health_check
         connection: local
         tags: [health-check]
 
@@ -215,6 +218,9 @@
           tags:
             - "env:{{ env }}"
             - "version:{{ ansible_local.epoch.version }}"
+        when:
+          - datadog_api_key != ""
+          - datadog_app_key != ""
         connection: local
         tags: [datadog-event]
       rescue:
@@ -228,6 +234,9 @@
             app_key: "{{ datadog_app_key }}"
             tags:
               - "env:{{ env }}"
+          when:
+            - datadog_api_key != ""
+            - datadog_app_key != ""
           connection: local
           tags: [datadog-event]
         - fail:

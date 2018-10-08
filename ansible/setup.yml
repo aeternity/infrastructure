@@ -33,6 +33,13 @@
       tags:
         - project-user
 
+    - name: Create master user
+      user:
+        name: master
+        shell: /bin/bash
+      tags:
+        - master-user
+
     # Automatic cleanup is not supported. You must remove old keys manually.
     - name: "Setup master SSH authorized keys"
       authorized_key:
