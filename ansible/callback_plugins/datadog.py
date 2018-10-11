@@ -20,6 +20,9 @@ from __main__ import cli
 
 
 class CallbackModule(CallbackBase):
+    CALLBACK_NAME = 'datadog'
+    CALLBACK_NEEDS_WHITELIST = True
+
     def __init__(self):
         if not HAS_MODULES:
             self.disabled = True

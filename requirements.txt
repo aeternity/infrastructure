@@ -3,3 +3,4 @@ ansible-lint ~= 3.4
 datadog
 boto
 boto3
+hvac == 0.6.4

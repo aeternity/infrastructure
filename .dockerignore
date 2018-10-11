@@ -1,4 +1,6 @@
 *
+!docker-entrypoint.sh
+!import-secrets.sh
 !ansible
 !aws
 !terraform

@@ -17,6 +17,11 @@ RUN curl -sSO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terr
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin \
     && rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
+ENV VAULT_VERSION=0.11.2
+RUN curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
+    && unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin \
+    && rm -f vault_${VAULT_VERSION}_linux_amd64.zip
+
 ADD requirements.txt /infrastructure/
 RUN apk add --no-cache --virtual build-deps \
         gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers \
@@ -29,3 +34,6 @@ RUN cd /infrastructure/ansible && ansible-galaxy install -r requirements.yml
 
 ADD . /infrastructure
 WORKDIR /infrastructure
+
+ENTRYPOINT ["/infrastructure/docker-entrypoint.sh"]
+CMD ["/bin/bash", "--login"]
