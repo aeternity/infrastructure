@@ -114,6 +114,7 @@
         - awscli
         - ansible
         - boto
+        - boto3
         - datadog
       tags:
         - dev-tools
