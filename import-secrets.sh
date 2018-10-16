@@ -19,5 +19,8 @@ if [ -n "$VAULT_TOKEN" ]; then
     AWS_CREDS=$(vault read aws/creds/epoch-fleet-manager)
     export AWS_ACCESS_KEY_ID=$(echo $AWS_CREDS | grep -o 'access_key [^ ]*' | awk '{print $2}')
     export AWS_SECRET_ACCESS_KEY=$(echo $AWS_CREDS | grep -o 'secret_key [^ ]*' | awk '{print $2}')
+    DOCKERHUB_CREDS=$(vault read secret/dockerhub/prod)
+    export DOCKER_USER=$(echo $DOCKERHUB_CREDS | grep -o 'username [^ ]*' | awk '{print $2}')
+    export DOCKER_PASS=$(echo $DOCKERHUB_CREDS | grep -o 'password [^ ]*' | awk '{print $2}')
     export DATADOG_API_KEY=$(vault read -field=api_key secret/datadog/deploy)
 fi
