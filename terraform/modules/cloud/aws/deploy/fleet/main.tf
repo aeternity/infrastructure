@@ -105,3 +105,7 @@ resource "aws_autoscaling_group" "spot_fleet" {
     },
   ]
 }
+
+output "static_node_ips" {
+  value = "${aws_eip_association.ip_associate.*.public_ip}"
+}

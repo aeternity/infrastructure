@@ -18,3 +18,17 @@ module "aws_fleet" {
 
   epoch = "${var.epoch}"
 }
+
+# Module to module depens_on workaround
+# See https://github.com/hashicorp/terraform/issues/1178#issuecomment-105613781
+# See https://github.com/hashicorp/terraform/issues/10462#issuecomment-285751349
+# See https://github.com/hashicorp/terraform/issues/17101
+resource "null_resource" "dummy_dependency" {
+  triggers {
+    depends_on = "${join(",", var.depends_on)}"
+  }
+}
+
+output "static_node_ips" {
+  value = "${module.aws_fleet.static_node_ips}"
+}
