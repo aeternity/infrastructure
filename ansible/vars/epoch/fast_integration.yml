@@ -17,11 +17,6 @@ epoch_config:
       port: 3113
     debug: true
 
-  websocket:
-    internal:
-      listen_address: 0.0.0.0
-      port: 3114
-
   keys:
     dir: keys
     password: secret
