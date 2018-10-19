@@ -194,3 +194,6 @@
     - name: Run ldconfig
       command: ldconfig
       listen: run ldconfig
+
+  roles:
+    - { role: jasonheecs.ubuntu-fail2ban }
