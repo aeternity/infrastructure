@@ -21,3 +21,5 @@ variable "subnets" {
 variable "epoch" {
   type = "map"
 }
+
+variable "ami_name" {}

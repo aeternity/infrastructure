@@ -12,6 +12,7 @@ module "aws_fleet" {
   subnets           = "${module.aws_vpc.subnets}"
   spot_price        = "${var.spot_price}"
   instance_type     = "${var.instance_type}"
+  ami_name          = "${var.ami_name}"
 
   spot_nodes   = "${var.spot_nodes}"
   static_nodes = "${var.static_nodes}"
