@@ -60,7 +60,7 @@ test-setup-environments:
 	cd terraform && terraform init && terraform plan
 
 lint:
-	ansible-lint ansible/setup.yml
+	ansible-lint ansible/setup.yml --exclude ~/.ansible/roles
 	ansible-lint ansible/monitoring.yml --exclude ~/.ansible/roles
 	ansible-lint ansible/manage-node.yml
 	ansible-lint ansible/reset-net.yml
