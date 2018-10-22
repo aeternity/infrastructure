@@ -25,9 +25,16 @@
     vault_version: "0.11.3"
     libsodium_version: "1.0.16"
     libsodium_module_version: "23.1.0"
-
-  vars_files:
-    - vars/fail2ban/default.yml
+    fail2ban_loglevel: INFO
+    fail2ban_bantime: 86400
+    fail2ban_maxretry: 3
+    fail2ban_logtarget: SYSLOG
+    fail2ban_action: action_
+    fail2ban_services:
+      - name: ssh
+        port: ssh
+        filter: sshd
+        logpath: /var/log/auth.log
 
   tasks:
     - name: Create epoch daemon user
