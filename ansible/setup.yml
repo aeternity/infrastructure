@@ -26,6 +26,9 @@
     libsodium_version: "1.0.16"
     libsodium_module_version: "23.1.0"
 
+  vars_files:
+    - vars/fail2ban/default.yml
+
   tasks:
     - name: Create epoch daemon user
       user:
