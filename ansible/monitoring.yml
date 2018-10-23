@@ -135,6 +135,17 @@
         dest: /etc/rsyslog.d/datadog.conf
         mode: 0600
       notify: restart rsyslogd
+    - name: Copy fail2ban.conf to rsyslog
+      copy:
+        src: files/rsyslog/fail2ban.conf
+        dest: /etc/rsyslog.d/fail2ban.conf
+        mode: 0600
+      notify: restart rsyslogd
+    - name: Copy fail2ban.conf to logrotate
+      copy:
+        src: files/logrotate/fail2ban
+        dest: /etc/logrotate.d/fail2ban
+        mode: 0600
 
   handlers:
     - name: Restart rsyslogd
