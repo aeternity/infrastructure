@@ -1,0 +1,35 @@
+api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
+
+epoch_config:
+  sync:
+    port: 3015
+
+  http:
+    external:
+      port: 3013
+    internal:
+      port: 3113
+
+  keys:
+    dir: keys
+    password: secret
+
+  chain:
+    persist: true
+    db_path: "./db{{ db_version|mandatory }}"
+
+  mining:
+    beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
+    cuckoo:
+      miner:
+        executable: "{{ ('amazon' in ansible_bios_version) | ternary('mean30s-avx2', 'mean30s-generic')  }}"
+        extra_args: "-t {{ ansible_processor_vcpus }}"
+        node_bits: 30
+
+  logging:
+    level: warning
+
+  metrics:
+      # StatsD server and port
+      host: 127.0.0.1
+      port: 8125
