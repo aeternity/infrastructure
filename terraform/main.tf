@@ -127,9 +127,9 @@ module "aws_deploy-uat-eu-west-2" {
 module "aws_deploy-dev1-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "dev1"
-  bootstrap_version = "master"
+  bootstrap_version = "v1.2"
 
-  spot_nodes    = 2
+  spot_nodes    = 10
   spot_price    = "0.125"
   instance_type = "m4.large"
   ami_name      = "epoch-ubuntu-16.04-v1536651794"
