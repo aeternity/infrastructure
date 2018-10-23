@@ -147,6 +147,7 @@ jobs:
       - DEPLOY_ENV: dev1
     steps:
       - *setup_node
+      - *setup_monitoring
       - *fail_notification
 
   setup_dev2:
