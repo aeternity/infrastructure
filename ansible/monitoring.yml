@@ -153,7 +153,7 @@
         mode: 0640
         owner: syslog
         group: adm
-        notify: restart rsyslogd
+      notify: restart rsyslogd
 
   handlers:
     - name: Restart rsyslogd
