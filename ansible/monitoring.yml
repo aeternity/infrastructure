@@ -138,7 +138,7 @@
     - name: Copy fail2ban.conf to rsyslog
       copy:
         src: files/rsyslog/fail2ban.conf
-        dest: /etc/rsyslog.d/fail2ban.conf
+        dest: /etc/rsyslog.d/49-fail2ban.conf
         mode: 0600
       notify: restart rsyslogd
     - name: Copy fail2ban.conf to logrotate
@@ -146,6 +146,14 @@
         src: files/logrotate/fail2ban
         dest: /etc/logrotate.d/fail2ban
         mode: 0600
+    - name: Copy fail2ban.log with correct permissions for syslog
+      copy:
+        content: ""
+        dest: /var/log/fail2ban.log
+        mode: 0640
+        owner: syslog
+        group: adm
+        notify: restart rsyslogd
 
   handlers:
     - name: Restart rsyslogd
