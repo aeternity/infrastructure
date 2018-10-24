@@ -153,7 +153,14 @@
         mode: 0640
         owner: syslog
         group: adm
-      notify: restart rsyslogd
+      notify:
+        - restart rsyslogd
+        - restart fail2ban
+    - name: Remove default fail2ban conf.d from Debian/Ubuntu
+      file:
+        path: /etc/fail2ban/jail.d/defaults-debian.conf
+        state: absent
+      notify: restart fail2ban
 
   handlers:
     - name: Restart rsyslogd
