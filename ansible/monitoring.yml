@@ -169,4 +169,10 @@
         state: restarted
       listen:
         - restart rsyslogd
+    - name: Restart fail2ban
+      service:
+        name: fail2ban
+        state: restarted
+      listen:
+        - restart fail2ban
 
