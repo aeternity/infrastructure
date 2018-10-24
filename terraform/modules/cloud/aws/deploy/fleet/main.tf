@@ -55,6 +55,8 @@ data "template_file" "user_data" {
     env               = "${var.env}"
     bootstrap_version = "${var.bootstrap_version}"
     epoch_package     = "${var.epoch["package"]}"
+    vault_addr        = "${var.vault_addr}"
+    vault_role        = "${var.vault_role}"
   }
 }
 

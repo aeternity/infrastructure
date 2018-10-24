@@ -6,6 +6,10 @@ terraform {
   }
 }
 
+variable "vault_addr" {
+  description = "Vault server URL address"
+}
+
 provider "aws" {
   version = "1.24"
   region  = "ap-southeast-1"
@@ -37,6 +41,8 @@ module "aws_deploy-ap-southeast-1" {
   env               = "uat"
   color             = "blue"
   bootstrap_version = "v1.2"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
 
   static_nodes = 1
   spot_nodes   = 14
@@ -59,6 +65,8 @@ module "aws_deploy-eu-central-1" {
   env               = "uat"
   color             = "blue"
   bootstrap_version = "v1.2"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
 
   static_nodes = 1
   spot_nodes   = 9
@@ -83,6 +91,8 @@ module "aws_deploy-us-west-2" {
   env               = "uat"
   color             = "green"
   bootstrap_version = "v1.2"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
 
   static_nodes = 1
   spot_nodes   = 14
@@ -105,6 +115,8 @@ module "aws_deploy-uat-eu-west-2" {
   env               = "uat"
   color             = "green"
   bootstrap_version = "v1.2"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
 
   static_nodes = 1
   spot_nodes   = 9
@@ -128,6 +140,8 @@ module "aws_deploy-dev1-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "dev1"
   bootstrap_version = "v1.2"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
 
   spot_nodes    = 10
   spot_price    = "0.125"
@@ -147,6 +161,8 @@ module "aws_deploy-dev2-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "dev2"
   bootstrap_version = "master"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
 
   spot_nodes    = 2
   spot_price    = "0.125"
@@ -166,6 +182,8 @@ module "aws_deploy-integration-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "integration"
   bootstrap_version = "v1.2"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
 
   static_nodes  = 1
   spot_nodes    = 2
@@ -186,6 +204,8 @@ module "aws_deploy-fast_integration-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "fast_integration"
   bootstrap_version = "v1.2"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
 
   static_nodes  = 1
   spot_nodes    = 2

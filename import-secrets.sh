@@ -3,6 +3,11 @@ set -e
 
 AWS_CREDS_ROLE="${AWS_CREDS_ROLE:-epoch-fleet-manager}"
 
+# Vault address secret used by Terraform, because it cannot be sources in TF
+if [ -n "$VAULT_ADDR" ]; then
+    export TF_VAR_vault_addr=$VAULT_ADDR
+fi
+
 if [ -n "$VAULT_GITHUB_TOKEN" ]; then
     export VAULT_TOKEN=$(vault login -field=token -method=github token=$VAULT_GITHUB_TOKEN)
 fi
