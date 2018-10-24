@@ -1,6 +1,8 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
 genesis_accounts:
   "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
+configure_peers: true
+seed_peers: []
 
 epoch_config:
   sync:

@@ -25,14 +25,18 @@ If you have configured multiple AWS credentials you can pass AWS_PROFILE variabl
 AWS_PROFILE=aeternity ansible-inventory --list
 ```
 
-### Ansible Secrets
+### Secrets
 
-Secrets are managed with [Ansible Vault](docs.ansible.com/ansible/2.4/vault.html).
-There is a tiny bridge vault file `vault-env` that bridges the `INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD` environment variable as Ansible vault password.
+Secrets are managed with [Hashicorp Vault](https://www.vaultproject.io).
 
-```
-export INFRASTRUCTURE_ANSIBLE_VAULT_PASSWORD="top secret"
-```
+The Vault server address can be set with `VAULT_ADDR` environment variable.
+
+An operator may authenticate with [GitHub personal token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/#creating-a-token)
+as `VAULT_GITHUB_TOKEN` environment variable. Any valid GitHub access token with the read:org scope can be used for authentication.
+
+Applications and services may authenticate with `VAULT_ROLE_ID` and `VAULT_SECRET_ID` environment variables.
+
+Vault token could be used by setting `VAULT_AUTH_TOKEN` environment variable (translates to `VAULT_TOKEN` by docker entry point). `VAULT_AUTH_TOKEN` is highest priority compared to other credentials.
 
 ## Docker image
 

@@ -38,8 +38,8 @@
     packages_path: "{{ ansible_env.HOME }}"
     genesis_accounts_path: "{{ project_root }}/data/aecore/.genesis/accounts.json"
     local_peer_keys_dir: "files/peer_keys/{{ public_ipv4 }}"
-    datadog_api_key: "{{ vault_datadog_api_key|default('') }}"
-    datadog_app_key: "{{ vault_datadog_app_key|default('') }}"
+    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
+    datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
     health_check: yes
@@ -159,24 +159,21 @@
         when: genesis_accounts is defined
         tags: [config]
 
-      # Workaround to deploy peer keys even with --limits that does not include seed groups
-      # Also workarounds an issue with hostname/IP of inventory items, as the keys are bound to IP
-      - name: Check if peer keys directory exists
-        stat:
-          path: "{{ local_peer_keys_dir }}"
-        register: stat_peer_dir
-        connection: local
+      - name: "Copy node public peer key to {{ project_root }}/{{ epoch_config['keys']['dir'] }}/peer_key.pub"
+        copy:
+          content: "{{ lookup('hashi_vault', 'secret=secret/epoch/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
+          dest: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}/peer_key.pub"
+          mode: 0600
+        when: public_ipv4 in seed_peers
+        notify: "restart epoch daemon"
         tags: [config, peer_keys]
 
-      - name: "Copy node peer keys to {{ project_root }}/{{ epoch_config['keys']['dir'] }}"
+      - name: "Copy node private peer key to {{ project_root }}/{{ epoch_config['keys']['dir'] }}/peer_key"
         copy:
-          src: "{{ item }}"
-          dest: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}"
+          content: "{{ lookup('hashi_vault', 'secret=secret/epoch/peer_keys/{{ public_ipv4 }}/private:base64')|b64decode }}"
+          dest: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}/peer_key"
           mode: 0600
-        with_items:
-          - "{{ local_peer_keys_dir }}/peer_key"
-          - "{{ local_peer_keys_dir }}/peer_key.pub"
-        when: stat_peer_dir.stat.exists
+        when: public_ipv4 in seed_peers
         notify: "restart epoch daemon"
         tags: [config, peer_keys]
 

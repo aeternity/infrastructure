@@ -1,6 +1,11 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
-
 configure_peers: false
+seed_peers:
+  - "52.10.46.160"
+  - "18.195.109.60"
+  - "13.250.162.250"
+  - "18.130.148.7"
+
 epoch_config:
   sync:
     port: 3015
