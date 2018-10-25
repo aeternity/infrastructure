@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+AWS_CREDS_ROLE="${AWS_CREDS_ROLE:-epoch-fleet-manager}"
+
 if [ -n "$VAULT_GITHUB_TOKEN" ]; then
     export VAULT_TOKEN=$(vault login -field=token -method=github token=$VAULT_GITHUB_TOKEN)
 fi
@@ -16,7 +18,7 @@ if [ -n "$VAULT_AUTH_TOKEN" ]; then
 fi
 
 if [ -n "$VAULT_TOKEN" ]; then
-    AWS_CREDS=$(vault read aws/creds/epoch-fleet-manager)
+    AWS_CREDS=$(vault read aws/creds/${AWS_CREDS_ROLE})
     export AWS_ACCESS_KEY_ID=$(echo $AWS_CREDS | grep -o 'access_key [^ ]*' | awk '{print $2}')
     export AWS_SECRET_ACCESS_KEY=$(echo $AWS_CREDS | grep -o 'secret_key [^ ]*' | awk '{print $2}')
     DOCKERHUB_CREDS=$(vault read secret/dockerhub/prod)
