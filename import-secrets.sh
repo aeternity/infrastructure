@@ -29,5 +29,8 @@ if [ -n "$VAULT_TOKEN" ]; then
 
     # AWS dynamic credentials are eventually consistent - add a delay
     # https://www.vaultproject.io/docs/secrets/aws/index.html#usage
-    sleep 10
+    # Retry each second with ~20s timeout
+    for i in {1..20}; do
+        aws sts get-caller-identity 2>/dev/null 1>&2 && break || sleep 1;
+    done
 fi
