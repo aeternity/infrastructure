@@ -146,13 +146,15 @@
         src: files/logrotate/fail2ban
         dest: /etc/logrotate.d/fail2ban
         mode: 0600
-    - name: Copy fail2ban.log with correct permissions for syslog
-      copy:
-        content: ""
-        dest: /var/log/fail2ban.log
+    - name: Set fail2ban.log correct permissions for syslog
+      file:
+        path: /var/log/fail2ban.log
+        state: touch
         mode: 0640
         owner: syslog
         group: adm
+        modification_time: "preserve"
+        access_time: "preserve"
       notify:
         - restart rsyslogd
         - restart fail2ban
