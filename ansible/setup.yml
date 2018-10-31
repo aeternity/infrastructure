@@ -22,6 +22,7 @@
       - UlfNorell
       - gorillainduction
       - sylane
+    vault_version: "0.11.3"
     libsodium_version: "1.0.16"
     libsodium_module_version: "23.1.0"
 
@@ -92,6 +93,7 @@
         - python-yaml
         - python-pip
         - jq
+        - unzip
       tags:
         - dev-tools
 
@@ -116,8 +118,32 @@
         - boto
         - boto3
         - datadog
+        - hvac
       tags:
         - dev-tools
+
+    - name: Create Vault source directory
+      file:
+        path: /usr/src/{{ vault_version }}/
+        state: directory
+      tags:
+        - vault-install
+
+    - name: Download and unarchive Vault binary
+      unarchive:
+        src: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+        dest: /usr/src/{{ vault_version }}/
+        creates: /usr/src/{{ vault_version }}/vault
+        remote_src: true
+      tags:
+        - vault-install
+
+    - name: Install Vault binary
+      copy:
+        src: /usr/src/{{ vault_version }}/vault
+        dest: /usr/bin/vault
+      tags:
+        - vault-install
 
     - name: "Create custom fact directory"
       file:
