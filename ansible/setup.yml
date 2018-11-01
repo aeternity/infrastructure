@@ -6,22 +6,6 @@
 
   vars:
     project_user: epoch
-    devops:
-      - dincho
-      - amir-hadi
-      - acidsennui
-    developers:
-      - sennui
-      - velzevur
-      - lucafavatella
-      - uwiger
-      - zp-sd
-      - ThomasArts
-      - hanssv
-      - happi
-      - UlfNorell
-      - gorillainduction
-      - sylane
     vault_version: "0.11.3"
     libsodium_version: "1.0.16"
     libsodium_module_version: "23.1.0"
@@ -52,16 +36,6 @@
         - master-user
 
     # Automatic cleanup is not supported. You must remove old keys manually.
-    - name: "Setup master SSH authorized keys"
-      authorized_key:
-        user: master
-        key: https://github.com/{{ item }}.keys
-      with_items: "{{ devops }}"
-      tags:
-        - ssh-keys
-        - devops-ssh-keys
-
-    # Automatic cleanup is not supported. You must remove old keys manually.
     - name: "Add CI master keys"
       authorized_key:
         user: master
@@ -73,16 +47,6 @@
         - master-ssh-keys
 
     # Automatic cleanup is not supported. You must remove old keys manually.
-    - name: "Setup {{ project_user }} SSH authorized keys"
-      authorized_key:
-        user: "{{ project_user }}"
-        key: https://github.com/{{ item }}.keys
-      with_items: "{{ developers }} + {{ devops }}"
-      tags:
-        - ssh-keys
-        - developers-ssh-keys
-
-    # Automatic cleanup is not supported. You must remove old keys manually.
     - name: Add CI deploy key to authorized keys
       authorized_key:
         user: "{{ project_user }}"
@@ -92,6 +56,27 @@
       tags:
         - ssh-keys
         - deploy-ssh-keys
+
+    - name: Download Vault public key
+      get_url:
+        url: "{{ vault_addr }}/v1/ssh-client-signer/public_key"
+        dest: /etc/ssh/trusted-user-ca-keys.pem
+      when: vault_addr is defined
+      tags:
+        - ssh-keys
+        - developer-ssh-keys
+      notify: restart ssh
+
+    - name: Setup trusted CA in sshd config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^TrustedUserCAKeys'
+        line: 'TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys.pem'
+      when: vault_addr is defined
+      tags:
+        - ssh-keys
+        - developer-ssh-keys
+      notify: restart ssh
 
     - name: Install dev tools
       apt:
@@ -204,6 +189,12 @@
     - name: Run ldconfig
       command: ldconfig
       listen: run ldconfig
+
+    - name: Restart ssh
+      service:
+        name: ssh
+        state: restarted
+      listen: restart ssh
 
   roles:
     - { role: jasonheecs.ubuntu-fail2ban }

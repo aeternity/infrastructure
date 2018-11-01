@@ -43,14 +43,19 @@ Vault token could be used by setting `VAULT_AUTH_TOKEN` environment variable (tr
 A Docker image `aeternity/infrastructure` is build and published to DockerHub. To use the image one should configure all the required credentials as documented above and run the container:
 
 ```bash
-docker run -it --env-file env.list -v ~/.ssh/:/root/.ssh/ aeternity/infrastructure
+docker run -it --env-file env.list aeternity/infrastructure
 ```
 
-Then in the container shell setup your private SSH key:
+### SSH
 
-```bash
-eval $(ssh-agent) && ssh-add -k ~/.ssh/id_rsa
+According to the Vault authentication token permissions, one can ssh to any node they have access to by running:
+
 ```
+make ssh HOST=192.168.1.1
+```
+
+This is a shorthand target the actually run `ssh-epoch`.
+Note the `ssh-%` target suffix, it could be any supported node username, e.g. `ssh-master`.
 
 ## Ansible playbooks
 

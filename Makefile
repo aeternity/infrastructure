@@ -8,7 +8,10 @@ setup-terraform:
 	cd terraform && terraform init && terraform apply --auto-approve
 
 setup-node: check-deploy-env
-	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" setup.yml
+	cd ansible && ansible-playbook \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		-e vault_addr=$(VAULT_ADDR) \
+		setup.yml
 
 setup-monitoring: check-deploy-env
 	cd ansible && ansible-playbook \
@@ -56,6 +59,17 @@ mnesia_backup:
 		-e backup_suffix=$(BACKUP_SUFFIX) \
 		mnesia_backup.yml
 
+~/.ssh/id_ed25519:
+	@ssh-keygen -t ed25519 -N "" -f $@
+
+~/.ssh/id_ed25519-%-cert.pub: ~/.ssh/id_ed25519
+	@vault write -field=signed_key ssh/sign/$* public_key=@$<.pub > $@
+
+ssh-%: ~/.ssh/id_ed25519-%-cert.pub
+	@ssh -i $< -i ~/.ssh/id_ed25519 $*@$(HOST)
+
+ssh: ssh-epoch
+
 test-setup-environments:
 	cd terraform && terraform init && terraform plan
 
@@ -78,7 +92,10 @@ ifndef DEPLOY_ENV
 	$(error DEPLOY_ENV is undefined)
 endif
 
+clean:
+	rm ~/.ssh/id_*
+
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
-	manage-node reset-net lint \
+	manage-node reset-net lint ssh-% ssh clean \
 	check-seed-peers check-deploy-env
