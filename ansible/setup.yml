@@ -124,7 +124,7 @@
 
     - name: Create Vault source directory
       file:
-        path: /usr/src/{{ vault_version }}/
+        path: /usr/src/vault-{{ vault_version }}/
         state: directory
       tags:
         - vault-install
@@ -132,16 +132,17 @@
     - name: Download and unarchive Vault binary
       unarchive:
         src: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
-        dest: /usr/src/{{ vault_version }}/
-        creates: /usr/src/{{ vault_version }}/vault
+        dest: /usr/src/vault-{{ vault_version }}/
+        creates: /usr/src/vault-{{ vault_version }}/vault
         remote_src: true
       tags:
         - vault-install
 
     - name: Install Vault binary
       copy:
-        src: /usr/src/{{ vault_version }}/vault
+        src: /usr/src/vault-{{ vault_version }}/vault
         dest: /usr/bin/vault
+        remote_src: true
       tags:
         - vault-install
 
