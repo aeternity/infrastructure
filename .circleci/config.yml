@@ -278,8 +278,6 @@ workflows:
               only: master
 
       - docker_push_tag:
-          requires:
-            - build_check
           filters:
             branches:
               ignore: /.*/
