@@ -1,4 +1,5 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
+seed_peers: []
 
 epoch_config:
   sync:
