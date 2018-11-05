@@ -1,0 +1,14 @@
+/var/log/fail2ban.log {
+
+    weekly
+    rotate 8
+    compress
+    size 20M
+
+    delaycompress
+    missingok
+    postrotate
+        fail2ban-client flushlogs 1>/dev/null
+    endscript
+
+}

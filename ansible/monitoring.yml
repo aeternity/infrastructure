@@ -135,6 +135,34 @@
         dest: /etc/rsyslog.d/datadog.conf
         mode: 0600
       notify: restart rsyslogd
+    - name: Copy fail2ban.conf to rsyslog
+      copy:
+        src: files/rsyslog/fail2ban.conf
+        dest: /etc/rsyslog.d/49-fail2ban.conf
+        mode: 0600
+      notify: restart rsyslogd
+    - name: Copy fail2ban.conf to logrotate
+      copy:
+        src: files/logrotate/fail2ban
+        dest: /etc/logrotate.d/fail2ban
+        mode: 0600
+    - name: Set fail2ban.log correct permissions for syslog
+      file:
+        path: /var/log/fail2ban.log
+        state: touch
+        mode: 0640
+        owner: syslog
+        group: adm
+        modification_time: "preserve"
+        access_time: "preserve"
+      notify:
+        - restart rsyslogd
+        - restart fail2ban
+    - name: Remove default fail2ban conf.d from Debian/Ubuntu
+      file:
+        path: /etc/fail2ban/jail.d/defaults-debian.conf
+        state: absent
+      notify: restart fail2ban
 
   handlers:
     - name: Restart rsyslogd
@@ -143,4 +171,10 @@
         state: restarted
       listen:
         - restart rsyslogd
+    - name: Restart fail2ban
+      service:
+        name: fail2ban
+        state: restarted
+      listen:
+        - restart fail2ban
 
