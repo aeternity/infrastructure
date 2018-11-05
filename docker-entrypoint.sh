@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 
-source import-secrets.sh
+source /infrastructure/import-secrets.sh
 
 exec "$@"
