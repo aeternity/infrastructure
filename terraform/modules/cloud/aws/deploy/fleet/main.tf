@@ -16,7 +16,7 @@ resource "aws_instance" "static_node" {
   count                = "${var.static_nodes}"
   ami                  = "${data.aws_ami.ami.id}"
   instance_type        = "${var.instance_type}"
-  iam_instance_profile = "${aws_iam_instance_profile.epoch.name}"
+  iam_instance_profile = "epoch-node"
 
   tags {
     Name  = "ae-${var.env}-static-node"
@@ -34,7 +34,7 @@ resource "aws_instance" "static_node" {
 
 resource "aws_launch_configuration" "spot" {
   name_prefix          = "ae-${var.env}-spot-nodes_"
-  iam_instance_profile = "${aws_iam_instance_profile.epoch.name}"
+  iam_instance_profile = "epoch-node"
   image_id             = "${data.aws_ami.ami.id}"
   instance_type        = "${var.instance_type}"
   spot_price           = "${var.spot_price}"
