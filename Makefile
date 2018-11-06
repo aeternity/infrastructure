@@ -59,14 +59,14 @@ mnesia_backup:
 		-e backup_suffix=$(BACKUP_SUFFIX) \
 		mnesia_backup.yml
 
-~/.ssh/id_ed25519:
+~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
 
-~/.ssh/id_ed25519-%-cert.pub: ~/.ssh/id_ed25519
+~/.ssh/id_ae_infra_ed25519-%-cert.pub: ~/.ssh/id_ae_infra_ed25519
 	@vault write -field=signed_key ssh/sign/$* public_key=@$<.pub > $@
 
-ssh-%: ~/.ssh/id_ed25519-%-cert.pub
-	@ssh -i $< -i ~/.ssh/id_ed25519 $*@$(HOST)
+ssh-%: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
+	@ssh -i $< -i ~/.ssh/id_ae_infra_ed25519 $*@$(HOST)
 
 ssh: ssh-epoch
 
@@ -93,7 +93,7 @@ ifndef DEPLOY_ENV
 endif
 
 clean:
-	rm ~/.ssh/id_*
+	rm ~/.ssh/id_ae_infra*
 
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
