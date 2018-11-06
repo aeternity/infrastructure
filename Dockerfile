@@ -22,6 +22,12 @@ RUN curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAUL
     && unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin \
     && rm -f vault_${VAULT_VERSION}_linux_amd64.zip
 
+ENV DOCKER_CLIENT_VERSION=17.09.0-ce
+RUN curl -L -o /tmp/docker-${DOCKER_CLIENT_VERSION}.tgz \
+    https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLIENT_VERSION}.tgz \
+    && tar -xz -C /tmp -f /tmp/docker-${DOCKER_CLIENT_VERSION}.tgz \
+    && mv /tmp/docker/docker /bin
+
 ADD requirements.txt /infrastructure/
 RUN apk add --no-cache --virtual build-deps \
         gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers \
