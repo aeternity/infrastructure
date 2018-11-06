@@ -7,6 +7,9 @@ exec > >(tee /tmp/user-data.log|logger -t user-data ) 2>&1
 git clone -b ${bootstrap_version} --single-branch https://github.com/aeternity/infrastructure.git /infrastructure
 cd /infrastructure/ansible
 
+# Temporary fix/workaround for non-executable vault install
+chmod +x /usr/bin/vault
+
 # Authenticate the instance to CSM
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
 export VAULT_ADDR=${vault_addr}

@@ -152,6 +152,7 @@
       copy:
         src: /usr/src/vault-{{ vault_version }}/vault
         dest: /usr/bin/vault
+        mode: 0755
         remote_src: true
       tags:
         - vault-install
