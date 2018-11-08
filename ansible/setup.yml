@@ -80,10 +80,9 @@
 
     - name: Install dev tools
       apt:
-        pkg: "{{ item }}"
         state: present
         update_cache: yes
-      with_items:
+        pkg:
         - build-essential
         - python-yaml
         - python-pip
@@ -94,9 +93,8 @@
 
     - name: Remove conflicting or obsolete packages
       apt:
-        pkg: "{{ item }}"
         state: absent
-      with_items:
+        pkg:
         # Ansible paramico has dependency on newer cryptography version which is installed as pip module
         # The OS package is older and once installed the pip version is not
         - python-cryptography
@@ -105,9 +103,8 @@
 
     - name: Install pip tools
       pip:
-        name: "{{ item }}"
         executable: pip2
-      with_items:
+        name:
         - awscli
         - ansible
         - boto
