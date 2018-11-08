@@ -23,6 +23,12 @@
         resource: "{{ ansible_ec2_instance_id }}"
         state: list
         region: "{{ ansible_ec2_placement_region }}"
+        # Backward compatibility for boto2/botocore because of session token.
+        # Maybe https://github.com/ansible/ansible/pull/43350 will fix that
+        # AWS_SECURITY_TOKEN does not work either ?!
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
       register: instance_tags
       when: ansible_ec2_instance_id is defined
 
