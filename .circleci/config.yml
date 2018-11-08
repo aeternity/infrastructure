@@ -198,6 +198,18 @@ jobs:
             docker push ${DOCKERHUB_REPO:?}:latest
       - *fail_notification
 
+  docker_push_tag:
+    <<: *machine_config
+    steps:
+      - *setup_ci_environment
+      - run:
+          name: Tag and push Docker image to DockerHub on Git tags
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} .
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?}
+      - *fail_notification
+
   check_seed_peers:
     <<: *container_config
     steps:
@@ -264,6 +276,13 @@ workflows:
           filters:
             branches:
               only: master
+
+      - docker_push_tag:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*$/
 
   daily_deploy:
     triggers:
