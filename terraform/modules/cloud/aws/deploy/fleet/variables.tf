@@ -23,3 +23,7 @@ variable "epoch" {
 }
 
 variable "ami_name" {}
+
+variable "vault_addr" {}
+
+variable "vault_role" {}
