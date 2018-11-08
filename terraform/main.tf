@@ -40,7 +40,7 @@ module "aws_deploy-ap-southeast-1" {
   source            = "modules/cloud/aws/deploy"
   env               = "uat"
   color             = "blue"
-  bootstrap_version = "v1.3"
+  bootstrap_version = "v1.2"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -49,7 +49,7 @@ module "aws_deploy-ap-southeast-1" {
 
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1541511248"
+  ami_name      = "epoch-ubuntu-16.04-v1536651794"
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -64,7 +64,7 @@ module "aws_deploy-eu-central-1" {
   source            = "modules/cloud/aws/deploy"
   env               = "uat"
   color             = "blue"
-  bootstrap_version = "v1.3"
+  bootstrap_version = "v1.2"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -73,7 +73,7 @@ module "aws_deploy-eu-central-1" {
 
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1541511248"
+  ami_name      = "epoch-ubuntu-16.04-v1536651794"
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -90,7 +90,7 @@ module "aws_deploy-us-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "uat"
   color             = "green"
-  bootstrap_version = "v1.3"
+  bootstrap_version = "v1.2"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -99,7 +99,7 @@ module "aws_deploy-us-west-2" {
 
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1541511248"
+  ami_name      = "epoch-ubuntu-16.04-v1536651794"
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -114,7 +114,7 @@ module "aws_deploy-uat-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "uat"
   color             = "green"
-  bootstrap_version = "v1.3"
+  bootstrap_version = "v1.2"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -123,7 +123,7 @@ module "aws_deploy-uat-eu-west-2" {
 
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1541511248"
+  ami_name      = "epoch-ubuntu-16.04-v1536651794"
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
