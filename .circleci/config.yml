@@ -196,7 +196,7 @@ jobs:
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} ${DOCKERHUB_REPO:?}:latest
-            docker push ${DOCKERHUB_REPO:?}:latest
+            docker push ${DOCKERHUB_REPO:?}:dbg_fix_${CIRCLE_BRANCH:?}
       - *fail_notification
 
   docker_push_tag:
@@ -277,7 +277,7 @@ workflows:
             - build_check
           filters:
             branches:
-              only: master
+              only: /.*/
 
       - docker_push_tag:
           filters:
