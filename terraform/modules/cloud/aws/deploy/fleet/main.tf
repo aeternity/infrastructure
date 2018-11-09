@@ -48,7 +48,7 @@ resource "aws_launch_configuration" "spot" {
 }
 
 data "template_file" "user_data" {
-  template = "${file("${path.module}/templates/user_data.bash")}"
+  template = "${file("${path.module}/templates/${var.user_data_file}")}"
 
   vars = {
     region            = "${data.aws_region.current.name}"
