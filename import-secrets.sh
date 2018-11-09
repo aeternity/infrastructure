@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+
 AWS_CREDS_ROLE="${AWS_CREDS_ROLE:-epoch-fleet-manager}"
 CREDS_ROLE="${CREDS_ROLE:-$AWS_CREDS_ROLE}"
 
