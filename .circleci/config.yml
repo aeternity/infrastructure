@@ -14,6 +14,13 @@ references:
     working_directory: /home/circleci/infrastructure
     environment:
       DOCKERHUB_REPO: aeternity/infrastructure
+      VAULT_VERSION: 0.11.2
+    run:
+      name: Install vault
+      command: |
+        curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip
+        unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin
+        rm -f vault_${VAULT_VERSION}_linux_amd64.zip
 
   pull_current_image: &pull_current_image
     run:
