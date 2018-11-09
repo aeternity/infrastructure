@@ -27,3 +27,5 @@ variable "ami_name" {}
 variable "vault_addr" {}
 
 variable "vault_role" {}
+
+variable "user_data_file" {}

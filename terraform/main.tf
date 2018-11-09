@@ -40,9 +40,10 @@ module "aws_deploy-ap-southeast-1" {
   source            = "modules/cloud/aws/deploy"
   env               = "uat"
   color             = "blue"
-  bootstrap_version = "v1.2"
+  bootstrap_version = "v1.2.1"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
+  user_data_file    = "user_data_uat.bash"
 
   static_nodes = 1
   spot_nodes   = 14
@@ -64,9 +65,10 @@ module "aws_deploy-eu-central-1" {
   source            = "modules/cloud/aws/deploy"
   env               = "uat"
   color             = "blue"
-  bootstrap_version = "v1.2"
+  bootstrap_version = "v1.2.1"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
+  user_data_file    = "user_data_uat.bash"
 
   static_nodes = 1
   spot_nodes   = 9
@@ -90,9 +92,10 @@ module "aws_deploy-us-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "uat"
   color             = "green"
-  bootstrap_version = "v1.2"
+  bootstrap_version = "v1.2.1"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
+  user_data_file    = "user_data_uat.bash"
 
   static_nodes = 1
   spot_nodes   = 14
@@ -114,9 +117,10 @@ module "aws_deploy-uat-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "uat"
   color             = "green"
-  bootstrap_version = "v1.2"
+  bootstrap_version = "v1.2.1"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
+  user_data_file    = "user_data_uat.bash"
 
   static_nodes = 1
   spot_nodes   = 9

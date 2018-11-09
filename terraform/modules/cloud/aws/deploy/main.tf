@@ -15,6 +15,7 @@ module "aws_fleet" {
   ami_name          = "${var.ami_name}"
   vault_addr        = "${var.vault_addr}"
   vault_role        = "${var.vault_role}"
+  user_data_file    = "${var.user_data_file}"
 
   spot_nodes   = "${var.spot_nodes}"
   static_nodes = "${var.static_nodes}"
