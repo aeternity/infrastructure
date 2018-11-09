@@ -188,6 +188,7 @@ jobs:
   docker_push_latest:
     <<: *machine_config
     steps:
+      - checkout
       - *setup_ci_environment
       - *pull_current_image
       - run:
@@ -201,6 +202,7 @@ jobs:
   docker_push_tag:
     <<: *machine_config
     steps:
+      - checkout
       - *setup_ci_environment
       - run:
           name: Tag and push Docker image to DockerHub on Git tags
