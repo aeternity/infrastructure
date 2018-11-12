@@ -23,9 +23,9 @@ epoch_config:
     beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
     cuckoo:
       miner:
-        executable: "{{ ('amazon' in ansible_bios_version) | ternary('mean30s-avx2', 'mean30s-generic')  }}"
+        executable: "{{ ('amazon' in ansible_bios_version) | ternary('mean29-avx2', 'mean29-generic')  }}"
         extra_args: "-t {{ ansible_processor_vcpus }}"
-        node_bits: 30
+        edge_bits: 29
 
   logging:
     level: warning
