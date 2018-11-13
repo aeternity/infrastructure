@@ -21,7 +21,7 @@ references:
       name: Install vault
       command: |
         curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip
-        unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin
+        sudo unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin
         rm -f vault_${VAULT_VERSION}_linux_amd64.zip
 
   pull_current_image: &pull_current_image
