@@ -205,7 +205,7 @@ jobs:
           name: Tag and push Docker "latest" image to DockerHub
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker tag ${DOCKERHUB_REPO:?}:dbg_fix_${CIRCLE_BRANCH:?} ${DOCKERHUB_REPO:?}:latest
+            docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} ${DOCKERHUB_REPO:?}:dbg_fix_${CIRCLE_BRANCH:?}
             docker push ${DOCKERHUB_REPO:?}:dbg_fix_${CIRCLE_BRANCH:?}
       - *fail_notification
 
