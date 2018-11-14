@@ -33,7 +33,8 @@ done
 
 pwd
 
-cd /infrastructure/ansible
+cd $(dirname $0)/../ansible/
+
 # Temporary fix/workaround for non-executable vault install
 chmod +x /usr/bin/vault
 
