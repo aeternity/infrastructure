@@ -42,7 +42,7 @@ chmod +x /usr/bin/vault
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
 
 export VAULT_ADDR=$vault_addr
-if [ -f "/root/.vault_nonce"] ; then
+if [ -f "/root/.vault_nonce" ] ; then
     export NONCE=$(cat /root/.vault_nonce)
     echo $NONCE > /root/.vault_nonce
 else
