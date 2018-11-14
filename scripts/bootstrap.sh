@@ -29,7 +29,7 @@ case $i in
 esac
 done
 
-cd /infrastructure/ansible
+cd ../ansible
 # Temporary fix/workaround for non-executable vault install
 chmod +x /usr/bin/vault
 
