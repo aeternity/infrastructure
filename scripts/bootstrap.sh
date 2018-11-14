@@ -44,12 +44,13 @@ PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | 
 export VAULT_ADDR=$vault_addr
 if [ -f "/root/.vault_nonce" ] ; then
     export NONCE=$(cat /root/.vault_nonce)
-    echo $NONCE > /root/.vault_nonce
+
 else
-    export NONCE=$(vault write -field=token_meta_nonce auth/aws/login pkcs7=$PKCS7 role=$vault_role)
+    export NONCE=$(vault write auth/aws/login pkcs7=$PKCS7 role=$vault_role | grep token_meta_nonce | awk '{print $1}')
+    echo $NONCE > /root/.vault_nonce
 fi
 
-export VAULT_TOKEN=$(vault write -field=tokenauth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=${NONCE})
+export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role)
 
 
 
