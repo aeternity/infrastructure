@@ -1,14 +1,15 @@
-datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
-genesis_accounts:
-  "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
 configure_peers: false
 seed_peers:
-  - "18.130.142.111"
+  - "35.177.192.219"
+  - "52.11.110.179"
+  - "52.220.198.72"
 
 epoch_config:
   peers:
-    - "aenode://pp_2SmwgNAp8zgHqNfCJEu5xLp7rN281ocnomAeEuJ5UPnkavroDs@18.130.142.111:3015"
+    - "aenode://pp_2KWhoNRdythXAmgCbM6QxFo95WM4XXGq2pjcbKitXFpUHnPQc3@35.177.192.219:3015"
+    - "aenode://pp_RKVZjm7UKPLGvyKWqVZN1pXN6CTCxfmYz2HkNL2xiAhLVd2ho@52.11.110.179:3015"
+    - "aenode://pp_2gPZjuPnJnTVEbrB9Qgv7f4MdhM4Jh6PD22mB2iBA1g7FRvHTk@52.220.198.72:3015"
 
   sync:
     port: 3015
@@ -28,15 +29,11 @@ epoch_config:
     db_path: "./db{{ db_version|mandatory }}"
 
   mining:
-    beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
-    cuckoo:
-      miner:
-        executable: mean29-avx2
-        extra_args: "-t {{ ansible_processor_vcpus }}"
-        edge_bits: 29
+    autostart: false
+    beneficiary: "ak_tjnw1KcmnwfqXvhtGa9GRjanbHM3t6PmEWEWtNMM3ouvNKRu5"
 
   logging:
-    level: debug
+    level: warning
 
   metrics:
       # StatsD server and port
@@ -44,4 +41,4 @@ epoch_config:
       port: 8125
 
   fork_management:
-    network_id: "ae_integration"
+    network_id: "ae_mainnet"

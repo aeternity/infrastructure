@@ -28,10 +28,12 @@
         timeout: 2
       register: aws_uri_check
       failed_when: False
+      tags: [always]
 
     - name: Set AWS check fact
       set_fact:
         is_aws: "{{ aws_uri_check.status == 200 }}"
+      tags: [always]
 
     - name: Gather instance metadata facts
       ec2_metadata_facts:

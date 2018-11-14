@@ -14,10 +14,11 @@
         timeout: 2
       register: aws_uri_check
       failed_when: False
+      when: packer_build_name is not defined
 
     - name: Set AWS check fact
       set_fact:
-        is_aws: "{{ aws_uri_check.status == 200 }}"
+        is_aws: "{{ packer_build_name is not defined and aws_uri_check.status == 200 }}"
 
     - name: Get instance metadata facts
       ec2_metadata_facts:
@@ -41,14 +42,14 @@
         aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
         security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
       register: instance_tags
-      when: ansible_ec2_instance_id is defined
+      when: is_aws
 
     - name: Define ec2 dynamic variables based on tags
       set_fact:
         env: "{{ instance_tags['tags']['env'] | default('unknown') }}"
         color: "{{ instance_tags['tags']['color'] | default('unknown') }}"
         kind: "{{ instance_tags['tags']['kind'] | default('peer') }}"
-      when: ansible_ec2_instance_id is defined
+      when: is_aws
 
 - name: Configure monitoring services (DataDog)
   hosts: all
