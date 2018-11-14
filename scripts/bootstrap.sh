@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# Do not run after first error
+set -e
 for i in "$@"
 do
 case $i in
