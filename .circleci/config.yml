@@ -14,6 +14,15 @@ references:
     working_directory: /home/circleci/infrastructure
     environment:
       DOCKERHUB_REPO: aeternity/infrastructure
+      VAULT_VERSION: 0.11.2
+
+  install_vault: &install_vault
+    run:
+      name: Install vault
+      command: |
+        curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip
+        sudo unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin
+        rm -f vault_${VAULT_VERSION}_linux_amd64.zip
 
   pull_current_image: &pull_current_image
     run:
@@ -188,6 +197,8 @@ jobs:
   docker_push_latest:
     <<: *machine_config
     steps:
+      - checkout
+      - *install_vault
       - *setup_ci_environment
       - *pull_current_image
       - run:
@@ -201,6 +212,8 @@ jobs:
   docker_push_tag:
     <<: *machine_config
     steps:
+      - checkout
+      - *install_vault
       - *setup_ci_environment
       - run:
           name: Tag and push Docker image to DockerHub on Git tags
