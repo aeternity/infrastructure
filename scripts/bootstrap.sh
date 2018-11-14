@@ -42,7 +42,16 @@ chmod +x /usr/bin/vault
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
 
 export VAULT_ADDR=$vault_addr
-#export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role)
+if [ -f "/root/.vault_nonce"] ; then
+    export NONCE=$(cat /root/.vault_nonce)
+    echo $NONCE > /root/.vault_nonce
+else
+    export NONCE=$(vault write -field=token_meta_nonce auth/aws/login pkcs7=$PKCS7 role=$vault_role)
+fi
+
+export VAULT_TOKEN=$(vault write -field=tokenauth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=${NONCE})
+
+
 
 export env=$env
 export epoch_package=$epoch_package
