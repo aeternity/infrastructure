@@ -59,7 +59,7 @@
 
     - name: Download Vault public key
       get_url:
-        url: "{{ vault_addr }}/v1/ssh-client-signer/public_key"
+        url: "{{ vault_addr }}/v1/ssh/public_key"
         dest: /etc/ssh/trusted-user-ca-keys.pem
       when: vault_addr is defined
       tags:
