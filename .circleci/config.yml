@@ -89,6 +89,7 @@ jobs:
     steps:
       - checkout
       - *install_vault
+      - *setup_ci_environment
       - run:
           name: Build and push Docker image to DockerHub
           command: |
