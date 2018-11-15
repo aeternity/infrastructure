@@ -49,8 +49,8 @@ fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
 
-export env=$env
-export epoch_package=$epoch_package
+#export env=$env
+#export epoch_package=$epoch_package
 
 # Install ansible roles
 ansible-galaxy install -r requirements.yml
