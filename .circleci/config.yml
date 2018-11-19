@@ -136,6 +136,7 @@ jobs:
   setup_terraform:
     <<: *container_config
     steps:
+      - *setup_secrets
       - *setup_terraform
       - *fail_notification
 
@@ -144,6 +145,7 @@ jobs:
     environment:
       - DEPLOY_ENV: uat
     steps:
+      - *setup_secrets
       - *setup_node
       - *setup_monitoring
       - *check_seed_peers
@@ -154,6 +156,7 @@ jobs:
     environment:
       - DEPLOY_ENV: integration
     steps:
+      - *setup_secrets
       - *setup_node
       - *setup_monitoring
       - *fail_notification
@@ -163,6 +166,7 @@ jobs:
     environment:
       - DEPLOY_ENV: fast_integration
     steps:
+      - *setup_secrets
       - *setup_node
       - *setup_monitoring
       - *fail_notification
@@ -172,6 +176,7 @@ jobs:
     environment:
       - DEPLOY_ENV: dev1
     steps:
+      - *setup_secrets
       - *setup_node
       - *setup_monitoring
       - *fail_notification
@@ -181,12 +186,14 @@ jobs:
     environment:
       - DEPLOY_ENV: dev2
     steps:
+      - *setup_secrets
       - *setup_node
       - *fail_notification
 
   build_images:
     <<: *container_config
     steps:
+      - *setup_secrets
       - *build_images
 
   docker_push_latest:
