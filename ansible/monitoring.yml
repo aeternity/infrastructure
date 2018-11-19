@@ -8,15 +8,26 @@
   gather_facts: yes
   tags: [datadog]
   tasks:
+    - name: Check if running on AWS instance
+      uri:
+        url: http://169.254.169.254/latest/meta-data
+        timeout: 2
+      register: aws_uri_check
+      failed_when: False
+
+    - name: Set AWS check fact
+      set_fact:
+        is_aws: "{{ aws_uri_check.status == 200 }}"
+
     - name: Get instance metadata facts
       ec2_metadata_facts:
-      when: '"amazon" in ansible_bios_version'
+      when: is_aws
 
     - name: Define ec2 dynamic variables
       set_fact:
         platform: aws
         region: "{{ ansible_ec2_placement_region }}"
-      when: '"amazon" in ansible_bios_version'
+      when: is_aws
 
     - name: Get instance tags
       ec2_tag:

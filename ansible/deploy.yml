@@ -21,10 +21,22 @@
       # http://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html#special-tags
       tags: [always]
       when: hosts_group is defined
+
+    - name: Check if running on AWS instance
+      uri:
+        url: http://169.254.169.254/latest/meta-data
+        timeout: 2
+      register: aws_uri_check
+      failed_when: False
+
+    - name: Set AWS check fact
+      set_fact:
+        is_aws: "{{ aws_uri_check.status == 200 }}"
+
     - name: Gather instance metadata facts
       ec2_metadata_facts:
       tags: [always]
-      when: '"amazon" in ansible_bios_version'
+      when: is_aws
 
 - name: Deploy epoch package
   hosts: all
