@@ -228,6 +228,7 @@ jobs:
   check_seed_peers:
     <<: *container_config
     steps:
+      - *setup_secrets
       - *check_seed_peers
       - *fail_notification
 
