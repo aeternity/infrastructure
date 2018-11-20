@@ -41,6 +41,5 @@ RUN cd /infrastructure/ansible && ansible-galaxy install -r requirements.yml
 ADD . /infrastructure
 WORKDIR /infrastructure
 
-LABEL com.circleci.preserve-entrypoint=true
 ENTRYPOINT ["/infrastructure/docker-entrypoint.sh"]
 CMD ["/bin/bash", "--login"]
