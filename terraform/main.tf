@@ -319,3 +319,39 @@ module "aws_deploy-fast_integration-eu-west-2" {
     aws = "aws.eu-west-2"
   }
 }
+
+
+
+##### GOOGLE
+
+provider "google" {
+  project = "epoch-p2p"
+  region = "us-central1"
+  alias  = "us-central1"
+}
+
+
+module "gcloud_deplo-us-central-1" {
+  source = "modules/cloud/google/deploy"
+
+  env               = "test-gc"
+  bootstrap_version = "master"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
+
+  static_nodes = 1
+
+  nodes = 4
+  instance_type = "n1-standard-2"
+  image_name      = "epoch-ubuntu-16-04-v1542381177"
+  zone ="us-central1-a"
+  region = "us-central1"
+
+  epoch = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    goolge = "google.us-central1"
+  }
+}
