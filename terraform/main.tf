@@ -32,8 +32,6 @@ provider "aws" {
   version                 = "1.24"
   region                  = "us-west-2"
   alias                   = "us-west-2"
-  shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
 }
 
 provider "aws" {
