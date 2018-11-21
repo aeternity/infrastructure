@@ -62,11 +62,15 @@ mnesia_backup:
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
 
+.PRECIOUS: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
 ~/.ssh/id_ae_infra_ed25519-%-cert.pub: ~/.ssh/id_ae_infra_ed25519
 	@vault write -field=signed_key ssh/sign/$* public_key=@$<.pub > $@
 
-ssh-%: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
-	@ssh -i $< -i ~/.ssh/id_ae_infra_ed25519 $*@$(HOST)
+cert-%: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
+	@
+
+ssh-%: cert-%
+	@ssh $*@$(HOST)
 
 ssh: ssh-epoch
 
@@ -97,5 +101,5 @@ clean:
 
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
-	manage-node reset-net lint ssh-% ssh clean \
+	manage-node reset-net lint cert-% ssh-% ssh clean \
 	check-seed-peers check-deploy-env

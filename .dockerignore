@@ -1,4 +1,5 @@
 *
+!docker/ssh_config
 !docker-entrypoint.sh
 !import-secrets.sh
 !ansible
