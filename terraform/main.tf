@@ -331,7 +331,8 @@ provider "google" {
 module "gcloud_deplo-us-central-1" {
   source = "modules/cloud/google/deploy"
 
-  env               = "test-gc"
+  env               = "uat"
+  color             = "blue"
   bootstrap_version = "master"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
