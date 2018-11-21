@@ -1,0 +1,15 @@
+# Ansible AWS EC2 dynamic inventory plugin
+# https://docs.ansible.com/ansible/2.6/plugins/inventory/gcp_compute.html
+plugin: gcp_compute
+zones: # populate inventory with instances in these regions
+  - us-central1-a
+projects:
+  - epoch-p2p
+filters:
+keyed_groups:
+  - prefix: tag
+    key: labels
+scopes:
+  - https://www.googleapis.com/auth/compute
+service_account_file: /root/.gcp.json
+auth_kind: serviceaccount
