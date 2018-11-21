@@ -5,3 +5,4 @@ boto
 boto3
 hvac == 0.6.4
 awscli
+google-oauth
