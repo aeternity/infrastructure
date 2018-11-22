@@ -1,0 +1,16 @@
+[Unit]
+Description=Aeternity epoch
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=forking
+User={{ project_user }}
+Group=users
+ExecStart={{ project_root }}/bin/epoch start
+ExecStop={{ project_root }}/bin/epoch stop
+Restart=on-failure
+LimitNOFILE=24576
+
+[Install]
+WantedBy=multi-user.target
