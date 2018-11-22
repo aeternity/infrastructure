@@ -38,6 +38,8 @@ RUN apk add --no-cache --virtual build-deps \
 ADD ansible/requirements.yml /infrastructure/ansible/
 RUN cd /infrastructure/ansible && ansible-galaxy install -r requirements.yml
 
+ADD docker/ssh_config /etc/ssh/ssh_config
+
 ADD . /infrastructure
 WORKDIR /infrastructure
 
