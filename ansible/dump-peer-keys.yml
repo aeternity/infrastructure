@@ -1,0 +1,28 @@
+- name: Dump peer keys
+  hosts: all
+  remote_user: epoch
+  gather_facts: no
+
+  tasks:
+    - name: Get the base58c public key
+      command: "/home/epoch/node/bin/epoch peer_key"
+      register: public_key
+
+    - debug:
+        msg: "Public key (base58c): {{ public_key.stdout }}"
+
+    - name: Get the base64 public key
+      slurp:
+        src: /home/epoch/node/keys/peer_key.pub
+      register: public_key
+
+    - debug:
+        msg: "Public key: {{ public_key['content'] }}"
+
+    - name: Get the private key
+      slurp:
+        src: /home/epoch/node/keys/peer_key
+      register: private_key
+
+    - debug:
+        msg: "Private key (base64): {{ private_key['content'] }}"

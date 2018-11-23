@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import subprocess
@@ -9,14 +9,14 @@ node_path = "/home/epoch/node"
 
 def read_node_file_contents(filename):
     try:
-        with file(node_path + "/" + filename) as f:
+        with open(node_path + "/" + filename) as f:
             return f.read().strip()
     except IOError as e:
         return ""
 
 try:
     with open(os.devnull, 'w') as devnull:
-        peer_key = subprocess.check_output(node_path + "/bin/epoch peer_key", shell=True, stderr=devnull)
+        peer_key = str(subprocess.check_output(node_path + "/bin/epoch peer_key", shell=True, stderr=devnull))
 except subprocess.CalledProcessError as exc:
     peer_key = ""
 
@@ -29,9 +29,9 @@ try:
 except IOError as e:
     config = {}
 
-print json.dumps({
+print(json.dumps({
     "version": read_node_file_contents("VERSION"),
     "revision": read_node_file_contents("REVISION"),
     "peer_key": peer_key,
     "config": config,
-})
+}))

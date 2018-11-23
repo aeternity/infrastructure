@@ -90,6 +90,9 @@ check-seed-peers:
 	curl -fs -m 5 http://18.195.109.60:3013/v2/peers/pubkey | grep -q '2vhFb3HtHd1S7ynbpbFnEdph1tnDXFSfu4NGtq46S2eM5HCdbC'
 	curl -fs -m 5 http://13.250.162.250:3013/v2/peers/pubkey | grep -q '27xmgQ4N1E3QwHyoutLtZsHW5DSW4zneQJ3CxT5JbUejxtFuAu'
 	curl -fs -m 5 http://18.130.148.7:3013/v2/peers/pubkey | grep -q 'nt5N7fwae3DW8Mqk4kxkGAnbykRDpEZq9dzzianiMMPo4fJV7'
+	curl -fs -m 5 http://52.220.198.72:3013/v2/peers/pubkey | grep -q '2gPZjuPnJnTVEbrB9Qgv7f4MdhM4Jh6PD22mB2iBA1g7FRvHTk'
+	curl -fs -m 5 http://52.11.110.179:3013/v2/peers/pubkey | grep -q 'RKVZjm7UKPLGvyKWqVZN1pXN6CTCxfmYz2HkNL2xiAhLVd2ho'
+	curl -fs -m 5 http://35.177.192.219:3013/v2/peers/pubkey | grep -q '2KWhoNRdythXAmgCbM6QxFo95WM4XXGq2pjcbKitXFpUHnPQc3'
 
 check-deploy-env:
 ifndef DEPLOY_ENV
