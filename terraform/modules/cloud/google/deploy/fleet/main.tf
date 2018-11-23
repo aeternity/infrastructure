@@ -7,7 +7,7 @@ resource "google_compute_address" "ip_address" {
 resource "google_compute_instance" "static_node" {
   count   = "${var.static_nodes}"
   project = "epoch-p2p"
-  name    = "ae-${var.env}-static-node"
+  name    = "ae-${var.env}-static-node1"
   zone    = "${var.zone}"
 
   boot_disk {
@@ -26,7 +26,7 @@ resource "google_compute_instance" "static_node" {
     }
   }
 
-  metadata_startup_script = "${data.template_file.user_data.rendered}"
+  metadata_startup_script = "${module.user_data.user_data}"
 
   tags = ["${var.env}"]
 
@@ -38,17 +38,14 @@ resource "google_compute_instance" "static_node" {
   }
 }
 
-data "template_file" "user_data" {
-  template = "${file("${path.module}/templates/${var.user_data_file}")}"
-
-  vars = {
-    region            = "${var.zone}"
-    env               = "${var.env}"
-    bootstrap_version = "${var.bootstrap_version}"
-    epoch_package     = "${var.epoch["package"]}"
-    vault_addr        = "${var.vault_addr}"
-    vault_role        = "${var.vault_role}"
-  }
+module "user_data" {
+  source = "../../../../user_data/"
+  region            = "${var.zone}"
+  env               = "${var.env}"
+  bootstrap_version = "${var.bootstrap_version}"
+  epoch_package     = "${var.epoch["package"]}"
+  vault_addr        = "${var.vault_addr}"
+  vault_role        = "${var.vault_role}"
 }
 
 resource "google_compute_instance" "nodes" {
@@ -71,7 +68,7 @@ resource "google_compute_instance" "nodes" {
     access_config {}
   }
 
-  metadata_startup_script = "${data.template_file.user_data.rendered}"
+  metadata_startup_script = "${module.user_data.user_data}"
 
   tags = ["${var.env}"]
 
@@ -86,6 +83,7 @@ resource "google_compute_instance" "nodes" {
 resource "google_compute_firewall" "firewal" {
   name    = "${var.env}-firewall"
   network = "${var.network_name}"
+  project = "${var.project}"
 
   allow {
     protocol = "icmp"

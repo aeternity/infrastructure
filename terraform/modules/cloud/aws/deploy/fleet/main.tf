@@ -26,7 +26,7 @@ resource "aws_instance" "static_node" {
     kind  = "seed"
   }
 
-  user_data = "${data.template_file.user_data.rendered}"
+  user_data = "${module.user_data.user_data}"
 
   subnet_id              = "${element( var.subnets, 1)}"
   vpc_security_group_ids = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
@@ -44,20 +44,17 @@ resource "aws_launch_configuration" "spot" {
     create_before_destroy = true
   }
 
-  user_data = "${data.template_file.user_data.rendered}"
+  user_data = "${module.user_data.user_data}"
 }
 
-data "template_file" "user_data" {
-  template = "${file("${path.module}/templates/${var.user_data_file}")}"
-
-  vars = {
-    region            = "${data.aws_region.current.name}"
-    env               = "${var.env}"
-    bootstrap_version = "${var.bootstrap_version}"
-    epoch_package     = "${var.epoch["package"]}"
-    vault_addr        = "${var.vault_addr}"
-    vault_role        = "${var.vault_role}"
-  }
+module "user_data" {
+  source = "../../../../user_data/"
+  region            = "${data.aws_region.current.name}"
+  env               = "${var.env}"
+  bootstrap_version = "${var.bootstrap_version}"
+  epoch_package     = "${var.epoch["package"]}"
+  vault_addr        = "${var.vault_addr}"
+  vault_role        = "${var.vault_role}"
 }
 
 resource "aws_autoscaling_group" "spot_fleet" {

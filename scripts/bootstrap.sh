@@ -30,24 +30,29 @@ case $i in
     ;;
 esac
 done
-
+echo "Go to Ansible DiR"
 cd $(dirname $0)/../ansible/
 
 # Temporary fix/workaround for non-executable vault install
+echo "chmod Vault"
 chmod +x /usr/bin/vault
 
+echo "Find Instance PKCS7"
 # Authenticate the instance to CSM
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
 
+echo "Vault authentication"
 export VAULT_ADDR=$vault_addr
 if [ -f "/root/.vault_nonce" ] ; then
+    echo "Nonce exist, read it"
     export NONCE=$(cat /root/.vault_nonce)
 else
+    echo "No nonce, login to vault"
     export NONCE=$(vault write auth/aws/login pkcs7=$PKCS7 role=$vault_role | grep token_meta_nonce | awk '{print $2}')
     echo $NONCE > /root/.vault_nonce
     chmod 0600 /root/.vault_nonce
 fi
-
+echo "Reauth vault with nonce"
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
 
 # Run Ansible in virtual environment

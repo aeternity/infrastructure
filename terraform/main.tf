@@ -322,13 +322,17 @@ module "aws_deploy-fast_integration-eu-west-2" {
 
 ##### GOOGLE
 
+variable "google_project" {
+  default = "epoch-p2p"
+}
+
 provider "google" {
-  project = "epoch-p2p"
+  project = "${var.google_project}"
   region  = "us-central1"
   alias   = "us-central1"
 }
 
-module "gcloud_deplo-us-central-1" {
+module "gcloud_deploy-us-central-1" {
   source = "modules/cloud/google/deploy"
 
   env               = "uat"
@@ -352,4 +356,5 @@ module "gcloud_deplo-us-central-1" {
   providers = {
     goolge = "google.us-central1"
   }
+  project = "${var.google_project}"
 }

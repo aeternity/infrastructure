@@ -39,3 +39,4 @@ variable "user_data_file" {
 variable "zone" {}
 variable "region" {}
 variable "nodes" {}
+variable "project" {}

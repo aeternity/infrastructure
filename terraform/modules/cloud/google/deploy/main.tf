@@ -1,6 +1,7 @@
 module "google_vpc" {
-  source = "vpc"
-  env    = "${var.env}"
+  source  = "vpc"
+  env     = "${var.env}"
+  project = "${var.project}"
 }
 
 module "google_fleet" {
@@ -19,4 +20,5 @@ module "google_fleet" {
   user_data_file    = "${var.user_data_file}"
   nodes             = "${var.nodes}"
   color             = "${var.color}"
+  project           = "${var.project}"
 }
