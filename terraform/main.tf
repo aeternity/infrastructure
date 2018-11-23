@@ -39,7 +39,7 @@ provider "aws" {
 module "aws_deploy-main-ap-southeast-1" {
   source            = "modules/cloud/aws/deploy"
   env               = "main"
-  bootstrap_version = "master"
+  bootstrap_version = "v1.5"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -62,7 +62,7 @@ module "aws_deploy-main-ap-southeast-1" {
 module "aws_deploy-main-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "main"
-  bootstrap_version = "master"
+  bootstrap_version = "v1.5"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -87,7 +87,7 @@ module "aws_deploy-main-eu-west-2" {
 module "aws_deploy-main-us-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "main"
-  bootstrap_version = "master"
+  bootstrap_version = "v1.5"
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
