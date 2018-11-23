@@ -4,11 +4,11 @@ genesis_accounts:
   "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
 configure_peers: false
 seed_peers:
-  - "18.130.142.111"
+  - "35.177.40.45"
 
 epoch_config:
   peers:
-    - "aenode://pp_2SmwgNAp8zgHqNfCJEu5xLp7rN281ocnomAeEuJ5UPnkavroDs@18.130.142.111:3015"
+    - "aenode://pp_275gTYBmh5t9ormHVntuThgeqCxRAwbKKtE8E9Mmoa8WjjWtLT@35.177.40.45:3015"
 
   sync:
     port: 3015
