@@ -32,7 +32,7 @@ epoch_config:
     expected_mine_rate: 15000
     cuckoo:
       miner:
-        executable: mean15-avx2
+        executable: mean15-generic
         extra_args: "-t {{ ansible_processor_vcpus }}"
         edge_bits: 15
 
