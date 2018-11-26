@@ -217,7 +217,7 @@ module "aws_deploy-dev1-eu-west-2" {
   spot_nodes    = 10
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1541511248"
+  ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -238,7 +238,7 @@ module "aws_deploy-dev2-eu-west-2" {
   spot_nodes    = 2
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1541511248"
+  ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -260,7 +260,7 @@ module "aws_deploy-integration-eu-west-2" {
   spot_nodes    = 2
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1541511248"
+  ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -282,7 +282,7 @@ module "aws_deploy-fast_integration-eu-west-2" {
   spot_nodes    = 2
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1541511248"
+  ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
