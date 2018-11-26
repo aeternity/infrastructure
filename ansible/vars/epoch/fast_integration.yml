@@ -2,11 +2,11 @@ datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
 configure_peers: false
 seed_peers:
-  - "18.130.187.37"
+  - "35.176.170.53"
 
 epoch_config:
   peers:
-    - "aenode://pp_2BCPYYhCKYnLtcNVeyBW1i8D9dZBt2epQXYztFPzibiMB5it6N@18.130.187.37:3015"
+    - "aenode://pp_2P9y2aA9CzdQRqXQN5e1WdmMaGc4UYNuQ5b9cHNME6wGL71jp6@35.176.170.53:3015"
 
   sync:
     port: 3015
