@@ -16,7 +16,7 @@ def read_node_file_contents(filename):
 
 try:
     with open(os.devnull, 'w') as devnull:
-        peer_key = str(subprocess.check_output(node_path + "/bin/epoch peer_key", shell=True, stderr=devnull))
+        peer_key = subprocess.check_output(node_path + "/bin/epoch peer_key", shell=True, stderr=devnull).decode('utf-8')
 except subprocess.CalledProcessError as exc:
     peer_key = ""
 

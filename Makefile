@@ -3,19 +3,20 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
-
 setup-terraform:
 	cd terraform && terraform init && terraform apply --auto-approve
 
 setup-node: check-deploy-env
 	cd ansible && ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e vault_addr=$(VAULT_ADDR) \
 		setup.yml
 
 setup-monitoring: check-deploy-env
 	cd ansible && ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e env=$(DEPLOY_ENV) \
 		monitoring.yml
 
@@ -31,6 +32,7 @@ ifneq ($(DEPLOY_COLOR),)
 endif
 	cd ansible && ansible-playbook \
 		--limit="$(LIMIT)" \
+		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e package=$(PACKAGE) \
 		-e hosts_group=tag_env_$(DEPLOY_ENV) \
 		-e env=$(DEPLOY_ENV) \
@@ -44,17 +46,22 @@ ifndef CMD
 endif
 	cd ansible && ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
 		-e db_version=0 \
 		-e cmd=$(CMD) \
 		manage-node.yml
 
 reset-net: check-deploy-env
-	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" reset-net.yml
+	cd ansible && ansible-playbook \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		-e ansible_python_interpreter=/usr/bin/python3 \
+		reset-net.yml
 
 mnesia_backup:
 	cd ansible && ansible-playbook \
 		--limit="tag_role_epoch:&tag_env_$(BACKUP_ENV)" \
+		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e download_dir=$(BACKUP_DIR) \
 		-e backup_suffix=$(BACKUP_SUFFIX) \
 		mnesia_backup.yml
