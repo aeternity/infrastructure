@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-AWS_CREDS_ROLE="${AWS_CREDS_ROLE:-epoch-fleet-manager}"
+AWS_CREDS_ROLE="${AWS_CREDS_ROLE:-epoch-inventory}"
 CREDS_ROLE="${CREDS_ROLE:-$AWS_CREDS_ROLE}"
 
 VAULT_ADDR=${VAULT_ADDR:-$AE_VAULT_ADDR}
@@ -35,10 +35,12 @@ if [ -n "$VAULT_TOKEN" ]; then
     export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.gcp.json
     vault read -field json secret/google/${CREDS_ROLE} > $GOOGLE_APPLICATION_CREDENTIALS
 
-    DOCKERHUB_CREDS=$(vault read secret/dockerhub/prod)
-    export DOCKER_USER=$(echo $DOCKERHUB_CREDS | grep -o 'username [^ ]*' | awk '{print $2}')
-    export DOCKER_PASS=$(echo $DOCKERHUB_CREDS | grep -o 'password [^ ]*' | awk '{print $2}')
+    if [ "$CREDS_ROLE" = "epoch-fleet-manager" ]; then
+        DOCKERHUB_CREDS=$(vault read secret/dockerhub/prod)
+        export DOCKER_USER=$(echo $DOCKERHUB_CREDS | grep -o 'username [^ ]*' | awk '{print $2}')
+        export DOCKER_PASS=$(echo $DOCKERHUB_CREDS | grep -o 'password [^ ]*' | awk '{print $2}')
 
-    export DATADOG_API_KEY=$(vault read -field=api_key secret/datadog/deploy)
-    export ROCKET_HOOK_URL=$(vault read -field=core-alerts secret/rocketchat/prod/hooks)
+        export DATADOG_API_KEY=$(vault read -field=api_key secret/datadog/deploy)
+        export ROCKET_HOOK_URL=$(vault read -field=core-alerts secret/rocketchat/prod/hooks)
+    fi
 fi
