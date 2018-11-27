@@ -36,6 +36,12 @@ provider "aws" {
   profile                 = "aeternity"
 }
 
+provider "aws" {
+  version = "1.24"
+  region  = "us-east-2"
+  alias   = "us-east-2"
+}
+
 module "aws_deploy-main-ap-southeast-1" {
   source            = "modules/cloud/aws/deploy"
   env               = "main"
@@ -43,8 +49,8 @@ module "aws_deploy-main-ap-southeast-1" {
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
-  static_nodes = 1
-  spot_nodes   = 2
+  static_nodes = 10
+  spot_nodes   = 4
 
   spot_price    = "0.15"
   instance_type = "c5.xlarge"
@@ -66,8 +72,8 @@ module "aws_deploy-main-eu-west-2" {
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
-  static_nodes = 1
-  spot_nodes   = 2
+  static_nodes = 10
+  spot_nodes   = 4
 
   spot_price    = "0.15"
   instance_type = "c5.xlarge"
@@ -91,8 +97,8 @@ module "aws_deploy-main-us-west-2" {
   vault_role        = "epoch-node"
   vault_addr        = "${var.vault_addr}"
 
-  static_nodes = 1
-  spot_nodes   = 2
+  static_nodes = 10
+  spot_nodes   = 4
 
   spot_price    = "0.15"
   instance_type = "c5.xlarge"
@@ -104,6 +110,29 @@ module "aws_deploy-main-us-west-2" {
 
   providers = {
     aws = "aws.us-west-2"
+  }
+}
+
+module "aws_deploy-main-us-east-2" {
+  source            = "modules/cloud/aws/deploy"
+  env               = "main"
+  bootstrap_version = "v1.5.1"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
+
+  static_nodes = 10
+  spot_nodes   = 4
+
+  spot_price    = "0.15"
+  instance_type = "c5.xlarge"
+  ami_name      = "epoch-ubuntu-16.04-v1542910070"
+
+  epoch = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.0-rc5-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    aws = "aws.us-east-2"
   }
 }
 
