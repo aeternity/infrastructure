@@ -6,18 +6,18 @@
   tasks:
     - name: Get the base58c public key
       command: "/home/epoch/node/bin/epoch peer_key"
-      register: public_key
+      register: public_key_base58c
 
     - debug:
-        msg: "Public key (base58c): {{ public_key.stdout }}"
+        msg: "Public key (base58c): {{ public_key_base58c.stdout }}"
 
     - name: Get the base64 public key
       slurp:
         src: /home/epoch/node/keys/peer_key.pub
-      register: public_key
+      register: public_key_base64
 
     - debug:
-        msg: "Public key: {{ public_key['content'] }}"
+        msg: "Public key: {{ public_key_base64['content'] }}"
 
     - name: Get the private key
       slurp:
@@ -26,3 +26,12 @@
 
     - debug:
         msg: "Private key (base64): {{ private_key['content'] }}"
+
+    - debug:
+        msg: "aenode://{{ public_key_base58c.stdout }}@{{ public_ipv4 }}:3015"
+
+    - debug:
+        msg: "vault write secret/epoch/peer_keys/{{ public_ipv4 }}/public base64={{ public_key_base64['content'] }}"
+
+    - debug:
+        msg: "vault write secret/epoch/peer_keys/{{ public_ipv4 }}/private base64={{ private_key['content'] }}"
