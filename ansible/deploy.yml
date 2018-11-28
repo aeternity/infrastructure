@@ -84,7 +84,7 @@
         with_first_found:
           - "vars/epoch/{{ env }}.yml"
           - "vars/epoch/default.yml"
-        tags: [config, peer_keys, health-check]
+        tags: [config, epoch_config, peer_keys, health-check]
 
       - name: Fail on missing package variable
         fail:
@@ -100,6 +100,7 @@
         when: "'http' in package"
         register: remote_package
         notify: "stop epoch daemon"
+        tags: [package]
 
       - name: Upload local package
         copy:
@@ -108,6 +109,7 @@
         when: "'http' not in package"
         register: local_package
         notify: "stop epoch daemon"
+        tags: [package]
 
       - name: "Make sure {{ project_root }} exists"
         file:
@@ -153,7 +155,7 @@
           path: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}"
           state: directory
           mode: 0700
-        tags: [config]
+        tags: [config, peer_keys]
 
       - name: "Copy node keys to {{ project_root }}/{{ epoch_config['keys']['dir'] }}"
         copy:
@@ -171,7 +173,7 @@
           dest: "{{ project_root }}/epoch.yaml"
           mode: '0600'
         notify: "restart epoch daemon"
-        tags: [config]
+        tags: [config, epoch_config]
 
       - name: Update accounts configuration
         copy:
@@ -229,7 +231,7 @@
           text: |
             %%%
             Revision: [{{ ansible_local.epoch.revision }}](https://github.com/aeternity/epoch/commit/{{ ansible_local.epoch.revision }})
-            Package: {{ package }}
+            Package: {{ package|default('unknown') }}
             %%%
           api_key: "{{ datadog_api_key }}"
           app_key: "{{ datadog_app_key }}"
@@ -247,7 +249,7 @@
             host: "{{ public_ipv4 }}"
             alert_type: error
             title: Deploy
-            text: "Package: {{ package }}"
+            text: "Package: {{ package|default('unknown') }}"
             api_key: "{{ datadog_api_key }}"
             app_key: "{{ datadog_app_key }}"
             tags:
