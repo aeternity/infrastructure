@@ -24,6 +24,7 @@ def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
     return [int(text) if text.isdigit() else text.lower()
             for text in re.split(_nsre, s)]   
 
+
 for group_name in env_groups:
     print("#### %s\n" % group_name[len(env_group_prefix):])
     hosts = data[group_name]['hosts'].sort(key=natural_sort_key)
@@ -32,5 +33,6 @@ for group_name in env_groups:
         host_ip = host
         if 'ansible_host' in hostvars[host]:
             host_ip = hostvars[host]['ansible_host']
-        print("- %s (%s) [status](http://%s:3013/v2/status) [top](http://%s:3013/v2/blocks/top)" % (host, host_ip, host_ip, host_ip))
+        bullet = '*' if 'kind' in hostvars[host]['tags'] and hostvars[host]['tags']['kind'] == 'seed' else '-'
+        print("%s %s (%s) [status](http://%s:3013/v2/status) [top](http://%s:3013/v2/blocks/top)" % (bullet, host, host_ip, host_ip, host_ip))
     print("\n")

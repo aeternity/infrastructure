@@ -68,7 +68,7 @@ cd ansible && ansible-inventory --list
 
 ### List inventory
 
-Get a grouped list of ansible inventory
+Get a grouped list of ansible inventory. Seed nodes are marked with `*`
 
 ```
 make list-inventory
