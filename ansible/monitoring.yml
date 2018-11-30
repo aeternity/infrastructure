@@ -147,6 +147,12 @@
     - { role: Datadog.datadog }
 
   post_tasks:
+    - name: Install rsyslog
+      apt:
+        state: present
+        update_cache: yes
+        pkg:
+        - rsyslog
     - name: Copy datadog.conf to rsyslog
       copy:
         src: files/rsyslog/datadog.conf
