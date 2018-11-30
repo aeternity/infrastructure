@@ -10,6 +10,7 @@ Group=users
 ExecStart={{ project_root }}/bin/epoch start
 ExecStop={{ project_root }}/bin/epoch stop
 Restart=on-failure
+# Systemd does not play well with user set limits with ulimit.
 LimitNOFILE=24576
 
 [Install]
