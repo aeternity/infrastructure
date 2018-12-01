@@ -66,6 +66,16 @@ Check that your AWS credentials are setup and dynamic inventory is working as ex
 cd ansible && ansible-inventory --list
 ```
 
+### List inventory
+
+Get a grouped list of ansible inventory. Seed nodes are marked with `*`
+
+```
+make list-inventory
+```
+
+Inventory data is stored in local file `ansible/inventory-list.json`. To refresh it later you can `make dump-inventory`
+
 ### Infrastructure setup
 
 An environment infrastructure can be setup with `make setup`,
