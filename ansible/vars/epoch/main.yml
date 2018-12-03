@@ -87,7 +87,7 @@ epoch_config:
 
   sync:
     port: 3015
-    max_gossip: 100
+    max_gossip: 1024
 
   http:
     external:
