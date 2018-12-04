@@ -152,9 +152,6 @@ list-inventory: ansible/inventory-list.json
 	cd ansible &&\
 	cat inventory-list.json | ./dump_inventory.py
 
-clean-inventory:
-	rm -f ansible/inventory-list.json
-
 clean: 
 	rm ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
@@ -162,4 +159,4 @@ clean:
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
-	check-seed-peers check-deploy-env list-inventory clean-inventory
+	check-seed-peers check-deploy-env list-inventory

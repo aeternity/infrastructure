@@ -74,7 +74,7 @@ Get a list of ansible inventory grouped by seed nodes and peers
 make list-inventory
 ```
 
-Inventory data is stored in local file `ansible/inventory-list.json`. To refresh it you can `make clean-inventory list-inventory`
+Inventory data is stored in local file `ansible/inventory-list.json`. To refresh it you can `make -B list-inventory`
 
 ### Infrastructure setup
 
