@@ -100,7 +100,7 @@ make deploy DEPLOY_ENV=integration
 ```
 
 Additional parameters:
-- DEPLOY_DOWNTIME - schedule a downtime period to mute monitoring alerts
+- DEPLOY_DOWNTIME - schedule a downtime period (in seconds) to mute monitoring alerts
 - DEPLOY_COLOR - some environments might be colored to enable blue/green deployments
 - DEPLOY_DB_VERSION - chain db directory suffix that can be bumped to purge the old db
 
