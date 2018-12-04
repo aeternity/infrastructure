@@ -57,7 +57,7 @@ module "aws_deploy-main-ap-southeast-1" {
   ami_name      = "epoch-ubuntu-16.04-v1542910070"
 
   epoch = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.0-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.1-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -80,7 +80,7 @@ module "aws_deploy-main-eu-west-2" {
   ami_name      = "epoch-ubuntu-16.04-v1542910070"
 
   epoch = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.0-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.1-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -105,7 +105,7 @@ module "aws_deploy-main-us-west-2" {
   ami_name      = "epoch-ubuntu-16.04-v1542910070"
 
   epoch = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.0-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.1-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -128,7 +128,7 @@ module "aws_deploy-main-us-east-2" {
   ami_name      = "epoch-ubuntu-16.04-v1542910070"
 
   epoch = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.0-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-1.0.1-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
