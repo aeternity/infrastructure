@@ -41,10 +41,12 @@ for group_name in env_groups:
             seeds.append(host)
         else:
             peers.append(host)
-    print('seeds:')
-    for seed in seeds:
-        print_host(seed)
-    print('peers:')
-    for peer in peers:
-        print_host(peer)
+    if seeds:
+        print('seeds:')
+        for seed in seeds:
+            print_host(seed)
+    if peers:
+        print('peers:')
+        for peer in peers:
+            print_host(peer)
     print("\n")
