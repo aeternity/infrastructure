@@ -1,6 +1,7 @@
 #!/bin/bash
 # Do not run after first error
-set -e
+set -eo pipefail
+
 for i in "$@"
 do
 case $i in
