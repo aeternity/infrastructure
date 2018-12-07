@@ -261,7 +261,7 @@
           tags: [datadog-event]
         - fail:
             msg: "Failed deploy"
-            when: true
+          when: true
 
   handlers:
     - name: Check epoch binary
