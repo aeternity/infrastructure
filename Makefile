@@ -145,10 +145,18 @@ ifndef DEPLOY_ENV
 	$(error DEPLOY_ENV is undefined)
 endif
 
-clean:
+ansible/inventory-list.json:
+	cd ansible && ansible-inventory --list > inventory-list.json
+
+list-inventory: ansible/inventory-list.json
+	cd ansible &&\
+	cat inventory-list.json | ./dump_inventory.py
+
+clean: 
 	rm ~/.ssh/id_ae_infra*
+	rm -f ansible/inventory-list.json
 
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
-	check-seed-peers check-deploy-env
+	check-seed-peers check-deploy-env list-inventory

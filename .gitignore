@@ -9,3 +9,4 @@ ansible/roles
 *.pyc
 .venv
 .terraform
+ansible/inventory-list.json
