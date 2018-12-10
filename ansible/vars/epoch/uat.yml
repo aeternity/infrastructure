@@ -30,7 +30,7 @@ epoch_config:
     db_path: "./db{{ db_version|mandatory }}"
 
   mining:
-    beneficiary: "ak_tjnw1KcmnwfqXvhtGa9GRjanbHM3t6PmEWEWtNMM3ouvNKRu5"
+    beneficiary: "ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688"
     cuckoo:
       miner:
         executable: mean29-avx2
