@@ -35,21 +35,6 @@ references:
       name: Setup Terraform
       command: make setup-terraform
 
-  setup_node: &setup_node
-    run:
-      name: Setup node
-      command: make setup-node
-
-  setup_monitoring: &setup_monitoring
-    run:
-      name: Install monitoring tools
-      command: make setup-monitoring
-
-  build_images: &build_images
-    run:
-      name: Build images
-      command: make images
-
   check_seed_peers: &check_seed_peers
     run:
       name: Check seed peers
@@ -142,63 +127,8 @@ jobs:
     steps:
       - *setup_secrets
       - *setup_terraform
-      - *fail_notification
-
-  setup_uat:
-    <<: *container_config
-    environment:
-      - DEPLOY_ENV: uat
-    steps:
-      - *setup_secrets
-      - *setup_node
-      - *setup_monitoring
       - *check_seed_peers
       - *fail_notification
-
-  setup_integration:
-    <<: *container_config
-    environment:
-      - DEPLOY_ENV: integration
-    steps:
-      - *setup_secrets
-      - *setup_node
-      - *setup_monitoring
-      - *fail_notification
-
-  setup_fast_integration:
-    <<: *container_config
-    environment:
-      - DEPLOY_ENV: fast_integration
-    steps:
-      - *setup_secrets
-      - *setup_node
-      - *setup_monitoring
-      - *fail_notification
-
-  setup_dev1:
-    <<: *container_config
-    environment:
-      - DEPLOY_ENV: dev1
-    steps:
-      - *setup_secrets
-      - *setup_node
-      - *setup_monitoring
-      - *fail_notification
-
-  setup_dev2:
-    <<: *container_config
-    environment:
-      - DEPLOY_ENV: dev2
-    steps:
-      - *setup_secrets
-      - *setup_node
-      - *fail_notification
-
-  build_images:
-    <<: *container_config
-    steps:
-      - *setup_secrets
-      - *build_images
 
   docker_push_latest:
     <<: *machine_config
@@ -250,46 +180,6 @@ workflows:
             branches:
               only: master
 
-      - setup_uat:
-          requires:
-            - build_check
-            - setup_terraform
-          filters:
-            branches:
-              only: master
-
-      - setup_integration:
-          requires:
-            - build_check
-            - setup_terraform
-          filters:
-            branches:
-              only: master
-
-      - setup_fast_integration:
-          requires:
-            - build_check
-            - setup_terraform
-          filters:
-            branches:
-              only: master
-
-      - setup_dev1:
-          requires:
-            - build_check
-            - setup_terraform
-          filters:
-            branches:
-              only: master
-
-      - setup_dev2:
-          requires:
-            - build_check
-            - setup_terraform
-          filters:
-            branches:
-              only: master
-
       - docker_push_latest:
           requires:
             - build_check
@@ -314,21 +204,6 @@ workflows:
                 - master
     jobs:
       - setup_terraform
-      - setup_uat:
-          requires:
-            - setup_terraform
-      - setup_dev1:
-          requires:
-            - setup_terraform
-      - setup_dev2:
-          requires:
-            - setup_terraform
-      - setup_integration:
-          requires:
-            - setup_terraform
-      - setup_fast_integration:
-          requires:
-            - setup_terraform
 
   hourly_seeds_check:
     triggers:
