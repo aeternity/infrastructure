@@ -76,6 +76,8 @@ mnesia_backup:
 cert-%: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
 	@
 
+cert: cert-epoch
+
 ssh-%: cert-%
 	@ssh $*@$(HOST)
 
