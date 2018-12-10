@@ -97,8 +97,8 @@ check-seed-peers:
 	curl -fs -m 5 http://52.10.46.160:3013/v2/peers/pubkey | grep -q 'QU9CvhAQH56a2kA15tCnWPRJ2srMJW8ZmfbbFTAy7eG4o16Bf'
 	curl -fs -m 5 http://18.195.109.60:3013/v2/peers/pubkey | grep -q '2vhFb3HtHd1S7ynbpbFnEdph1tnDXFSfu4NGtq46S2eM5HCdbC'
 	curl -fs -m 5 http://13.250.162.250:3013/v2/peers/pubkey | grep -q '27xmgQ4N1E3QwHyoutLtZsHW5DSW4zneQJ3CxT5JbUejxtFuAu'
-	# Mainnet
 	curl -fs -m 5 http://18.130.148.7:3013/v2/peers/pubkey | grep -q 'nt5N7fwae3DW8Mqk4kxkGAnbykRDpEZq9dzzianiMMPo4fJV7'
+	# Mainnet
 	curl -fs -m 5 http://35.178.61.73:3013/v2/peers/pubkey | grep -q '5mmzrsoPh9owYMfKhZSkUihufDTB6TuayD173Ng464ukVm9xU'
 	curl -fs -m 5 http://35.177.192.219:3013/v2/peers/pubkey | grep -q '2KWhoNRdythXAmgCbM6QxFo95WM4XXGq2pjcbKitXFpUHnPQc3'
 	curl -fs -m 5 http://18.136.37.63:3013/v2/peers/pubkey | grep -q '2L8A5vSjnkLtfFNpJNgP9HbmGLD7ZAGFxoof47N8L4yyLAyyMi'
