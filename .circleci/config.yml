@@ -85,53 +85,57 @@ references:
 
 jobs:
   build_check:
-    <<: *machine_config
+    docker:
+      - image: aeternity/infrastructure:master
+      - image: rastasheep/ubuntu-sshd:16.04
+    working_directory: /src
+    environment:
+      DOCKERHUB_REPO: aeternity/infrastructure
+      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
+      ANSIBLE_HOST_KEY_CHECKING: False
     steps:
       - checkout
-      - *install_vault
-      - *setup_secrets
+      - setup_remote_docker:
+          version: 18.06.0-ce
+          docker_layer_caching: true
       - run:
-          name: Build and push Docker image to DockerHub
+          # Used in .circleci/docker-run.sh
+          name: Build docker branch image
           command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} .
-            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
       - run:
           name: Configuration lint
-          command: .circleci/docker-run.sh make lint
-      # - run:
-      #     name: Prepare Ansible test environment
-      #     command: |
-      #       # Cleanup ansible environment on "remote" host. Order is important.
-      #       sudo apt-get remove python-urllib3 python-setuptools
-      #       sudo apt-get update && sudo apt-get install -y python-dev python-pip python-virtualenv
-      #       sudo /usr/bin/pip2 install -U setuptools
-      #       # Allow ansible runs from "controller" host
-      #       pip install -r requirements.txt
-      #       ansible-galaxy install -r ansible/requirements.yml
-      # - run:
-      #     name: Test ansible setup playbook
-      #     environment:
-      #       - ANSIBLE_CALLBACK_WHITELIST: profile_tasks
-      #     command: |
-      #       .circleci/test-ansible-playbook.sh ansible/setup.yml
-      # - run:
-      #     name: Test ansible monitoring playbook
-      #     environment:
-      #       - ANSIBLE_CALLBACK_WHITELIST: profile_tasks
-      #     command: |
-      #       .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
-      #         -e datadog_api_key=test
-      # - run:
-      #     name: Test ansible deploy playbook
-      #     environment:
-      #       - ANSIBLE_CALLBACK_WHITELIST: profile_tasks
-      #     command: |
-      #       .circleci/test-ansible-playbook.sh ansible/deploy.yml \
-      #         -e env=test \
-      #         -e datadog_api_key= \
-      #         -e datadog_app_key=
-      - *fail_notification
+          # Secrets are auto-imported by the docker entry-point
+          command: |
+            .circleci/docker-run.sh make lint
+      - run:
+          name: Setup ansible environment
+          command: |
+            apk add sshpass
+            pip install -r requirements.txt
+            ansible-galaxy install -r ansible/requirements.yml
+      - run:
+          name: Test ansible/setup.yml
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/setup.yml
+      - run:
+          name: Test ansible/monitoring.yml
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
+              -e datadog_api_key=test -e datadog_enabled=yes
+      - run:
+          name: Test ansible/deploy.yml
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/deploy.yml \
+              -e env=test \
+              -e datadog_api_key= \
+              -e datadog_app_key=
+      - run:
+          name: Push (branch) Docker image to DockerHub
+          command: |
+            source import-secrets.sh
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
 
   setup_terraform:
     <<: *container_config
