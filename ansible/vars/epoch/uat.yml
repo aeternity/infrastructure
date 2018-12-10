@@ -20,6 +20,7 @@ epoch_config:
       port: 3013
     internal:
       port: 3113
+    debug: true
 
   keys:
     dir: keys
