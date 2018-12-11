@@ -19,15 +19,15 @@ This is intended to be used as fast setup recipe, for additional details read th
 Setup Vault authentication:
 
 ```bash
-export VAULT_ADDR=https://the.vault.address/
-export VAULT_GITHUB_TOKEN=your_personal_github_token
+export AE_VAULT_ADDR=https://the.vault.address/
+export AE_VAULT_GITHUB_TOKEN=your_personal_github_token
 ```
 
 Run the container:
 
 ```
 docker pull aeternity/infrastructure
-docker run -it --env-file env.list aeternity/infrastructure
+docker run -it -e AE_VAULT_ADDR -e AE_VAULT_GITHUB_TOKEN aeternity/infrastructure
 ```
 
 Make sure there are no authentication errors after running the container.
@@ -45,10 +45,10 @@ All secrets are managed with [Hashicorp Vault](https://www.vaultproject.io),
 so that only authentication to Vault must be configured explicitly, it needs an address, authentication secret(s) and role:
 
 - Vault address (can be found in the private communication channels)
-    * The Vault server address can be set by `VAULT_ADDR` environment variable.
+    * The Vault server address can be set by `AE_VAULT_ADDR` environment variable.
 - Vault secret can be provided in either of the following methods:
     - [GitHub Auth](https://www.vaultproject.io/docs/auth/github.html) by using [GitHub personal token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/#creating-a-token)
-    set as `VAULT_GITHUB_TOKEN` environment variable. Any valid GitHub access token with the read:org scope can be used for authentication.
+    set as `AE_VAULT_GITHUB_TOKEN` environment variable. Any valid GitHub access token with the read:org scope can be used for authentication.
     - [AppRole Auth](https://www.vaultproject.io/docs/auth/approle.html) set as `VAULT_ROLE_ID` and `VAULT_SECRET_ID` environment variables.
     - [Token Auth](https://www.vaultproject.io/docs/auth/token.html) by setting `VAULT_AUTH_TOKEN` environment variable (translates to `VAULT_TOKEN` by docker entry point). `VAULT_AUTH_TOKEN` is highest priority compared to other credentials.
 - Vault credentials role by setting `CREDS_ROLE` (defaults to `epoch-inventory`)
@@ -61,6 +61,13 @@ A Docker image `aeternity/infrastructure` is build and published to DockerHub. T
 
 ```bash
 docker pull aeternity/infrastructure
+docker run -it -e AE_VAULT_ADDR -e AE_VAULT_GITHUB_TOKEN aeternity/infrastructure
+```
+
+For convenience all the environment variables are listed in `env.list` file that can be used instead of explicit CLI variables list,
+however the command below is meant to be run in a path of this repository clone:
+
+```bash
 docker run -it --env-file env.list aeternity/infrastructure
 ```
 
