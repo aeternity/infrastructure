@@ -6,9 +6,11 @@ CREDS_ROLE="${CREDS_ROLE:-$AWS_CREDS_ROLE}"
 
 VAULT_ADDR=${VAULT_ADDR:-$AE_VAULT_ADDR}
 VAULT_GITHUB_TOKEN=${VAULT_GITHUB_TOKEN:-$AE_VAULT_GITHUB_TOKEN}
+VAULT_AUTH_TOKEN=${VAULT_AUTH_TOKEN:-$AE_VAULT_AUTH_TOKEN}
 
 # Vault address secret used by Terraform, because it cannot be sources in TF
 if [ -n "$VAULT_ADDR" ]; then
+    export VAULT_ADDR
     export TF_VAR_vault_addr=$VAULT_ADDR
 fi
 

@@ -12,35 +12,60 @@ Below documentation is meant for manual testing and additional details. It's alr
 The only requirement is Docker. All the libraries and packages are built in the docker image.
 If for some reason one needs to setup the requirements on the host system see the Dockerfile.
 
-## Credentials setup
+## Getting started
 
-### Amazon Web Services
+This is intended to be used as fast setup recipe, for additional details read the documentation below.
 
-Yous should make sure [AWS CommandLine interface credentials are set](http://docs.ansible.com/ansible/latest/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
-either by environment variables or `~/.aws/credentials` file.
-
-If you have configured multiple AWS credentials you can pass AWS_PROFILE variable before the commands:
+Setup Vault authentication:
 
 ```bash
-AWS_PROFILE=aeternity ansible-inventory --list
+export AE_VAULT_ADDR=https://the.vault.address/
+export AE_VAULT_GITHUB_TOKEN=your_personal_github_token
 ```
 
-### Secrets
+Run the container:
 
-Secrets are managed with [Hashicorp Vault](https://www.vaultproject.io).
+```
+docker pull aeternity/infrastructure
+docker run -it -e AE_VAULT_ADDR -e AE_VAULT_GITHUB_TOKEN aeternity/infrastructure
+```
 
-The Vault server address can be set with `VAULT_ADDR` environment variable.
+Make sure there are no authentication errors after running the container.
 
-An operator may authenticate with [GitHub personal token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/#creating-a-token)
-as `VAULT_GITHUB_TOKEN` environment variable. Any valid GitHub access token with the read:org scope can be used for authentication.
+SSH to any host:
 
-Applications and services may authenticate with `VAULT_ROLE_ID` and `VAULT_SECRET_ID` environment variables.
+```bash
+make cert
+ssh epoch@192.168.1.1
+```
 
-Vault token could be used by setting `VAULT_AUTH_TOKEN` environment variable (translates to `VAULT_TOKEN` by docker entry point). `VAULT_AUTH_TOKEN` is highest priority compared to other credentials.
+## Credentials
+
+All secrets are managed with [Hashicorp Vault](https://www.vaultproject.io),
+so that only authentication to Vault must be configured explicitly, it needs an address, authentication secret(s) and role:
+
+- Vault address (can be found in the private communication channels)
+    * The Vault server address can be set by `AE_VAULT_ADDR` environment variable.
+- Vault secret can be provided in either of the following methods:
+    - [GitHub Auth](https://www.vaultproject.io/docs/auth/github.html) by using [GitHub personal token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/#creating-a-token)
+    set as `AE_VAULT_GITHUB_TOKEN` environment variable. Any valid GitHub access token with the read:org scope can be used for authentication.
+    - [AppRole Auth](https://www.vaultproject.io/docs/auth/approle.html) set as `VAULT_ROLE_ID` and `VAULT_SECRET_ID` environment variables.
+    - [Token Auth](https://www.vaultproject.io/docs/auth/token.html) by setting `VAULT_AUTH_TOKEN` environment variable (translates to `VAULT_TOKEN` by docker entry point). `VAULT_AUTH_TOKEN` is highest priority compared to other credentials.
+- Vault credentials role by setting `CREDS_ROLE` (defaults to `epoch-inventory`)
+    - `epoch-inventory` allows SSH as `epoch` user to all nodes and using Ansible dynamic inventories, together allowing a deployment. All developers are authorized.
+    - `epoch-fleet-manager` allows SSH as `master` user to all nodes and managing the infrastructure (AWS and GCP) - creating, dropping and changing environments (running Terraform). Only devops.
 
 ## Docker image
 
-A Docker image `aeternity/infrastructure` is build and published to DockerHub. To use the image one should configure all the required credentials as documented above and run the container:
+A Docker image `aeternity/infrastructure` is build and published to DockerHub. To use the image one should configure all the required credentials as documented above and run the container (always make sure you have the latest docker image):
+
+```bash
+docker pull aeternity/infrastructure
+docker run -it -e AE_VAULT_ADDR -e AE_VAULT_GITHUB_TOKEN aeternity/infrastructure
+```
+
+For convenience all the environment variables are listed in `env.list` file that can be used instead of explicit CLI variables list,
+however the command below is meant to be run in a path of this repository clone:
 
 ```bash
 docker run -it --env-file env.list aeternity/infrastructure
@@ -50,14 +75,51 @@ docker run -it --env-file env.list aeternity/infrastructure
 
 According to the Vault authentication token permissions, one can ssh to any node they have access to by running:
 
-```
+```bash
 make ssh HOST=192.168.1.1
 ```
 
-This is a shorthand target the actually run `ssh-epoch`.
-Note the `ssh-%` target suffix, it could be any supported node username, e.g. `ssh-master`.
+#### Certificates
+
+SSH certificates (and keys) can be explicitly generated by running:
+
+```bash
+make cert
+```
+
+Then the regular ssh/scp commands could be run:
+```bash
+ssh epoch@192.168.1.1
+```
+
+#### Users
+
+`ssh` and `cert` targets are shorthands that actually run `ssh-epoch` and `cert-epoch`.
+Note the `ssh-%` and `cert-%` target suffix, it could be any supported node username, e.g. `ssh-master`.
+For example to ssh with `master` user (given the Vault token have the sufficient permissions):
+```bash
+make ssh-master HOST=192.168.1.1
+```
 
 ## Ansible playbooks
+
+### SSH setup
+
+To run any of the Ansible playbooks a SSH certificate (and keys) must be setup in advance.
+Depending on the playbook it requires either `epoch` or `master` SSH remote user access.
+
+Both can be setup by running:
+```bash
+make cert-epoch
+```
+
+and/or
+
+```bash
+make cert-master
+```
+
+Please note that only devops are authorized to request `master` user certificates.
 
 ### Ansible dynamic inventory
 
