@@ -30,6 +30,7 @@ epoch_config:
     db_path: "./db{{ db_version|mandatory }}"
 
   mining:
+    autostart: true
     beneficiary: "ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688"
     cuckoo:
       miner:
