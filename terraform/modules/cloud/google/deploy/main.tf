@@ -21,5 +21,5 @@ module "google_fleet" {
   nodes             = "${var.nodes}"
   color             = "${var.color}"
   project           = "${var.project}"
-  platform = "${var.platform}"
+  platform          = "${var.platform}"
 }

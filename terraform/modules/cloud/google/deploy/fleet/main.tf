@@ -38,13 +38,13 @@ resource "google_compute_instance" "static_node" {
   }
 
   service_account {
-    email = "epoch-images@epoch-p2p.iam.gserviceaccount.com"
+    email  = "epoch-images@epoch-p2p.iam.gserviceaccount.com"
     scopes = []
   }
 }
 
 module "user_data" {
-  source = "../../../../user_data/"
+  source            = "../../../../user_data/"
   region            = "${var.zone}"
   env               = "${var.env}"
   bootstrap_version = "${var.bootstrap_version}"

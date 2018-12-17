@@ -48,7 +48,7 @@ resource "aws_launch_configuration" "spot" {
 }
 
 module "user_data" {
-  source = "../../../../user_data/"
+  source            = "../../../../user_data/"
   region            = "${data.aws_region.current.name}"
   env               = "${var.env}"
   bootstrap_version = "${var.bootstrap_version}"

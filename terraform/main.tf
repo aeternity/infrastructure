@@ -356,5 +356,6 @@ module "gcloud_deploy-us-central-1" {
   providers = {
     goolge = "google.us-central1"
   }
+
   project = "${var.google_project}"
 }
