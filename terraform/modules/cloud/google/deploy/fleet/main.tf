@@ -36,7 +36,7 @@ resource "google_compute_instance" "static_node" {
     role  = "epoch"
     color = "${var.color}"
   }
-
+allow_stopping_for_update = true
   service_account {
     email  = "epoch-images@epoch-p2p.iam.gserviceaccount.com"
     scopes = []

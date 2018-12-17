@@ -48,7 +48,7 @@ if [ platform == "google_cloud "]; then
     INSTANCE_AUTH_TOKEN=$(-H "Metadata-Flavor: Google" 'http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=epoch&format=full' | tr -d '\n')
 elif [ platform == "aws "]; then
     INSTANCE_AUTH_TOKEN=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
-do
+fi
 
 echo "Vault authentication"
 export VAULT_ADDR=$vault_addr
