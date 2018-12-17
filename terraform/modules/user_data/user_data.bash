@@ -1,6 +1,7 @@
 #!/bin/bash
 # Don't enable debug mode in this script if secrets are managed as it ends-up in the logs
 # set -x
+
 exec > >(tee /tmp/user-data.log|logger -t user-data ) 2>&1
 
 if [ ! -d "/infrastructure" ] ; then
@@ -13,4 +14,5 @@ bash /infrastructure/scripts/bootstrap.sh \
      --vault_addr=${vault_addr} \
      --vault_role=${vault_role} \
      --env=${env} \
-     --epoch_package=${epoch_package}
+     --epoch_package=${epoch_package} \
+     --platform=${platform}

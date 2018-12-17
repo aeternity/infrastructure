@@ -8,6 +8,7 @@ data "template_file" "user_data" {
     epoch_package     = "${var.epoch_package}"
     vault_addr        = "${var.vault_addr}"
     vault_role        = "${var.vault_role}"
+    platform          = "${var.platform}"
   }
 }
 

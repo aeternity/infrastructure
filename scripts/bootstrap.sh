@@ -21,6 +21,11 @@ case $i in
     epoch_package="${i#*=}"
     shift # past argument=value
     ;;
+    --platform=*)
+    platform="${i#*=}"
+    shift # past argument=value
+    ;;
+
     --default)
     DEFAULT=YES
     shift # past argument with no value
@@ -39,7 +44,11 @@ chmod +x /usr/bin/vault
 
 echo "Find Instance PKCS7"
 # Authenticate the instance to CSM
-PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
+if [ platform == "google_cloud "]; then
+    INSTANCE_AUTH_TOKEN=$(-H "Metadata-Flavor: Google" 'http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=epoch&format=full' | tr -d '\n')
+elif [ platform == "aws "]; then
+    INSTANCE_AUTH_TOKEN=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
+do
 
 echo "Vault authentication"
 export VAULT_ADDR=$vault_addr

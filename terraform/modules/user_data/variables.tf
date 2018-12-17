@@ -1,3 +1,4 @@
+variable "platform" {}
 variable "region" {}
 variable "env" {}
 variable "bootstrap_version" {}

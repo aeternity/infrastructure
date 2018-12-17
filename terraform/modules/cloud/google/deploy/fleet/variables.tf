@@ -20,3 +20,4 @@ variable "epoch" {
 variable "nodes" {}
 variable "color" {}
 variable "project" {}
+variable "platform" {}

@@ -40,3 +40,4 @@ variable "zone" {}
 variable "region" {}
 variable "nodes" {}
 variable "project" {}
+variable "platform" {}

@@ -7,7 +7,7 @@ resource "google_compute_address" "ip_address" {
 resource "google_compute_instance" "static_node" {
   count   = "${var.static_nodes}"
   project = "epoch-p2p"
-  name    = "ae-${var.env}-static-node1"
+  name    = "ae-${var.env}-static-node"
   zone    = "${var.zone}"
 
   boot_disk {
@@ -36,6 +36,11 @@ resource "google_compute_instance" "static_node" {
     role  = "epoch"
     color = "${var.color}"
   }
+
+  service_account {
+    email = "epoch-images@epoch-p2p.iam.gserviceaccount.com"
+    scopes = []
+  }
 }
 
 module "user_data" {
@@ -46,6 +51,7 @@ module "user_data" {
   epoch_package     = "${var.epoch["package"]}"
   vault_addr        = "${var.vault_addr}"
   vault_role        = "${var.vault_role}"
+  platform          = "${var.platform}"
 }
 
 resource "google_compute_instance" "nodes" {
