@@ -46,7 +46,7 @@ chmod +x /usr/bin/vault
 
 echo "Find Instance identity"
 echo sh auth_${platform}.sh --vault_role={$vault_role}
-VAULT_TOKEN=`sh auth_${platform}.sh --vault_role={$vault_role}`
+VAULT_TOKEN=`sh auth_${platform}.sh --vault_role=${vault_role}`
 
 # Authenticate the instance to CSM
 
