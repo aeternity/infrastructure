@@ -19,17 +19,30 @@ resource "aws_instance" "static_node" {
   iam_instance_profile = "epoch-node"
 
   tags {
-    Name  = "ae-${var.env}-static-node"
-    env   = "${var.env}"
-    role  = "epoch"
-    color = "${var.color}"
-    kind  = "seed"
+    Name    = "ae-${var.env}-static-node"
+    env     = "${var.env}"
+    role    = "epoch"
+    color   = "${var.color}"
+    kind    = "seed"
+    package = "${var.epoch["package"]}"
   }
 
   user_data = "${data.template_file.user_data.rendered}"
 
   subnet_id              = "${element( var.subnets, 1)}"
   vpc_security_group_ids = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
+}
+
+data "template_file" "user_data" {
+  template = "${file("${path.module}/templates/user_data.bash")}"
+
+  vars = {
+    region            = "${data.aws_region.current.name}"
+    env               = "${var.env}"
+    bootstrap_version = "${var.bootstrap_version}"
+    vault_addr        = "${var.vault_addr}"
+    vault_role        = "${var.vault_role}"
+  }
 }
 
 resource "aws_launch_configuration" "spot" {
@@ -44,11 +57,11 @@ resource "aws_launch_configuration" "spot" {
     create_before_destroy = true
   }
 
-  user_data = "${data.template_file.user_data.rendered}"
+  user_data = "${data.template_file.spot_user_data.rendered}"
 }
 
-data "template_file" "user_data" {
-  template = "${file("${path.module}/templates/${var.user_data_file}")}"
+data "template_file" "spot_user_data" {
+  template = "${file("${path.module}/templates/spot_user_data.bash")}"
 
   vars = {
     region            = "${data.aws_region.current.name}"
@@ -89,6 +102,11 @@ resource "aws_autoscaling_group" "spot_fleet" {
     {
       key                 = "color"
       value               = "${var.color}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "package"
+      value               = "${var.epoch["package"]}"
       propagate_at_launch = true
     },
   ]
