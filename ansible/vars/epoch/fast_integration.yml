@@ -32,10 +32,10 @@ epoch_config:
     beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
     expected_mine_rate: 15000
     cuckoo:
-      miner:
-        executable: mean15-generic
-        extra_args: "-t {{ ansible_processor_vcpus }}"
-        edge_bits: 15
+      edge_bits: 15
+      miners:
+        - executable: mean15-generic
+          extra_args: "-t {{ ansible_processor_vcpus }}"
 
   logging:
     level: warning
