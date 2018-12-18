@@ -12,4 +12,5 @@ fi
 bash /infrastructure/scripts/bootstrap.sh \
      --vault_addr=${vault_addr} \
      --vault_role=${vault_role} \
-     --env=${env}
+     --env=${env} \
+     --epoch_package=${epoch_package}
