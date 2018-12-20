@@ -33,10 +33,10 @@ epoch_config:
     autostart: true
     beneficiary: "ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688"
     cuckoo:
-      miner:
-        executable: mean29-avx2
-        extra_args: "-t 1"
-        edge_bits: 29
+      edge_bits: 29
+      miners:
+        - executable: mean29-avx2
+          extra_args: "-t 1"
 
   logging:
     level: warning
