@@ -94,6 +94,16 @@ jobs:
           command: |
             .circleci/docker-run.sh make lint
       - run:
+          name: Unit Tests
+          # Secrets are auto-imported by the docker entry-point
+          command: |
+            .circleci/docker-run.sh make unit-tests
+      - run:
+          name: Integration Tests
+          # Secrets are auto-imported by the docker entry-point
+          command: |
+            .circleci/docker-run.sh make integration-tests
+      - run:
           name: Setup ansible environment
           command: |
             apk add sshpass
