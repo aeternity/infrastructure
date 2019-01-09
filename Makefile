@@ -3,12 +3,6 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
-test-setup:
-	cd test/terraform && terraform init
-	cd test/terraform && terraform apply --auto-approve
-	cd ansible && ansible-playbook health-check.yml --limit=tag_env_tf_test
-	cd test/terraform && terraform destroy --auto-approve
-
 setup-terraform:
 	cd terraform && terraform init && terraform apply --auto-approve
 
