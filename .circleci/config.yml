@@ -192,9 +192,9 @@ workflows:
       - integration_tests:
           requires:
             - build_check
-          # filters:
-          #   branches:
-          #     only: master
+          filters:
+            branches:
+              only: master
 
       - setup_terraform:
           requires:
