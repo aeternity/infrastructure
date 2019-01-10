@@ -95,15 +95,8 @@ jobs:
             .circleci/docker-run.sh make lint
       - run:
           name: Unit Tests
-          # Secrets are auto-imported by the docker entry-point
           command: |
             .circleci/docker-run.sh make unit-tests
-      - run:
-          name: Integration Tests
-          # Secrets are auto-imported by the docker entry-point
-          command: |
-            source import-secrets.sh
-            make integration-tests
       - run:
           name: Setup ansible environment
           command: |
@@ -177,6 +170,16 @@ jobs:
       - *check_seed_peers
       - *fail_notification
 
+  integration_tests:
+    <<: *container_config
+    steps:
+      - *setup_secrets
+      - run:
+          name: Integration Tests
+          command: |
+            make integration-tests
+      - *fail_notification
+
 workflows:
   version: 2
   check_deploy:
@@ -184,16 +187,23 @@ workflows:
       - build_check:
           requires: []
 
-      - setup_terraform:
+      - integration_tests:
           requires:
             - build_check
+          # filters:
+          #   branches:
+          #     only: master
+
+      - setup_terraform:
+          requires:
+            - integration_tests
           filters:
             branches:
               only: master
 
       - docker_push_latest:
           requires:
-            - build_check
+            - integration_tests
           filters:
             branches:
               only: master
