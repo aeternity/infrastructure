@@ -217,7 +217,7 @@ workflows:
             tags:
               only: /^v.*$/
 
-  daily_deploy:
+  daily_check_deploy:
     triggers:
       - schedule:
           cron: "0 12 * * *"
@@ -226,7 +226,12 @@ workflows:
               only:
                 - master
     jobs:
-      - setup_terraform
+      - integration_tests:
+          requires: []
+
+      - setup_terraform:
+          requires:
+            - integration_tests
 
   hourly_seeds_check:
     triggers:
