@@ -172,7 +172,9 @@ jobs:
 
   integration_tests:
     <<: *container_config
+    working_directory: /src
     steps:
+      - checkout
       - *setup_secrets
       - run:
           name: Integration Tests
