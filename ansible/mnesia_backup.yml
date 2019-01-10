@@ -36,3 +36,11 @@
       fetch:
         src: /tmp/{{ backup_filename }}.gz
         dest: "{{ download_dir }}"
+
+    - name: Remove Mnesia backups
+      file:
+        path:  "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/{{ backup_filename }}
+        - /tmp/{{ backup_filename }}.gz
