@@ -199,3 +199,119 @@ make mnesia_backup BACKUP_ENV=integration
 Additional parameters:
 - BACKUP_SUFFIX - backup filename suffix, by default the destination file is overwritten (per host), suffix can be used to set unique filename
 - BACKUP_DIR - destination directory of backup files
+
+## Data share
+
+The easiest way to share data between a container and the host is using [bind mounts](https://docs.docker.com/storage/bind-mounts/).
+For example during development is much easier to edit the source on the host and run/test in the container,
+that way you don't have to rebuild the container with each change to test it.
+Bind mounting the source files to the container makes this possible:
+
+```bash
+docker run -it --env-file env.list -v ${PWD}:/src -w /src aeternity/infrastructure
+```
+
+The same method can be used to share data from the container to the host, it's two-way sharing.
+
+An alternative method for one shot transfers could be [docker copy command](https://docs.docker.com/engine/reference/commandline/cp/).
+
+## Testing
+
+### Dockerfile
+
+To test any Dockerfile or (entrypoint) changes a local container can be build and run:
+
+```bash
+docker build -t aeternity/infrastructure:local .
+docker run -it --env-file env.list aeternity/infrastructure:local
+```
+
+### Ansible playbooks
+
+#### Dev environments
+
+The most easy way to test Ansible playbooks is to run it against dev environments.
+First claim a dev environment in the chat and then run the playbook against it:
+
+#### Local docker
+
+Local docker containers can be used for faster feedback loops at the price of some extra docker setup.
+
+To enable network communication between the containers, all the containers that needs to communicate has to be in the same docker network:
+
+```bash
+docker network create aeternity
+```
+
+The infrastructure docker image cannot be used because it's based on Alpine but aeternity node should run on Ubuntu.
+Thus an Ubuntu based container should be run, a convenient image with sshd is `rastasheep/ubuntu-sshd`.
+Note the `net` and `name` parameters:
+
+```bash
+docker pull rastasheep/ubuntu-sshd:16.04
+docker run -d --net aeternity --name aenode rastasheep/ubuntu-sshd:16.04
+```
+
+The above command will run an Ubuntu 16.04 with sshd daemon running
+and reachable by other hosts in the same docker network at address `aenode.aeternity`.
+
+Once the test node is running, start an infrastructure container in the same docker network:
+
+```bash
+docker run -it --env-file env.list -v ${PWD}:/src -w /src --net aeternity aeternity/infrastructure
+```
+
+Running an Ansible playbook against the `aenode` container requires setting [additional Ansible parameters](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#list-of-behavioral-inventory-parameters):
+
+- inventory host - `aenode.aeternity`
+- ssh user - `root`
+- ssh password - `root`
+- python interpreter - `/usr/bin/python3`
+
+For example to run the `setup.yml` playbook:
+
+```bash
+cd ansible && ansible-playbook -i aenode.aeternity, \
+  -e ansible_user=root \
+  -e ansible_ssh_pass=root \
+  -e ansible_python_interpreter=/usr/bin/python3 \
+  setup.yml
+```
+
+### Terraform configuration
+
+To test Terraform configuration changes, a new test configuration can be created then run.
+Another option would be changing the `test/terraform/test.tf` configuration and applying it:
+
+```
+cd test/terraform
+terraform init && terraform apply
+```
+
+After the fleet is create the expected functionality should be validated by using the AWS console or CLI.
+For fast health check the ansible playbook can be used, note that the above Terraform configuration creates an environment with name `tf_test`:
+
+```bash
+cd ansible && ansible-playbook health-check.yml --limit=tag_env_tf_test
+```
+
+Don't forget to cleanup the test environment after the tests are completed:
+
+```bash
+cd test/terraform && terraform destroy
+```
+
+All of the above can be run with single `make` wrapper:
+
+```bash
+make integration-tests
+```
+
+*Note that this environment is also used and run automatically each day by the CI server, it also can be run by other users as well. It's not designed to be multi-user yet, so a bit of coordination should be made to prevent collisions*
+
+### CircleCI configuration
+
+CircleCI provides a [CLI tool](https://circleci.com/docs/2.0/local-cli/) that can be used to validate configuration and run jobs locally.
+However as the local jobs runner has it's limitation, to fully test a workflow it's acceptable to temporary change (as little as possible) the configuration to trigger the test. However, such changes are not accepted on `master` branch.
+
+To debug failing jobs on CircleCI, it supports [SSH debug sessions](https://circleci.com/docs/2.0/ssh-access-jobs/), one can ssh to the build container/VM and inspect the environment.
