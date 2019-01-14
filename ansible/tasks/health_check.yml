@@ -3,7 +3,7 @@
   wait_for:
     port: "{{ epoch_config.http.external.port }}"
     host: "{{ public_ipv4 }}"
-    timeout: 30
+    timeout: 180
   connection: local
 
 - name: API health check

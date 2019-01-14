@@ -83,8 +83,16 @@ ssh-%: cert-%
 
 ssh: ssh-epoch
 
-test-setup-environments:
+# TODO also add ansible idempotent tests here
+unit-tests:
 	cd terraform && terraform init && terraform plan
+
+integration-tests:
+	cd test/terraform && terraform init
+	cd test/terraform && terraform apply --auto-approve
+	# TODO this is actually a smoke test that can be migrated to "goss"
+	cd ansible && ansible-playbook health-check.yml --limit=tag_env_tf_test
+	cd test/terraform && terraform destroy --auto-approve
 
 lint:
 	ansible-lint ansible/setup.yml --exclude ~/.ansible/roles
@@ -93,6 +101,7 @@ lint:
 	ansible-lint ansible/reset-net.yml
 	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
+# TODO move this to "goss" acceptance tests
 # Keep in sync from https://github.com/aeternity/epoch/blob/master/config/sys.config
 check-seed-peers:
 	# UAT
