@@ -95,3 +95,6 @@
   post_tasks:
     - name: Prepare health checks
       include_tasks: tasks/health_check.yml
+      vars:
+        epoch_config: "{{ epoch_vars }}"
+        api_base_uri: http://{{ public_ipv4 }}:{{ epoch_vars.http.external.port }}/v2
