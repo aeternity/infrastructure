@@ -35,3 +35,9 @@ variable "ami_name" {}
 variable "vault_addr" {}
 
 variable "vault_role" {}
+
+# Keep 8GB as default root volume size, that is the same if no parameter is used
+variable "root_volume_size" {
+  description = "Number of gigabytes. Default to 8."
+  default     = 8
+}
