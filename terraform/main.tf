@@ -11,25 +11,25 @@ variable "vault_addr" {
 }
 
 provider "aws" {
-  version = "1.24"
+  version = "1.55"
   region  = "ap-southeast-1"
   alias   = "ap-southeast-1"
 }
 
 provider "aws" {
-  version = "1.24"
+  version = "1.55"
   region  = "eu-central-1"
   alias   = "eu-central-1"
 }
 
 provider "aws" {
-  version = "1.24"
+  version = "1.55"
   region  = "eu-west-2"
   alias   = "eu-west-2"
 }
 
 provider "aws" {
-  version                 = "1.24"
+  version                 = "1.55"
   region                  = "us-west-2"
   alias                   = "us-west-2"
   shared_credentials_file = "/aws/credentials"
@@ -37,7 +37,7 @@ provider "aws" {
 }
 
 provider "aws" {
-  version = "1.24"
+  version = "1.55"
   region  = "us-east-2"
   alias   = "us-east-2"
 }
