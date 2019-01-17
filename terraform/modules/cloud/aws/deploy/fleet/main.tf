@@ -18,6 +18,11 @@ resource "aws_instance" "static_node" {
   instance_type        = "${var.instance_type}"
   iam_instance_profile = "epoch-node"
 
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = "${var.root_volume_size}"
+  }
+
   tags {
     Name    = "ae-${var.env}-static-node"
     env     = "${var.env}"
@@ -52,6 +57,11 @@ resource "aws_launch_configuration" "spot" {
   instance_type        = "${var.instance_type}"
   spot_price           = "${var.spot_price}"
   security_groups      = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
+
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = "${var.root_volume_size}"
+  }
 
   lifecycle {
     create_before_destroy = true

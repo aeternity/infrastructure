@@ -27,3 +27,5 @@ variable "ami_name" {}
 variable "vault_addr" {}
 
 variable "vault_role" {}
+
+variable "root_volume_size" {}

@@ -3,7 +3,7 @@ variable "vault_addr" {
 }
 
 provider "aws" {
-  version = "1.24"
+  version = "1.55"
   region  = "us-east-1"
   alias   = "us-east-1"
 }
