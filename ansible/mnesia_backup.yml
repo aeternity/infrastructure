@@ -26,6 +26,8 @@
   tasks:
     - name: Backup Mnesia database
       command: "{{ epoch_bin }} eval 'ok = mnesia:backup(\"/tmp/{{ backup_filename }}\").'"
+      args:
+        creates: "/tmp/{{ backup_filename }}"
 
     - name: Archive Mnesia backup
       archive:

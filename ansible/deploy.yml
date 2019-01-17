@@ -259,7 +259,8 @@
             - datadog_app_key != ""
           connection: local
           tags: [datadog-event]
-        - fail:
+        - name: Fail the playbook
+          fail:
             msg: "Failed deploy"
           when: true
 

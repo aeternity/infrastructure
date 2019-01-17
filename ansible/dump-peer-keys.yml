@@ -7,6 +7,7 @@
     - name: Get the base58c public key
       command: "/home/epoch/node/bin/epoch peer_key"
       register: public_key_base58c
+      changed_when: public_key_base58c.stdout != ""
 
     - debug:
         msg: "Public key (base58c): {{ public_key_base58c.stdout }}"

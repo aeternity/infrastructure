@@ -95,10 +95,7 @@ integration-tests:
 	cd test/terraform && terraform destroy --auto-approve
 
 lint:
-	ansible-lint ansible/setup.yml --exclude ~/.ansible/roles
-	ansible-lint ansible/monitoring.yml --exclude ~/.ansible/roles
-	ansible-lint ansible/manage-node.yml
-	ansible-lint ansible/reset-net.yml
+	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
 	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
 # TODO move this to "goss" acceptance tests
