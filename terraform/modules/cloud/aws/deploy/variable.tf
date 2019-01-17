@@ -16,7 +16,7 @@ variable "instance_type" {}
 
 variable "spot_price" {}
 
-variable "epoch" {
+variable "aeternity" {
   type = "map"
 }
 

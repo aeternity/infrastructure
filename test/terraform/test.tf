@@ -22,7 +22,7 @@ module "aws_deploy-test" {
   instance_type = "t3.medium"
   ami_name      = "epoch-ubuntu-16.04-*"
 
-  epoch = {
+  aeternity = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
   }
 

@@ -18,7 +18,7 @@ variable "subnets" {
   type = "list"
 }
 
-variable "epoch" {
+variable "aeternity" {
   type = "map"
 }
 
