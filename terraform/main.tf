@@ -52,9 +52,10 @@ module "aws_deploy-main-ap-southeast-1" {
   static_nodes = 10
   spot_nodes   = 4
 
-  spot_price    = "0.15"
-  instance_type = "c5.xlarge"
-  ami_name      = "epoch-ubuntu-16.04-v1542910070"
+  spot_price       = "0.15"
+  instance_type    = "c5.xlarge"
+  ami_name         = "epoch-ubuntu-16.04-v1542910070"
+  root_volume_size = 16
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -75,9 +76,10 @@ module "aws_deploy-main-eu-west-2" {
   static_nodes = 10
   spot_nodes   = 4
 
-  spot_price    = "0.15"
-  instance_type = "c5.xlarge"
-  ami_name      = "epoch-ubuntu-16.04-v1542910070"
+  spot_price       = "0.15"
+  instance_type    = "c5.xlarge"
+  ami_name         = "epoch-ubuntu-16.04-v1542910070"
+  root_volume_size = 16
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -100,9 +102,10 @@ module "aws_deploy-main-us-west-2" {
   static_nodes = 10
   spot_nodes   = 4
 
-  spot_price    = "0.15"
-  instance_type = "c5.xlarge"
-  ami_name      = "epoch-ubuntu-16.04-v1542910070"
+  spot_price       = "0.15"
+  instance_type    = "c5.xlarge"
+  ami_name         = "epoch-ubuntu-16.04-v1542910070"
+  root_volume_size = 16
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
@@ -123,9 +126,10 @@ module "aws_deploy-main-us-east-2" {
   static_nodes = 10
   spot_nodes   = 4
 
-  spot_price    = "0.15"
-  instance_type = "c5.xlarge"
-  ami_name      = "epoch-ubuntu-16.04-v1542910070"
+  spot_price       = "0.15"
+  instance_type    = "c5.xlarge"
+  ami_name         = "epoch-ubuntu-16.04-v1542910070"
+  root_volume_size = 16
 
   epoch = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
