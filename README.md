@@ -165,7 +165,7 @@ make manage-node DEPLOY_ENV=integration CMD=ping
 
 ### Deploy
 
-To deploy epoch package run:
+To deploy aeternity package run:
 ```bash
 export PACKAGE=https://github.com/aeternity/epoch/releases/download/v0.17.0/epoch-0.17.0-ubuntu-x86_64.tar.gz
 make deploy DEPLOY_ENV=integration
