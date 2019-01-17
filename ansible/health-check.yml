@@ -11,8 +11,8 @@
     - name: "Load a variable files for environment: {{ env }}"
       include_vars: "{{ item }}"
       with_first_found:
-        - "vars/epoch/{{ env }}.yml"
-        - "vars/epoch/default.yml"
+        - "vars/aeternity/{{ env }}.yml"
+        - "vars/aeternity/default.yml"
 
     - name: Run health checks
       include_tasks: tasks/health_check.yml

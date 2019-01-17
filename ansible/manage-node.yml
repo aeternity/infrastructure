@@ -1,75 +1,75 @@
 ---
-- name: Manage epoch nodes
+- name: Manage aeternity nodes
   hosts: all
   remote_user: epoch
 
   vars:
-    epoch_bin: "{{ ansible_env.HOME }}/node/bin/epoch"
-    epoch_action: "{{ cmd | default('ping') }}"
-    epoch_running: false
+    aeternity_bin: "{{ ansible_env.HOME }}/node/bin/epoch"
+    aeternity_action: "{{ cmd | default('ping') }}"
+    aeternity_running: false
 
   tasks:
     - name: Fail on unsupported command
       fail:
         msg: "Invalid command. Supported commands are: ping, start, stop, restart"
       when:
-        - epoch_action != "ping"
-        - epoch_action != "start"
-        - epoch_action != "stop"
-        - epoch_action != "restart"
+        - aeternity_action != "ping"
+        - aeternity_action != "start"
+        - aeternity_action != "stop"
+        - aeternity_action != "restart"
       connection: local
 
     - name: "Load a variable files for environment: {{ env }}"
       include_vars: "{{ item }}"
       with_first_found:
-        - "vars/epoch/{{ env }}.yml"
-        - "vars/epoch/default.yml"
+        - "vars/aeternity/{{ env }}.yml"
+        - "vars/aeternity/default.yml"
 
-    - name: Epoch binary exists
+    - name: Aeternity binary exists
       stat:
-        path: "{{ epoch_bin }}"
-      register: epoch
+        path: "{{ aeternity_bin }}"
+      register: ae_node
       changed_when: false
-      failed_when: epoch.stat.exists != True
+      failed_when: ae_node.stat.exists != True
 
-    - name: Ping epoch daemon
-      command: "{{ epoch_bin }} ping"
+    - name: Ping aeternity daemon
+      command: "{{ aeternity_bin }} ping"
       register: ping
       failed_when: no
       changed_when: false
-      when: epoch.stat.exists == True
+      when: ae_node.stat.exists == True
 
-    - name: Register running epoch daemon
+    - name: Register running aeternity daemon
       set_fact:
-        epoch_running: true
+        node_running: true
       when: ping.stdout == "pong"
 
     - name: Fail if not running
       fail:
         msg: "Ping failed"
       when:
-        - not epoch_running
-        - epoch_action == "ping"
+        - not node_running
+        - aeternity_action == "ping"
 
-    - name: Start epoch deamon
-      command: "{{ epoch_bin }} start"
+    - name: Start aeternity deamon
+      command: "{{ aeternity_bin }} start"
       when:
-        - not epoch_running
-        - epoch_action == "start" or epoch_action == "restart"
+        - not node_running
+        - aeternity_action == "start" or aeternity_action == "restart"
 
-    - name: Stop epoch deamon
-      command: "{{ epoch_bin }} stop"
+    - name: Stop aeternity deamon
+      command: "{{ aeternity_bin }} stop"
       when:
-        - epoch_running
-        - epoch_action == "stop"
+        - node_running
+        - aeternity_action == "stop"
 
-    - name: Restart epoch deamon
-      command: "{{ epoch_bin }} restart"
+    - name: Restart aeternity deamon
+      command: "{{ aeternity_bin }} restart"
       when:
-        - epoch_running
-        - epoch_action == "restart"
+        - node_running
+        - aeternity_action == "restart"
 
   post_tasks:
     - name: Prepare health checks
       include_tasks: tasks/health_check.yml
-      when: epoch_action != "stop"
+      when: aeternity_action != "stop"

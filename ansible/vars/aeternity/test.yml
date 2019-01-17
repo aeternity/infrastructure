@@ -1,4 +1,4 @@
-api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
+api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 genesis_accounts:
   "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
 package: https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz
@@ -6,7 +6,7 @@ health_check: no
 configure_peers: true
 seed_peers: []
 
-epoch_config:
+node_config:
   sync:
     port: 3015
 

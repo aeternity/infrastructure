@@ -1,10 +1,15 @@
-api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
+datadog_enabled: yes
+api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 genesis_accounts:
   "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
-configure_peers: true
-seed_peers: []
+configure_peers: false
+seed_peers:
+  - "35.177.40.45"
 
-epoch_config:
+node_config:
+  peers:
+    - "aenode://pp_275gTYBmh5t9ormHVntuThgeqCxRAwbKKtE8E9Mmoa8WjjWtLT@35.177.40.45:3015"
+
   sync:
     port: 3015
 
@@ -23,11 +28,12 @@ epoch_config:
     db_path: "./db{{ db_version|mandatory }}"
 
   mining:
+    autostart: true
     beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
     cuckoo:
       edge_bits: 29
       miners:
-        - executable: mean29-generic
+        - executable: mean29-avx2
           extra_args: "-t {{ ansible_processor_vcpus }}"
 
   logging:
@@ -37,3 +43,6 @@ epoch_config:
       # StatsD server and port
       host: 127.0.0.1
       port: 8125
+
+  fork_management:
+    network_id: "ae_integration"

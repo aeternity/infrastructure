@@ -21,7 +21,7 @@
         logpath: /var/log/auth.log
 
   tasks:
-    - name: Create epoch daemon user
+    - name: Create aeternity daemon user
       user:
         name: "{{ project_user }}"
         shell: /bin/bash
@@ -85,7 +85,7 @@
         pkg:
         - build-essential
         - python3
-        - python3-yaml #epoch.fact
+        - python3-yaml #aeternity.fact
         - python3-pip
         - virtualenv
         - jq
@@ -139,10 +139,10 @@
       tags:
         - ansible-facts
 
-    - name: "Install epoch fact file"
+    - name: "Install aeternity.fact file"
       copy:
-        src: files/epoch.fact
-        dest: /etc/ansible/facts.d/epoch.fact
+        src: files/aeternity.fact
+        dest: /etc/ansible/facts.d/aeternity.fact
         mode: 0755
       tags:
         - ansible-facts

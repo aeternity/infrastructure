@@ -1,4 +1,4 @@
-api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
+api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 configure_peers: false
 seed_peers:
   - "35.178.61.73"
@@ -42,7 +42,7 @@ seed_peers:
   - "13.228.202.140"
   - "52.77.168.79"
 
-epoch_config:
+node_config:
   peers:
     - "aenode://pp_5mmzrsoPh9owYMfKhZSkUihufDTB6TuayD173Ng464ukVm9xU@35.178.61.73:3015"
     - "aenode://pp_2KWhoNRdythXAmgCbM6QxFo95WM4XXGq2pjcbKitXFpUHnPQc3@35.177.192.219:3015"

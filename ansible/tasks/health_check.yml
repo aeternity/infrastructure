@@ -1,7 +1,7 @@
 ---
-- name: Wait epoch node API to boot
+- name: Wait aeternity node API to boot
   wait_for:
-    port: "{{ epoch_config.http.external.port }}"
+    port: "{{ node_config.http.external.port }}"
     host: "{{ public_ipv4 }}"
     timeout: 180
   connection: local
