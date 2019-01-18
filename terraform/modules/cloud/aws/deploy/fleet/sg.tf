@@ -64,7 +64,7 @@ resource "aws_security_group_rule" "allow_ssh" {
   security_group_id = "${aws_security_group.ae-nodes-management.id}"
 }
 
-resource "aws_security_group_rule" "allow_aeternity_icmp" {
+resource "aws_security_group_rule" "allow_icmp" {
   type              = "ingress"
   from_port         = 8
   to_port           = -1

@@ -8,14 +8,14 @@ setup-terraform:
 
 setup-node: check-deploy-env
 	cd ansible && ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e vault_addr=$(VAULT_ADDR) \
 		setup.yml
 
 setup-monitoring: check-deploy-env
 	cd ansible && ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e env=$(DEPLOY_ENV) \
 		monitoring.yml
@@ -26,7 +26,7 @@ deploy: check-deploy-env
 ifeq ($(DEPLOY_DB_VERSION),)
 	$(error DEPLOY_DB_VERSION should be provided)
 endif
-	$(eval LIMIT=tag_role_epoch:&tag_env_$(DEPLOY_ENV))
+	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
 ifneq ($(DEPLOY_COLOR),)
 	$(eval LIMIT=$(LIMIT):&tag_color_$(DEPLOY_COLOR))
 endif
@@ -45,7 +45,7 @@ ifndef CMD
 	$(error CMD is undefined, supported commands: start, stop, restart, ping)
 endif
 	cd ansible && ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
 		-e db_version=0 \
@@ -54,13 +54,13 @@ endif
 
 reset-net: check-deploy-env
 	cd ansible && ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_epoch" \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		reset-net.yml
 
 mnesia_backup:
 	cd ansible && ansible-playbook \
-		--limit="tag_role_epoch:&tag_env_$(BACKUP_ENV)" \
+		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e download_dir=$(BACKUP_DIR) \
 		-e backup_suffix=$(BACKUP_SUFFIX) \
@@ -160,7 +160,7 @@ list-inventory: ansible/inventory-list.json
 	cd ansible &&\
 	cat inventory-list.json | ./dump_inventory.py
 
-clean: 
+clean:
 	rm ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
 

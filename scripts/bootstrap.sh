@@ -69,7 +69,7 @@ cat > /tmp/local_inventory << EOF
 [local]
 localhost ansible_connection=local
 
-[tag_role_epoch:children]
+[tag_role_aenode:children]
 local
 
 [tag_env_${env}:children]

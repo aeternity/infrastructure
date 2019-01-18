@@ -26,7 +26,7 @@ resource "aws_instance" "static_node" {
   tags {
     Name    = "ae-${var.env}-static-node"
     env     = "${var.env}"
-    role    = "epoch"
+    role    = "aenode"
     color   = "${var.color}"
     kind    = "seed"
     package = "${var.aeternity["package"]}"
