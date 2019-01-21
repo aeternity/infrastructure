@@ -13,4 +13,4 @@ bash /infrastructure/scripts/bootstrap.sh \
      --vault_addr=${vault_addr} \
      --vault_role=${vault_role} \
      --env=${env} \
-     --aeternity_package=${aeternity_package}
+     --epoch_package=${epoch_package}

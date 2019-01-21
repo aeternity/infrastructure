@@ -17,8 +17,8 @@ case $i in
     env="${i#*=}"
     shift # past argument=value
     ;;
-    --aeternity_package=*)
-    aeternity_package="${i#*=}"
+    --epoch_package=*)
+    epoch_package="${i#*=}"
     shift # past argument=value
     ;;
     --default)
@@ -80,10 +80,10 @@ EOF
 # Fetch package from EC2 tags if not provided as parameter
 # Spot instances pass this parameter in user_data because they don't have tags assigned during boot yet
 # Static instances rely on tags
-if [ -z "$aeternity_package" ]; then
+if [ -z "$epoch_package" ]; then
     INSTANCE_ID=$(ec2metadata --instance-id)
     REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | grep region | awk -F\" '{print $4}')
-    aeternity_package=$(aws ec2 describe-tags --region=$REGION --filters "Name=resource-id,Values=$INSTANCE_ID" "Name=key,Values=package" --query 'Tags[0].Value' --output=text)
+    epoch_package=$(aws ec2 describe-tags --region=$REGION --filters "Name=resource-id,Values=$INSTANCE_ID" "Name=key,Values=package" --query 'Tags[0].Value' --output=text)
 fi
 
 # While Ansible is run by Python 3 because of the virtual environment
@@ -106,7 +106,7 @@ ansible-playbook \
     -i /tmp/local_inventory \
     -e ansible_python_interpreter=$(which python3) \
     --become-user epoch -b \
-    -e package=${aeternity_package} \
+    -e package=${epoch_package} \
     -e env=${env} \
     -e db_version=0 \
     deploy.yml
