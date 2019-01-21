@@ -20,7 +20,7 @@ module "aws_fleet" {
   spot_nodes   = "${var.spot_nodes}"
   static_nodes = "${var.static_nodes}"
 
-  epoch = "${var.epoch}"
+  aeternity = "${var.aeternity}"
 }
 
 # Module to module depens_on workaround

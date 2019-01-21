@@ -26,10 +26,10 @@ resource "aws_instance" "static_node" {
   tags {
     Name    = "ae-${var.env}-static-node"
     env     = "${var.env}"
-    role    = "epoch"
+    role    = "aenode"
     color   = "${var.color}"
     kind    = "seed"
-    package = "${var.epoch["package"]}"
+    package = "${var.aeternity["package"]}"
   }
 
   user_data = "${data.template_file.user_data.rendered}"
@@ -77,7 +77,7 @@ data "template_file" "spot_user_data" {
     region            = "${data.aws_region.current.name}"
     env               = "${var.env}"
     bootstrap_version = "${var.bootstrap_version}"
-    epoch_package     = "${var.epoch["package"]}"
+    epoch_package     = "${var.aeternity["package"]}"
     vault_addr        = "${var.vault_addr}"
     vault_role        = "${var.vault_role}"
   }
@@ -116,7 +116,7 @@ resource "aws_autoscaling_group" "spot_fleet" {
     },
     {
       key                 = "package"
-      value               = "${var.epoch["package"]}"
+      value               = "${var.aeternity["package"]}"
       propagate_at_launch = true
     },
   ]

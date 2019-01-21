@@ -3,8 +3,8 @@
 # This is required to allow deploying on fraction of group hosts
 # For example rolling updates and deploying only to single hosts of a group
 #
-# For example below command will deploy only to ae-dev2-epoch-n0 host in tag_env_dev2 group
-# ansible-playbook --limit="ae-dev2-epoch-n0" --extra-vars "hosts_group=tag_env_dev2" deploy.yml
+# For example below command will deploy only to ae-dev2-aeternity-n0 host in tag_env_dev2 group
+# ansible-playbook --limit="ae-dev2-aeternity-n0" --extra-vars "hosts_group=tag_env_dev2" deploy.yml
 
 - name: Facts setup
   hosts: all
@@ -40,7 +40,7 @@
       tags: [always]
       when: is_aws
 
-- name: Deploy epoch package
+- name: Deploy aeternity package
   hosts: all
   remote_user: epoch
   # Facts are already collected in the previous playbook
@@ -82,9 +82,9 @@
       - name: "Load a variable files for environment: {{ env }}"
         include_vars: "{{ item }}"
         with_first_found:
-          - "vars/epoch/{{ env }}.yml"
-          - "vars/epoch/default.yml"
-        tags: [config, epoch_config, peer_keys, health-check]
+          - "vars/aeternity/{{ env }}.yml"
+          - "vars/aeternity/default.yml"
+        tags: [config, node_config, peer_keys, health-check]
 
       - name: Fail on missing package variable
         fail:
@@ -99,7 +99,7 @@
           checksum: "{{ package_checksum|default(omit) }}"
         when: "'http' in package"
         register: remote_package
-        notify: "stop epoch daemon"
+        notify: "stop aeternity daemon"
         tags: [package]
 
       - name: Upload local package
@@ -108,7 +108,7 @@
           dest: "{{ packages_path }}/{{ package|basename }}"
         when: "'http' not in package"
         register: local_package
-        notify: "stop epoch daemon"
+        notify: "stop aeternity daemon"
         tags: [package]
 
       - name: "Make sure {{ project_root }} exists"
@@ -127,53 +127,53 @@
           mode: 0400
         tags: [config, erlang_cookie]
 
-      - name: Extract epoch package into {{ project_root }}
+      - name: Extract aeternity package into {{ project_root }}
         unarchive:
           remote_src: true
           keep_newer: true
           src: "{{ packages_path }}/{{ package|basename }}"
           dest: "{{ project_root }}"
         when: remote_package.changed or local_package.changed
-        notify: "start epoch daemon"
+        notify: "start aeternity daemon"
         tags: [package]
 
       - name: Plant ENV file
         copy:
           content: "{{ env }}\n"
           dest: "{{ project_root }}/ENV"
-        notify: "restart epoch daemon"
+        notify: "restart aeternity daemon"
         tags: [package]
 
-      - name: "Make sure chain path ( {{ epoch_config.chain.db_path }} ) exists"
+      - name: "Make sure chain path ( {{ node_config.chain.db_path }} ) exists"
         file:
-          path: "{{ project_root }}/{{ epoch_config.chain.db_path }}"
+          path: "{{ project_root }}/{{ node_config.chain.db_path }}"
           state: directory
         tags: [config]
 
-      - name: "Make sure keys dir ( {{ epoch_config['keys']['dir'] }} ) exists"
+      - name: "Make sure keys dir ( {{ node_config['keys']['dir'] }} ) exists"
         file:
-          path: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}"
+          path: "{{ project_root }}/{{ node_config['keys']['dir'] }}"
           state: directory
           mode: 0700
         tags: [config, peer_keys]
 
-      - name: "Copy node keys to {{ project_root }}/{{ epoch_config['keys']['dir'] }}"
+      - name: "Copy node keys to {{ project_root }}/{{ node_config['keys']['dir'] }}"
         copy:
           src: "{{ item }}"
-          dest: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}"
+          dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}"
           mode: 0600
         with_items: "{{ keypair }}"
         when: keypair is defined
-        notify: "restart epoch daemon"
+        notify: "restart aeternity daemon"
         tags: [config]
 
-      - name: Update epoch configuration
+      - name: Update node configuration
         template:
-          src: templates/epoch.yaml
+          src: templates/aeternity.yaml
           dest: "{{ project_root }}/epoch.yaml"
           mode: '0600'
-        notify: "restart epoch daemon"
-        tags: [config, epoch_config]
+        notify: "restart aeternity daemon"
+        tags: [config, node_config]
 
       - name: Update accounts configuration
         copy:
@@ -182,29 +182,29 @@
         when: genesis_accounts is defined
         tags: [config]
 
-      - name: "Copy node public peer key to {{ project_root }}/{{ epoch_config['keys']['dir'] }}/peer_key.pub"
+      - name: "Copy node public peer key to {{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key.pub"
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/epoch/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
-          dest: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}/peer_key.pub"
+          dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key.pub"
           mode: 0600
         when: public_ipv4 in seed_peers
-        notify: "restart epoch daemon"
+        notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
-      - name: "Copy node private peer key to {{ project_root }}/{{ epoch_config['keys']['dir'] }}/peer_key"
+      - name: "Copy node private peer key to {{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key"
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/epoch/peer_keys/{{ public_ipv4 }}/private:base64')|b64decode }}"
-          dest: "{{ project_root }}/{{ epoch_config['keys']['dir'] }}/peer_key"
+          dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key"
           mode: 0600
         when: public_ipv4 in seed_peers
-        notify: "restart epoch daemon"
+        notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
       - meta: flush_handlers
 
-      - name: Wait epoch node API to boot
+      - name: Wait aeternity node API to boot
         wait_for:
-          port: "{{ epoch_config.http.external.port }}"
+          port: "{{ node_config.http.external.port }}"
           host: "{{ public_ipv4 }}"
           timeout: 300
         when: health_check
@@ -219,7 +219,7 @@
         connection: local
         tags: [health-check]
 
-      - name: Refresh epoch facts
+      - name: Refresh aeternity facts
         setup:
         tags: [datadog-event]
 
@@ -230,14 +230,14 @@
           title: Deploy
           text: |
             %%%
-            Revision: [{{ ansible_local.epoch.revision }}](https://github.com/aeternity/epoch/commit/{{ ansible_local.epoch.revision }})
+            Revision: [{{ ansible_local.aeternity.revision }}](https://github.com/aeternity/epoch/commit/{{ ansible_local.aeternity.revision }})
             Package: {{ package|default('unknown') }}
             %%%
           api_key: "{{ datadog_api_key }}"
           app_key: "{{ datadog_app_key }}"
           tags:
             - "env:{{ env }}"
-            - "version:{{ ansible_local.epoch.version }}"
+            - "version:{{ ansible_local.aeternity.version }}"
         when:
           - datadog_api_key != ""
           - datadog_app_key != ""
@@ -265,36 +265,36 @@
           when: true
 
   handlers:
-    - name: Check epoch binary
+    - name: Check aeternity binary
       stat:
         path: "{{ project_root }}/bin/epoch"
-      register: epoch
+      register: ae_node
       tags: [daemon]
       listen:
-        - "stop epoch daemon"
-        - "restart epoch daemon"
+        - "stop aeternity daemon"
+        - "restart aeternity daemon"
 
-    - name: Ping epoch
+    - name: Ping aeternity node
       command: "{{ project_root }}/bin/epoch ping"
       failed_when: no
       register: ping
-      when: epoch.stat.exists == True
+      when: ae_node.stat.exists == True
       tags: [daemon]
       listen:
-        - "stop epoch daemon"
-        - "restart epoch daemon"
+        - "stop aeternity daemon"
+        - "restart aeternity daemon"
 
-    - name: Stop epoch
+    - name: Stop aeternity node
       command: "{{ project_root }}/bin/epoch stop"
-      when: epoch.stat.exists == True and ping.stdout == "pong"
+      when: ae_node.stat.exists == True and ping.stdout == "pong"
       tags: [daemon]
       listen:
-        - "stop epoch daemon"
-        - "restart epoch daemon"
+        - "stop aeternity daemon"
+        - "restart aeternity daemon"
 
-    - name: Start epoch
+    - name: Start aeternity node
       command: "{{ project_root }}/bin/epoch start"
       tags: [daemon]
       listen:
-        - "start epoch daemon"
-        - "restart epoch daemon"
+        - "start aeternity daemon"
+        - "restart aeternity daemon"

@@ -18,14 +18,14 @@
   remote_user: epoch
 
   vars:
-    epoch_bin: "{{ ansible_env.HOME }}/node/bin/epoch"
+    aeternity_bin: "{{ ansible_env.HOME }}/node/bin/epoch"
     download_dir: /tmp/mnesia_backups
     backup_suffix: backup
     backup_filename: "mnesia_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ backup_suffix }}"
 
   tasks:
     - name: Backup Mnesia database
-      command: "{{ epoch_bin }} eval 'ok = mnesia:backup(\"/tmp/{{ backup_filename }}\").'"
+      command: "{{ aeternity_bin }} eval 'ok = mnesia:backup(\"/tmp/{{ backup_filename }}\").'"
       args:
         creates: "/tmp/{{ backup_filename }}"
 

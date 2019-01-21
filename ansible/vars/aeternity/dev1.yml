@@ -1,7 +1,7 @@
-api_base_uri: http://{{ public_ipv4 }}:{{ epoch_config.http.external.port }}/v2
+api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 seed_peers: []
 
-epoch_config:
+node_config:
   sync:
     port: 3015
 
