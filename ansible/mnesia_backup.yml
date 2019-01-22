@@ -18,7 +18,7 @@
   remote_user: epoch
 
   vars:
-    aeternity_bin: "{{ ansible_env.HOME }}/node/bin/epoch"
+    aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
     download_dir: /tmp/mnesia_backups
     backup_suffix: backup
     backup_filename: "mnesia_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ backup_suffix }}"
