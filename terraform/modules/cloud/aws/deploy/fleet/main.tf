@@ -16,7 +16,7 @@ resource "aws_instance" "static_node" {
   count                = "${var.static_nodes}"
   ami                  = "${data.aws_ami.ami.id}"
   instance_type        = "${var.instance_type}"
-  iam_instance_profile = "epoch-node"
+  iam_instance_profile = "ae-node"
 
   root_block_device {
     volume_type = "gp2"
@@ -52,7 +52,7 @@ data "template_file" "user_data" {
 
 resource "aws_launch_configuration" "spot" {
   name_prefix          = "ae-${var.env}-spot-nodes_"
-  iam_instance_profile = "epoch-node"
+  iam_instance_profile = "ae-node"
   image_id             = "${data.aws_ami.ami.id}"
   instance_type        = "${var.instance_type}"
   spot_price           = "${var.spot_price}"
