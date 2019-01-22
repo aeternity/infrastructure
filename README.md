@@ -51,9 +51,9 @@ so that only authentication to Vault must be configured explicitly, it needs an 
     set as `AE_VAULT_GITHUB_TOKEN` environment variable. Any valid GitHub access token with the read:org scope can be used for authentication.
     - [AppRole Auth](https://www.vaultproject.io/docs/auth/approle.html) set as `VAULT_ROLE_ID` and `VAULT_SECRET_ID` environment variables.
     - [Token Auth](https://www.vaultproject.io/docs/auth/token.html) by setting `VAULT_AUTH_TOKEN` environment variable (translates to `VAULT_TOKEN` by docker entry point). `VAULT_AUTH_TOKEN` is highest priority compared to other credentials.
-- Vault credentials role by setting `CREDS_ROLE` (defaults to `epoch-inventory`)
-    - `epoch-inventory` allows SSH as `epoch` user to all nodes and using Ansible dynamic inventories, together allowing a deployment. All developers are authorized.
-    - `epoch-fleet-manager` allows SSH as `master` user to all nodes and managing the infrastructure (AWS and GCP) - creating, dropping and changing environments (running Terraform). Only devops.
+- Vault credentials role by setting `VAULT_SECRETS_ROLE` (defaults to `ae-inventory`)
+    - `ae-inventory` allows SSH as `epoch` user to all nodes and using Ansible dynamic inventories, together allowing a deployment. All developers are authorized.
+    - `ae-fleet-manager` allows SSH as `master` user to all nodes and managing the infrastructure (AWS and GCP) - creating, dropping and changing environments (running Terraform). Only devops.
 
 ## Docker image
 
