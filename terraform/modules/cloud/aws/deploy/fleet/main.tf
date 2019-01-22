@@ -106,7 +106,7 @@ resource "aws_autoscaling_group" "spot_fleet" {
     },
     {
       key                 = "role"
-      value               = "epoch"
+      value               = "aenode"
       propagate_at_launch = true
     },
     {
