@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-AWS_CREDS_ROLE="${AWS_CREDS_ROLE:-epoch-inventory}"
-CREDS_ROLE="${CREDS_ROLE:-$AWS_CREDS_ROLE}"
+CREDS_ROLE="${CREDS_ROLE:-ae-inventory}"
+VAULT_SECRETS_ROLE="${VAULT_SECRETS_ROLE:-$CREDS_ROLE}"
 
 VAULT_ADDR=${VAULT_ADDR:-$AE_VAULT_ADDR}
 VAULT_GITHUB_TOKEN=${VAULT_GITHUB_TOKEN:-$AE_VAULT_GITHUB_TOKEN}
 VAULT_AUTH_TOKEN=${VAULT_AUTH_TOKEN:-$AE_VAULT_AUTH_TOKEN}
 
-# Vault address secret used by Terraform, because it cannot be sources in TF
+# Vault address secret used by Terraform, because it cannot be sourced in TF
 if [ -n "$VAULT_ADDR" ]; then
     export VAULT_ADDR
     export TF_VAR_vault_addr=$VAULT_ADDR
@@ -29,15 +29,15 @@ if [ -n "$VAULT_AUTH_TOKEN" ]; then
 fi
 
 if [ -n "$VAULT_TOKEN" ]; then
-    AWS_CREDS=$(vault write -f aws/sts/${CREDS_ROLE})
+    AWS_CREDS=$(vault write -f aws/sts/${VAULT_SECRETS_ROLE})
     export AWS_ACCESS_KEY_ID=$(echo $AWS_CREDS | grep -o 'access_key [^ ]*' | awk '{print $2}')
     export AWS_SECRET_ACCESS_KEY=$(echo $AWS_CREDS | grep -o 'secret_key [^ ]*' | awk '{print $2}')
     export AWS_SESSION_TOKEN=$(echo $AWS_CREDS | grep -o 'security_token [^ ]*' | awk '{print $2}')
 
     export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.gcp.json
-    vault read -field json secret/google/${CREDS_ROLE} > $GOOGLE_APPLICATION_CREDENTIALS
+    vault read -field json secret/google/${VAULT_SECRETS_ROLE} > $GOOGLE_APPLICATION_CREDENTIALS
 
-    if [ "$CREDS_ROLE" = "epoch-fleet-manager" ]; then
+    if [ "$VAULT_SECRETS_ROLE" = "ae-fleet-manager" ]; then
         DOCKERHUB_CREDS=$(vault read secret/dockerhub/prod)
         export DOCKER_USER=$(echo $DOCKERHUB_CREDS | grep -o 'username [^ ]*' | awk '{print $2}')
         export DOCKER_PASS=$(echo $DOCKERHUB_CREDS | grep -o 'password [^ ]*' | awk '{print $2}')
