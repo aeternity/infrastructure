@@ -58,7 +58,7 @@ module "aws_deploy-main-ap-southeast-1" {
   root_volume_size = 16
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -82,7 +82,7 @@ module "aws_deploy-main-eu-west-2" {
   root_volume_size = 16
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -108,7 +108,7 @@ module "aws_deploy-main-us-west-2" {
   root_volume_size = 16
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -132,7 +132,7 @@ module "aws_deploy-main-us-east-2" {
   root_volume_size = 16
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -156,7 +156,7 @@ module "aws_deploy-ap-southeast-1" {
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -180,7 +180,7 @@ module "aws_deploy-eu-central-1" {
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -206,7 +206,7 @@ module "aws_deploy-us-west-2" {
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -230,7 +230,7 @@ module "aws_deploy-uat-eu-west-2" {
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-releases/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -253,7 +253,7 @@ module "aws_deploy-dev1-eu-west-2" {
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -274,7 +274,7 @@ module "aws_deploy-dev2-eu-west-2" {
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -296,7 +296,7 @@ module "aws_deploy-integration-eu-west-2" {
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-epoch-builds/epoch-latest-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
