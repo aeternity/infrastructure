@@ -1,7 +1,7 @@
 ---
 - name: Health check remote nodes
   hosts: all
-  remote_user: epoch
+  remote_user: aeternity
 
   vars:
     env: unknown

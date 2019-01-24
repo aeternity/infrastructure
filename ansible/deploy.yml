@@ -8,7 +8,7 @@
 
 - name: Facts setup
   hosts: all
-  remote_user: epoch
+  remote_user: aeternity
   # Gather fact the usual way when hosts_group is not defined for delegated way
   gather_facts: "{{ (hosts_group is not defined) }}"
   tasks:
@@ -42,7 +42,7 @@
 
 - name: Deploy aeternity package
   hosts: all
-  remote_user: epoch
+  remote_user: aeternity
   # Facts are already collected in the previous playbook
   gather_facts: no
   max_fail_percentage: 25

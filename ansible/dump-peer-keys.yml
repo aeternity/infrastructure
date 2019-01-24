@@ -1,11 +1,11 @@
 - name: Dump peer keys
   hosts: all
-  remote_user: epoch
+  remote_user: aeternity
   gather_facts: no
 
   tasks:
     - name: Get the base58c public key
-      command: "/home/epoch/node/bin/aeternity peer_key"
+      command: "/home/epoch/node/bin/aeterity peer_key"
       register: public_key_base58c
       changed_when: public_key_base58c.stdout != ""
 
@@ -14,7 +14,7 @@
 
     - name: Get the base64 public key
       slurp:
-        src: /home/epoch/node/keys/peer_key.pub
+        src: /home/aeternity/node/keys/peer_key.pub
       register: public_key_base64
 
     - debug:
@@ -22,7 +22,7 @@
 
     - name: Get the private key
       slurp:
-        src: /home/epoch/node/keys/peer_key
+        src: /home/aeternity/node/keys/peer_key
       register: private_key
 
     - debug:
