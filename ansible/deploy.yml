@@ -184,7 +184,7 @@
 
       - name: "Copy node public peer key to {{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key.pub"
         copy:
-          content: "{{ lookup('hashi_vault', 'secret=secret/epoch/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
+          content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
           dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key.pub"
           mode: 0600
         when: public_ipv4 in seed_peers
@@ -193,7 +193,7 @@
 
       - name: "Copy node private peer key to {{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key"
         copy:
-          content: "{{ lookup('hashi_vault', 'secret=secret/epoch/peer_keys/{{ public_ipv4 }}/private:base64')|b64decode }}"
+          content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/private:base64')|b64decode }}"
           dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key"
           mode: 0600
         when: public_ipv4 in seed_peers

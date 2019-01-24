@@ -32,7 +32,7 @@
         msg: "aenode://{{ public_key_base58c.stdout }}@{{ public_ipv4 }}:3015"
 
     - debug:
-        msg: "vault write secret/epoch/peer_keys/{{ public_ipv4 }}/public base64={{ public_key_base64['content'] }}"
+        msg: "vault write secret/aenode/peer_keys/{{ public_ipv4 }}/public base64={{ public_key_base64['content'] }}"
 
     - debug:
-        msg: "vault write secret/epoch/peer_keys/{{ public_ipv4 }}/private base64={{ private_key['content'] }}"
+        msg: "vault write secret/aenode/peer_keys/{{ public_ipv4 }}/private base64={{ private_key['content'] }}"
