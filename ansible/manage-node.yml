@@ -6,7 +6,7 @@
   vars:
     aeternity_bin: "{{ ansible_env.HOME }}/node/bin/epoch"
     aeternity_action: "{{ cmd | default('ping') }}"
-    aeternity_running: false
+    node_running: false
 
   tasks:
     - name: Fail on unsupported command
