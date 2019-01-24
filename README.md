@@ -36,7 +36,7 @@ SSH to any host:
 
 ```bash
 make cert
-ssh epoch@192.168.1.1
+ssh aeternity@192.168.1.1
 ```
 
 ## Credentials
@@ -52,7 +52,7 @@ so that only authentication to Vault must be configured explicitly, it needs an 
     - [AppRole Auth](https://www.vaultproject.io/docs/auth/approle.html) set as `VAULT_ROLE_ID` and `VAULT_SECRET_ID` environment variables.
     - [Token Auth](https://www.vaultproject.io/docs/auth/token.html) by setting `VAULT_AUTH_TOKEN` environment variable (translates to `VAULT_TOKEN` by docker entry point). `VAULT_AUTH_TOKEN` is highest priority compared to other credentials.
 - Vault credentials role by setting `VAULT_SECRETS_ROLE` (defaults to `ae-inventory`)
-    - `ae-inventory` allows SSH as `epoch` user to all nodes and using Ansible dynamic inventories, together allowing a deployment. All developers are authorized.
+    - `ae-inventory` allows SSH as `aeternity` user to all nodes and using Ansible dynamic inventories, together allowing a deployment. All developers are authorized.
     - `ae-fleet-manager` allows SSH as `master` user to all nodes and managing the infrastructure (AWS and GCP) - creating, dropping and changing environments (running Terraform). Only devops.
 
 ## Docker image
@@ -89,12 +89,12 @@ make cert
 
 Then the regular ssh/scp commands could be run:
 ```bash
-ssh epoch@192.168.1.1
+ssh aeternity@192.168.1.1
 ```
 
 #### Users
 
-`ssh` and `cert` targets are shorthands that actually run `ssh-epoch` and `cert-epoch`.
+`ssh` and `cert` targets are shorthands that actually run `ssh-aeternity` and `cert-aeternity`.
 Note the `ssh-%` and `cert-%` target suffix, it could be any supported node username, e.g. `ssh-master`.
 For example to ssh with `master` user (given the Vault token have the sufficient permissions):
 ```bash
@@ -106,11 +106,11 @@ make ssh-master HOST=192.168.1.1
 ### SSH setup
 
 To run any of the Ansible playbooks a SSH certificate (and keys) must be setup in advance.
-Depending on the playbook it requires either `epoch` or `master` SSH remote user access.
+Depending on the playbook it requires either `aeternity` or `master` SSH remote user access.
 
 Both can be setup by running:
 ```bash
-make cert-epoch
+make cert-aeternity
 ```
 
 and/or
