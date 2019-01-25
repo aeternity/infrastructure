@@ -102,11 +102,12 @@ ansible-playbook \
     -e env=${env} \
     monitoring.yml
 
+# Keep db_version in sync with the value in file deployment/DB_VERSION from aeternity/aeternity repo!
 ansible-playbook \
     -i /tmp/local_inventory \
     -e ansible_python_interpreter=$(which python3) \
     --become-user epoch -b \
     -e package=${epoch_package} \
     -e env=${env} \
-    -e db_version=0 \
+    -e db_version=1 \
     deploy.yml
