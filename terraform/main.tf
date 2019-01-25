@@ -50,7 +50,7 @@ module "aws_deploy-main-ap-southeast-1" {
   vault_addr        = "${var.vault_addr}"
 
   static_nodes = 10
-  spot_nodes   = 4
+  spot_nodes   = 0
 
   spot_price       = "0.15"
   instance_type    = "c5.xlarge"
@@ -74,7 +74,7 @@ module "aws_deploy-main-eu-west-2" {
   vault_addr        = "${var.vault_addr}"
 
   static_nodes = 10
-  spot_nodes   = 4
+  spot_nodes   = 0
 
   spot_price       = "0.15"
   instance_type    = "c5.xlarge"
@@ -100,7 +100,7 @@ module "aws_deploy-main-us-west-2" {
   vault_addr        = "${var.vault_addr}"
 
   static_nodes = 10
-  spot_nodes   = 4
+  spot_nodes   = 0
 
   spot_price       = "0.15"
   instance_type    = "c5.xlarge"
@@ -124,7 +124,7 @@ module "aws_deploy-main-us-east-2" {
   vault_addr        = "${var.vault_addr}"
 
   static_nodes = 10
-  spot_nodes   = 4
+  spot_nodes   = 0
 
   spot_price       = "0.15"
   instance_type    = "c5.xlarge"
