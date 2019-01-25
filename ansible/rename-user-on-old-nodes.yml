@@ -1,0 +1,43 @@
+---
+- name: Rename epoch user
+  hosts: all
+  remote_user: master
+  become: yes
+
+  vars:
+    project_new_user: aeternity
+    project_old_user: epoch
+    project_old_group: "{{ project_old_user }}"
+    project_new_group: "{{ project_new_user }}"
+    project_new_home: /home/aeternity
+    project_old_home: /home/epoch
+    project_root: "{{ project_old_home }}/node/"
+    aeternity_bin: "{{ project_root }}/bin/epoch"
+
+  tasks:
+    - name: Check aeternity binary
+      stat:
+        path: "{{ project_root }}/bin/epoch"
+      register: ae_node
+
+    - name: Ping aeternity node
+      command: "{{ project_root }}/bin/epoch ping"
+      failed_when: no
+      register: ping
+      when: ae_node.stat.exists == True
+
+    - name: Stop aeternity node
+      command: "{{ project_root }}/bin/epoch stop"
+
+    - name: Rename group
+      command: "groupmod -n {{ project_new_group }} {{ project_old_group }}"
+      
+    - name: Rename user
+      command: "usermod -m -d {{ project_new_home }} -l {{ project_new_user }} {{ project_old_user }}"
+      
+    - name:  old home directory
+      command: "ln -s {{ project_new_home }} {{ project_old_home }}"
+
+    - name: Start aeternity daemon
+      command: "{{ aeternity_bin }} start"
+      when: ae_node.stat.exists
