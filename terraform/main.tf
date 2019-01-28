@@ -298,7 +298,6 @@ module "aws_deploy-uat-eu-north-1" {
   depends_on = ["${module.aws_deploy-us-west-2.static_node_ips}"]
 }
 
-
 module "aws_deploy-dev1-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "dev1"
