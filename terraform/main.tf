@@ -272,6 +272,33 @@ module "aws_deploy-uat-eu-west-2" {
   depends_on = ["${module.aws_deploy-us-west-2.static_node_ips}"]
 }
 
+module "aws_deploy-uat-eu-north-1" {
+  source            = "modules/cloud/aws/deploy"
+  env               = "uat"
+  color             = "green"
+  bootstrap_version = "v1.7.0"
+  vault_role        = "ae-node"
+  vault_addr        = "${var.vault_addr}"
+
+  static_nodes = 1
+  spot_nodes   = 9
+
+  spot_price    = "0.125"
+  instance_type = "m4.large"
+  ami_name      = "aeternity-ubuntu-16.04-v1548669657"
+
+  aeternity = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    aws = "aws.eu-north-1"
+  }
+
+  depends_on = ["${module.aws_deploy-us-west-2.static_node_ips}"]
+}
+
+
 module "aws_deploy-dev1-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "dev1"
