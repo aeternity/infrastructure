@@ -42,6 +42,12 @@ provider "aws" {
   alias   = "us-east-2"
 }
 
+provider "aws" {
+  version = "1.55"
+  region  = "eu-north-1"
+  alias   = "eu-north-1"
+}
+
 module "aws_deploy-main-ap-southeast-1" {
   source            = "modules/cloud/aws/deploy"
   env               = "main"
@@ -87,6 +93,32 @@ module "aws_deploy-main-eu-west-2" {
 
   providers = {
     aws = "aws.eu-west-2"
+  }
+
+  depends_on = ["${module.aws_deploy-ap-southeast-1.static_node_ips}"]
+}
+
+module "aws_deploy-main-eu-north-1" {
+  source            = "modules/cloud/aws/deploy"
+  env               = "main"
+  bootstrap_version = "v1.7.0"
+  vault_role        = "epoch-node"
+  vault_addr        = "${var.vault_addr}"
+
+  static_nodes = 10
+  spot_nodes   = 0
+
+  spot_price       = "0.15"
+  instance_type    = "c5.xlarge"
+  ami_name         = "aeternity-ubuntu-16.04-v1548669657"
+  root_volume_size = 16
+
+  aeternity = {
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz"
+  }
+
+  providers = {
+    aws = "aws.eu-north-1"
   }
 
   depends_on = ["${module.aws_deploy-ap-southeast-1.static_node_ips}"]
