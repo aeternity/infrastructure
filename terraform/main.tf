@@ -283,8 +283,8 @@ module "aws_deploy-uat-eu-north-1" {
   static_nodes = 1
   spot_nodes   = 9
 
-  spot_price    = "0.125"
-  instance_type = "m4.large"
+  spot_price    = "0.07"
+  instance_type = "m5.large"
   ami_name      = "aeternity-ubuntu-16.04-v1548669657"
 
   aeternity = {
