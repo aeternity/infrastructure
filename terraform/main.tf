@@ -373,7 +373,7 @@ module "aws_deploy-next-eu-west-2" {
   spot_nodes    = 2
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1548669657"
+  ami_name      = "aeternity-ubuntu-16.04-v1548684655"
 
   aeternity = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-next-ubuntu-x86_64.tar.gz"
@@ -395,7 +395,7 @@ module "aws_deploy-unstable-eu-west-2" {
   spot_nodes    = 2
   spot_price    = "0.125"
   instance_type = "m4.large"
-  ami_name      = "epoch-ubuntu-16.04-v1548669657"
+  ami_name      = "aeternity-ubuntu-16.04-v1548684655"
 
   aeternity = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-next-ubuntu-x86_64.tar.gz"
