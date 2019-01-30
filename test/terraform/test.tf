@@ -4,8 +4,8 @@ variable "vault_addr" {
 
 provider "aws" {
   version = "1.55"
-  region  = "us-east-1"
-  alias   = "us-east-1"
+  region  = "eu-west-3"
+  alias   = "eu-west-3"
 }
 
 module "aws_deploy-test" {
@@ -18,15 +18,15 @@ module "aws_deploy-test" {
   static_nodes = 1
   spot_nodes   = 1
 
-  spot_price    = "0.05"
+  spot_price    = "0.08"
   instance_type = "t3.medium"
-  ami_name      = "epoch-ubuntu-16.04-*"
+  ami_name      = "aeternity-ubuntu-16.04-*"
 
   aeternity = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
-    aws = "aws.us-east-1"
+    aws = "aws.eu-west-3"
   }
 }
