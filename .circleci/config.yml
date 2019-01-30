@@ -180,6 +180,11 @@ jobs:
           name: Integration Tests
           command: |
             make integration-tests
+      - run:
+          name: Integration env cleanup
+          command: |
+            make integration-tests-cleanup
+          when: on_fail
       - *fail_notification
 
 workflows:

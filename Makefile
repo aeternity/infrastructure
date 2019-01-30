@@ -87,12 +87,16 @@ ssh: ssh-epoch
 unit-tests:
 	cd terraform && terraform init && terraform plan
 
-integration-tests:
+integration-tests-run:
 	cd test/terraform && terraform init
 	cd test/terraform && terraform apply --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
 	cd ansible && ansible-playbook health-check.yml --limit=tag_env_tf_test
+
+integration-tests-cleanup:
 	cd test/terraform && terraform destroy --auto-approve
+
+integration-tests: integration-tests-run integration-tests-cleanup
 
 lint:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
