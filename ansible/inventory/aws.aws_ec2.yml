@@ -3,11 +3,11 @@
 plugin: aws_ec2
 regions:
   - eu-central-1
-  - us-west-2
-  - ap-southeast-1
   - eu-west-2
-  - us-east-1
+  - ap-southeast-1
+  - ap-southeast-2
   - us-east-2
+  - us-west-2
 hostnames:
   - ip-address
 keyed_groups:
