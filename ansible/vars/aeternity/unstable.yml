@@ -1,4 +1,5 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
+seed_peers: []
 configure_peers: false
 
 node_config:
