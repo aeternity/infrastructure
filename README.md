@@ -167,14 +167,27 @@ make manage-node DEPLOY_ENV=integration CMD=ping
 
 To deploy aeternity package run:
 ```bash
-export PACKAGE=https://github.com/aeternity/epoch/releases/download/v0.17.0/epoch-0.17.0-ubuntu-x86_64.tar.gz
+export PACKAGE=https://github.com/aeternity/aeternity/releases/download/v1.4.0/aeternity-1.4.0-ubuntu-x86_64.tar.gz
 make deploy DEPLOY_ENV=integration
 ```
 
 Additional parameters:
-- DEPLOY_DOWNTIME - schedule a downtime period (in seconds) to mute monitoring alerts
-- DEPLOY_COLOR - some environments might be colored to enable blue/green deployments
-- DEPLOY_DB_VERSION - chain db directory suffix that can be bumped to purge the old db
+- DEPLOY_DOWNTIME - schedule a downtime period (in seconds) to mute monitoring alerts (0 by default e.g. monitors are not muted)
+- DEPLOY_COLOR - some environments might be colored to enable blue/green deployments (not limits by default)
+- DEPLOY_DB_VERSION - chain db directory suffix that can be bumped to purge the old db (0 by default)
+
+#### Deploy to mainnet
+
+Full example for deploying 1.4.0 release to all mainnet nodes.
+
+```bash
+DEPLOY_VERSION=1.4.0
+export DEPLOY_ENV=main
+export DEPLOY_DOWNTIME=1800 #30 minutes
+export DEPLOY_DB_VERSION=$(curl https://raw.githubusercontent.com/aeternity/aeternity/v${DEPLOY_VERSION}/deployment/DB_VERSION)
+export PACKAGE=https://github.com/aeternity/aeternity/releases/download/v${DEPLOY_VERSION}/aeternity-${DEPLOY_VERSION}-ubuntu-x86_64.tar.gz
+make cert && make deploy
+```
 
 ### Reset network of nodes
 
