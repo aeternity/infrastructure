@@ -4,8 +4,8 @@ variable "vault_addr" {
 
 provider "aws" {
   version = "1.55"
-  region  = "eu-west-3"
-  alias   = "eu-west-3"
+  region  = "ap-southeast-2"
+  alias   = "ap-southeast-2"
 }
 
 module "aws_deploy-test" {
@@ -18,7 +18,7 @@ module "aws_deploy-test" {
   static_nodes = 1
   spot_nodes   = 1
 
-  spot_price    = "0.08"
+  spot_price    = "0.04"
   instance_type = "t3.medium"
   ami_name      = "aeternity-ubuntu-16.04-*"
 
@@ -27,6 +27,6 @@ module "aws_deploy-test" {
   }
 
   providers = {
-    aws = "aws.eu-west-3"
+    aws = "aws.ap-southeast-2"
   }
 }
