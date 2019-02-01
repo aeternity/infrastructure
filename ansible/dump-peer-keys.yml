@@ -5,7 +5,7 @@
 
   tasks:
     - name: Get the base58c public key
-      command: "/home/epoch/node/bin/aeterity peer_key"
+      command: "/home/aeternity/node/bin/aeterity peer_key"
       register: public_key_base58c
       changed_when: public_key_base58c.stdout != ""
 
