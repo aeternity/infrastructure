@@ -12,7 +12,7 @@ module "aws_deploy-test" {
   source            = "../../terraform/modules/cloud/aws/deploy"
   env               = "tf_test"
   bootstrap_version = "master"
-  vault_role        = "epoch-node"
+  vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
   static_nodes = 1
