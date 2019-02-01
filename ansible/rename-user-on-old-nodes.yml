@@ -14,7 +14,15 @@
     project_root: "{{ project_old_home }}/node/"
     aeternity_bin: "{{ project_root }}/bin/epoch"
 
-  tasks:
+  tasks:        
+    - name: Check if epoch user exists
+      getent:
+        database: passwd
+        key: "{{ project_old_user }}"
+        split: ':'
+        fail_key: False
+      register: old_user_present
+
     - name: Check aeternity binary
       stat:
         path: "{{ project_root }}/bin/epoch"
@@ -28,16 +36,47 @@
 
     - name: Stop aeternity node
       command: "{{ project_root }}/bin/epoch stop"
+      when: (ae_node.stat.exists == True and ping.stdout == "pong") or
+            old_user_present.ansible_facts.getent_passwd.epoch != None
 
-    - name: Rename group
-      command: "groupmod -n {{ project_new_group }} {{ project_old_group }}"
+    - name: Check new home directory
+      stat:
+        path: "{{ project_new_home }}"
+      register: new_home_present
       
-    - name: Rename user
-      command: "usermod -m -d {{ project_new_home }} -l {{ project_new_user }} {{ project_old_user }}"
+      # Copy modyle does not support recursive directory copying with
+      # remote_src
+    - name: Move home directory
+      command: "mv {{ project_old_home }} {{project_new_home}}"
+      when: not new_home_present.stat.exists
       
-    - name:  old home directory
-      command: "ln -s {{ project_new_home }} {{ project_old_home }}"
+    - name: Delete epoch user
+      user:
+        name: "{{ project_old_user }}"
+        state: absent
+        remove: yes
 
-    - name: Start aeternity daemon
-      command: "{{ aeternity_bin }} start"
-      when: ae_node.stat.exists
+    - name: Create aeternity user
+      user:
+        name: "{{ project_new_user }}"
+        home: "{{ project_new_home }}"
+        create_home: no
+        state: present
+    - name: Change ownership of new user home directory
+      file:
+        path: "{{ project_new_home }}"
+        owner: "{{ project_new_user }}"
+        group: "{{ project_new_user}}"
+        recurse: yes
+
+    - name: Create /home/epoch symlink
+      file:
+        src: "{{ project_new_home }}"
+        dest: "{{ project_old_home }}"
+        owner: "{{ project_new_user }}"
+        group: "{{ project_new_user }}"
+        state: link
+
+    - name: Start aeternity node
+      command: "{{ project_root }}/bin/epoch start"
+      when: old_user_present.ansible_facts.getent_passwd.epoch != None
