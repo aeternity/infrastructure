@@ -171,7 +171,7 @@
       - name: Update node configuration
         template:
           src: templates/aeternity.yaml
-          dest: "{{ project_root }}/epoch.yaml"
+          dest: "{{ project_root }}/aeternity.yaml"
           mode: '0600'
         notify: "restart aeternity daemon"
         tags: [config, node_config]
