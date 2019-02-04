@@ -102,7 +102,7 @@ module "aws_deploy-main-eu-north-1" {
   source            = "modules/cloud/aws/deploy"
   env               = "main"
   bootstrap_version = "v1.7.0"
-  vault_role        = "epoch-node"
+  vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
   static_nodes = 10
