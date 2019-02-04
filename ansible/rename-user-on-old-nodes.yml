@@ -14,7 +14,7 @@
     project_root: "{{ project_old_home }}/node/"
     aeternity_bin: "{{ project_root }}/bin/epoch"
 
-  tasks:        
+  tasks:
     - name: Check if epoch user exists
       getent:
         database: passwd
@@ -43,13 +43,13 @@
       stat:
         path: "{{ project_new_home }}"
       register: new_home_present
-      
+
       # Copy modyle does not support recursive directory copying with
       # remote_src
     - name: Move home directory
       command: "mv {{ project_old_home }} {{project_new_home}}"
       when: not new_home_present.stat.exists
-      
+
     - name: Delete epoch user
       user:
         name: "{{ project_old_user }}"
