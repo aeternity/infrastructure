@@ -59,7 +59,7 @@ module "aws_deploy-main-ap-southeast-1" {
   spot_nodes   = 0
 
   spot_price       = "0.15"
-  instance_type    = "c5.xlarge"
+  instance_type    = "t3.small"
   ami_name         = "epoch-ubuntu-16.04-v1542910070"
   root_volume_size = 16
 
@@ -109,7 +109,7 @@ module "aws_deploy-main-eu-north-1" {
   spot_nodes   = 0
 
   spot_price       = "0.15"
-  instance_type    = "c5.xlarge"
+  instance_type    = "t3.small"
   ami_name         = "aeternity-ubuntu-16.04-v1548669657"
   root_volume_size = 16
 
@@ -135,7 +135,7 @@ module "aws_deploy-main-us-west-2" {
   spot_nodes   = 0
 
   spot_price       = "0.15"
-  instance_type    = "c5.xlarge"
+  instance_type    = "t3.small"
   ami_name         = "epoch-ubuntu-16.04-v1542910070"
   root_volume_size = 16
 
@@ -184,7 +184,7 @@ module "aws_deploy-ap-southeast-1" {
   spot_nodes   = 14
 
   spot_price    = "0.125"
-  instance_type = "m4.large"
+  instance_type = "t3.small"
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
@@ -258,7 +258,7 @@ module "aws_deploy-uat-eu-west-2" {
   spot_nodes   = 9
 
   spot_price    = "0.125"
-  instance_type = "m4.large"
+  instance_type = "t3.small"
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
@@ -307,7 +307,7 @@ module "aws_deploy-dev1-eu-west-2" {
 
   spot_nodes    = 10
   spot_price    = "0.125"
-  instance_type = "m4.large"
+  instance_type = "t3.small"
   ami_name      = "epoch-ubuntu-16.04-v1542985640"
 
   aeternity = {
@@ -372,7 +372,7 @@ module "aws_deploy-next-eu-west-2" {
   static_nodes  = 1
   spot_nodes    = 2
   spot_price    = "0.125"
-  instance_type = "m4.large"
+  instance_type = "t3.small"
   ami_name      = "aeternity-ubuntu-16.04-v1548684655"
 
   aeternity = {
@@ -394,7 +394,7 @@ module "aws_deploy-unstable-eu-west-2" {
   static_nodes  = 1
   spot_nodes    = 2
   spot_price    = "0.125"
-  instance_type = "m4.large"
+  instance_type = "t3.small"
   ami_name      = "aeternity-ubuntu-16.04-v1548684655"
 
   aeternity = {
