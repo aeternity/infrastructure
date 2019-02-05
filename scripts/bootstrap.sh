@@ -106,7 +106,7 @@ ansible-playbook \
 ansible-playbook \
     -i /tmp/local_inventory \
     -e ansible_python_interpreter=$(which python3) \
-    --become-user epoch -b \
+    --become-user aeternity -b \
     -e package=${epoch_package} \
     -e env=${env} \
     -e db_version=1 \

@@ -59,7 +59,7 @@
   tags: [datadog]
 
   vars:
-    project_user: epoch
+    project_user: aeternity
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
     datadog_agent6: true
     datadog_config:

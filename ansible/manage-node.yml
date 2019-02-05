@@ -1,7 +1,7 @@
 ---
 - name: Manage aeternity nodes
   hosts: all
-  remote_user: epoch
+  remote_user: aeternity
 
   vars:
     aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"

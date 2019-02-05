@@ -5,7 +5,7 @@ import subprocess
 import yaml
 import json
 
-node_path = "/home/epoch/node"
+node_path = "/home/aeternity/node"
 
 def read_node_file_contents(filename):
     try:

@@ -15,7 +15,7 @@
 
 - name: Backup, archive and download Mnesia database
   hosts: "{{ ansible_play_hosts | last }}"
-  remote_user: epoch
+  remote_user: aeternity
 
   vars:
     aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"

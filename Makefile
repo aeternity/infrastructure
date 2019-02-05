@@ -76,12 +76,12 @@ mnesia_backup:
 cert-%: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
 	@
 
-cert: cert-epoch
+cert: cert-aeternity
 
 ssh-%: cert-%
 	@ssh $*@$(HOST)
 
-ssh: ssh-epoch
+ssh: ssh-aeternity
 
 # TODO also add ansible idempotent tests here
 unit-tests:

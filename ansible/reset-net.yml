@@ -1,7 +1,7 @@
 ---
 - name: Reset aeternity test-net
   hosts: all
-  remote_user: epoch
+  remote_user: aeternity
 
   vars:
     project_root: "{{ ansible_env.HOME }}/node"
