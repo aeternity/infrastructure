@@ -96,9 +96,10 @@
       - name: Delete old downloaded pacakges glob
         find:
           paths: "{{packages_path}}"
-          paterns:
+          patterns:
             - .*aeternity-.*ubuntu.*.tar.gz
             - .*epoch-.*ubuntu.*.tar.gz
+          exclude: "{{ package|basename }}"
           use_regex: yes
         register: old_packages_to_delete
 
