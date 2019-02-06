@@ -77,7 +77,7 @@ data "template_file" "spot_user_data" {
     region            = "${data.aws_region.current.name}"
     env               = "${var.env}"
     bootstrap_version = "${var.bootstrap_version}"
-    epoch_package     = "${var.aeternity["package"]}"
+    aeternity_package = "${var.aeternity["package"]}"
     vault_addr        = "${var.vault_addr}"
     vault_role        = "${var.vault_role}"
   }
