@@ -41,15 +41,15 @@ PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | 
 
 export VAULT_ADDR=$vault_addr
 if [ -f "/root/.vault_nonce" ] ; then
-    export NONCEa=$(cat /root/.vault_nonce)
+    export NONCE=$(cat /root/.vault_nonce)
 else
-    export NONCEa=$(vault write auth/aws/login pkcs7=$PKCS7 role=$vault_role | grep token_meta_nonce | awk '{print $2}')
+    export NONCE=$(vault write auth/aws/login pkcs7=$PKCS7 role=$vault_role | grep token_meta_nonce | awk '{print $2}')
     if [ -z "$NONCE" ]; then
         echo "NONCE is empty"
         exit 1
     fi
 
-    echo $NONCE > /root/.vault_nonce
+    echo $NONCE > /rooasdt/.vault_nonce
 
     if [ $? -nq 0 ]; then
         echo "not able to save NONCE"
