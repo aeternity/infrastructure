@@ -79,7 +79,6 @@
         owner: "{{ project_new_user }}"
         group: "{{ project_new_user }}"
         state: link
-      when: old_user_present.ansible_facts.getent_passwd.epoch != None
 
     - name: Start aeternity node
       command: "{{ project_root }}/bin/aeternity start"
