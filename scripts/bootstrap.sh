@@ -49,7 +49,7 @@ else
         exit 1
     fi
 
-    echo $NONCE > /rooasdt/.vault_nonce
+    echo $NONCE > /root/.vault_nonce
 
     if [ $? -nq 0 ]; then
         echo "not able to save NONCE"
