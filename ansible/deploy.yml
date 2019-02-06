@@ -119,6 +119,10 @@
             # allow group read for integration purposes  (e.g. logs)
             mode: 0750
 
+      - name: Start aeternity node
+        command: "{{ project_root }}/bin/aeternity start"
+        tags: [daemon]
+
       - meta: flush_handlers
 
       - name: Create erlang cookie file
