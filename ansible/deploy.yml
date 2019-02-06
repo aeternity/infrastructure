@@ -124,7 +124,7 @@
       - name: Create erlang cookie file
         copy:
           dest: "{{ ansible_env.HOME }}/.erlang.cookie"
-          content: "epoch_cookie"
+          content: "aeternity_cookie"
           mode: 0400
         tags: [config, erlang_cookie]
 
