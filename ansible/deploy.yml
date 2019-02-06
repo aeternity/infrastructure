@@ -119,10 +119,6 @@
             # allow group read for integration purposes  (e.g. logs)
             mode: 0750
 
-      - name: Start aeternity node
-        command: "{{ project_root }}/bin/aeternity start"
-        tags: [daemon]
-
       - meta: flush_handlers
 
       - name: Create erlang cookie file
@@ -204,6 +200,10 @@
         when: public_ipv4 in seed_peers
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
+
+      - name: Start aeternity node
+        command: "{{ project_root }}/bin/aeternity start"
+        tags: [daemon]
 
       - meta: flush_handlers
 
