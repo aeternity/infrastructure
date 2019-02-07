@@ -44,7 +44,13 @@ if [ -f "/root/.vault_nonce" ] ; then
     export NONCE=$(cat /root/.vault_nonce)
 else
     export NONCE=$(vault write auth/aws/login pkcs7=$PKCS7 role=$vault_role | grep token_meta_nonce | awk '{print $2}')
+    if [ -z "$NONCE" ]; then
+        echo "NONCE is empty"
+        exit 1
+    fi
+
     echo $NONCE > /root/.vault_nonce
+
     chmod 0600 /root/.vault_nonce
 fi
 
