@@ -86,6 +86,11 @@
       become_flags: "-i"
       become_method: sudo
 
+    - name: Wait for left-over processes to finish before renaming user
+      wait_for:
+        timeout: 15
+      when: old_user_present.ansible_facts.getent_passwd.epoch != None
+
     - name: Rename group
       command: "groupmod -n {{ project_new_group }} {{ project_old_group }}"
       when: old_group_present.ansible_facts.getent_group.epoch != None
@@ -115,7 +120,7 @@
 
     - name: Start aeternity node
       command: "{{ project_root }}/bin/aeternity start"
-      when: ae_node.stat.exists == True and ping.stdout != "pong"
+      when: ae_node.stat.exists == True
       become: yes
       become_user: "{{ project_new_user }}"
       become_method: sudo
