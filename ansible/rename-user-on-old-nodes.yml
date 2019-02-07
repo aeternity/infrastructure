@@ -66,7 +66,7 @@
       find:
         paths:
           - "{{project_old_home}}"
-          - "{{ project_new_home }}"
+          - "{{project_new_home}}"
         patterns:
           - .*epmd$
         use_regex: yes
