@@ -93,7 +93,7 @@
         instances:
           - name: ssh
             search_string: ['sshd']
-          - name: epoch
+          - name: aeternity
             search_string: ['beam.smp']
           - name: epmd
             search_string: ['epmd']
@@ -113,26 +113,26 @@
         logs:
           - type: tcp
             port: 10518
-            service: epoch
+            service: aeternity
             source: syslog
           - type: file
             path: "/home/{{ project_user }}/node/log/epoch.log"
-            service: epoch
+            service: aeternity
             source: lager
-            sourcecategory: epoch
+            sourcecategory: aeternity
           - type: file
             path: "/home/{{ project_user }}/node/log/epoch_mining.log"
-            service: epoch
+            service: aeternity
             source: lager
             sourcecategory: mining
           - type: file
             path: "/home/{{ project_user }}/node/log/epoch_pow_cuckoo.log"
-            service: epoch
+            service: aeternity
             source: lager
             sourcecategory: pow
           - type: file
             path: "/home/{{ project_user }}/node/log/epoch_sync.log"
-            service: epoch
+            service: aeternity
             source: lager
             sourcecategory: sync
 
@@ -201,4 +201,3 @@
         state: restarted
       listen:
         - restart fail2ban
-

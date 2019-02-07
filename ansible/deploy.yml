@@ -124,7 +124,7 @@
       - name: Create erlang cookie file
         copy:
           dest: "{{ ansible_env.HOME }}/.erlang.cookie"
-          content: "epoch_cookie"
+          content: "aeternity_cookie"
           mode: 0400
         tags: [config, erlang_cookie]
 
@@ -231,7 +231,7 @@
           title: Deploy
           text: |
             %%%
-            Revision: [{{ node_vars.revision }}](https://github.com/aeternity/epoch/commit/{{ node_vars.revision }})
+            Revision: [{{ node_vars.revision }}](https://github.com/aeternity/aeternity/commit/{{ node_vars.revision }})
             Package: {{ package|default('unknown') }}
             %%%
           api_key: "{{ datadog_api_key }}"

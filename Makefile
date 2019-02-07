@@ -103,7 +103,7 @@ lint:
 	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
 # TODO move this to "goss" acceptance tests
-# Keep in sync from https://github.com/aeternity/epoch/blob/master/config/sys.config
+# Keep in sync from https://github.com/aeternity/aeternity/blob/master/config/sys.config
 check-seed-peers:
 	# UAT
 	curl -fs -m 5 http://52.10.46.160:3013/v2/peers/pubkey | grep -q '2ssMqRVVRP7Dcy6QHhjSdhfgi9rm3TKPVsmRB8VMr4HSwKm1Yf'
