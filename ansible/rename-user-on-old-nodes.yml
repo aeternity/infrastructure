@@ -21,10 +21,12 @@
         fail_key: False
       register: old_user_present
 
-    - set_fact:
+    - name: Set var node user (epoch)
+      set_fact:
         ae_user: "{{ project_old_user }}"
       when: old_user_present.ansible_facts.getent_passwd.epoch != None
-    - set_fact:
+    - name: Set var node user (aeternity)
+      set_fact:
         ae_user: "{{ project_new_user }}"
       when: old_user_present.ansible_facts.getent_passwd.epoch == None
 
@@ -112,6 +114,7 @@
 
     - name: Start aeternity node
       command: "{{ project_root }}/bin/aeternity start"
+      when: ae_node.stat.exists == True and ping.stdout != "pong"
       become: yes
       become_user: "{{ project_new_user }}"
       become_method: sudo
