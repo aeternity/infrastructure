@@ -2,7 +2,6 @@
 - name: Rename epoch user
   hosts: all
   remote_user: master
-  become: yes
 
   vars:
     project_new_user: aeternity
@@ -12,7 +11,6 @@
     project_new_home: /home/aeternity
     project_old_home: /home/epoch
     project_root: "{{ project_old_home }}/node/"
-    aeternity_bin: "{{ project_root }}/bin/epoch"
 
   tasks:
     - name: Check if epoch user exists
@@ -23,51 +21,85 @@
         fail_key: False
       register: old_user_present
 
+    - name: Set var node user (epoch)
+      set_fact:
+        ae_user: "{{ project_old_user }}"
+      when: old_user_present.ansible_facts.getent_passwd.epoch != None
+    - name: Set var node user (aeternity)
+      set_fact:
+        ae_user: "{{ project_new_user }}"
+      when: old_user_present.ansible_facts.getent_passwd.epoch == None
+
+    - name: Check if epoch group exists
+      getent:
+        database: group
+        key: "{{ project_old_user }}"
+        split: ':'
+        fail_key: False
+      register: old_group_present
+
     - name: Check aeternity binary
       stat:
-        path: "{{ project_root }}/bin/epoch"
+        path: "{{ project_root }}/bin/aeternity"
       register: ae_node
+      become: yes
 
     - name: Ping aeternity node
-      command: "{{ project_root }}/bin/epoch ping"
+      command: "{{ project_root }}/bin/aeternity ping"
       failed_when: no
       register: ping
       when: ae_node.stat.exists == True
+      become_user: "{{ ae_user }}"
+      become: yes
+      become_flags: "-i"
+      become_method: sudo
 
     - name: Stop aeternity node
-      command: "{{ project_root }}/bin/epoch stop"
-      when: (ae_node.stat.exists == True and ping.stdout == "pong") or
+      command: "{{ project_root }}/bin/aeternity stop"
+      register: stopped
+      when: ae_node.stat.exists == True and ping.stdout == "pong" and
             old_user_present.ansible_facts.getent_passwd.epoch != None
+      become_user: "{{ ae_user }}"
+      become: yes
+      become_flags: "-i"
+      become_method: sudo
 
-    - name: Check new home directory
-      stat:
-        path: "{{ project_new_home }}"
-      register: new_home_present
-
-      # Copy modyle does not support recursive directory copying with
-      # remote_src
-    - name: Move home directory
-      command: "mv {{ project_old_home }} {{project_new_home}}"
-      when: not new_home_present.stat.exists
-
-    - name: Delete epoch user
-      user:
-        name: "{{ project_old_user }}"
-        state: absent
-        remove: yes
-
-    - name: Create aeternity user
-      user:
-        name: "{{ project_new_user }}"
-        home: "{{ project_new_home }}"
-        create_home: no
-        state: present
-    - name: Change ownership of new user home directory
-      file:
-        path: "{{ project_new_home }}"
-        owner: "{{ project_new_user }}"
-        group: "{{ project_new_user}}"
+    - name: Find epmd binary
+      find:
+        paths:
+          - "{{project_old_home}}"
+          - "{{project_new_home}}"
+        patterns:
+          - .*epmd$
+        use_regex: yes
+        exclude: .*.beam
         recurse: yes
+        file_type: file
+      register: epmd_path
+      become: yes
+
+    - name: Stop epmd leftover process
+      command: "{{ epmd_path.files[0].path }} -kill"
+      when: old_user_present.ansible_facts.getent_passwd.epoch != None
+      become_user: "{{ ae_user }}"
+      become: yes
+      become_flags: "-i"
+      become_method: sudo
+
+    - name: Wait for left-over processes to finish before renaming user
+      wait_for:
+        timeout: 15
+      when: old_user_present.ansible_facts.getent_passwd.epoch != None
+
+    - name: Rename group
+      command: "groupmod -n {{ project_new_group }} {{ project_old_group }}"
+      when: old_group_present.ansible_facts.getent_group.epoch != None
+      become: yes
+
+    - name: Rename user
+      command: "usermod -m -d {{ project_new_home }} -l {{ project_new_user }} {{ project_old_user }}"
+      when: old_user_present.ansible_facts.getent_passwd.epoch != None
+      become: yes
 
     - name: Create /home/epoch symlink
       file:
@@ -76,7 +108,20 @@
         owner: "{{ project_new_user }}"
         group: "{{ project_new_user }}"
         state: link
+      become: yes
+
+    - name: Change ownership of new user home directory
+      file:
+        path: "{{ project_new_home }}"
+        owner: "{{ project_new_user }}"
+        group: "{{ project_new_user}}"
+        recurse: yes
+      become: yes
 
     - name: Start aeternity node
-      command: "{{ project_root }}/bin/epoch start"
-      when: old_user_present.ansible_facts.getent_passwd.epoch != None
+      command: "{{ project_root }}/bin/aeternity start"
+      when: ae_node.stat.exists == True
+      become: yes
+      become_user: "{{ project_new_user }}"
+      become_method: sudo
+      become_flags: "-i"
