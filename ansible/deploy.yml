@@ -201,8 +201,9 @@
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
-      - name: Start aeternity node
-        command: "{{ project_root }}/bin/aeternity start"
+      - name: Trugger start ae node
+        command: "/bin/true"
+        notify: "start aeternity daemon"
         tags: [daemon]
 
       - meta: flush_handlers
