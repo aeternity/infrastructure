@@ -76,6 +76,7 @@
         recurse: yes
         file_type: file
       register: epmd_path
+      become: yes
 
     - name: Stop epmd leftover process
       command: "{{ epmd_path.files[0].path }} -kill"
