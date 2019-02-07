@@ -51,10 +51,6 @@ else
 
     echo $NONCE > /root/.vault_nonce
 
-    if [ $? -nq 0 ]; then
-        echo "not able to save NONCE"
-        exit 1
-    fi
     chmod 0600 /root/.vault_nonce
 fi
 
