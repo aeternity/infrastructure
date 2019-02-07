@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Simple script that takes a ansible-inventory JSON output (stdin) 
+Simple script that takes a ansible-inventory JSON output (stdin)
 and dumps inventory markdown grouped by environment.
 
 Examples
@@ -9,7 +9,7 @@ Examples
 ansible-inventory --list | ./dump_inventory.py
 
 """
- 
+
 import sys, json, re
 
 env_group_prefix = 'tag_env_'
@@ -22,13 +22,13 @@ env_groups = [g for g in filtered_groups if g.startswith(env_group_prefix)]
 # source https://stackoverflow.com/a/16090640/3967231
 def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
     return [int(text) if text.isdigit() else text.lower()
-            for text in re.split(_nsre, s)]   
+            for text in re.split(_nsre, s)]
 
 def print_host(host):
         host_ip = host
         if 'ansible_host' in hostvars[host]:
             host_ip = hostvars[host]['ansible_host']
-        print("  - %s (%s) [status](http://%s:3013/v2/status) [top](http://%s:3013/v2/blocks/top)" % (host, host_ip, host_ip, host_ip))
+        print("    - %s (%s) [status](http://%s:3013/v2/status) [top](http://%s:3013/v2/blocks/top)" % (host, host_ip, host_ip, host_ip))
 
 for group_name in env_groups:
     print("#### %s\n" % group_name[len(env_group_prefix):])
@@ -43,10 +43,26 @@ for group_name in env_groups:
             peers.append(host)
     if seeds:
         print('**seeds:**')
+        regions = []
         for seed in seeds:
-            print_host(seed)
+            seed_region = hostvars[seed]['placement']['region']
+            if seed_region not in regions:
+                regions.append(seed_region)
+        for region in regions:
+            print("  *%s*:" % region )
+            for seed in seeds:
+                if hostvars[seed]['placement']['region'] == region:
+                    print_host(seed)
     if peers:
         print('**peers:**')
+        regions = []
         for peer in peers:
-            print_host(peer)
+            peer_region = hostvars[peer]['placement']['region']
+            if peer_region not in regions:
+                regions.append(peer_region)
+        for region in regions:
+            print("  *%s*:" % region )
+            for peer in peers:
+                if hostvars[peer]['placement']['region'] == region:
+                    print_host(peer)
     print("\n")
