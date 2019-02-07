@@ -204,7 +204,7 @@
       - name: Trigger start ae node
         command: "/bin/true"
         notify: "restart aeternity daemon"
-        tags: [daemon]
+        tags: [config]
 
       - meta: flush_handlers
 
