@@ -201,9 +201,9 @@
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
-      - name: Trugger start ae node
+      - name: Trigger start ae node
         command: "/bin/true"
-        notify: "start aeternity daemon"
+        notify: "restart aeternity daemon"
         tags: [daemon]
 
       - meta: flush_handlers
