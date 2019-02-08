@@ -91,7 +91,7 @@ integration-tests-run:
 	cd test/terraform && terraform init
 	cd test/terraform && terraform apply --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
-	cd ansible && ansible-playbook health-check.yml --limit=tag_env_tf_test
+	cd ansible && ansible-playbook health-check.yml --limit=tag_env_tf_test$(TF_VAR_current_branch)
 
 integration-tests-cleanup:
 	cd test/terraform && terraform destroy --auto-approve
