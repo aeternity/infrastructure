@@ -201,9 +201,9 @@
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
-      - name: Trigger start ae node
+      - name: Ensure node is running
         command: "/bin/true"
-        notify: "restart aeternity daemon"
+        notify: "start aeternity daemon"
         changed_when: false
         tags: [daemon]
 
