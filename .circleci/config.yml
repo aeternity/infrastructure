@@ -234,9 +234,9 @@ workflows:
       - integration_tests:
           requires: []
 
-      - setup_terraform:
-          requires:
-            - integration_tests
+      # - setup_terraform:
+      #     requires:
+      #       - integration_tests
 
   hourly_seeds_check:
     triggers:
