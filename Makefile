@@ -106,10 +106,10 @@ lint:
 # Keep in sync from https://github.com/aeternity/epoch/blob/master/config/sys.config
 check-seed-peers:
 	# UAT
-	curl -fs -m 5 http://52.10.46.160:3013/v2/peers/pubkey | grep -q 'QU9CvhAQH56a2kA15tCnWPRJ2srMJW8ZmfbbFTAy7eG4o16Bf'
+	curl -fs -m 5 http://52.10.46.160:3013/v2/peers/pubkey | grep -q '2ssMqRVVRP7Dcy6QHhjSdhfgi9rm3TKPVsmRB8VMr4HSwKm1Yf'
 	curl -fs -m 5 http://18.195.109.60:3013/v2/peers/pubkey | grep -q '2vhFb3HtHd1S7ynbpbFnEdph1tnDXFSfu4NGtq46S2eM5HCdbC'
 	curl -fs -m 5 http://13.250.162.250:3013/v2/peers/pubkey | grep -q '27xmgQ4N1E3QwHyoutLtZsHW5DSW4zneQJ3CxT5JbUejxtFuAu'
-	curl -fs -m 5 http://13.53.161.215:3013/v2/peers/pubkey |grep -q 'DMLqy7Zuhoxe2FzpydyQTgwCJ52wouzxtHWsPGo51XDcxc5c8'
+	curl -fs -m 5 http://13.53.161.215:3013/v2/peers/pubkey |grep -q '21A4HvJu1AuMV5njfEqLoR6JkKTWDyuirXZUZP2JND2RbQ1kBE'
 	# Mainnet
 	curl -fs -m 5 http://18.136.37.63:3013/v2/peers/pubkey | grep -q '2L8A5vSjnkLtfFNpJNgP9HbmGLD7ZAGFxoof47N8L4yyLAyyMi'
 	curl -fs -m 5 http://52.220.198.72:3013/v2/peers/pubkey | grep -q '2gPZjuPnJnTVEbrB9Qgv7f4MdhM4Jh6PD22mB2iBA1g7FRvHTk'
