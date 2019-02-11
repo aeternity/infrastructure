@@ -116,22 +116,22 @@
             service: epoch
             source: syslog
           - type: file
-            path: "/home/{{ project_user }}/node/log/epoch.log"
+            path: "/home/{{ project_user }}/node/log/aeternity.log"
             service: epoch
             source: lager
             sourcecategory: epoch
           - type: file
-            path: "/home/{{ project_user }}/node/log/epoch_mining.log"
+            path: "/home/{{ project_user }}/node/log/aeternity_mining.log"
             service: epoch
             source: lager
             sourcecategory: mining
           - type: file
-            path: "/home/{{ project_user }}/node/log/epoch_pow_cuckoo.log"
+            path: "/home/{{ project_user }}/node/log/aeternity_pow_cuckoo.log"
             service: epoch
             source: lager
             sourcecategory: pow
           - type: file
-            path: "/home/{{ project_user }}/node/log/epoch_sync.log"
+            path: "/home/{{ project_user }}/node/log/aeternity_sync.log"
             service: epoch
             source: lager
             sourcecategory: sync
