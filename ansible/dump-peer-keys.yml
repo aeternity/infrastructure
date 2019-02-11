@@ -8,31 +8,46 @@
       command: "/home/aeternity/node/bin/aeterity peer_key"
       register: public_key_base58c
       changed_when: public_key_base58c.stdout != ""
+      tags: [public-key]
 
-    - debug:
-        msg: "Public key (base58c): {{ public_key_base58c.stdout }}"
+    - name: Print base58c encoded public key
+      debug:
+        msg: "{{ public_key_base58c.stdout }}"
+      tags: [public-key]
 
     - name: Get the base64 public key
       slurp:
         src: /home/aeternity/node/keys/peer_key.pub
       register: public_key_base64
+      tags: [public-key, vault-cmd]
 
-    - debug:
-        msg: "Public key: {{ public_key_base64['content'] }}"
+    - name: Print base64 encoded public key
+      debug:
+        msg: "{{ public_key_base64['content'] }}"
+      tags: [public-key]
+
+    - name: Print node URL
+      debug:
+        msg: "aenode://{{ public_key_base58c.stdout }}@{{ public_ipv4 }}:3015"
+      tags: [public-key, node-url]
+
+    - name: Print vault command to create public key secret
+      debug:
+        msg: "vault write secret/aenode/peer_keys/{{ public_ipv4 }}/public base64={{ public_key_base64['content'] }}"
+      tags: [public-key, vault-cmd]
 
     - name: Get the private key
       slurp:
         src: /home/aeternity/node/keys/peer_key
       register: private_key
+      tags: [private-key, vault-cmd]
 
-    - debug:
-        msg: "Private key (base64): {{ private_key['content'] }}"
+    - name: Print base64 encoded private key
+      debug:
+        msg: "{{ private_key['content'] }}"
+      tags: [private-key]
 
-    - debug:
-        msg: "aenode://{{ public_key_base58c.stdout }}@{{ public_ipv4 }}:3015"
-
-    - debug:
-        msg: "vault write secret/aenode/peer_keys/{{ public_ipv4 }}/public base64={{ public_key_base64['content'] }}"
-
-    - debug:
+    - name: Print vault command to create private key secret
+      debug:
         msg: "vault write secret/aenode/peer_keys/{{ public_ipv4 }}/private base64={{ private_key['content'] }}"
+      tags: [private-key, vault-cmd]
