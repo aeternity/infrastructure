@@ -21,7 +21,7 @@
       register: public_key_base64
       tags: [public-key, vault-cmd]
 
-    - name: Print base64 encoded public key
+    - name: Print node base64 encoded public key
       debug:
         msg: "{{ public_key_base64['content'] }}"
       tags: [public-key]
@@ -36,13 +36,23 @@
         msg: "vault write secret/aenode/peer_keys/{{ public_ipv4 }}/public base64={{ public_key_base64['content'] }}"
       tags: [public-key, vault-cmd]
 
+    - name: Print vault base64 encoded public key
+      debug:
+        msg: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64') }}"
+      tags: [public-key]
+
+    - name: Print check command
+      debug:
+        msg: "curl -fs -m 5 http://{{ public_ipv4 }}:3013/v2/peers/pubkey | grep -q '{{ public_key_base58c.stdout }}'"
+      tags: [public-key, vault-cmd]
+
     - name: Get the private key
       slurp:
         src: /home/aeternity/node/keys/peer_key
       register: private_key
       tags: [private-key, vault-cmd]
 
-    - name: Print base64 encoded private key
+    - name: Print node base64 encoded private key
       debug:
         msg: "{{ private_key['content'] }}"
       tags: [private-key]
@@ -51,3 +61,14 @@
       debug:
         msg: "vault write secret/aenode/peer_keys/{{ public_ipv4 }}/private base64={{ private_key['content'] }}"
       tags: [private-key, vault-cmd]
+
+    - name: Print vault base64 encoded private key
+      debug:
+        msg: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/private:base64') }}"
+      tags: [private-key]
+
+    - name: Compare deployed keys to vault keys (base64)
+      assert:
+        that:
+          - "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64') ==  public_key_base64['content'] }}"
+          - "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/private:base64') ==  private_key['content'] }}"
