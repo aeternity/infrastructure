@@ -30,6 +30,14 @@ def print_host(host):
             host_ip = hostvars[host]['ansible_host']
         print("    - %s (%s) [status](http://%s:3013/v2/status) [top](http://%s:3013/v2/blocks/top)" % (host, host_ip, host_ip, host_ip))
 
+def set_hosts_regions(hosts):
+    regions = []
+    for host in hosts:
+        host_region = hostvars[host]['placement']['region']
+        if host_region not in regions:
+            regions.append(host_region)
+    return regions
+
 for group_name in env_groups:
     print("#### %s\n" % group_name[len(env_group_prefix):])
     hosts = data[group_name]['hosts'].sort(key=natural_sort_key)
@@ -43,24 +51,14 @@ for group_name in env_groups:
             peers.append(host)
     if seeds:
         print('**seeds:**')
-        regions = []
-        for seed in seeds:
-            seed_region = hostvars[seed]['placement']['region']
-            if seed_region not in regions:
-                regions.append(seed_region)
-        for region in regions:
+        for region in set_hosts_regions(seeds):
             print("  *%s*:" % region )
             for seed in seeds:
                 if hostvars[seed]['placement']['region'] == region:
                     print_host(seed)
     if peers:
         print('**peers:**')
-        regions = []
-        for peer in peers:
-            peer_region = hostvars[peer]['placement']['region']
-            if peer_region not in regions:
-                regions.append(peer_region)
-        for region in regions:
+        for region in set_hosts_regions(peers):
             print("  *%s*:" % region )
             for peer in peers:
                 if hostvars[peer]['placement']['region'] == region:
