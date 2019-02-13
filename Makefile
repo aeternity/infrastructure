@@ -187,12 +187,6 @@ list-inventory: ansible/inventory-list.json
 	cd ansible &&\
 	cat inventory-list.json | ./dump_inventory.py
 
-refresh-token:
-	cd /infrastructure;\
-	vault token revoke -self;\
-	unset VAULT_TOKEN;\
-	source import-secrets.sh
-
 clean:
 	rm ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
