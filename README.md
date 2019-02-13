@@ -64,7 +64,7 @@ cd /infrastructure
 source refresh-secrets.sh
 ```
 
-***Note***: Using `source` is the only way to have all variables set-up correctly. Running the script with `bash`, `./`, or adding the commands as Makefile rule **WILL NOT* work. Only `source` will be executed in the same shell process as your active terminal. Running it in any other way will not set required variables and your Vault session will be broken.
+***Note*** Using `source` is the only way to have all variables set-up correctly. Running the script with `bash`, `./`, or adding the commands as Makefile rule **WILL NOT** work. Only `source` will be executed in the same shell process as your active terminal. Running it in any other way will not set required variables and your Vault session will be broken.
 
 ## Docker image
 
