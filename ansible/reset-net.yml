@@ -30,13 +30,13 @@
         - ping.stdout == "pong"
       tags: [daemon]
 
-    - name: Stat aeternity.yaml
+    - name: Stat epoch.yaml
       stat:
-        path: "{{ project_root }}/aeternity.yaml"
+        path: "{{ project_root }}/epoch.yaml"
       register: config_file
 
-    - name: Read aeternity.yaml contents
-      command: "cat {{ project_root }}/aeternity.yaml"
+    - name: Read epoch.yaml contents
+      command: "cat {{ project_root }}/epoch.yaml"
       register: cat_output
       when: config_file.stat.exists
       tags: [config]
