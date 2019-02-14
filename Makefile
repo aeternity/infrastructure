@@ -108,9 +108,9 @@ lint:
 check-seed-peers:
 	# UAT
 	curl -fs -m 5 http://13.250.162.250:3013/v2/peers/pubkey | grep -q '27xmgQ4N1E3QwHyoutLtZsHW5DSW4zneQJ3CxT5JbUejxtFuAu'
-	curl -fs -m 5 http://13.53.161.215:3013/v2/peers/pubkey |grep -q '21A4HvJu1AuMV5njfEqLoR6JkKTWDyuirXZUZP2JND2RbQ1kBE'
+	curl -fs -m 5 http://13.53.161.215:3013/v2/peers/pubkey |grep -q 'DMLqy7Zuhoxe2FzpydyQTgwCJ52wouzxtHWsPGo51XDcxc5c8'
 	curl -fs -m 5 http://18.195.109.60:3013/v2/peers/pubkey | grep -q '2vhFb3HtHd1S7ynbpbFnEdph1tnDXFSfu4NGtq46S2eM5HCdbC'
-	curl -fs -m 5 http://52.10.46.160:3013/v2/peers/pubkey | grep -q '2ssMqRVVRP7Dcy6QHhjSdhfgi9rm3TKPVsmRB8VMr4HSwKm1Yf'
+	curl -fs -m 5 http://52.10.46.160:3013/v2/peers/pubkey | grep -q 'QU9CvhAQH56a2kA15tCnWPRJ2srMJW8ZmfbbFTAy7eG4o16Bf'
 	# Mainnet: ap-southeast-1
 	curl -fs -m 5 http://13.228.202.140:3013/v2/peers/pubkey | grep -q 'QkNjQbJL3Ab1TVG5GesKuZTixBdXEutUtxG677mVu9D4mMNRr'
 	curl -fs -m 5 http://13.250.144.60:3013/v2/peers/pubkey | grep -q 'sGegC48UrvDA7cvvUU3GPTze9wNUnnK1P4q46mL5jAFddNrbD'
