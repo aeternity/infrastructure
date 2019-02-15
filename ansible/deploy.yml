@@ -201,6 +201,12 @@
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
+      - name: Ensure node is running
+        command: "/bin/true"
+        notify: "start aeternity daemon"
+        changed_when: false
+        tags: [daemon]
+
       - meta: flush_handlers
 
       - name: Wait aeternity node API to boot
