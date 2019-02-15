@@ -93,6 +93,22 @@
         when: package is not defined
         tags: [package]
 
+      - name: Delete old downloaded pacakges glob
+        find:
+          paths: "{{ packages_path }}"
+          patterns:
+            - .*aeternity-.*ubuntu.*.tar.gz
+            - .*epoch-.*ubuntu.*.tar.gz
+          exclude: "{{ package|basename }}"
+          use_regex: yes
+        register: old_packages_to_delete
+
+      - name: Delete old packages
+        file:
+          path: "{{ item.path }}"
+          state: absent
+        loop: "{{ old_packages_to_delete.files }}"
+
       - name: Download remote package
         get_url:
           url: "{{ package }}"
