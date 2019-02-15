@@ -369,8 +369,8 @@ module "aws_deploy-next-eu-west-2" {
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
-  static_nodes  = 1
-  spot_nodes    = 2
+  static_nodes  = 0
+  spot_nodes    = 3
   spot_price    = "0.125"
   instance_type = "m4.large"
   ami_name      = "aeternity-ubuntu-16.04-v1549009934"
