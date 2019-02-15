@@ -3,9 +3,11 @@ variable "vault_addr" {
 }
 
 provider "aws" {
-  version = "1.55"
-  region  = "ap-southeast-2"
-  alias   = "ap-southeast-2"
+  version                 = "1.55"
+  region                  = "ap-southeast-2"
+  alias                   = "ap-southeast-2"
+  shared_credentials_file = "/aws/credentials"
+  profile                 = "aeternity"
 }
 
 module "aws_deploy-test" {
