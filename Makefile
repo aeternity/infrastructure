@@ -155,6 +155,8 @@ check-seed-peers:
 	curl -fs -m 5 http://13.53.77.98:3013/v2/peers/pubkey | grep -q 'vTDXS3HJrwJecqnPqX3iRxKG5RBRz9MdicWGy8p9hSdyhAY4S'
 	curl -fs -m 5 http://13.53.78.163:3013/v2/peers/pubkey | grep -q 'NPrJPXfzBU8da5Ufy2o2LmyHXhLX733NPHER2Xh3cTcbK2BDD'
 	curl -fs -m 5 http://13.53.89.32:3013/v2/peers/pubkey | grep -q '27VNp1gHQQsNa2hBPB7na6CUCtvobqAe7sQmPKBW4G3v6uEq9s'
+	# Unstable
+	curl -fs -m 5 http://3.8.38.115:3013/v2/peers/pubkey | grep -q '2N6MS9Sm5ULbh54iCDvVxFUZ7WcoDLCdJQEDNdfmf5MRSTDGV1'
 
 check-deploy-env:
 ifndef DEPLOY_ENV
