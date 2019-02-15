@@ -28,3 +28,4 @@
          >> /tmp/user-data.log 2>&1
       async: 900
       poll: 15
+      changed_when: False
