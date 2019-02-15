@@ -1,0 +1,38 @@
+---
+- name: Bootstrap node servers
+  hosts: all
+  remote_user: master
+  become: yes
+
+  vars:
+    bootstrap_version: master
+    vault_role: ae-node
+    package: "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
+
+  tasks:
+    - name: Clone infrastructure repo
+      git:
+        repo:  https://github.com/aeternity/infrastructure.git
+        dest: /infrastructure
+        version: "{{ bootstrap_version }}"
+        depth: 1
+        force: yes
+
+    - name: Run bootstrap.sh
+      shell: |
+        /infrastructure/scripts/bootstrap.sh \
+         --vault_addr={{ vault_addr }} \
+         --vault_role={{ vault_role }} \
+         --env={{ env }} \
+         --epoch_package={{ package }} \
+         >> /tmp/user-data.log 2>&1
+      async: 900
+      poll: 0
+      register: bootstrap_script
+
+    - name: Check bootstrap finished
+      async_status:
+        jid: "{{ bootstrap_script.ansible_job_id }}"
+      register: bootstrap_finished
+      until: bootstrap_finished.finished
+      retries: 180
