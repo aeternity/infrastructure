@@ -2,6 +2,10 @@ variable "vault_addr" {
   description = "Vault server URL address"
 }
 
+variable "env_name" {
+  default = "tf_test"
+}
+
 provider "aws" {
   version                 = "1.55"
   region                  = "ap-southeast-2"
@@ -12,7 +16,7 @@ provider "aws" {
 
 module "aws_deploy-test" {
   source            = "../../terraform/modules/cloud/aws/deploy"
-  env               = "tf_test"
+  env               = "${var.env_name}"
   bootstrap_version = "master"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
