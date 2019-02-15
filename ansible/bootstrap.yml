@@ -27,12 +27,4 @@
          --epoch_package={{ package }} \
          >> /tmp/user-data.log 2>&1
       async: 900
-      poll: 0
-      register: bootstrap_script
-
-    - name: Check bootstrap finished
-      async_status:
-        jid: "{{ bootstrap_script.ansible_job_id }}"
-      register: bootstrap_finished
-      until: bootstrap_finished.finished
-      retries: 180
+      poll: 15
