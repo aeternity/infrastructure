@@ -26,6 +26,6 @@
          --env={{ env }} \
          --aeternity_package={{ package }} \
          >> /tmp/provision.log 2>&1
-      async: 900
+      async: 600
       poll: 15
       changed_when: False
