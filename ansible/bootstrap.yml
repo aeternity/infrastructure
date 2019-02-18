@@ -24,8 +24,8 @@
          --vault_addr={{ vault_addr }} \
          --vault_role={{ vault_role }} \
          --env={{ env }} \
-         --epoch_package={{ package }} \
-         >> /tmp/user-data.log 2>&1
+         --aeternity_package={{ package }} \
+         >> /tmp/provision.log 2>&1
       async: 900
       poll: 15
       changed_when: False
