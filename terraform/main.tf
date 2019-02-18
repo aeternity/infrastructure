@@ -3,6 +3,7 @@ terraform {
     bucket = "aeternity-terraform-states"
     key    = "aeternitystate.tfstate"
     region = "us-east-1"
+    dynamodb_table = "terraform-lock-table"
   }
 }
 
@@ -32,8 +33,6 @@ provider "aws" {
   version                 = "1.55"
   region                  = "us-west-2"
   alias                   = "us-west-2"
-  shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
 }
 
 provider "aws" {
