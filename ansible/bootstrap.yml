@@ -5,7 +5,7 @@
   become: yes
 
   vars:
-    bootstrap_version: master
+    bootstrap_version: stable
     vault_role: ae-node
     package: "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
 
