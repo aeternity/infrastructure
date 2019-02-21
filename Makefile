@@ -176,8 +176,7 @@ check-seed-peers:
 	curl -fs -m 5 http://3.8.38.115:3013/v2/peers/pubkey | grep -q '2N6MS9Sm5ULbh54iCDvVxFUZ7WcoDLCdJQEDNdfmf5MRSTDGV1'
 
 test/goss/seed-peers-vars.yaml:
-	curl -fsS https://raw.githubusercontent.com/aeternity/aeternity/master/config/sys.config \
-		|grep aenode |cut -f2 -d '_' |cut -f1 -d ':' \
+	grep aenode ansible/vars/aeternity/main.yml |cut -f2 -d '_' |cut -f1 -d ':' \
 		|awk -F '@' 'BEGINFILE{print "---\nhosts:"}{print "  -\n    pubkey: " $$1"\n    ip_addr: " $$2}' \
 		> test/goss/seed-peers-vars.yaml
 	grep aenode ansible/vars/aeternity/uat.yml |cut -f2 -d '_'|cut -f1 -d ':' \
