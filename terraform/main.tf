@@ -1,8 +1,9 @@
 terraform {
   backend "s3" {
-    bucket = "aeternity-terraform-states"
-    key    = "aeternitystate.tfstate"
-    region = "us-east-1"
+    bucket         = "aeternity-terraform-states"
+    key            = "aeternitystate.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-lock-table"
   }
 }
 
@@ -29,11 +30,9 @@ provider "aws" {
 }
 
 provider "aws" {
-  version                 = "1.55"
-  region                  = "us-west-2"
-  alias                   = "us-west-2"
-  shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
+  version = "1.55"
+  region  = "us-west-2"
+  alias   = "us-west-2"
 }
 
 provider "aws" {
