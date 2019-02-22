@@ -1,9 +1,3 @@
-http:
-{{range $host := .Vars.hosts}}
-  http://{{$host.ip_addr}}:3013/v2/peers/pubkey:
-    status: 200
-    allow-insecure: true
-    no-follow-redirects: true
-    timeout: 5000
-    body: [{{$host.pubkey}}]
-{{end}}
+gossfile:
+  test/goss/check-seed-peers.yaml: {}
+#  test/goss/check-peers-top.yaml: {}
