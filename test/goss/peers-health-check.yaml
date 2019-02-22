@@ -1,0 +1,23 @@
+http:
+{{$tagenv := getEnv "TAGENV" "aws_ec2"}}
+{{$region := getEnv "REGION"}}
+{{$hostvars := index .Vars "_meta" "hostvars"}}
+{{if $envhosts := index .Vars $tagenv}}
+{{range $host := index $envhosts "hosts"}}
+{{$host_region := index $hostvars $host "placement" "region"}}
+  {{if or (eq $region $host_region) (not $region)}}
+  http://{{$host}}:3013/v2/status:
+    status: 200
+    allow-insecure: true
+    no-follow-redirects: true
+    timeout: 5000
+  http://{{$host}}:3013/v2/blocks/top:
+    status: 200
+    allow-insecure: true
+    no-follow-redirects: true
+    timeout: 5000
+  {{end}}
+{{end}}
+{{end}}
+#example usage:
+#TAGENV=tag_env_main REGION=us-west-2 goss -g test/goss/peers-health-check.yaml --vars ansible/inventory-list.json validate --format documentation
