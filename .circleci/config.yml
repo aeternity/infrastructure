@@ -228,6 +228,7 @@ jobs:
   chain_backup:
     <<: *container_config
     steps:
+      - *setup_secrets
       - run:
           name: Snapshot of environment blockchain
           environment:
