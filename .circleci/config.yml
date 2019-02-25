@@ -35,6 +35,11 @@ references:
       name: Setup Terraform
       command: make setup-terraform
 
+  check_terraform_changes: &check_terraform_changes
+    run:
+      name: Fail on Terraform changes
+      command: make check-terraform-changes
+
   check_seed_peers: &check_seed_peers
     run:
       name: Check seed peers
@@ -148,6 +153,17 @@ jobs:
       - *check_seed_peers
       - *fail_notification
 
+  check_terraform_changes:
+    <<: *container_config
+    working_directory: /src
+    steps:
+      - checkout
+      - *setup_secrets
+      - run:
+          name: Fail on Terraform changes
+          command: |
+            make check-terraform-changes
+
   docker_push_latest:
     <<: *machine_config
     steps:
@@ -228,6 +244,15 @@ workflows:
           filters:
             branches:
               only:
+                - master
+                - stable
+
+      - check_terraform_changes:
+          requires:
+            - build_check # because of the TF state locks
+          filters:
+            branches:
+              ignore:
                 - master
                 - stable
 
