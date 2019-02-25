@@ -184,6 +184,7 @@ jobs:
       - *check_seed_peers
       - *fail_notification
 
+  # Checks the compatibility of latest package build and master bootstrap
   integration_tests:
     <<: *container_config
     working_directory: /src
@@ -193,6 +194,7 @@ jobs:
       - integration_tests
       - *fail_notification
 
+  # Checks the compatibility of latest package release and stable bootstrap
   stable_integration_tests:
       <<: *container_config
       working_directory: /src
@@ -218,14 +220,16 @@ workflows:
             - build_check
           filters:
             branches:
-              only: 164168041_stable_integration_tests
+              only: stable
 
       - integration_tests:
           requires:
             - build_check
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - stable
 
       - setup_terraform:
           requires:
