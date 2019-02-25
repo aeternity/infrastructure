@@ -226,14 +226,15 @@ jobs:
         - *fail_notification
 
   chain_backup:
-    run:
-      name: Snapshot of environment blockchain
-      environment:
-        - BACKUP_DIR: /tmp
-      command: |
-        export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
-        make mnesia_backup
-      no_output_timeout: 30m
+    steps:
+      run:
+        name: Snapshot of environment blockchain
+        environment:
+          - BACKUP_DIR: /tmp
+        command: |
+          export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
+          make mnesia_backup
+        no_output_timeout: 30m
 
 workflows:
   check_deploy:
