@@ -321,7 +321,7 @@ module "aws_deploy-dev1-eu-west-2" {
 module "aws_deploy-dev2-eu-west-2" {
   source            = "modules/cloud/aws/deploy"
   env               = "dev2"
-  bootstrap_version = "stable2"
+  bootstrap_version = "stable"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
