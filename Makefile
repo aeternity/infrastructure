@@ -3,6 +3,9 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
+check-terraform-changes:
+	cd terraform && terraform init && terraform plan -detailed-exitcode
+
 setup-terraform:
 	cd terraform && terraform init && terraform apply --auto-approve
 
