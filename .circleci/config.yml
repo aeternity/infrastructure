@@ -226,6 +226,7 @@ jobs:
         - *fail_notification
 
   chain_backup:
+    <<: *container_config
     steps:
       - run:
           name: Snapshot of environment blockchain
