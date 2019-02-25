@@ -170,6 +170,15 @@ list-inventory: ansible/inventory-list.json
 	cd ansible &&\
 	cat inventory-list.json | ./dump_inventory.py
 
+provision: check-deploy-env
+	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
+	-e ansible_python_interpreter=/usr/bin/python3 \
+	-e env=$(DEPLOY_ENV) \
+	-e vault_addr=$(VAULT_ADDR) \
+	-e package=$(PACKAGE) \
+	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
+	async_provision.yml
+
 clean:
 	rm ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
