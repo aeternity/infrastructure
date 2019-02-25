@@ -7,7 +7,7 @@ check-terraform-changes:
 	cd terraform && terraform init && terraform plan -detailed-exitcode
 
 setup-terraform:
-	cd terraform && terraform init && terraform apply --auto-approve
+	cd terraform/environments && terraform init && terraform apply --auto-approve
 
 setup-node: check-deploy-env
 	cd ansible && ansible-playbook \
@@ -88,7 +88,7 @@ ssh: ssh-aeternity
 
 # TODO also add ansible idempotent tests here
 unit-tests:
-	cd terraform && terraform init && terraform plan
+	cd terraform/environments && terraform init && terraform plan
 
 integration-tests-run:
 	cd test/terraform && terraform init
@@ -103,7 +103,7 @@ integration-tests: integration-tests-run integration-tests-cleanup
 
 lint:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
-	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
+	cd terraform/environments && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
 # TODO move this to "goss" acceptance tests
 # Keep in sync from https://github.com/aeternity/aeternity/blob/master/config/sys.config
