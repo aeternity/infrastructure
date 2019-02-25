@@ -4,7 +4,7 @@ BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
 check-terraform-changes:
-	cd terraform && terraform init && terraform plan -detailed-exitcode
+	cd terraform/environments && terraform init && terraform plan -detailed-exitcode
 
 setup-terraform:
 	cd terraform/environments && terraform init && terraform apply --auto-approve
