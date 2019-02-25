@@ -229,7 +229,7 @@ jobs:
     run:
       name: Snapshot of environment blockchain
       environment:
-        - BACKUP_DIR: *chain_snapshots
+        - BACKUP_DIR: /tmp
       command: |
         export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
         make mnesia_backup
