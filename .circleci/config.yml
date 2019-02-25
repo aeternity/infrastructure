@@ -288,6 +288,7 @@ workflows:
               only: /^v.*$/
 
   chain_backup:
+    jobs:
       - chain_backup:
           filters:
             branches:
