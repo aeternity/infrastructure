@@ -232,7 +232,7 @@ jobs:
       - run:
           name: Snapshot of environment blockchain
           environment:
-            - BACKUP_ENV: uat
+            - BACKUP_ENV: dev1
             - BACKUP_DIR: /tmp
           command: |
             export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)

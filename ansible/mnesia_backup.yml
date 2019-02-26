@@ -29,6 +29,9 @@
       args:
         creates: "/tmp/{{ backup_filename }}"
 
+    - name: Resttore Mnesia database
+      command: "{{ aeternity_bin }} eval 'ok = mnesia:restore(\"/tmp/{{ backup_filename }}\").'"
+
     - name: Archive Mnesia backup
       archive:
         path: /tmp/{{ backup_filename }}
