@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 references:
   container_config: &container_config
@@ -35,6 +35,11 @@ references:
       name: Setup Terraform
       command: make setup-terraform
 
+  check_terraform_changes: &check_terraform_changes
+    run:
+      name: Fail on Terraform changes
+      command: make check-terraform-changes
+
   check_seed_peers: &check_seed_peers
     run:
       name: Check seed peers
@@ -67,6 +72,20 @@ references:
     run:
       name: Setup Environment
       command: echo "source import-secrets.sh" >> $BASH_ENV
+
+commands:
+  integration_tests:
+    description: "Integration Tests"
+    steps:
+      - run:
+          name: Integration Tests
+          command: |
+            make integration-tests TF_VAR_env_name="tf_test_${CIRCLE_SHA1}"
+      - run:
+          name: Integration env cleanup
+          command: |
+            make integration-tests-cleanup TF_VAR_env_name="tf_test_${CIRCLE_SHA1}"
+          when: on_fail
 
 jobs:
   build_check:
@@ -134,6 +153,17 @@ jobs:
       - *check_seed_peers
       - *fail_notification
 
+  check_terraform_changes:
+    <<: *container_config
+    working_directory: /src
+    steps:
+      - checkout
+      - *setup_secrets
+      - run:
+          name: Fail on Terraform changes
+          command: |
+            make check-terraform-changes
+
   docker_push_latest:
     <<: *machine_config
     steps:
@@ -170,36 +200,61 @@ jobs:
       - *check_seed_peers
       - *fail_notification
 
+  # Checks the compatibility of latest package build and master bootstrap
   integration_tests:
     <<: *container_config
     working_directory: /src
     steps:
       - checkout
       - *setup_secrets
-      - run:
-          name: Integration Tests
-          command: |
-            make integration-tests
-      - run:
-          name: Integration env cleanup
-          command: |
-            make integration-tests-cleanup
-          when: on_fail
+      - integration_tests
       - *fail_notification
 
+  # Checks the compatibility of latest package release and stable bootstrap
+  stable_integration_tests:
+      <<: *container_config
+      working_directory: /src
+      steps:
+        - checkout
+        - *setup_secrets
+        - run:
+            name: Setup integration tests parameters
+            command: |
+              echo "export TF_VAR_bootstrap_version=stable" >> $BASH_ENV
+              echo "export TF_VAR_package=https://releases.ops.aeternity.com/aeternity-latest-ubuntu-x86_64.tar.gz" >> $BASH_ENV
+        - integration_tests
+        - *fail_notification
+
 workflows:
-  version: 2
   check_deploy:
     jobs:
       - build_check:
           requires: []
+
+      - stable_integration_tests:
+          requires:
+            - build_check
+          filters:
+            branches:
+              only: stable
 
       - integration_tests:
           requires:
             - build_check
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - stable
+
+      - check_terraform_changes:
+          requires:
+            - build_check # because of the TF state locks
+          filters:
+            branches:
+              ignore:
+                - master
+                - stable
 
       - setup_terraform:
           requires:

@@ -3,8 +3,11 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 
+check-terraform-changes:
+	cd terraform/environments && terraform init && terraform plan -detailed-exitcode
+
 setup-terraform:
-	cd terraform && terraform init && terraform apply --auto-approve
+	cd terraform/environments && terraform init && terraform apply --auto-approve
 
 setup-node: check-deploy-env
 	cd ansible && ansible-playbook \
@@ -66,6 +69,15 @@ mnesia_backup:
 		-e backup_suffix=$(BACKUP_SUFFIX) \
 		mnesia_backup.yml
 
+provision: check-deploy-env
+	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
+	-e ansible_python_interpreter=/usr/bin/python3 \
+	-e env=$(DEPLOY_ENV) \
+	-e vault_addr=$(VAULT_ADDR) \
+	-e package=$(PACKAGE) \
+	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
+	async_provision.yml
+
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
 
@@ -85,13 +97,13 @@ ssh: ssh-aeternity
 
 # TODO also add ansible idempotent tests here
 unit-tests:
-	cd terraform && terraform init && terraform plan
+	cd terraform/environments && terraform init && terraform plan
 
 integration-tests-run:
 	cd test/terraform && terraform init
 	cd test/terraform && terraform apply --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
-	cd ansible && ansible-playbook health-check.yml --limit=tag_env_tf_test
+	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(TF_VAR_env_name)
 
 integration-tests-cleanup:
 	cd test/terraform && terraform destroy --auto-approve
@@ -100,7 +112,7 @@ integration-tests: integration-tests-run integration-tests-cleanup
 
 lint:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
-	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
+	cd terraform/environments && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
 # TODO move this to "goss" acceptance tests
 # Keep in sync from https://github.com/aeternity/aeternity/blob/master/config/sys.config
@@ -155,6 +167,8 @@ check-seed-peers:
 	curl -fs -m 5 http://13.53.77.98:3013/v2/peers/pubkey | grep -q 'vTDXS3HJrwJecqnPqX3iRxKG5RBRz9MdicWGy8p9hSdyhAY4S'
 	curl -fs -m 5 http://13.53.78.163:3013/v2/peers/pubkey | grep -q 'NPrJPXfzBU8da5Ufy2o2LmyHXhLX733NPHER2Xh3cTcbK2BDD'
 	curl -fs -m 5 http://13.53.89.32:3013/v2/peers/pubkey | grep -q '27VNp1gHQQsNa2hBPB7na6CUCtvobqAe7sQmPKBW4G3v6uEq9s'
+	# Unstable
+	curl -fs -m 5 http://3.8.38.115:3013/v2/peers/pubkey | grep -q '2N6MS9Sm5ULbh54iCDvVxFUZ7WcoDLCdJQEDNdfmf5MRSTDGV1'
 
 check-deploy-env:
 ifndef DEPLOY_ENV

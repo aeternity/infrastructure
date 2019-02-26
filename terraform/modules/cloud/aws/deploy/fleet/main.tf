@@ -36,6 +36,10 @@ resource "aws_instance" "static_node" {
 
   subnet_id              = "${element( var.subnets, 1)}"
   vpc_security_group_ids = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 data "template_file" "user_data" {
@@ -51,7 +55,7 @@ data "template_file" "user_data" {
 }
 
 resource "aws_launch_configuration" "spot" {
-  name_prefix          = "ae-${var.env}-spot-nodes_"
+  name_prefix          = "ae-${var.env}-spot-nodes-"
   iam_instance_profile = "ae-node"
   image_id             = "${data.aws_ami.ami.id}"
   instance_type        = "${var.instance_type}"
@@ -84,14 +88,18 @@ data "template_file" "spot_user_data" {
 }
 
 resource "aws_autoscaling_group" "spot_fleet" {
-  name                 = "ae-${var.env}-spot-nodes"
+  name                 = "${aws_launch_configuration.spot.name}"
   min_size             = "${var.spot_nodes}"
   max_size             = "${var.spot_nodes}"
-  launch_configuration = "${aws_launch_configuration.spot.id}"
+  launch_configuration = "${aws_launch_configuration.spot.name}"
   vpc_zone_identifier  = ["${var.subnets}"]
 
   #  suspended_processes  = ["Terminate"]
   termination_policies = ["OldestInstance"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   tags = [
     {

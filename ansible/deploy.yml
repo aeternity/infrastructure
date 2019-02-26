@@ -93,6 +93,22 @@
         when: package is not defined
         tags: [package]
 
+      - name: Delete old downloaded pacakges glob
+        find:
+          paths: "{{ packages_path }}"
+          patterns:
+            - .*aeternity-.*ubuntu.*.tar.gz
+            - .*epoch-.*ubuntu.*.tar.gz
+          exclude: "{{ package|basename }}"
+          use_regex: yes
+        register: old_packages_to_delete
+
+      - name: Delete old packages
+        file:
+          path: "{{ item.path }}"
+          state: absent
+        loop: "{{ old_packages_to_delete.files }}"
+
       - name: Download remote package
         get_url:
           url: "{{ package }}"
@@ -200,6 +216,12 @@
         when: public_ipv4 in seed_peers
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
+
+      - name: Ensure node is running
+        command: "/bin/true"
+        notify: "start aeternity daemon"
+        changed_when: false
+        tags: [daemon]
 
       - meta: flush_handlers
 

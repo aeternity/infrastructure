@@ -2,6 +2,18 @@ variable "vault_addr" {
   description = "Vault server URL address"
 }
 
+variable "env_name" {
+  default = "tf_test"
+}
+
+variable "bootstrap_version" {
+  default = "master"
+}
+
+variable "package" {
+  default = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
+}
+
 provider "aws" {
   version                 = "1.55"
   region                  = "ap-southeast-2"
@@ -12,8 +24,8 @@ provider "aws" {
 
 module "aws_deploy-test" {
   source            = "../../terraform/modules/cloud/aws/deploy"
-  env               = "tf_test"
-  bootstrap_version = "master"
+  env               = "${var.env_name}"
+  bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -25,7 +37,7 @@ module "aws_deploy-test" {
   ami_name      = "aeternity-ubuntu-16.04-*"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
+    package = "${var.package}"
   }
 
   providers = {

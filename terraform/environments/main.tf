@@ -1,55 +1,9 @@
-terraform {
-  backend "s3" {
-    bucket = "aeternity-terraform-states"
-    key    = "aeternitystate.tfstate"
-    region = "us-east-1"
-  }
-}
-
 variable "vault_addr" {
   description = "Vault server URL address"
 }
 
-provider "aws" {
-  version = "1.55"
-  region  = "ap-southeast-1"
-  alias   = "ap-southeast-1"
-}
-
-provider "aws" {
-  version = "1.55"
-  region  = "eu-central-1"
-  alias   = "eu-central-1"
-}
-
-provider "aws" {
-  version = "1.55"
-  region  = "eu-west-2"
-  alias   = "eu-west-2"
-}
-
-provider "aws" {
-  version                 = "1.55"
-  region                  = "us-west-2"
-  alias                   = "us-west-2"
-  shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
-}
-
-provider "aws" {
-  version = "1.55"
-  region  = "us-east-2"
-  alias   = "us-east-2"
-}
-
-provider "aws" {
-  version = "1.55"
-  region  = "eu-north-1"
-  alias   = "eu-north-1"
-}
-
 module "aws_deploy-main-ap-southeast-1" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "main"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
@@ -73,7 +27,7 @@ module "aws_deploy-main-ap-southeast-1" {
 }
 
 module "aws_deploy-main-eu-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "main"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
@@ -99,7 +53,7 @@ module "aws_deploy-main-eu-west-2" {
 }
 
 module "aws_deploy-main-eu-north-1" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "main"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
@@ -125,7 +79,7 @@ module "aws_deploy-main-eu-north-1" {
 }
 
 module "aws_deploy-main-us-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "main"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
@@ -149,7 +103,7 @@ module "aws_deploy-main-us-west-2" {
 }
 
 module "aws_deploy-main-us-east-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "main"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
@@ -173,7 +127,7 @@ module "aws_deploy-main-us-east-2" {
 }
 
 module "aws_deploy-ap-southeast-1" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "uat"
   color             = "blue"
   bootstrap_version = "stable"
@@ -197,7 +151,7 @@ module "aws_deploy-ap-southeast-1" {
 }
 
 module "aws_deploy-eu-central-1" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "uat"
   color             = "blue"
   bootstrap_version = "stable"
@@ -223,7 +177,7 @@ module "aws_deploy-eu-central-1" {
 }
 
 module "aws_deploy-us-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "uat"
   color             = "green"
   bootstrap_version = "stable"
@@ -247,7 +201,7 @@ module "aws_deploy-us-west-2" {
 }
 
 module "aws_deploy-uat-eu-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "uat"
   color             = "green"
   bootstrap_version = "stable"
@@ -273,7 +227,7 @@ module "aws_deploy-uat-eu-west-2" {
 }
 
 module "aws_deploy-uat-eu-north-1" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "uat"
   color             = "green"
   bootstrap_version = "stable"
@@ -299,7 +253,7 @@ module "aws_deploy-uat-eu-north-1" {
 }
 
 module "aws_deploy-dev1-eu-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "dev1"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
@@ -320,7 +274,7 @@ module "aws_deploy-dev1-eu-west-2" {
 }
 
 module "aws_deploy-dev2-eu-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "dev2"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
@@ -341,7 +295,7 @@ module "aws_deploy-dev2-eu-west-2" {
 }
 
 module "aws_deploy-integration-eu-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "integration"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
@@ -363,14 +317,14 @@ module "aws_deploy-integration-eu-west-2" {
 }
 
 module "aws_deploy-next-eu-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "next"
   bootstrap_version = "stable"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
-  static_nodes  = 1
-  spot_nodes    = 2
+  static_nodes  = 0
+  spot_nodes    = 3
   spot_price    = "0.125"
   instance_type = "m4.large"
   ami_name      = "aeternity-ubuntu-16.04-v1549009934"
@@ -385,7 +339,7 @@ module "aws_deploy-next-eu-west-2" {
 }
 
 module "aws_deploy-unstable-eu-west-2" {
-  source            = "modules/cloud/aws/deploy"
+  source            = "../modules/cloud/aws/deploy"
   env               = "unstable"
   bootstrap_version = "stable"
   vault_role        = "ae-node"

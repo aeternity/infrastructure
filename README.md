@@ -320,7 +320,11 @@ All of the above can be run with single `make` wrapper:
 make integration-tests
 ```
 
-*Note that this environment is also used and run automatically each day by the CI server, it also can be run by other users as well. It's not designed to be multi-user yet, so a bit of coordination should be made to prevent collisions*
+*Note these test are run automatically each day by the CI server, and can be run by other users as well. To prevent collisions you can specify unique environment name instead the default "tf_test" (do not use special symbols other than "_", otherwise tests will not pass):*
+
+```bash
+make integration-tests TF_VAR_env_name=tf_test_my_test_env
+```
 
 ### CircleCI configuration
 
