@@ -69,6 +69,15 @@ mnesia_backup:
 		-e backup_suffix=$(BACKUP_SUFFIX) \
 		mnesia_backup.yml
 
+provision: check-deploy-env
+	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
+	-e ansible_python_interpreter=/usr/bin/python3 \
+	-e env=$(DEPLOY_ENV) \
+	-e vault_addr=$(VAULT_ADDR) \
+	-e package=$(PACKAGE) \
+	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
+	async_provision.yml
+
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
 
