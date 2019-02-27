@@ -175,20 +175,21 @@ check-seed-peers:
 	# Unstable
 	curl -fs -m 5 http://3.8.38.115:3013/v2/peers/pubkey | grep -q '2N6MS9Sm5ULbh54iCDvVxFUZ7WcoDLCdJQEDNdfmf5MRSTDGV1'
 
-test/goss/vars/seed-peers-main.yaml:
-	cat ansible/inventory-list.json | python3 test/goss/scripts/dump-seed-peers-keys.py --env main \
-		> test/goss/vars/seed-peers-main.yaml
-test/goss/vars/seed-peers-uat.yaml:
-	cat ansible/inventory-list.json | python3 test/goss/scripts/dump-seed-peers-keys.py --env uat \
-		> test/goss/vars/seed-peers-uat.yaml
-test/goss/vars/seed-peers-unstable.yaml:
-	cat ansible/inventory-list.json | python3 test/goss/scripts/dump-seed-peers-keys.py --env unstable \
-		> test/goss/vars/seed-peers-unstable.yaml
+test/goss/remote/vars/seed-peers-main.yaml: ansible/inventory-list.json
+	cat ansible/inventory-list.json | python3 test/goss/remote/scripts/dump-seed-peers-keys.py --env main \
+		> test/goss/remote/vars/seed-peers-main.yaml
+test/goss/remote/vars/seed-peers-uat.yaml: ansible/inventory-list.json
+	cat ansible/inventory-list.json | python3 test/goss/remote/scripts/dump-seed-peers-keys.py --env uat \
+		> test/goss/remote/vars/seed-peers-uat.yaml
+test/goss/remote/vars/seed-peers-unstable.yaml: ansible/inventory-list.json
+	cat ansible/inventory-list.json | python3 test/goss/remote/scripts/dump-seed-peers-keys.py --env unstable \
+		> test/goss/remote/vars/seed-peers-unstable.yaml
 
-check-seed-peers-goss: test/goss/vars/seed-peers-main.yaml test/goss/vars/seed-peers-uat.yaml test/goss/vars/seed-peers-unstable.yaml
-	goss --vars test/goss/vars/seed-peers-main.yaml validate
-	goss --vars test/goss/vars/seed-peers-uat.yaml validate
-	goss --vars test/goss/vars/seed-peers-unstable.yaml validate
+check-seed-peers-goss: test/goss/remote/vars/seed-peers-main.yaml test/goss/remote/vars/seed-peers-uat.yaml test/goss/remote/vars/seed-peers-unstable.yaml
+	cd test/goss/remote && \
+	goss --vars vars/seed-peers-main.yaml validate && \
+	goss --vars vars/seed-peers-main.yaml validate && \
+	goss --vars vars/seed-peers-uat.yaml validate
 
 check-deploy-env:
 ifndef DEPLOY_ENV
