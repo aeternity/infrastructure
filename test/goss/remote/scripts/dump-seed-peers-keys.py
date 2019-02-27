@@ -29,7 +29,7 @@ def get_peer_pubkey_from_vault(host):
     vproc = subprocess.Popen(vault_cmd, stdout=subprocess.PIPE)
     out, err = vproc.communicate()
     if vproc.returncode > 0:
-        print(err)
+        print(err, file=sys.stderr)
 #        sys.exit(1)
     return out.decode("utf-8")
 
@@ -37,4 +37,4 @@ env_seed_list = []
 for host in inventory[env]['hosts']:
     if host in inventory['tag_kind_seed']['hosts']:
         env_seed_list.append({'ip_addr': host, 'pubkey': get_peer_pubkey_from_vault(host)})
-json.dump({'hosts': env_seed_list}, sys.stdout)
+yaml.dump({'hosts': env_seed_list}, sys.stdout, default_flow_style=False)
