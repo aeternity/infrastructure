@@ -204,7 +204,8 @@ list-inventory: ansible/inventory-list.json
 	cat inventory-list.json | ./dump_inventory.py
 
 health-check: check-deploy-env ansible/inventory-list.json
-	TAGENV=tag_env_$(DEPLOY_ENV) REGION=$(AWS_REGION) goss -g test/goss/peers-health-check.yaml --vars ansible/inventory-list.json validate
+	cd test/goss/remote && \
+	TAGENV=tag_env_$(DEPLOY_ENV) REGION=$(AWS_REGION) goss -g peers-health-check.yaml --vars ../../../ansible/inventory-list.json validate
 
 clean:
 	rm ~/.ssh/id_ae_infra*
