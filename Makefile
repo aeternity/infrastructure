@@ -2,12 +2,15 @@
 DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
+TF_LOCK_TIMEOUT=5m
 
 check-terraform-changes:
-	cd terraform/environments && terraform init && terraform plan -detailed-exitcode
+	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -detailed-exitcode
 
 setup-terraform:
-	cd terraform/environments && terraform init && terraform apply --auto-approve
+	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/environments && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) --auto-approve
 
 setup-node: check-deploy-env
 	cd ansible && ansible-playbook \
@@ -97,7 +100,8 @@ ssh: ssh-aeternity
 
 # TODO also add ansible idempotent tests here
 unit-tests:
-	cd terraform/environments && terraform init && terraform plan
+	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT)
 
 integration-tests-run:
 	cd test/terraform && terraform init
