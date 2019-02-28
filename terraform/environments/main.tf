@@ -263,6 +263,7 @@ module "aws_deploy-dev1-eu-west-2" {
   spot_price    = "0.125"
   instance_type = "m4.large"
   ami_name      = "aeternity-ubuntu-16.04-v1549009934"
+  root_volume_size = 20
 
   aeternity = {
     package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
