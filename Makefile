@@ -191,6 +191,9 @@ list-inventory: ansible/inventory-list.json
 	cd ansible &&\
 	cat inventory-list.json | ./dump_inventory.py
 
+health-check-node:
+	goss -g test/goss/remote/health-check-node.yaml validate
+
 health-check: check-deploy-env ansible/inventory-list.json
 	cd test/goss/remote && \
 	TAGENV=tag_env_$(DEPLOY_ENV) REGION=$(AWS_REGION) goss -g peers-health-check.yaml --vars ../../../ansible/inventory-list.json validate
@@ -203,4 +206,4 @@ clean:
 	images setup-terraform setup-node setup-monitoring setup \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
 	check-seed-peers check-deploy-env list-inventory \
-	check-seed-peers-% check-seed-peers-all
+	check-seed-peers-% check-seed-peers-all health-check-node
