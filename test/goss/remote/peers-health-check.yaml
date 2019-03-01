@@ -1,3 +1,5 @@
+{{$genesis_main := "kh_pbtwgLrNu23k9PA6XCZnUbtsvEFeQGgavY4FS2do3QP8kcp2z"}}
+{{$genesis_uat := "kh_wUCideEB8aDtUaiHCtKcfywU6oHZW6gnyci8Mw6S1RSTCnCRu"}}
 http:
 {{$tagenv := getEnv "TAGENV" "aws_ec2"}}
 {{$region := getEnv "REGION"}}
@@ -5,12 +7,15 @@ http:
 {{if $envhosts := index .Vars $tagenv}}
 {{range $host := index $envhosts "hosts"}}
 {{$host_region := index $hostvars $host "placement" "region"}}
+{{$host_env := index $hostvars $host "tags" "env"}}
   {{if or (eq $region $host_region) (not $region)}}
   http://{{$host}}:3013/v2/status:
     status: 200
     allow-insecure: true
     no-follow-redirects: true
     timeout: 5000
+    body:
+      - '"genesis_key_block_hash":"{{if eq $host_env "main" "dev2"}}{{$genesis_main}}{{else}}{{$genesis_uat}}{{end}}"'
   http://{{$host}}:3013/v2/blocks/top:
     status: 200
     allow-insecure: true
@@ -20,4 +25,4 @@ http:
 {{end}}
 {{end}}
 #example usage:
-#TAGENV=tag_env_main REGION=us-west-2 goss -g test/goss/peers-health-check.yaml --vars ansible/inventory-list.json validate --format documentation
+#TAGENV=tag_env_main REGION=us-west-2 goss -g test/goss/remote/peers-health-check.yaml --vars ansible/inventory-list.json validate --format documentation
