@@ -4,6 +4,7 @@ BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
+SEED_CHECK_ENVS = main uat unstable
 
 check-terraform-changes:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
@@ -175,21 +176,13 @@ check-seed-peers:
 	# Unstable
 	curl -fs -m 5 http://3.8.38.115:3013/v2/peers/pubkey | grep -q '2N6MS9Sm5ULbh54iCDvVxFUZ7WcoDLCdJQEDNdfmf5MRSTDGV1'
 
-test/goss/remote/vars/seed-peers-main.yaml: ansible/inventory-list.json
-	cat ansible/inventory-list.json | python3 test/goss/remote/scripts/dump-seed-peers-keys.py --env main \
-		> test/goss/remote/vars/seed-peers-main.yaml
-test/goss/remote/vars/seed-peers-uat.yaml: ansible/inventory-list.json
-	cat ansible/inventory-list.json | python3 test/goss/remote/scripts/dump-seed-peers-keys.py --env uat \
-		> test/goss/remote/vars/seed-peers-uat.yaml
-test/goss/remote/vars/seed-peers-unstable.yaml: ansible/inventory-list.json
-	cat ansible/inventory-list.json | python3 test/goss/remote/scripts/dump-seed-peers-keys.py --env unstable \
-		> test/goss/remote/vars/seed-peers-unstable.yaml
+test/goss/remote/vars/seed-peers-%.yaml: ansible/inventory-list.json
+	cat ansible/inventory-list.json | python3 test/goss/remote/scripts/dump-seed-peers-keys.py --env $* > $@
 
-check-seed-peers-goss: test/goss/remote/vars/seed-peers-main.yaml test/goss/remote/vars/seed-peers-uat.yaml test/goss/remote/vars/seed-peers-unstable.yaml
-	cd test/goss/remote && \
-	goss --vars vars/seed-peers-main.yaml validate && \
-	goss --vars vars/seed-peers-main.yaml validate && \
-	goss --vars vars/seed-peers-uat.yaml validate
+check-seed-peers-%: test/goss/remote/vars/seed-peers-%.yaml
+	goss -g test/goss/remote/check-seed-peers.yaml --vars $< validate
+
+check-seed-peers-all: $(addprefix check-seed-peers-, $(SEED_CHECK_ENVS))
 
 check-deploy-env:
 ifndef DEPLOY_ENV
@@ -214,4 +207,5 @@ clean:
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
-	check-seed-peers check-deploy-env list-inventory
+	check-seed-peers check-deploy-env list-inventory \
+	check-seed-peers-% check-seed-peers-all
