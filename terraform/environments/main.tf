@@ -13,7 +13,7 @@ module "aws_deploy-main-ap-southeast-1" {
   spot_nodes   = 0
 
   spot_price       = "0.15"
-  instance_type    = "t3.large"
+  instance_type    = "t3.small"
   ami_name         = "aeternity-ubuntu-16.04-v1549009934"
   root_volume_size = 16
 
@@ -37,7 +37,7 @@ module "aws_deploy-main-eu-west-2" {
   spot_nodes   = 0
 
   spot_price       = "0.15"
-  instance_type    = "t3.large"
+  instance_type    = "t3.small"
   ami_name         = "aeternity-ubuntu-16.04-v1549009934"
   root_volume_size = 16
 
@@ -63,7 +63,7 @@ module "aws_deploy-main-eu-north-1" {
   spot_nodes   = 0
 
   spot_price       = "0.15"
-  instance_type    = "t3.large"
+  instance_type    = "t3.small"
   ami_name         = "aeternity-ubuntu-16.04-v1549009934"
   root_volume_size = 16
 
@@ -89,7 +89,7 @@ module "aws_deploy-main-us-west-2" {
   spot_nodes   = 0
 
   spot_price       = "0.15"
-  instance_type    = "t3.large"
+  instance_type    = "t3.small"
   ami_name         = "aeternity-ubuntu-16.04-v1549009934"
   root_volume_size = 16
 
@@ -113,7 +113,7 @@ module "aws_deploy-main-us-east-2" {
   spot_nodes   = 0
 
   spot_price       = "0.15"
-  instance_type    = "t3.large"
+  instance_type    = "t3.small"
   ami_name         = "aeternity-ubuntu-16.04-v1549009934"
   root_volume_size = 16
 
