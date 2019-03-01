@@ -3,6 +3,7 @@ DEPLOY_DOWNTIME ?= 0
 BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 TF_LOCK_TIMEOUT=5m
+VAULT_TOKENS_TTL ?= 4h
 
 check-terraform-changes:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
@@ -86,7 +87,7 @@ provision: check-deploy-env
 
 .PRECIOUS: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
 ~/.ssh/id_ae_infra_ed25519-%-cert.pub: ~/.ssh/id_ae_infra_ed25519
-	@vault write -field=signed_key ssh/sign/$* public_key=@$<.pub > $@
+	@vault write -field=signed_key ssh/sign/$* ttl=$(VAULT_TOKENS_TTL) public_key=@$<.pub > $@
 
 cert-%: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
 	@
