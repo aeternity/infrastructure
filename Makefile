@@ -130,13 +130,9 @@ integration-tests: integration-tests-run integration-tests-cleanup
 
 lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
-<<<<<<< HEAD
-	cd terraform/environments && terraform init && terraform validate && terraform fmt -check=true -diff=true
-=======
 
 terraform-validate:
 	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
->>>>>>> c8889a5... working backup + restore
 
 lint: lint-ansible terraform-validate
 
