@@ -17,10 +17,20 @@ module "aws_fleet" {
   vault_addr        = "${var.vault_addr}"
   vault_role        = "${var.vault_role}"
 
-  spot_nodes   = "${var.spot_nodes}"
-  static_nodes = "${var.static_nodes}"
+  spot_nodes        = "${var.spot_nodes}"
+  static_nodes      = "${var.static_nodes}"
+  gateway_nodes_min = "${var.gateway_nodes_min}"
+  gateway_nodes_max = "${var.gateway_nodes_max}"
 
   aeternity = "${var.aeternity}"
+}
+
+output "gateway_lb_dns" {
+  value = "${module.aws_fleet.gateway_lb_dns}"
+}
+
+output "gateway_lb_zone_id" {
+  value = "${module.aws_fleet.gateway_lb_zone_id}"
 }
 
 # Module to module depens_on workaround

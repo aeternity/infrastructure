@@ -6,7 +6,17 @@ variable "color" {
 
 variable "bootstrap_version" {}
 
-variable "spot_nodes" {}
+variable "spot_nodes" {
+  default = 0
+}
+
+variable "gateway_nodes_min" {
+  default = 0
+}
+
+variable "gateway_nodes_max" {
+  default = 0
+}
 
 variable "static_nodes" {
   default = 0

@@ -2,6 +2,10 @@ variable "static_nodes" {}
 
 variable "spot_nodes" {}
 
+variable "gateway_nodes_min" {}
+
+variable "gateway_nodes_max" {}
+
 variable "color" {}
 
 variable "env" {}
