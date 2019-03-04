@@ -225,6 +225,16 @@ jobs:
         - integration_tests
         - *fail_notification
 
+  chain_backup:
+    run:
+      name: Snapshot of environment blockchain
+      environment:
+        - BACKUP_DIR: *chain_snapshots
+      command: |
+        export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
+        make mnesia_backup
+      no_output_timeout: 30m
+
 workflows:
   check_deploy:
     jobs:
@@ -276,6 +286,12 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*$/
+
+  chain_backup:
+      - chain_backup:
+          filters:
+            branches:
+              only: speedup_init_synch_163475803
 
   daily_check_deploy:
     triggers:
