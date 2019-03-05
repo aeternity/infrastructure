@@ -1,7 +1,5 @@
 #example usage:
 #ANSIBLE_TAG=tag_env_main REGION=us-west-2 goss -g test/goss/remote/peers-health-check.yaml --vars ansible/inventory-list.json validate --format documentation
-{{$genesis_main := "kh_pbtwgLrNu23k9PA6XCZnUbtsvEFeQGgavY4FS2do3QP8kcp2z"}}
-{{$genesis_uat := "kh_wUCideEB8aDtUaiHCtKcfywU6oHZW6gnyci8Mw6S1RSTCnCRu"}}
 {{$tagenv := getEnv "ANSIBLE_TAG" "aws_ec2"}}
 {{$region := getEnv "REGION"}}
 http:
