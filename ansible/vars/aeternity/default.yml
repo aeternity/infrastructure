@@ -1,7 +1,5 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
-genesis_accounts:
-  "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
-configure_peers: true
+configure_peers: false
 seed_peers: []
 
 node_config:
@@ -22,18 +20,5 @@ node_config:
     persist: true
     db_path: "./db{{ db_version|mandatory }}"
 
-  mining:
-    beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
-    cuckoo:
-      edge_bits: 29
-      miners:
-        - executable: mean29-generic
-          extra_args: "-t {{ ansible_processor_vcpus }}"
-
   logging:
     level: debug
-
-  metrics:
-      # StatsD server and port
-      host: 127.0.0.1
-      port: 8125
