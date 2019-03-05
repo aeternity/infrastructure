@@ -5,10 +5,15 @@ Simple script that takes a ansible-inventory JSON output (stdin)
 and dumps seed nodes with public keys
 You can specify environment with --env env_name or omit to get all hosts
 """
-import sys, json, yaml, subprocess
+import sys, json, yaml, subprocess, re
 
 inventory = json.load(sys.stdin)
 all_envs = [ c for c in inventory['all']['children'] if c.startswith('tag_env_') ]
+
+# source https://stackoverflow.com/a/16090640/3967231
+def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
+    return [int(text) if text.isdigit() else text.lower()
+            for text in re.split(_nsre, s)]
 
 if len(sys.argv) > 2:
     param = sys.argv[2]
@@ -30,10 +35,11 @@ def get_peer_pubkey_from_vault(host):
     out, err = vproc.communicate()
     if vproc.returncode > 0:
         print(err, file=sys.stderr)
-#        sys.exit(1)
+        sys.exit(1)
     return out.decode("utf-8")
 
 env_seed_list = []
+inventory[env]['hosts'].sort(key=natural_sort_key)
 for host in inventory[env]['hosts']:
     if host in inventory['tag_kind_seed']['hosts']:
         env_seed_list.append({'ip_addr': host, 'pubkey': get_peer_pubkey_from_vault(host)})
