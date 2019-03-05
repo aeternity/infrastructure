@@ -1,3 +1,0 @@
-gossfile:
-  check-seed-peers.yaml: {}
-#  test/goss/check-peers-top.yaml: {}
