@@ -17,8 +17,12 @@
   hosts: "{{ ansible_play_hosts | last }}"
   remote_user: aeternity
   tasks:
-    - include_vars: backup/config.yml
-    - import_tasks: backup/disable_mining_and_peers.yml
+
+    - name: Include configuration variables
+      include_vars: backup/config.yml
+
+    - name: Disable mining and peers
+      import_tasks: backup/disable_mining_and_peers.yml
 
     - meta: flush_handlers
 

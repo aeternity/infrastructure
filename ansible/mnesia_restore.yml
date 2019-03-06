@@ -18,7 +18,8 @@
   remote_user: aeternity
 
   tasks:
-    - include_vars: backup/config.yml
+    - name: Include configuration variables
+      include_vars: backup/config.yml
 
     - name: Download backup to S3 bucket latest
       aws_s3:
@@ -48,7 +49,11 @@
 
     - name: Restore Mnesia database
       command: "{{ aeternity_bin }} eval '{atomic, _} = mnesia:restore(\"/tmp/backup\", [{default_op, recreate_tables}]).'"
+      register: restore_result
+      changed_when: "restore_result.stdout|search('atomic')"
 
+    - debug:
+        var: restore_result
     - import_tasks: backup/restore_mining_and_peers_config.yml
 
     - name: Remove Mnesia backups
