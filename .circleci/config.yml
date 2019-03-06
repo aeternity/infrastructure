@@ -43,7 +43,7 @@ references:
   check_seed_peers: &check_seed_peers
     run:
       name: Check seed peers
-      command: make check-seed-peers
+      command: make check-seed-peers-all
 
   fail_notification: &fail_notification
     run:
