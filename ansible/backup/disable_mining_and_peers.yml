@@ -1,13 +1,9 @@
 ---
-- name: Create backup filename
-  set_fact:
-    backup_archive_filename: "mnesia_{{ env }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ backup_suffix }}_{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}.{{ format }}"
-
 - name: "Load a variable files for environment: {{ env }}"
   include_vars: "{{ item }}"
   with_first_found:
-    - "vars/aeternity/{{ env }}.yml"
-    - "vars/aeternity/default.yml"
+    - "../vars/aeternity/{{ env }}.yml"
+    - "../vars/aeternity/default.yml"
   tags: [config, node_config, peer_keys, health-check]
 
 - name: Peers backup
@@ -30,7 +26,7 @@
 
 - name: Update node configuration
   template:
-    src: templates/aeternity.yaml
+    src: ../templates/aeternity.yaml
     dest: "{{ project_root }}/aeternity.yaml"
     mode: '0600'
   notify: "restart aeternity daemon"

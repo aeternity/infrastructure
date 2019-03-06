@@ -76,15 +76,6 @@ mnesia_backup:
 		-e env=$(BACKUP_ENV) \
 		mnesia_backup.yml
 
-provision: check-deploy-env
-	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-	-e ansible_python_interpreter=/usr/bin/python3 \
-	-e env=$(DEPLOY_ENV) \
-	-e vault_addr=$(VAULT_ADDR) \
-	-e package=$(PACKAGE) \
-	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
-	async_provision.yml
-
 mnesia_restore:
 	cd ansible && ansible-playbook \
 		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
@@ -94,6 +85,15 @@ mnesia_restore:
 		-e db_version=$(BACKUP_DB_VERSION) \
 		-e env=$(BACKUP_ENV) \
 		mnesia_restore.yml
+
+provision: check-deploy-env
+	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
+	-e ansible_python_interpreter=/usr/bin/python3 \
+	-e env=$(DEPLOY_ENV) \
+	-e vault_addr=$(VAULT_ADDR) \
+	-e package=$(PACKAGE) \
+	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
+	async_provision.yml
 
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
@@ -170,15 +170,6 @@ health-check-all: ansible/inventory-list.json
 clean:
 	rm ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
-
-#DEVHELPER
-infrastructure-local-build:
-	docker build -t aeternity/local .
-
-infrastructure-local-run:
-	docker run -it --env-file=env.list -v ${PWD}:/src aeternity/local
-
-infrastructure-local: infrastructure-local-build infrastructure-local-run
 
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \

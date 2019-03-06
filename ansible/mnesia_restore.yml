@@ -17,17 +17,9 @@
   hosts: "{{ ansible_play_hosts | last }}"
   remote_user: aeternity
 
-  vars:
-    project_root: "{{ ansible_env.HOME }}/node"
-    aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
-    download_dir: /tmp/mnesia_backups
-    backup_bucket: aeternity-database-backups
-    backup_suffix: backup
-    health_check: yes
-    format: zip
-    backup_archive_filename_latest: "mnesia_{{ env }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ backup_suffix }}_latest.{{ format }}"
-
   tasks:
+    - include_vars: backup/config.yml
+
     - name: Download backup to S3 bucket latest
       aws_s3:
         bucket: "{{ backup_bucket }}"
@@ -41,7 +33,7 @@
         src: /tmp/{{ backup_archive_filename_latest }}
         dest: /tmp/
 
-    - import_tasks: disable_mining_and_peers.yml
+    - import_tasks: backup/disable_mining_and_peers.yml
 
     - meta: flush_handlers
 
@@ -57,7 +49,7 @@
     - name: Restore Mnesia database
       command: "{{ aeternity_bin }} eval '{atomic, _} = mnesia:restore(\"/tmp/backup\", [{default_op, recreate_tables}]).'"
 
-    - import_tasks: restore_mining_and_peers_config.yml
+    - import_tasks: backup/restore_mining_and_peers_config.yml
 
     - name: Remove Mnesia backups
       file:
@@ -68,36 +60,4 @@
         - /tmp/{{ backup_archive_filename_latest }}
 
   handlers:
-    - name: Check aeternity binary
-      stat:
-        path: "{{ project_root }}/bin/aeternity"
-      register: ae_node
-      tags: [daemon]
-      listen:
-        - "stop aeternity daemon"
-        - "restart aeternity daemon"
-
-    - name: Ping aeternity node
-      command: "{{ project_root }}/bin/aeternity ping"
-      failed_when: no
-      register: ping
-      when: ae_node.stat.exists == True
-      tags: [daemon]
-      listen:
-        - "stop aeternity daemon"
-        - "restart aeternity daemon"
-
-    - name: Stop aeternity node
-      command: "{{ project_root }}/bin/aeternity stop"
-      when: ae_node.stat.exists == True and ping.stdout == "pong"
-      tags: [daemon]
-      listen:
-        - "stop aeternity daemon"
-        - "restart aeternity daemon"
-
-    - name: Start aeternity node
-      command: "{{ project_root }}/bin/aeternity start"
-      tags: [daemon]
-      listen:
-        - "start aeternity daemon"
-        - "restart aeternity daemon"
+  - import_tasks: handlers.yml
