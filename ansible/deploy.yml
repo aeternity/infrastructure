@@ -216,6 +216,13 @@
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
+      - name: Database migration
+        include_tasks: tasks/migrate-db-name.yml
+        vars:
+          aeternity_bin: "{{ project_root }}/bin/aeternity"
+          db_path: "{{ project_root }}/db{{ db_version|mandatory }}"
+          # it also includes the playbook vars
+
       - name: Ensure node is running
         command: "/bin/true"
         notify: "start aeternity daemon"
