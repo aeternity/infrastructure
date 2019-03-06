@@ -52,8 +52,6 @@
       register: restore_result
       changed_when: "restore_result.stdout|search('atomic')"
 
-    - debug:
-        var: restore_result
     - import_tasks: backup/restore_mining_and_peers_config.yml
 
     - name: Remove Mnesia backups

@@ -6,27 +6,9 @@
     - "../vars/aeternity/default.yml"
   tags: [config, node_config, peer_keys, health-check]
 
-- name: Peers backup
-  set_fact:
-    peers_backup: "{{ node_config.peers }}"
-  when: node_config.peers is defined
-
-- name: Mining autostart backup
-  set_fact:
-    mining_backup: "{{ node_config.mining.autostart }}"
-  when: node_config.mining.autostart is defined
-
-- name: Empty peers list.
-  set_fact:
-    node_config: "{{ node_config|combine({'peers': []}, recursive=True) }}"
-
-- name: Disable mining
-  set_fact:
-    node_config: "{{ node_config|combine({'mining': {'autostart': false}}, recursive=True) }}"
-
 - name: Update node configuration
   template:
-    src: ../templates/aeternity.yaml
+    src: ../templates/aeternity.backup.yaml
     dest: "{{ project_root }}/aeternity.yaml"
     mode: '0600'
   notify: "restart aeternity daemon"

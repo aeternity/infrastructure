@@ -1,0 +1,8 @@
+---
+chain:
+  persist: true
+  db_path: "./db{{ db_version|mandatory }}"
+fork_management:
+    network_id: {{ node_config.fork_management.network_id }}
+mining:
+    autostart: false

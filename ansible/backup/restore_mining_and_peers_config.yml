@@ -1,27 +1,4 @@
 ---
-- name: Set mining settings
-  set_fact:
-    node_config: "{{ node_config|combine({'mining': {'autostart': mining_backup}}, recursive=True) }}"
-
-- name: Set tempolary variable
-  set_fact:
-    node_config_restored: {}
-
-- name: Remove peers settings
-  set_fact:
-    node_config_restored: "{{node_config_restored |combine({item.key: item.value})}}"
-  when: "{{item.key not in ['peers']}}"
-  with_dict: "{{node_config}}"
-
-- name: Restore configuration
-  set_fact:
-    node_config: "{{node_config_restored}}"
-
-- name: Set peers settings if was existing
-  set_fact:
-    node_config: "{{ node_config|combine({'peers': {'peers': peers_backup}}, recursive=True) }}"
-  when: peers_backup is defined
-
 - name: Update node configuration
   template:
     src: ../templates/aeternity.yaml
