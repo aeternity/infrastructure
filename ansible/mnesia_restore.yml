@@ -28,6 +28,19 @@
     backup_archive_filename_latest: "mnesia_{{ env }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ backup_suffix }}_latest.{{ format }}"
 
   tasks:
+    - name: Download backup to S3 bucket latest
+      aws_s3:
+        bucket: "{{ backup_bucket }}"
+        object: "{{ backup_archive_filename_latest }}"
+        dest: /tmp/{{ backup_archive_filename_latest }}
+        mode: get
+
+    - name: Unaarchive backup
+      unarchive:
+        remote_src: yes
+        src: /tmp/{{ backup_archive_filename_latest }}
+        dest: /tmp/
+
     - import_tasks: disable_mining_and_peers.yml
 
     - meta: flush_handlers
@@ -41,31 +54,10 @@
 
       tags: [health-check]
 
-    - name: Backup Mnesia database
-      command: "{{ aeternity_bin }} eval 'ok = mnesia:backup(\"/tmp/backup\").'"
-      args:
-        creates: "/tmp/backup"
-      notify: "stop aeternity daemon"
+    - name: Restore Mnesia database
+      command: "{{ aeternity_bin }} eval '{atomic, _} = mnesia:restore(\"/tmp/backup\", [{default_op, recreate_tables}]).'"
 
-    - name: Archive Mnesia backup
-      archive:
-        format: zip
-        path: /tmp/backup
-        dest: /tmp/{{ backup_archive_filename }}
-
-    - name: Upload backup to S3 bucket
-      aws_s3:
-        bucket: "{{ backup_bucket }}"
-        object: "{{ backup_archive_filename }}"
-        src: /tmp/{{ backup_archive_filename }}
-        mode: put
-
-    - name: Upload backup to S3 bucket latest
-      aws_s3:
-        bucket: "{{ backup_bucket }}"
-        object: "{{ backup_archive_filename_latest }}"
-        src: /tmp/{{ backup_archive_filename }}
-        mode: put
+    - import_tasks: restore_mining_and_peers_config.yml
 
     - name: Remove Mnesia backups
       file:
@@ -73,9 +65,7 @@
         state: absent
       loop:
         - /tmp/backup
-        - /tmp/{{ backup_archive_filename }}
-
-    - import_tasks: restore_mining_and_peers_config.yml
+        - /tmp/{{ backup_archive_filename_latest }}
 
   handlers:
     - name: Check aeternity binary

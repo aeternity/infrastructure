@@ -69,9 +69,11 @@ reset-net: check-deploy-env
 mnesia_backup:
 	cd ansible && ansible-playbook \
 		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
+		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e download_dir=$(BACKUP_DIR) \
 		-e backup_suffix=$(BACKUP_SUFFIX) \
+		-e db_version=$(BACKUP_DB_VERSION) \
+		-e env=$(BACKUP_ENV) \
 		mnesia_backup.yml
 
 provision: check-deploy-env
@@ -82,6 +84,16 @@ provision: check-deploy-env
 	-e package=$(PACKAGE) \
 	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
 	async_provision.yml
+
+mnesia_restore:
+	cd ansible && ansible-playbook \
+		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
+		-e ansible_python_interpreter=/var/venv/bin/python \
+		-e download_dir=$(BACKUP_DIR) \
+		-e backup_suffix=$(BACKUP_SUFFIX) \
+		-e db_version=$(BACKUP_DB_VERSION) \
+		-e env=$(BACKUP_ENV) \
+		mnesia_restore.yml
 
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
@@ -116,9 +128,18 @@ integration-tests-cleanup:
 
 integration-tests: integration-tests-run integration-tests-cleanup
 
-lint:
+lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
+<<<<<<< HEAD
 	cd terraform/environments && terraform init && terraform validate && terraform fmt -check=true -diff=true
+=======
+
+terraform-validate:
+	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
+>>>>>>> c8889a5... working backup + restore
+
+lint: lint-ansible terraform-validate
+
 
 test/goss/remote/vars/seed-peers-%.yaml: ansible/inventory-list.json
 	cat ansible/inventory-list.json | python3 ansible/scripts/dump-seed-peers-keys.py --env $* > $@
@@ -153,6 +174,15 @@ health-check-all: ansible/inventory-list.json
 clean:
 	rm ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
+
+#DEVHELPER
+infrastructure-local-build:
+	docker build -t aeternity/local .
+
+infrastructure-local-run:
+	docker run -it --env-file=env.list -v ${PWD}:/src aeternity/local
+
+infrastructure-local: infrastructure-local-build infrastructure-local-run
 
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \

@@ -1,0 +1,37 @@
+---
+- name: Create backup filename
+  set_fact:
+    backup_archive_filename: "mnesia_{{ env }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ backup_suffix }}_{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}.{{ format }}"
+
+- name: "Load a variable files for environment: {{ env }}"
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "vars/aeternity/{{ env }}.yml"
+    - "vars/aeternity/default.yml"
+  tags: [config, node_config, peer_keys, health-check]
+
+- name: Peers backup
+  set_fact:
+    peers_backup: "{{ node_config.peers }}"
+  when: node_config.peers is defined
+
+- name: Mining autostart backup
+  set_fact:
+    mining_backup: "{{ node_config.mining.autostart }}"
+  when: node_config.mining.autostart is defined
+
+- name: Empty peers list.
+  set_fact:
+    node_config: "{{ node_config|combine({'peers': []}, recursive=True) }}"
+
+- name: Disable mining
+  set_fact:
+    node_config: "{{ node_config|combine({'mining': {'autostart': false}}, recursive=True) }}"
+
+- name: Update node configuration
+  template:
+    src: templates/aeternity.yaml
+    dest: "{{ project_root }}/aeternity.yaml"
+    mode: '0600'
+  notify: "restart aeternity daemon"
+  tags: [config, node_config]
