@@ -57,7 +57,7 @@
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
     health_check: yes
-    node_vars: "{{ ansible_local.aeternity|default(ansible_local.epoch) }}"
+    node_vars: "{{ ansible_local.aeternity }}"
 
     # Label used for datadog tagging and ENV file planting
     env: unknown
@@ -98,7 +98,6 @@
           paths: "{{ packages_path }}"
           patterns:
             - .*aeternity-.*ubuntu.*.tar.gz
-            - .*epoch-.*ubuntu.*.tar.gz
           exclude: "{{ package|basename }}"
           use_regex: yes
         register: old_packages_to_delete
@@ -187,7 +186,7 @@
       - name: Update node configuration
         template:
           src: templates/aeternity.yaml
-          dest: "{{ project_root }}/epoch.yaml"
+          dest: "{{ project_root }}/aeternity.yaml"
           mode: '0600'
         notify: "restart aeternity daemon"
         tags: [config, node_config]
