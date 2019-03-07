@@ -18,7 +18,7 @@ fi
 
 if [ -n "$VAULT_GITHUB_TOKEN" ]; then
     export VAULT_TOKEN=$(vault login -field=token -method=github token=$VAULT_GITHUB_TOKEN)
-    vault token renew -increment=${VAULT_TOKENS_TTL} $VAULT_TOKEN > /dev/null 2>&1
+    vault token renew -increment=${VAULT_TOKENS_TTL} > /dev/null 2>&1
 fi
 
 if [ -n "$VAULT_ROLE_ID" -a -n "$VAULT_SECRET_ID" ]; then
