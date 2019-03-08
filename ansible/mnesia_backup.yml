@@ -19,7 +19,7 @@
   tasks:
 
     - name: Include configuration variables
-      include_vars: backup/config.yml
+      import_vars: backup/config.yml
 
     - name: Disable mining and peers
       import_tasks: backup/disable_mining_and_peers.yml
