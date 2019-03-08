@@ -31,7 +31,7 @@
         port: "{{ node_config.http.external.port }}"
         host: "{{ public_ipv4 }}"
         timeout: 300
-      when: health_check
+
 
       tags: [health-check]
 
