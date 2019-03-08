@@ -26,6 +26,8 @@
     - meta: flush_handlers
     - debug:
         var: health_check
+    - debug:
+        var: project_root
     - name: Wait aeternity node API to boot
       wait_for:
         port: "{{ node_config.http.external.port }}"
