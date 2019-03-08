@@ -127,18 +127,15 @@ jobs:
           name: Test ansible/setup.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/setup.yml \
-              -e ansible_python_interpreter=/usr/bin/python3
       - run:
           name: Test ansible/monitoring.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
-              -e ansible_python_interpreter=/usr/bin/python3 \
               -e datadog_api_key=test -e datadog_enabled=yes
       - run:
           name: Test ansible/deploy.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/deploy.yml \
-              -e ansible_python_interpreter=/usr/bin/python3 \
               -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key=
