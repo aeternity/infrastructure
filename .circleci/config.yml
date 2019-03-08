@@ -139,6 +139,13 @@ jobs:
               -e datadog_api_key= \
               -e datadog_app_key=
       - run:
+          name: Test ansible/deploy.yml
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/mnesia_backup.yml \
+              -e env=test \
+              -e datadog_api_key= \
+              -e datadog_app_key=
+      - run:
           name: Push (branch) Docker image to DockerHub
           command: |
             source import-secrets.sh
