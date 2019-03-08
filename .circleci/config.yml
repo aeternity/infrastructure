@@ -99,6 +99,7 @@ jobs:
       ANSIBLE_HOST_KEY_CHECKING: False
     steps:
       - checkout
+      - *setup_secrets
       - setup_remote_docker:
           version: 18.06.0-ce
           docker_layer_caching: true
@@ -149,10 +150,7 @@ jobs:
               -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key= \
-              -e db_version=1 \
-              -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
-              -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-              -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
+              -e db_version=1
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
