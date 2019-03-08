@@ -146,8 +146,9 @@ jobs:
               -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key= \
-              -e db_version=1
-              -e backup_env=test
+              -e db_version=1 \
+              -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+              -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
