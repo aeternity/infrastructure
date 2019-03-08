@@ -2,9 +2,11 @@
 chain:
   persist: true
   db_path: "./db{{ db_version|mandatory }}"
+{% if node_config['fork_management']
 {% if node_config['fork_management']['network_id'] %}
 fork_management:
     network_id: {{ node_config.fork_management.network_id }}
+{% endif %}
 {% endif %}
 mining:
     autostart: false
