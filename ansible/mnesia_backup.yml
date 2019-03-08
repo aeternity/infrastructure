@@ -56,6 +56,9 @@
         object: "{{ backup_archive_filename }}"
         src: /tmp/{{ backup_archive_filename }}
         mode: put
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
 
     - name: Upload backup to S3 bucket latest
       aws_s3:
