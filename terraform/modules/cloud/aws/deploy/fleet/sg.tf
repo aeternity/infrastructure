@@ -6,6 +6,10 @@ resource "aws_security_group" "ae-nodes" {
   }
 
   vpc_id = "${var.vpc_id}"
+
+  tags = {
+    Name = "ae-${var.env}-nodes-terraform"
+  }
 }
 
 resource "aws_security_group_rule" "allow_all_internal" {
@@ -53,6 +57,10 @@ resource "aws_security_group" "ae-nodes-management" {
   }
 
   vpc_id = "${var.vpc_id}"
+
+  tags = {
+    Name = "ae-${var.env}-management-terraform"
+  }
 }
 
 resource "aws_security_group_rule" "allow_ssh" {
