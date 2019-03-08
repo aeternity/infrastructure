@@ -132,7 +132,7 @@ lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
 
 terraform-validate:
-	cd terraform && terraform init && terraform validate && terraform fmt -check=true -diff=true
+	cd terraform/environments && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
 lint: lint-ansible terraform-validate
 
