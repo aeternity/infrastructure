@@ -17,7 +17,6 @@
   hosts: "{{ ansible_play_hosts | last }}"
   remote_user: aeternity
   tasks:
-
     - name: Include configuration variables
       include_vars: backup/config.yml
 
@@ -25,13 +24,14 @@
       import_tasks: backup/disable_mining_and_peers.yml
 
     - meta: flush_handlers
-
+    - debug:
+        var: health_check
     - name: Wait aeternity node API to boot
       wait_for:
         port: "{{ node_config.http.external.port }}"
         host: "{{ public_ipv4 }}"
         timeout: 300
-
+      when: health_check
 
       tags: [health-check]
 
