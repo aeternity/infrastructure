@@ -90,7 +90,7 @@ commands:
 jobs:
   build_check:
     docker:
-      - image: aeternity/infrastructure:master
+      - image: aeternity/infrastructure:speedup_init_synch_163475803
       - image: rastasheep/ubuntu-sshd:16.04
     working_directory: /src
     environment:
@@ -298,12 +298,12 @@ workflows:
             tags:
               only: /^v.*$/
 
-  chain_backup:
-    jobs:
-      - chain_backup:
-          filters:
-            branches:
-              only: speedup_init_synch_163475803
+#  chain_backup:
+#    jobs:
+#      - chain_backup:
+#          filters:
+#            branches:
+#              only: speedup_init_synch_163475803
 
   daily_check_deploy:
     triggers:
