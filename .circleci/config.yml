@@ -301,12 +301,12 @@ workflows:
             tags:
               only: /^v.*$/
 
-#  chain_backup:
-#    jobs:
-#      - chain_backup:
-#          filters:
-#            branches:
-#              only: speedup_init_synch_163475803
+  chain_backup:
+    jobs:
+      - chain_backup:
+          filters:
+            branches:
+              only: speedup_init_synch_163475803
 
   daily_check_deploy:
     triggers:
