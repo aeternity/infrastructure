@@ -91,7 +91,7 @@ module "aws_deploy-main-us-west-2" {
   spot_price       = "0.15"
   instance_type    = "t3.large"
   ami_name         = "aeternity-ubuntu-16.04-v1549009934"
-  root_volume_size = 16
+  root_volume_size = 40
 
   aeternity = {
     package = "https://releases.ops.aeternity.com/aeternity-2.0.0-ubuntu-x86_64.tar.gz"
