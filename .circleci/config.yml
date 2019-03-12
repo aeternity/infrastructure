@@ -327,7 +327,7 @@ workflows:
               only: /^v.*$/
 
   chain_snapshot:
-   triggers:
+    triggers:
       - schedule:
           # run At minute 0 past hour 0. UTC
           cron: "0 0 * * *"
