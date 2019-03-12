@@ -42,7 +42,6 @@
       command: "{{ aeternity_bin }} eval 'ok = mnesia:backup(\"/tmp/backup\").'"
       args:
         creates: "/tmp/backup"
-      notify: "stop aeternity daemon"
 
     - name: Archive Mnesia backup
       archive:
