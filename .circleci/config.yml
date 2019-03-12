@@ -251,6 +251,7 @@ jobs:
           environment:
             - BACKUP_ENV: uat
             - BACKUP_DIR: /tmp
+            - BACKUP_DB_VERSION: 1
           command: |
             export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
             make mnesia_snapshot
@@ -265,6 +266,7 @@ jobs:
           environment:
             - BACKUP_ENV: main
             - BACKUP_DIR: /tmp
+            - BACKUP_DB_VERSION: 1
           command: |
             export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
             make mnesia_snapshot

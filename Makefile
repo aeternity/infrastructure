@@ -72,7 +72,7 @@ mnesia_snapshot:
 		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e download_dir=$(BACKUP_DIR) \
 		-e backup_suffix=$(BACKUP_SUFFIX) \
-		-e db_version=1 \
+		-e db_version=$(BACKUP_DB_VERSION) \
 		-e env=$(BACKUP_ENV) \
 		mnesia_snapshot.yml
 
@@ -82,7 +82,7 @@ mnesia_snapshot_restore:
 		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e download_dir=$(BACKUP_DIR) \
 		-e backup_suffix=$(BACKUP_SUFFIX) \
-		-e db_version=1 \
+		-e db_version=$(BACKUP_DB_VERSION) \
 		-e env=$(BACKUP_ENV) \
 		mnesia_snapshot_restore.yml
 
