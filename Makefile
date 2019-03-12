@@ -66,7 +66,7 @@ reset-net: check-deploy-env
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		reset-net.yml
 
-mnesia_backup:
+mnesia_snapshot:
 	cd ansible && ansible-playbook \
 		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
@@ -74,9 +74,9 @@ mnesia_backup:
 		-e backup_suffix=$(BACKUP_SUFFIX) \
 		-e db_version=$(BACKUP_DB_VERSION) \
 		-e env=$(BACKUP_ENV) \
-		mnesia_backup.yml
+		mnesia_snapshot.yml
 
-mnesia_restore:
+mnesia_snapshot_restore:
 	cd ansible && ansible-playbook \
 		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
@@ -84,7 +84,7 @@ mnesia_restore:
 		-e backup_suffix=$(BACKUP_SUFFIX) \
 		-e db_version=$(BACKUP_DB_VERSION) \
 		-e env=$(BACKUP_ENV) \
-		mnesia_restore.yml
+		mnesia_snapshot_restore.yml
 
 provision: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \

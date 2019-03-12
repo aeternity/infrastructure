@@ -242,14 +242,28 @@ jobs:
         - integration_tests
         - *fail_notification
 
-  chain_backup:
+  chain_snapshot_uat:
     <<: *container_config
     steps:
       - *setup_secrets
       - run:
           name: Snapshot of environment blockchain
           environment:
-            - BACKUP_ENV: dev1
+            - BACKUP_ENV: uat
+            - BACKUP_DIR: /tmp
+          command: |
+            export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
+            make mnesia_backup
+          no_output_timeout: 30m
+
+  chain_snapshot_main:
+    <<: *container_config
+    steps:
+      - *setup_secrets
+      - run:
+          name: Snapshot of environment blockchain
+          environment:
+            - BACKUP_ENV: main
             - BACKUP_DIR: /tmp
           command: |
             export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
@@ -310,7 +324,12 @@ workflows:
 
   chain_backup:
     jobs:
-      - chain_backup:
+      - chain_backup_uat:
+          filters:
+            branches:
+              only: speedup_init_synch_163475803
+
+      - chain_backup_main:
           filters:
             branches:
               only: speedup_init_synch_163475803
