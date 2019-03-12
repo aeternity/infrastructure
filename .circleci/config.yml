@@ -252,7 +252,7 @@ jobs:
           name: Snapshot of environment blockchain
           no_output_timeout: 2h
           environment:
-            - BACKUP_ENV: dev1
+            - BACKUP_ENV: uat
             - BACKUP_DIR: /tmp
             - BACKUP_DB_VERSION: 1
           command: |
@@ -333,10 +333,10 @@ workflows:
             branches:
               only: speedup_init_synch_163475803
 
-#      - chain_snapshot_main:
-#          filters:
-#            branches:
-#              only: speedup_init_synch_163475803
+      - chain_snapshot_main:
+          filters:
+            branches:
+              only: speedup_init_synch_163475803
 
   daily_check_deploy:
     triggers:
