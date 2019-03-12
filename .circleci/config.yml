@@ -3,7 +3,7 @@ version: 2.1
 references:
   container_config: &container_config
     docker:
-      - image: aeternity/infrastructure:master
+      - image: aeternity/infrastructure:speedup_init_synch_163475803
     working_directory: /infrastructure
     environment:
       DOCKERHUB_REPO: aeternity/infrastructure
@@ -13,7 +13,7 @@ references:
       docker_layer_caching: true
     working_directory: /home/circleci/infrastructure
     environment:
-      DOCKERHUB_REPO: aeternity/infrastructure:master
+      DOCKERHUB_REPO: aeternity/infrastructure:speedup_init_synch_163475803
       VAULT_VERSION: 0.11.2
 
   install_vault: &install_vault
@@ -90,7 +90,7 @@ commands:
 jobs:
   build_check:
     docker:
-      - image: aeternity/infrastructure:master
+      - image: aeternity/infrastructure:speedup_init_synch_163475803
       - image: rastasheep/ubuntu-sshd:16.04
     working_directory: /src
     environment:
@@ -250,6 +250,7 @@ jobs:
       - *setup_secrets
       - run:
           name: Snapshot of environment blockchain
+          no_output_timeout: 2h
           environment:
             - BACKUP_ENV: uat
             - BACKUP_DIR: /tmp
@@ -265,6 +266,7 @@ jobs:
       - *setup_secrets
       - run:
           name: Snapshot of environment blockchain
+          no_output_timeout: 2h
           environment:
             - BACKUP_ENV: main
             - BACKUP_DIR: /tmp
@@ -327,14 +329,9 @@ workflows:
               only: /^v.*$/
 
   chain_snapshot:
-    triggers:
-      - schedule:
-          # run At minute 0 past hour 0. UTC
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only:
-                - master
+    filters:
+      branches:
+        only: speedup_init_synch_163475803
     jobs:
       - chain_snapshot_uat:
           filters:

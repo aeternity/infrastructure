@@ -10,3 +10,8 @@ fork_management:
 {% endif %}
 mining:
     autostart: false
+
+
+keys:
+  dir: keys
+  peer_password: secret
