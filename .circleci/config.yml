@@ -109,6 +109,13 @@ jobs:
           command: |
             docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} .
       - run:
+          name: Push (branch) Docker image to DockerHub
+          command: |
+            source import-secrets.sh
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
+
+      - run:
           name: Configuration lint
           # Secrets are auto-imported by the docker entry-point
           command: |
