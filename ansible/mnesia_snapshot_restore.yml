@@ -51,4 +51,4 @@
         - /tmp/{{ backup_archive_filename_latest }}
 
   handlers:
-  - import_tasks: handlers.yml
+  - import_tasks: tasks/handlers.yml

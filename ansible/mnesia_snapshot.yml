@@ -63,4 +63,4 @@
     - import_tasks: tasks/restore_mining_and_peers_config.yml
 
   handlers:
-  - import_tasks: handlers.yml
+  - import_tasks: tasks/handlers.yml

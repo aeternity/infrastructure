@@ -287,4 +287,4 @@
           when: true
 
   handlers:
-  - import_tasks: handlers.yml
+  - import_tasks: tasks/handlers.yml
