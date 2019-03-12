@@ -4,7 +4,7 @@
   with_first_found:
     - "../vars/aeternity/{{ env }}.yml"
     - "../vars/aeternity/default.yml"
-  tags: [config, node_config, peer_keys, health-check]
+  tags: [config, node_config]
 
 - name: Update node configuration
   template:
