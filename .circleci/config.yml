@@ -322,14 +322,14 @@ workflows:
             tags:
               only: /^v.*$/
 
-  chain_backup:
+  chain_snapshot:
     jobs:
-      - chain_backup_uat:
+      - chain_snapshot_uat:
           filters:
             branches:
               only: speedup_init_synch_163475803
 
-      - chain_backup_main:
+      - chain_snapshot_main:
           filters:
             branches:
               only: speedup_init_synch_163475803
