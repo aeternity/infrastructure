@@ -139,24 +139,24 @@ jobs:
               -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key=
-      - run:
-          name: Test ansible/mnesia_snapshot.yml
-          command: |
-            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot.yml \
-              -e ansible_python_interpreter=/var/venv/bin/python \
-              -e env=test \
-              -e datadog_api_key= \
-              -e datadog_app_key= \
-              -e db_version=1
-      - run:
-          name: Test ansible/mnesia_snapshot_restore.yml
-          command: |
-            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot_restore.yml \
-              -e ansible_python_interpreter=/var/venv/bin/python \
-              -e env=test \
-              -e datadog_api_key= \
-              -e datadog_app_key= \
-              -e db_version=1
+#      - run:
+#          name: Test ansible/mnesia_snapshot.yml
+#          command: |
+#            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot.yml \
+#              -e ansible_python_interpreter=/var/venv/bin/python \
+#              -e env=test \
+#              -e datadog_api_key= \
+#              -e datadog_app_key= \
+#              -e db_version=1
+#      - run:
+#          name: Test ansible/mnesia_snapshot_restore.yml
+#          command: |
+#            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot_restore.yml \
+#              -e ansible_python_interpreter=/var/venv/bin/python \
+#              -e env=test \
+#              -e datadog_api_key= \
+#              -e datadog_app_key= \
+#              -e db_version=1
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
