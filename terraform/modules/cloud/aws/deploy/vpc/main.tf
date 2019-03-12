@@ -2,7 +2,7 @@ resource "aws_vpc" "vpc" {
   cidr_block = "10.0.0.0/16"
 
   tags = {
-    name = "${var.env}"
+    Name = "${var.env}"
   }
 }
 
@@ -25,6 +25,10 @@ output "vpc_id" {
 
 resource "aws_internet_gateway" "ig" {
   vpc_id = "${aws_vpc.vpc.id}"
+
+  tags = {
+    Name = "${var.env}"
+  }
 }
 
 resource "aws_route_table" "rt" {
@@ -33,6 +37,10 @@ resource "aws_route_table" "rt" {
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = "${aws_internet_gateway.ig.id}"
+  }
+
+  tags = {
+    Name = "${var.env}"
   }
 }
 
