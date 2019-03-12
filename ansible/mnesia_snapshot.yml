@@ -21,7 +21,7 @@
       include_vars: backup/config.yml
 
     - name: Disable mining and peers
-      import_tasks: backup/disable_mining_and_peers.yml
+      import_tasks: tasks/disable_mining_and_peers.yml
 
     - meta: flush_handlers
 
@@ -72,7 +72,7 @@
         - /tmp/backup
         - /tmp/{{ backup_archive_filename }}
 
-    - import_tasks: backup/restore_mining_and_peers_config.yml
+    - import_tasks: tasks/restore_mining_and_peers_config.yml
 
   handlers:
   - import_tasks: handlers.yml
