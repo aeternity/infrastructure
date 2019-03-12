@@ -258,7 +258,6 @@ jobs:
           command: |
             export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
             make mnesia_snapshot
-          no_output_timeout: 30m
 
   chain_snapshot_main:
     <<: *container_config
@@ -274,7 +273,6 @@ jobs:
           command: |
             export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
             make mnesia_snapshot
-          no_output_timeout: 30m
 
 workflows:
   check_deploy:
