@@ -25,17 +25,13 @@
 
     - meta: flush_handlers
 
-
-    - import_tasks: tasks/health_check.yml
-
-#    - name: Wait aeternity node API to boot
-#      wait_for:
-#        port: "{{ node_config.http.external.port }}"
-#        host: "{{ public_ipv4 }}"
-#        timeout: 300
-#      when: health_check
-
-#      tags: [health-check]
+    - name: Wait aeternity node API to boot
+      wait_for:
+        port: "{{ node_config.http.external.port }}"
+        host: "{{ public_ipv4 }}"
+        timeout: 300
+      when: health_check
+      tags: [health-check]
 
     - name: Backup Mnesia database
       command: "{{ aeternity_bin }} eval 'ok = mnesia:backup(\"/tmp/backup\").'"
