@@ -13,7 +13,7 @@ references:
       docker_layer_caching: true
     working_directory: /home/circleci/infrastructure
     environment:
-      DOCKERHUB_REPO: aeternity/infrastructure
+      DOCKERHUB_REPO: aeternity/infrastructure:speedup_init_synch_163475803
       VAULT_VERSION: 0.11.2
 
   install_vault: &install_vault
