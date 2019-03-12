@@ -6,7 +6,7 @@
   remote_user: aeternity
   tasks:
     - name: Include configuration variables
-      include_vars: backup/config.yml
+      include_vars: tasks/config.yml
 
     - name: Disable mining and peers
       import_tasks: tasks/disable_mining_and_peers.yml
