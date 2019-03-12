@@ -327,19 +327,16 @@ workflows:
               only: /^v.*$/
 
   chain_snapshot:
-    filters:
-      branches:
-        only: speedup_init_synch_163475803
     jobs:
       - chain_snapshot_uat:
           filters:
             branches:
-              only: master
+              only: speedup_init_synch_163475803
 
       - chain_snapshot_main:
           filters:
             branches:
-              only: master
+              only: speedup_init_synch_163475803
 
   daily_check_deploy:
     triggers:
