@@ -139,24 +139,24 @@ jobs:
               -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key=
-#      - run:
-#          name: Test ansible/mnesia_snapshot.yml
-#          command: |
-#            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot.yml \
-#              -e ansible_python_interpreter=/var/venv/bin/python \
-#              -e env=test \
-#              -e datadog_api_key= \
-#              -e datadog_app_key= \
-#              -e db_version=1
-#      - run:
-#          name: Test ansible/mnesia_snapshot_restore.yml
-#          command: |
-#            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot_restore.yml \
-#              -e ansible_python_interpreter=/var/venv/bin/python \
-#              -e env=test \
-#              -e datadog_api_key= \
-#              -e datadog_app_key= \
-#              -e db_version=1
+      - run:
+          name: Test ansible/mnesia_snapshot.yml
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot.yml \
+              -e ansible_python_interpreter=/var/venv/bin/python \
+              -e env=test \
+              -e datadog_api_key= \
+              -e datadog_app_key= \
+              -e db_version=1
+      - run:
+          name: Test ansible/mnesia_snapshot_restore.yml
+          command: |
+            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot_restore.yml \
+              -e ansible_python_interpreter=/var/venv/bin/python \
+              -e env=test \
+              -e datadog_api_key= \
+              -e datadog_app_key= \
+              -e db_version=1
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
@@ -327,16 +327,17 @@ workflows:
               only: /^v.*$/
 
   chain_snapshot:
+    triggers:
+      - schedule:
+          # run At minute 0 past hour 0. UTC
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
     jobs:
-      - chain_snapshot_uat:
-          filters:
-            branches:
-              only: speedup_init_synch_163475803
-
-      - chain_snapshot_main:
-          filters:
-            branches:
-              only: speedup_init_synch_163475803
+      - chain_snapshot_uat
+      - chain_snapshot_main
 
   daily_check_deploy:
     triggers:
