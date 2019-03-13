@@ -28,7 +28,7 @@
 
     - name: Archive Mnesia backup
       archive:
-        format: zip
+        format: {{ format }}
         path: /tmp/backup
         dest: /tmp/{{ backup_archive_filename }}
 
