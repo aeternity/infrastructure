@@ -3,7 +3,7 @@ version: 2.1
 references:
   container_config: &container_config
     docker:
-      - image: aeternity/infrastructure:speedup_init_synch_163475803
+      - image: aeternity/infrastructure:master
     working_directory: /infrastructure
     environment:
       DOCKERHUB_REPO: aeternity/infrastructure
@@ -13,7 +13,7 @@ references:
       docker_layer_caching: true
     working_directory: /home/circleci/infrastructure
     environment:
-      DOCKERHUB_REPO: aeternity/infrastructure:speedup_init_synch_163475803
+      DOCKERHUB_REPO: aeternity/infrastructure:master
       VAULT_VERSION: 0.11.2
 
   install_vault: &install_vault
@@ -90,7 +90,7 @@ commands:
 jobs:
   build_check:
     docker:
-      - image: aeternity/infrastructure:speedup_init_synch_163475803
+      - image: aeternity/infrastructure:stable
       - image: rastasheep/ubuntu-sshd:16.04
     working_directory: /src
     environment:
@@ -139,24 +139,6 @@ jobs:
               -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key=
-      - run:
-          name: Test ansible/mnesia_snapshot.yml
-          command: |
-            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot.yml \
-              -e ansible_python_interpreter=/var/venv/bin/python \
-              -e env=test \
-              -e datadog_api_key= \
-              -e datadog_app_key= \
-              -e db_version=1
-      - run:
-          name: Test ansible/mnesia_snapshot_restore.yml
-          command: |
-            .circleci/test-ansible-playbook.sh ansible/mnesia_snapshot_restore.yml \
-              -e ansible_python_interpreter=/var/venv/bin/python \
-              -e env=test \
-              -e datadog_api_key= \
-              -e datadog_app_key= \
-              -e db_version=1
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
