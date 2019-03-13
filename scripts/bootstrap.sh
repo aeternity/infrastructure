@@ -44,7 +44,6 @@ RESTORE_DATABASE=false
 export VAULT_ADDR=$vault_addr
 if [ -f "/root/.vault_nonce" ] ; then
     export NONCE=$(cat /root/.vault_nonce)
-    RESTORE_DATABASE=true
 else
     export NONCE=$(vault write auth/aws/login pkcs7=$PKCS7 role=$vault_role | grep token_meta_nonce | awk '{print $2}')
     if [ -z "$NONCE" ]; then
@@ -55,6 +54,8 @@ else
     echo $NONCE > /root/.vault_nonce
 
     chmod 0600 /root/.vault_nonce
+
+    RESTORE_DATABASE=true
 fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
