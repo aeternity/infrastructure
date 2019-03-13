@@ -295,7 +295,6 @@ workflows:
               only:
                 - master
                 - stable
-                - speedup_init_synch_163475803
 
       - check_terraform_changes:
           requires:
