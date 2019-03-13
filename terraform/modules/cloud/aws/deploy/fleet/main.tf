@@ -55,6 +55,7 @@ data "template_file" "user_data" {
 }
 
 resource "aws_launch_configuration" "spot" {
+  count = "${ var.spot_nodes > 0 ? 1 : 0 }"
   name_prefix          = "ae-${var.env}-spot-nodes-"
   iam_instance_profile = "ae-node"
   image_id             = "${data.aws_ami.ami.id}"
@@ -88,6 +89,7 @@ data "template_file" "spot_user_data" {
 }
 
 resource "aws_autoscaling_group" "spot_fleet" {
+  count = "${ var.spot_nodes > 0 ? 1 : 0 }"
   name                 = "${aws_launch_configuration.spot.name}"
   min_size             = "${var.spot_nodes}"
   max_size             = "${var.spot_nodes}"
