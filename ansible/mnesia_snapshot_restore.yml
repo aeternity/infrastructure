@@ -16,7 +16,7 @@
         dest: /tmp/{{ backup_archive_filename_latest }}
         mode: get
 
-    - name: Unaarchive backup
+    - name: Unarchive backup
       unarchive:
         remote_src: yes
         src: /tmp/{{ backup_archive_filename_latest }}
