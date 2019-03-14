@@ -150,7 +150,6 @@ jobs:
     steps:
       - *setup_secrets
       - *setup_terraform
-      - *check_seed_peers
       - *fail_notification
 
   check_terraform_changes:
@@ -289,6 +288,13 @@ workflows:
       - setup_terraform:
           requires:
             - integration_tests
+          filters:
+            branches:
+              only: master
+
+      - check_seed_peers:
+          requires:
+            - setup_terraform
           filters:
             branches:
               only: master
