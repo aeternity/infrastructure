@@ -1,3 +1,4 @@
 Host *
+    User aeternity
     IdentityFile ~/.ssh/id_ae_infra_ed25519
     CertificateFile ~/.ssh/id_ae_infra_ed25519-%r-cert.pub
