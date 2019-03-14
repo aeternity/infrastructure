@@ -90,7 +90,7 @@ commands:
 jobs:
   build_check:
     docker:
-      - image: aeternity/infrastructure:stable
+      - image: aeternity/infrastructure:master
       - image: rastasheep/ubuntu-sshd:16.04
     working_directory: /src
     environment:
