@@ -66,13 +66,15 @@ reset-net: check-deploy-env
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		reset-net.yml
 
-mnesia_backup:
+mnesia_snapshot:
 	cd ansible && ansible-playbook \
 		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
+		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e download_dir=$(BACKUP_DIR) \
 		-e backup_suffix=$(BACKUP_SUFFIX) \
-		mnesia_backup.yml
+		-e db_version=$(BACKUP_DB_VERSION) \
+		-e env=$(BACKUP_ENV) \
+		mnesia_snapshot.yml
 
 provision: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
@@ -116,9 +118,14 @@ integration-tests-cleanup:
 
 integration-tests: integration-tests-run integration-tests-cleanup
 
-lint:
+lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
+
+terraform-validate:
 	cd terraform/environments && terraform init && terraform validate && terraform fmt -check=true -diff=true
+
+lint: lint-ansible terraform-validate
+
 
 test/goss/remote/vars/seed-peers-%.yaml: ansible/inventory-list.json
 	cat ansible/inventory-list.json | python3 ansible/scripts/dump-seed-peers-keys.py --env $* > $@
