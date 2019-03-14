@@ -76,16 +76,6 @@ mnesia_snapshot:
 		-e env=$(BACKUP_ENV) \
 		mnesia_snapshot.yml
 
-mnesia_snapshot_restore:
-	cd ansible && ansible-playbook \
-		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
-		-e ansible_python_interpreter=/var/venv/bin/python \
-		-e download_dir=$(BACKUP_DIR) \
-		-e backup_suffix=$(BACKUP_SUFFIX) \
-		-e db_version=$(BACKUP_DB_VERSION) \
-		-e env=$(BACKUP_ENV) \
-		mnesia_snapshot_restore.yml
-
 provision: check-deploy-env
 	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 	-e ansible_python_interpreter=/usr/bin/python3 \
