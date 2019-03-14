@@ -47,7 +47,7 @@ endif
 		-e env=$(DEPLOY_ENV) \
 		-e downtime=$(DEPLOY_DOWNTIME) \
 		-e db_version=$(DEPLOY_DB_VERSION) \
-		-e rolling_update=$(ROLING_UPDATE) \
+		--extra-vars="rolling_update=${ROLLING_UPDATE}" \
 		deploy.yml
 
 manage-node: check-deploy-env
