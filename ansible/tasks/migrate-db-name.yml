@@ -36,7 +36,7 @@
     - db.stat.exists
     - find_results.files|length == 0
 
-- name: Migarte db schema names
+- name: Migrate db schema names
   command: "{{ aeternity_bin }} rename_db {{ db_path }}"
   when:
     - binary.stat.exists
