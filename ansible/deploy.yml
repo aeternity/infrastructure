@@ -222,6 +222,7 @@
           aeternity_bin: "{{ project_root }}/bin/aeternity"
           db_path: "{{ project_root }}/db{{ db_version|mandatory }}"
           # it also includes the playbook vars
+        when: skip_db_migrations is not defined
 
       - name: Ensure node is running
         command: "/bin/true"

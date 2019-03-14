@@ -6,6 +6,7 @@ health_check: no
 configure_peers: true
 seed_peers: []
 db_version: 1
+skip_db_migrations: true
 
 node_config:
   sync:
