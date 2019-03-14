@@ -28,6 +28,11 @@ RUN curl -L -o /tmp/docker-${DOCKER_CLIENT_VERSION}.tgz \
     && tar -xz -C /tmp -f /tmp/docker-${DOCKER_CLIENT_VERSION}.tgz \
     && mv /tmp/docker/docker /bin
 
+ENV GOSS_VER=v0.3.6
+RUN curl -L https://github.com/aelsabbahy/goss/releases/download/${GOSS_VER}/goss-linux-amd64 \
+    -o /usr/bin/goss \
+    && chmod +rx /usr/bin/goss
+
 ADD requirements.txt /infrastructure/
 RUN apk add --no-cache --virtual build-deps \
         gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers \

@@ -25,12 +25,7 @@ node_config:
     beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
 
   logging:
-    level: warning
-
-  metrics:
-      # StatsD server and port
-      host: 127.0.0.1
-      port: 8125
+    level: debug
 
   fork_management:
-    network_id: "ae_dev1"
+    network_id: "ae_dev2"
