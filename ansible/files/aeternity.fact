@@ -26,7 +26,7 @@ except subprocess.CalledProcessError as exc:
     peer_key = ""
 
 try:
-    with open(node_path + "/epoch.yaml", 'r') as stream:
+    with open(node_path + "/aeternity.yaml", 'r') as stream:
         try:
             config = yaml.safe_load(stream)
         except yaml.YAMLError as exc:

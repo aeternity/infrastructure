@@ -1,0 +1,15 @@
+---
+- name: "Load a variable files for environment: {{ env }}"
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "../vars/aeternity/{{ env }}.yml"
+    - "../vars/aeternity/default.yml"
+  tags: [config, node_config]
+
+- name: Update node configuration
+  template:
+    src: ../templates/aeternity.backup.yaml
+    dest: "{{ project_root }}/aeternity.yaml"
+    mode: '0600'
+  notify: "restart aeternity daemon"
+  tags: [config, node_config]

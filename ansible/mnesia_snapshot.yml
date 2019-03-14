@@ -1,0 +1,66 @@
+---
+# Playbook used create mnesia snapshoot and upload it to S3
+
+- name: Backup, archive and download Mnesia database
+  hosts: "{{ ansible_play_hosts | last }}"
+  remote_user: aeternity
+  tasks:
+    - name: Include configuration variables
+      include_vars: tasks/config.yml
+
+    - name: Disable mining and peers
+      import_tasks: tasks/disable_mining_and_peers.yml
+
+    - meta: flush_handlers
+
+    - name: Wait aeternity node API to boot
+      wait_for:
+        port: "{{ node_config.http.external.port }}"
+        host: "{{ public_ipv4 }}"
+        timeout: 300
+      when: health_check
+      tags: [health-check]
+
+    - name: Backup Mnesia database
+      command: "{{ aeternity_bin }} eval 'ok = mnesia:backup(\"/tmp/backup\").'"
+      args:
+        creates: "/tmp/backup"
+
+    - name: Archive Mnesia backup
+      archive:
+        format: "{{ format }}"
+        path: /tmp/backup
+        dest: /tmp/{{ backup_archive_filename }}
+
+    - name: Upload backup to S3 bucket
+      aws_s3:
+        bucket: "{{ backup_bucket }}"
+        object: "{{ backup_archive_filename }}"
+        src: /tmp/{{ backup_archive_filename }}
+        mode: put
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+
+    - name: Upload backup to S3 bucket latest
+      aws_s3:
+        bucket: "{{ backup_bucket }}"
+        object: "{{ backup_archive_filename_latest }}"
+        src: /tmp/{{ backup_archive_filename }}
+        mode: put
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+
+    - name: Remove Mnesia backups
+      file:
+        path:  "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/backup
+        - /tmp/{{ backup_archive_filename }}
+
+    - import_tasks: tasks/restore_mining_and_peers_config.yml
+
+  handlers:
+  - import_tasks: tasks/handlers.yml

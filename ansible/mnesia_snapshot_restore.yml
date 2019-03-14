@@ -1,0 +1,54 @@
+---
+# Playbook used to download mnesia snapshoot for env from S3 and restore it to give node
+
+- name: Backup, archive and download Mnesia database
+  hosts: "{{ ansible_play_hosts | last }}"
+  remote_user: aeternity
+
+  tasks:
+    - name: Include configuration variables
+      include_vars: tasks/config.yml
+
+    - name: Download backup to S3 bucket latest
+      aws_s3:
+        bucket: "{{ backup_bucket }}"
+        object: "{{ backup_archive_filename_latest }}"
+        dest: /tmp/{{ backup_archive_filename_latest }}
+        mode: get
+
+    - name: Unarchive backup
+      unarchive:
+        remote_src: yes
+        src: /tmp/{{ backup_archive_filename_latest }}
+        dest: /tmp/
+
+    - import_tasks: tasks/disable_mining_and_peers.yml
+
+    - meta: flush_handlers
+
+    - name: Wait aeternity node API to boot
+      wait_for:
+        port: "{{ node_config.http.external.port }}"
+        host: "{{ public_ipv4 }}"
+        timeout: 300
+      when: health_check
+
+      tags: [health-check]
+
+    - name: Restore Mnesia database
+      command: "{{ aeternity_bin }} eval '{atomic, _} = mnesia:restore(\"/tmp/backup\", [{default_op, recreate_tables}]).'"
+      register: restore_result
+      changed_when: "restore_result.stdout|search('atomic')"
+
+    - import_tasks: tasks/restore_mining_and_peers_config.yml
+
+    - name: Remove Mnesia backups
+      file:
+        path:  "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/backup
+        - /tmp/{{ backup_archive_filename_latest }}
+
+  handlers:
+  - import_tasks: tasks/handlers.yml

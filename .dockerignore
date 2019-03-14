@@ -8,6 +8,7 @@
 terraform/.terraform
 !Makefile
 !requirements.txt
+!test/goss/remote
 # Copy from .gitignore
 *.retry
 ansible/group_vars/**/*.local.*

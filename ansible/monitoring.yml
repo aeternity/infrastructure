@@ -118,22 +118,22 @@
             service: aeternity
             source: syslog
           - type: file
-            path: "/home/{{ project_user }}/node/log/epoch.log"
+            path: "/home/{{ project_user }}/node/log/aeternity.log"
             service: aeternity
             source: lager
             sourcecategory: aeternity
           - type: file
-            path: "/home/{{ project_user }}/node/log/epoch_mining.log"
+            path: "/home/{{ project_user }}/node/log/aeternity_mining.log"
             service: aeternity
             source: lager
             sourcecategory: mining
           - type: file
-            path: "/home/{{ project_user }}/node/log/epoch_pow_cuckoo.log"
+            path: "/home/{{ project_user }}/node/log/aeternity_pow_cuckoo.log"
             service: aeternity
             source: lager
             sourcecategory: pow
           - type: file
-            path: "/home/{{ project_user }}/node/log/epoch_sync.log"
+            path: "/home/{{ project_user }}/node/log/aeternity_sync.log"
             service: aeternity
             source: lager
             sourcecategory: sync

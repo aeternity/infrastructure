@@ -55,6 +55,17 @@ so that only authentication to Vault must be configured explicitly, it needs an 
     - `ae-inventory` allows SSH as `aeternity` user to all nodes and using Ansible dynamic inventories, together allowing a deployment. All developers are authorized.
     - `ae-fleet-manager` allows SSH as `master` user to all nodes and managing the infrastructure (AWS and GCP) - creating, dropping and changing environments (running Terraform). Only devops.
 
+### Token refresh
+
+Vault tokens expire after a certain amount of time. To continue working one MUST refresh the token. The only workable option is to source the `refresh-secrets.sh` script.
+
+```
+cd /infrastructure
+source refresh-secrets.sh
+```
+
+***Note*** Using `source` is the only way to have all variables set-up correctly. Running the script with `bash`, `./`, or adding the commands as Makefile rule **WILL NOT** work. Only `source` will be executed in the same shell process as your active terminal. Running it in any other way will not set required variables and your Vault session will be broken.
+
 ## Docker image
 
 A Docker image `aeternity/infrastructure` is build and published to DockerHub. To use the image one should configure all the required credentials as documented above and run the container (always make sure you have the latest docker image):
@@ -186,6 +197,15 @@ export DEPLOY_ENV=main
 export DEPLOY_DOWNTIME=1800 #30 minutes
 export DEPLOY_DB_VERSION=1 # Get the version with 'curl https://raw.githubusercontent.com/aeternity/aeternity/v${DEPLOY_VERSION}/deployment/DB_VERSION'
 export PACKAGE=https://github.com/aeternity/aeternity/releases/download/v${DEPLOY_VERSION}/aeternity-${DEPLOY_VERSION}-ubuntu-x86_64.tar.gz
+export ROLLING_UPDATE=100%
+
+#ROLLING_UPDATE optional default=100%
+# - examples:"50%" run on 50% of nodes in run
+# - "1" ron on one node at a time
+# - '[1, 2]' run 1, node then on 2 nodes etc...
+# - "['10%', '50%']" run on 10% nodes then on 50% etc...
+# Define batch size for rolling updates: https://docs.ansible.com/ansible/latest/user_guide/playbooks_delegation.html#rolling-update-batch-size
+
 make cert && make deploy
 ```
 
