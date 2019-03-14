@@ -123,12 +123,14 @@ ansible-playbook \
     deploy.yml
 
 if [ "$RESTORE_DATABASE" = true ] ; then
-    ansible-playbook \
-        -i /tmp/local_inventory \
-        -e ansible_python_interpreter=$(which python3) \
-        --become-user aeternity -b \
-        -e download_dir=/tmp \
-        -e env=${env} \
-        -e db_version=1 \
-        mnesia_snapshot_restore.yml
+    if [ "$env" = "main" ] || [ "$env" == "uat" ] ; then # restore only main / uat
+        ansible-playbook \
+            -i /tmp/local_inventory \
+            -e ansible_python_interpreter=$(which python3) \
+            --become-user aeternity -b \
+            -e download_dir=/tmp \
+            -e env=${env} \
+            -e db_version=1 \
+            mnesia_snapshot_restore.yml
+    fi
 fi
