@@ -11,7 +11,7 @@ fork_management:
 mining:
     autostart: false
 
-
+peers: []
 keys:
   dir: keys
   peer_password: secret

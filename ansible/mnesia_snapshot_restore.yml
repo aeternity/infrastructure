@@ -36,9 +36,9 @@
       tags: [health-check]
 
     - name: Restore Mnesia database
-      command: "{{ aeternity_bin }} eval '{atomic, _} = mnesia:restore(\"/tmp/backup\", [{default_op, recreate_tables}]).'"
+      command: "{{ aeternity_bin }} eval 'ok = mnesia:install_fallback(\"/tmp/backup\").'"
       register: restore_result
-      changed_when: "restore_result.stdout|search('atomic')"
+      changed_when: "restore_result.stdout|search('ok')"
 
     - import_tasks: tasks/restore_mining_and_peers_config.yml
 
