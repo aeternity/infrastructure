@@ -197,6 +197,15 @@ export DEPLOY_ENV=main
 export DEPLOY_DOWNTIME=1800 #30 minutes
 export DEPLOY_DB_VERSION=1 # Get the version with 'curl https://raw.githubusercontent.com/aeternity/aeternity/v${DEPLOY_VERSION}/deployment/DB_VERSION'
 export PACKAGE=https://github.com/aeternity/aeternity/releases/download/v${DEPLOY_VERSION}/aeternity-${DEPLOY_VERSION}-ubuntu-x86_64.tar.gz
+export ROLLING_UPDATE=100%
+
+#ROLLING_UPDATE optional default=100%
+# - examples:"50%" run on 50% of nodes in run
+# - "1" ron on one node at a time
+# - '[1, 2]' run 1, node then on 2 nodes etc...
+# - "['10%', '50%']" run on 10% nodes then on 50% etc...
+# Define batch size for rolling updates: https://docs.ansible.com/ansible/latest/user_guide/playbooks_delegation.html#rolling-update-batch-size
+
 make cert && make deploy
 ```
 

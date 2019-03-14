@@ -8,6 +8,7 @@
 
 - name: Facts setup
   hosts: all
+  serial: "{{ rolling_update | default('100%') }}"
   remote_user: aeternity
   # Gather fact the usual way when hosts_group is not defined for delegated way
   gather_facts: "{{ (hosts_group is not defined) }}"
