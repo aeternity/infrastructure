@@ -47,7 +47,6 @@ check_genesis_hash() {
     test $(echo $node_status| jq -r '.genesis_key_block_hash') == ${!network_genesis}
 }
 check_network_id() {
-    echo $node_status| jq '.network_id'
     test $(echo $node_status| jq -r '.network_id') ==  ${!network_id}
 }
 check_top_height() {
