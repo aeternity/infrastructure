@@ -50,7 +50,7 @@ check_network_id() {
     test $(echo $node_status| jq -r '.network_id') ==  ${!network_id}
 }
 check_top_height() {
-    test $(curl -sS http://$HOST:3013/v2/key-blocks/current | jq '.height') -gt $height
+    test $(curl -sS -m5 http://$HOST:3013/v2/key-blocks/current | jq '.height') -gt $height
 }
 check_version() {
     test $(echo $node_status| jq -r '.node_version') == $version
