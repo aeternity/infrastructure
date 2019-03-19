@@ -6,10 +6,6 @@ variable "bootstrap_version" {
   default = "mainnet_API_gateway_164307329"
 }
 
-variable "package" {
-  default = "https://github.com/aeternity/aeternity/releases/download/v2.0.0/aeternity-2.0.0-ubuntu-x86_64.tar.gz"
-}
-
 module "aws_deploy-main-eu-west-2" {
   source            = "../modules/cloud/aws/deploy"
   env               = "main"
