@@ -16,7 +16,7 @@ module "aws_deploy-main-eu-west-2" {
   static_nodes      = 0
   spot_nodes        = 0
   gateway_nodes_min = 2
-  gateway_nodes_max = 5
+  gateway_nodes_max = 30
 
   spot_price       = "0.15"
   instance_type    = "t3.large"
@@ -42,7 +42,7 @@ module "aws_deploy-main-us-west-2" {
   static_nodes      = 0
   spot_nodes        = 0
   gateway_nodes_min = 2
-  gateway_nodes_max = 5
+  gateway_nodes_max = 30
 
   spot_price       = "0.15"
   instance_type    = "t3.large"
