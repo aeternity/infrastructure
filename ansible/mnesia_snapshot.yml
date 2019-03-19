@@ -8,28 +8,23 @@
     - name: Include configuration variables
       include_vars: tasks/config.yml
 
-    - name: Disable mining and peers
-      import_tasks: tasks/disable_mining_and_peers.yml
+    - name: "Load a variable files for environment: {{ env }}"
+      include_vars: "{{ item }}"
+      with_first_found:
+        - "../vars/aeternity/{{ env }}.yml"
+        - "../vars/aeternity/default.yml"
+      tags: [config, node_config]
+
+    - name: Stop node
+      command: "/bin/true"
+      notify: "stop aeternity daemon"
 
     - meta: flush_handlers
 
-    - name: Wait aeternity node API to boot
-      wait_for:
-        port: "{{ node_config.http.external.port }}"
-        host: "{{ public_ipv4 }}"
-        timeout: 300
-      when: health_check
-      tags: [health-check]
-
-    - name: Backup Mnesia database
-      command: "{{ aeternity_bin }} eval 'ok = mnesia:backup(\"/tmp/backup\").'"
-      args:
-        creates: "/tmp/backup"
-
-    - name: Archive Mnesia backup
+    - name: Archive Mnesia Directory
       archive:
         format: "{{ format }}"
-        path: /tmp/backup
+        path: "{{ project_root }}/{{ node_config.chain.db_path }}"
         dest: /tmp/{{ backup_archive_filename }}
 
     - name: Upload backup to S3 bucket
@@ -60,7 +55,9 @@
         - /tmp/backup
         - /tmp/{{ backup_archive_filename }}
 
-    - import_tasks: tasks/restore_mining_and_peers_config.yml
+    - name: Stop node
+      command: "/bin/true"
+      notify: "start aeternity daemon"
 
   handlers:
   - import_tasks: tasks/handlers.yml

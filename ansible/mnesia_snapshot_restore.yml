@@ -9,6 +9,13 @@
     - name: Include configuration variables
       include_vars: tasks/config.yml
 
+    - name: "Load a variable files for environment: {{ env }}"
+      include_vars: "{{ item }}"
+      with_first_found:
+        - "../vars/aeternity/{{ env }}.yml"
+        - "../vars/aeternity/default.yml"
+      tags: [config, node_config]
+
     - name: Download backup to S3 bucket latest
       aws_s3:
         bucket: "{{ backup_bucket }}"
@@ -16,31 +23,17 @@
         dest: /tmp/{{ backup_archive_filename_latest }}
         mode: get
 
-    - name: Unarchive backup
-      unarchive:
-        remote_src: yes
-        src: /tmp/{{ backup_archive_filename_latest }}
-        dest: /tmp/
-
-    - import_tasks: tasks/disable_mining_and_peers.yml
+    - name: Stop node
+      command: "/bin/true"
+      notify: "stop aeternity daemon"
 
     - meta: flush_handlers
 
-    - name: Wait aeternity node API to boot
-      wait_for:
-        port: "{{ node_config.http.external.port }}"
-        host: "{{ public_ipv4 }}"
-        timeout: 300
-      when: health_check
-
-      tags: [health-check]
-
     - name: Restore Mnesia database
-      command: "{{ aeternity_bin }} eval '{atomic, _} = mnesia:restore(\"/tmp/backup\", [{default_op, recreate_tables}]).'"
-      register: restore_result
-      changed_when: "restore_result.stdout|search('atomic')"
-
-    - import_tasks: tasks/restore_mining_and_peers_config.yml
+      unarchive:
+        remote_src: yes
+        src: /tmp/{{ backup_archive_filename_latest }}
+        dest: "{{ project_root }}/{{ node_config.chain.db_path }}"
 
     - name: Remove Mnesia backups
       file:
@@ -49,6 +42,10 @@
       loop:
         - /tmp/backup
         - /tmp/{{ backup_archive_filename_latest }}
+
+    - name: Start node
+      command: "/bin/true"
+      notify: "start aeternity daemon"
 
   handlers:
   - import_tasks: tasks/handlers.yml
