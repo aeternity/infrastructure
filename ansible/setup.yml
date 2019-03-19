@@ -91,6 +91,7 @@
         - virtualenv
         - jq
         - unzip
+        - bc
       tags:
         - dev-tools
 
