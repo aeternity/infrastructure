@@ -55,7 +55,7 @@
         - /tmp/backup
         - /tmp/{{ backup_archive_filename }}
 
-    - name: Stop node
+    - name: Start node
       command: "/bin/true"
       notify: "start aeternity daemon"
 
