@@ -59,9 +59,9 @@ resource "aws_launch_configuration" "gateway" {
     volume_size = "${var.root_volume_size}"
   }
 
-  #  lifecycle {
-  #    create_before_destroy = true
-  #  }
+  lifecycle {
+    create_before_destroy = true
+  }
 
   user_data = "${data.template_file.spot_user_data.rendered}"
 }
