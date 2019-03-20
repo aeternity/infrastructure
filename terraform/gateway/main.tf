@@ -3,7 +3,7 @@ variable "vault_addr" {
 }
 
 variable "bootstrap_version" {
-  default = "mainnet_API_gateway_164307329"
+  default = "master"
 }
 
 module "aws_deploy-main-us-west-2" {
