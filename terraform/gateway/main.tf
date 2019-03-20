@@ -58,64 +58,28 @@ module "aws_deploy-main-us-west-2" {
   }
 }
 
-resource "aws_route53_health_check" "api-eu-west-2" {
-  provider          = "aws.eu-west-2"
-  fqdn              = "${module.aws_deploy-main-eu-west-2.gateway_lb_dns}"
-  port              = 3013
-  type              = "HTTP"
-  resource_path     = "/v2/blocks/top"
-  measure_latency   = false
-  failure_threshold = "4"
-  request_interval  = 30
-}
-
-resource "aws_route53_record" "api-eu-west-2" {
-  provider = "aws.eu-west-2"
-  zone_id  = "${var.dns_zone}"
-  name     = "api.main.ops.aeternity.com"
-  type     = "A"
-
-  health_check_id = "${aws_route53_health_check.api-eu-west-2.id}"
-  set_identifier  = "eu-west-2"
-
-  alias {
-    name                   = "${module.aws_deploy-main-eu-west-2.gateway_lb_dns}"
-    zone_id                = "${module.aws_deploy-main-eu-west-2.gateway_lb_zone_id}"
-    evaluate_target_health = true
+module "aws_gateway" {
+  providers = {
+    aws = "aws.us-west-2"
   }
 
-  latency_routing_policy = {
-    region = "eu-west-2"
-  }
-}
+  source   = "../modules/cloud/aws/gateway"
+  dns_zone = "${var.dns_zone}"
 
-resource "aws_route53_health_check" "api-us-west-2" {
-  provider          = "aws.us-west-2"
-  fqdn              = "${module.aws_deploy-main-us-west-2.gateway_lb_dns}"
-  port              = 3013
-  type              = "HTTP"
-  resource_path     = "/v2/blocks/top"
-  measure_latency   = false
-  failure_threshold = "4"
-  request_interval  = 30
-}
+  loadbalancers = [
+    "${module.aws_deploy-main-eu-west-2.gateway_lb_dns}",
+    "${module.aws_deploy-main-us-west-2.gateway_lb_dns}",
+  ]
 
-resource "aws_route53_record" "api-us-west-2" {
-  provider = "aws.us-west-2"
-  zone_id  = "${var.dns_zone}"
-  name     = "api.main.ops.aeternity.com"
-  type     = "A"
+  loadbalancers_zones = [
+    "${module.aws_deploy-main-eu-west-2.gateway_lb_zone_id}",
+    "${module.aws_deploy-main-us-west-2.gateway_lb_zone_id}",
+  ]
 
-  health_check_id = "${aws_route53_health_check.api-us-west-2.id}"
-  set_identifier  = "us-west-2"
+  loadbalancers_regions = [
+    "eu-west-2",
+    "us-west-2",
+  ]
 
-  alias {
-    name                   = "${module.aws_deploy-main-us-west-2.gateway_lb_dns}"
-    zone_id                = "${module.aws_deploy-main-us-west-2.gateway_lb_zone_id}"
-    evaluate_target_health = true
-  }
-
-  latency_routing_policy = {
-    region = "us-west-2"
-  }
+  api_dns = "api.main.ops.aeternity.com"
 }
