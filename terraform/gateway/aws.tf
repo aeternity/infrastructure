@@ -21,6 +21,6 @@ provider "aws" {
 
 provider "aws" {
   version = "1.55"
-  region  = "ap-southeast-2"
-  alias   = "ap-southeast-2"
+  region  = "eu-north-1"
+  alias   = "eu-north-1"
 }
