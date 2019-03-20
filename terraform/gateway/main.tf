@@ -54,7 +54,7 @@ module "aws_deploy-main-eu-north-1" {
   }
 
   providers = {
-    aws = "aws.eu-north-2"
+    aws = "aws.eu-north-1"
   }
 }
 
@@ -68,17 +68,17 @@ module "aws_gateway" {
 
   loadbalancers = [
     "${module.aws_deploy-main-us-west-2.gateway_lb_dns}",
-    "${module.aws_deploy-main-eu-north-1.gateway_lb_dns}",
+#    "${module.aws_deploy-main-eu-north-1.gateway_lb_dns}",
   ]
 
   loadbalancers_zones = [
     "${module.aws_deploy-main-us-west-2.gateway_lb_zone_id}",
-    "${module.aws_deploy-main-eu-north-1.gateway_lb_zone_id}",
+#    "${module.aws_deploy-main-eu-north-1.gateway_lb_zone_id}",
   ]
 
   loadbalancers_regions = [
     "us-west-2",
-    "eu-north-1",
+#    "eu-north-1",
   ]
 
   api_dns = "api.main.ops.aeternity.com"
