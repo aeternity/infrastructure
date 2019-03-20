@@ -33,7 +33,7 @@
       unarchive:
         remote_src: yes
         src: /tmp/{{ backup_archive_filename_latest }}
-        dest: "{{ project_root }}/{{ node_config.chain.db_path }}"
+        dest: "{{ project_root }}/"
 
     - name: Remove Mnesia backups
       file:
