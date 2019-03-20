@@ -25,6 +25,7 @@
 
     - name: Stop node
       command: "/bin/true"
+      changed_when: false
       notify: "stop aeternity daemon"
 
     - meta: flush_handlers
@@ -45,6 +46,7 @@
 
     - name: Start node
       command: "/bin/true"
+      changed_when: false
       notify: "start aeternity daemon"
 
   handlers:
