@@ -1,5 +1,9 @@
 resource "aws_eip" "ip" {
   count = "${var.static_nodes}"
+
+  tags = {
+    Name = "${var.env}"
+  }
 }
 
 resource "aws_eip_association" "ip_associate" {

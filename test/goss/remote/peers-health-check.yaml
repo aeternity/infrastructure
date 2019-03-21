@@ -1,0 +1,19 @@
+#example usage:
+#ANSIBLE_TAG=tag_env_main REGION=us-west-2 goss -g test/goss/remote/peers-health-check.yaml --vars ansible/inventory-list.json validate --format documentation
+{{$tagenv := getEnv "ANSIBLE_TAG" "aws_ec2"}}
+{{$region := getEnv "REGION"}}
+http:
+{{$hostvars := index .Vars "_meta" "hostvars"}}
+{{if $envhosts := index .Vars $tagenv}}
+  {{range $host := index $envhosts "hosts"}}
+    {{$host_region := index $hostvars $host "placement" "region"}}
+    {{$host_env := index $hostvars $host "tags" "env"}}
+      {{if or (eq $region $host_region) (not $region)}}
+      http://{{$host}}:3013/v2/status:
+        status: 200
+        allow-insecure: true
+        no-follow-redirects: true
+        timeout: 5000
+    {{end}}
+  {{end}}
+{{end}}

@@ -1,0 +1,9 @@
+project_root: "{{ ansible_env.HOME }}/node"
+aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
+download_dir: /tmp/mnesia_backups
+backup_bucket: aeternity-database-backups
+backup_suffix: backup
+health_check: yes
+format: gz
+backup_archive_filename: "mnesia_{{ env }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ backup_suffix }}.{{ format }}"
+backup_archive_filename_latest: "mnesia_{{ env }}_latest.{{ format }}"

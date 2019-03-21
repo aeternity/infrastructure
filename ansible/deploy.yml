@@ -8,6 +8,7 @@
 
 - name: Facts setup
   hosts: all
+  serial: "{{ rolling_update | default('100%') }}"
   remote_user: aeternity
   # Gather fact the usual way when hosts_group is not defined for delegated way
   gather_facts: "{{ (hosts_group is not defined) }}"
@@ -57,7 +58,7 @@
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
     health_check: yes
-    node_vars: "{{ ansible_local.aeternity|default(ansible_local.epoch) }}"
+    node_vars: "{{ ansible_local.aeternity }}"
 
     # Label used for datadog tagging and ENV file planting
     env: unknown
@@ -98,7 +99,6 @@
           paths: "{{ packages_path }}"
           patterns:
             - .*aeternity-.*ubuntu.*.tar.gz
-            - .*epoch-.*ubuntu.*.tar.gz
           exclude: "{{ package|basename }}"
           use_regex: yes
         register: old_packages_to_delete
@@ -187,7 +187,7 @@
       - name: Update node configuration
         template:
           src: templates/aeternity.yaml
-          dest: "{{ project_root }}/epoch.yaml"
+          dest: "{{ project_root }}/aeternity.yaml"
           mode: '0600'
         notify: "restart aeternity daemon"
         tags: [config, node_config]
@@ -216,6 +216,14 @@
         when: public_ipv4 in seed_peers
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
+
+      - name: Database migration
+        include_tasks: tasks/migrate-db-name.yml
+        vars:
+          aeternity_bin: "{{ project_root }}/bin/aeternity"
+          db_path: "{{ project_root }}/db{{ db_version|mandatory }}"
+          # it also includes the playbook vars
+        when: skip_db_migrations is not defined
 
       - name: Ensure node is running
         command: "/bin/true"
@@ -288,36 +296,4 @@
           when: true
 
   handlers:
-    - name: Check aeternity binary
-      stat:
-        path: "{{ project_root }}/bin/aeternity"
-      register: ae_node
-      tags: [daemon]
-      listen:
-        - "stop aeternity daemon"
-        - "restart aeternity daemon"
-
-    - name: Ping aeternity node
-      command: "{{ project_root }}/bin/aeternity ping"
-      failed_when: no
-      register: ping
-      when: ae_node.stat.exists == True
-      tags: [daemon]
-      listen:
-        - "stop aeternity daemon"
-        - "restart aeternity daemon"
-
-    - name: Stop aeternity node
-      command: "{{ project_root }}/bin/aeternity stop"
-      when: ae_node.stat.exists == True and ping.stdout == "pong"
-      tags: [daemon]
-      listen:
-        - "stop aeternity daemon"
-        - "restart aeternity daemon"
-
-    - name: Start aeternity node
-      command: "{{ project_root }}/bin/aeternity start"
-      tags: [daemon]
-      listen:
-        - "start aeternity daemon"
-        - "restart aeternity daemon"
+  - import_tasks: tasks/handlers.yml

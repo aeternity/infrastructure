@@ -43,7 +43,7 @@ references:
   check_seed_peers: &check_seed_peers
     run:
       name: Check seed peers
-      command: make check-seed-peers
+      command: make check-seed-peers-all
 
   fail_notification: &fail_notification
     run:
@@ -225,6 +225,36 @@ jobs:
         - integration_tests
         - *fail_notification
 
+  chain_snapshot_uat:
+    <<: *container_config
+    steps:
+      - *setup_secrets
+      - run:
+          name: Snapshot of environment blockchain
+          no_output_timeout: 2h
+          environment:
+            - BACKUP_ENV: uat
+            - BACKUP_DIR: /tmp
+            - BACKUP_DB_VERSION: 1
+          command: |
+            export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
+            make mnesia_snapshot
+
+  chain_snapshot_main:
+    <<: *container_config
+    steps:
+      - *setup_secrets
+      - run:
+          name: Snapshot of environment blockchain
+          no_output_timeout: 2h
+          environment:
+            - BACKUP_ENV: main
+            - BACKUP_DIR: /tmp
+            - BACKUP_DB_VERSION: 1
+          command: |
+            export BACKUP_SUFFIX=${BACKUP_ENV:?}_db_backup_$(date +%s)
+            make mnesia_snapshot
+
 workflows:
   check_deploy:
     jobs:
@@ -276,6 +306,19 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*$/
+
+  chain_snapshot:
+    triggers:
+      - schedule:
+          # run At minute 0 past hour 0. UTC
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - chain_snapshot_uat
+      - chain_snapshot_main
 
   daily_check_deploy:
     triggers:
