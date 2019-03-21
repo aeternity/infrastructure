@@ -39,6 +39,9 @@ endif
 ifneq ($(DEPLOY_COLOR),)
 	$(eval LIMIT=$(LIMIT):&tag_color_$(DEPLOY_COLOR))
 endif
+ifneq ($(DEPLOY_KIND),)
+	$(eval LIMIT=$(LIMIT):&tag_kind_$(DEPLOY_KIND))
+endif
 	cd ansible && ansible-playbook \
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
