@@ -69,6 +69,12 @@ reset-net: check-deploy-env
 		reset-net.yml
 
 mnesia_snapshot:
+ifeq ($(BACKUP_DB_VERSION),)
+	$(error BACKUP_DB_VERSION should be provided)
+endif
+ifeq ($(BACKUP_ENV),)
+	$(error BACKUP_ENV should be provided)
+endif
 	cd ansible && ansible-playbook \
 		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
