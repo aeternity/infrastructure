@@ -39,8 +39,6 @@ chmod +x /usr/bin/vault
 # Authenticate the instance to CSM
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
 
-RESTORE_DATABASE=false
-
 export VAULT_ADDR=$vault_addr
 if [ -f "/root/.vault_nonce" ] ; then
     export NONCE=$(cat /root/.vault_nonce)
@@ -54,8 +52,6 @@ else
     echo $NONCE > /root/.vault_nonce
 
     chmod 0600 /root/.vault_nonce
-
-    RESTORE_DATABASE=true
 fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
@@ -121,16 +117,3 @@ ansible-playbook \
     -e env=${env} \
     -e db_version=1 \
     deploy.yml
-
-if [ "$RESTORE_DATABASE" = true ] ; then
-    if [ "$env" = "main" ] || [ "$env" == "uat" ] ; then # restore only main / uat
-        ansible-playbook \
-            -i /tmp/local_inventory \
-            -e ansible_python_interpreter=$(which python3) \
-            --become-user aeternity -b \
-            -e download_dir=/tmp \
-            -e env=${env} \
-            -e db_version=1 \
-            mnesia_snapshot_restore.yml
-    fi
-fi
