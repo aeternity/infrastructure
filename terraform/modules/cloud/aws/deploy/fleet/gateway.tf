@@ -76,9 +76,6 @@ resource "aws_autoscaling_group" "gateway" {
 
   target_group_arns = ["${aws_lb_target_group.gateway.arn}"]
 
-  #  suspended_processes  = ["Terminate"]
-  termination_policies = ["OldestInstance"]
-
   lifecycle {
     create_before_destroy = true
   }
