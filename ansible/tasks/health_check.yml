@@ -6,7 +6,7 @@
     dest: /tmp/
 
 - name:  Test user existance
-  command: goss -g /tmp/users.yml validate
+  command: goss -g /tmp/health.yml validate
 
 
 - name: Wait aeternity node API to boot
