@@ -7,6 +7,7 @@
   vars:
     project_user: aeternity
     vault_version: "0.11.3"
+    goss_version: "v0.3.6"
     libsodium_version: "1.0.16"
     libsodium_module_version: "23.1.0"
     fail2ban_loglevel: INFO
@@ -127,6 +128,29 @@
       copy:
         src: /usr/src/vault-{{ vault_version }}/vault
         dest: /usr/bin/vault
+        mode: 0755
+        remote_src: true
+      tags:
+        - vault-install
+
+    - name: Create Goss source directory
+      file:
+        path: /usr/src/goss-{{ goss_version }}/
+        state: directory
+      tags:
+        - goss-install
+
+    - name: Download and unarchive Goss binary
+      get_url:
+        url: "https://github.com/aelsabbahy/goss/releases/download/{{ goss_version }}/goss-linux-amd64"
+        dest: /usr/src/goss-{{ goss_version }}/goss
+      tags:
+        - goss-install
+
+    - name: Install Goss binary
+      copy:
+        src: /usr/src/goss-{{ goss_version }}/goss
+        dest: /usr/bin/goss
         mode: 0755
         remote_src: true
       tags:
