@@ -2,7 +2,7 @@
 # Playbook used to download mnesia snapshoot for env from S3 and restore it to give node
 
 - name: Backup, archive and download Mnesia database
-  hosts: "{{ ansible_play_hosts | last }}"
+  hosts: all
   remote_user: aeternity
 
   tasks:
