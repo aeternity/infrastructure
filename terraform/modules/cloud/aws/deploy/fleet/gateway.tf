@@ -90,6 +90,11 @@ resource "aws_autoscaling_group" "gateway" {
       propagate_at_launch = true
     },
     {
+      key                 = "kind"
+      value               = "api"
+      propagate_at_launch = true
+    },
+    {
       key                 = "env"
       value               = "${var.env}"
       propagate_at_launch = true

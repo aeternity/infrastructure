@@ -105,11 +105,6 @@ resource "aws_autoscaling_group" "spot_fleet" {
 
   tags = [
     {
-      key                 = "kind"
-      value               = "api"
-      propagate_at_launch = true
-    },
-    {
       key                 = "Name"
       value               = "ae-${var.env}-nodes"
       propagate_at_launch = true
