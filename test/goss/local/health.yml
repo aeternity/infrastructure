@@ -15,13 +15,13 @@ port:
     ip:
     - 0.0.0.0
 
-port:
+
   tcp:3015:
     listening: true
     ip:
     - 0.0.0.0
 
-port:
+
   tcp:3013:
     listening: true
     ip:
