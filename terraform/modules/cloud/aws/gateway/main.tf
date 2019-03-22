@@ -1,8 +1,8 @@
 resource "aws_route53_health_check" "health" {
   count             = "${length(var.loadbalancers)}"
   fqdn              = "${element(var.loadbalancers, count.index)}"
-  port              = 3013
-  type              = "HTTP"
+  port              = 443
+  type              = "HTTPS"
   resource_path     = "/v2/blocks/top"
   measure_latency   = false
   failure_threshold = "4"
