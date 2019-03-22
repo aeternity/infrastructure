@@ -25,6 +25,6 @@ resource "aws_route53_record" "api-eu-west-2" {
   }
 
   latency_routing_policy = {
-    region = "eu-west-2"
+    region = "us-west-2"
   }
 }
