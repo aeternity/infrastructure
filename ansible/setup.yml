@@ -7,7 +7,7 @@
   vars:
     project_user: aeternity
     vault_version: "0.11.3"
-    goss_version: "v0.3.6"
+    goss_version: "0.3.6"
     libsodium_version: "1.0.16"
     libsodium_module_version: "23.1.0"
     fail2ban_loglevel: INFO
@@ -142,7 +142,7 @@
 
     - name: Download and unarchive Goss binary
       get_url:
-        url: "https://github.com/aelsabbahy/goss/releases/download/{{ goss_version }}/goss-linux-amd64"
+        url: "https://github.com/aelsabbahy/goss/releases/download/v{{ goss_version }}/goss-linux-amd64"
         dest: /usr/src/goss-{{ goss_version }}/goss
       tags:
         - goss-install
