@@ -3,7 +3,7 @@ resource "aws_lb" "gateway" {
   name               = "ae-${var.env}-gateway"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = ["${aws_security_group.ae-nodes.id}"]
+  security_groups    = ["${aws_security_group.ae-gateway-nodes-loadbalancer.id}"]
   subnets            = ["${var.subnets}"]
 
   enable_deletion_protection = false
