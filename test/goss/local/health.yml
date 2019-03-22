@@ -3,17 +3,30 @@ user:
     exists: true
   master:
     exists: true
+
 service:
   sshd:
     enabled: true
     running: true
+
 port:
   tcp:22:
     listening: true
     ip:
     - 0.0.0.0
+
+port:
+  tcp:3015:
+    listening: true
+    ip:
+    - 0.0.0.0
+
 port:
   tcp:3013:
     listening: true
     ip:
     - 0.0.0.0
+
+http:
+  http://localhost:3013/v2/blocks/top:
+    status: 200
