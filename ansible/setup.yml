@@ -154,7 +154,7 @@
         mode: 0755
         remote_src: true
       tags:
-        - vault-install
+        - goss-install
 
     - name: "Create custom fact directory"
       file:
