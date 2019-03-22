@@ -33,7 +33,7 @@ module "aws_deploy-main-eu-west-2" {
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
-  static_nodes = 10
+  static_nodes = 5
   spot_nodes   = 0
 
   spot_price       = "0.15"
