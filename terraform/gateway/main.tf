@@ -6,6 +6,10 @@ variable "bootstrap_version" {
   default = "master"
 }
 
+variable "main_gateway_dns" {
+  default = "api.main.ops.aeternity.com"
+}
+
 module "aws_deploy-main-us-west-2" {
   source            = "../modules/cloud/aws/deploy"
   env               = "main"
@@ -17,11 +21,12 @@ module "aws_deploy-main-us-west-2" {
   spot_nodes        = 0
   gateway_nodes_min = 2
   gateway_nodes_max = 30
-
-  spot_price       = "0.15"
-  instance_type    = "t3.large"
-  ami_name         = "aeternity-ubuntu-16.04-v1549009934"
-  root_volume_size = 40
+  dns_zone          = "${var.dns_zone}"
+  gateway_dns       = "${var.main_gateway_dns}"
+  spot_price        = "0.15"
+  instance_type     = "t3.large"
+  ami_name          = "aeternity-ubuntu-16.04-v1549009934"
+  root_volume_size  = 40
 
   aeternity = {
     package = "https://releases.ops.aeternity.com/aeternity-2.0.0-ubuntu-x86_64.tar.gz"
@@ -43,6 +48,8 @@ module "aws_deploy-main-eu-north-1" {
   spot_nodes        = 0
   gateway_nodes_min = 2
   gateway_nodes_max = 30
+  dns_zone          = "${var.dns_zone}"
+  gateway_dns       = "${var.main_gateway_dns}"
 
   spot_price       = "0.15"
   instance_type    = "t3.large"
@@ -81,5 +88,5 @@ module "aws_gateway" {
     "eu-north-1",
   ]
 
-  api_dns = "api.main.ops.aeternity.com"
+  api_dns = "${var.main_gateway_dns}"
 }

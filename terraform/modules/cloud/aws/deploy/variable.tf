@@ -51,3 +51,11 @@ variable "root_volume_size" {
   description = "Number of gigabytes. Default to 8."
   default     = 8
 }
+
+variable "dns_zone" {
+  default = ""
+}
+
+variable "gateway_dns" {
+  default = ""
+}
