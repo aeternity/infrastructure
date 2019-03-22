@@ -115,7 +115,7 @@ integration-tests-run:
 	# TODO this is actually a smoke test that can be migrated to "goss"
 	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(TF_VAR_env_name)
 
-run-node-health-check:
+health-check-env-local:
 	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(DEPLOY_ENV) \
 	-e env=$(DEPLOY_ENV) \
 
