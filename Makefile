@@ -187,6 +187,7 @@ clean:
 
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
+	setup-terraform-gatewway setup-terraform-environments \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
 	check-seed-peers check-deploy-env list-inventory \
 	check-seed-peers-% check-seed-peers-all \
