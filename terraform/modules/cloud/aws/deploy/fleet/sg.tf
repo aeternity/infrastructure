@@ -13,7 +13,8 @@ resource "aws_security_group" "ae-nodes" {
 }
 
 resource "aws_security_group" "ae-gateway-nodes-loadbalancer" {
-  name = "ae-${var.env}-gateway-nodes-loadbalancer"
+  count = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name  = "ae-${var.env}-gateway-nodes-loadbalancer"
 
   lifecycle {
     create_before_destroy = true
@@ -46,6 +47,7 @@ resource "aws_security_group_rule" "external_api_port" {
 }
 
 resource "aws_security_group_rule" "external_api_port_lb" {
+  count                    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   type                     = "ingress"
   from_port                = 3013
   to_port                  = 3013
@@ -64,6 +66,7 @@ resource "aws_security_group_rule" "sync_protocol_port" {
 }
 
 resource "aws_security_group_rule" "ssl_protocol_port" {
+  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   type              = "ingress"
   from_port         = 443
   to_port           = 443
@@ -82,6 +85,7 @@ resource "aws_security_group_rule" "allow_outgoing-node" {
 }
 
 resource "aws_security_group_rule" "allow_outgoing-node-lb" {
+  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   type              = "egress"
   from_port         = 0
   to_port           = 65535
