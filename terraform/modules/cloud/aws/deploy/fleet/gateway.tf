@@ -76,6 +76,17 @@ resource "aws_autoscaling_group" "gateway" {
 
   target_group_arns = ["${aws_lb_target_group.gateway.arn}"]
 
+  enabled_metrics = [
+    "GroupMinSize",
+    "GroupMaxSize",
+    "GroupDesiredCapacity",
+    "GroupInServiceInstances",
+    "GroupPendingInstances",
+    "GroupStandbyInstances",
+    "GroupTerminatingInstances",
+    "GroupTotalInstances",
+  ]
+
   lifecycle {
     create_before_destroy = true
   }
