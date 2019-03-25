@@ -5,7 +5,7 @@ BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
-SEED_CHECK_ENVS = main uat unstable
+SEED_CHECK_ENVS = main uat
 
 check-terraform-changes:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
