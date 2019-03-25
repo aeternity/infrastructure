@@ -5,15 +5,27 @@ BACKUP_SUFFIX ?= backup
 BACKUP_DIR ?= /tmp/mnesia_backups
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
-SEED_CHECK_ENVS = main uat unstable
+SEED_CHECK_ENVS = main uat
 
-check-terraform-changes:
+check-terraform-changes-environments:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
 	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -detailed-exitcode
 
-setup-terraform:
+check-terraform-changes-gateway:
+	cd terraform/gateway && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/gateway && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -detailed-exitcode
+
+check-terraform-changes: check-terraform-changes-environments check-terraform-changes-gateway
+
+setup-terraform-environments:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
 	cd terraform/environments && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) --auto-approve
+
+setup-terraform-gatewway:
+	cd terraform/gateway && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/gateway && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) --auto-approve
+
+setup-terraform: setup-terraform-environments setup-terraform-gatewway
 
 setup-node: check-deploy-env
 	cd ansible && ansible-playbook \
@@ -124,6 +136,10 @@ integration-tests-run:
 	# TODO this is actually a smoke test that can be migrated to "goss"
 	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(TF_VAR_env_name)
 
+health-check-env-local:
+	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(DEPLOY_ENV) \
+	-e env=$(DEPLOY_ENV) \
+
 integration-tests-cleanup:
 	cd test/terraform && terraform destroy --auto-approve
 
@@ -132,11 +148,15 @@ integration-tests: integration-tests-run integration-tests-cleanup
 lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
 
-terraform-validate:
+terraform-validate-environments:
 	cd terraform/environments && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
-lint: lint-ansible terraform-validate
+terraform-validate-gateway:
+	cd terraform/gateway && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
+terraform-validate: terraform-validate-environments terraform-validate-gateway
+
+lint: lint-ansible terraform-validate
 
 test/goss/remote/vars/seed-peers-%.yaml: ansible/inventory-list.json
 	cat ansible/inventory-list.json | python3 ansible/scripts/dump-seed-peers-keys.py --env $* > $@
@@ -174,6 +194,7 @@ clean:
 
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
+	setup-terraform-gatewway setup-terraform-environments \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
 	check-seed-peers check-deploy-env list-inventory \
 	check-seed-peers-% check-seed-peers-all \
