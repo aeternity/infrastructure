@@ -128,7 +128,6 @@ if [ "$RESTORE_DATABASE" = true ] ; then
             -i /tmp/local_inventory \
             -e ansible_python_interpreter=$(which python3) \
             --become-user aeternity -b \
-            -e download_dir=/tmp \
             -e env=${env} \
             -e db_version=1 \
             mnesia_snapshot_restore.yml
