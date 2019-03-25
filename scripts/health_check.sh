@@ -2,19 +2,19 @@
 #example usage: health_check.sh --network=main --min_height=52000 --version=2.1.0 18.136.37.63
 set -eo pipefail
 
-declare -A network_genesis_hashmap
-network_genesis_hashmap['main']="kh_pbtwgLrNu23k9PA6XCZnUbtsvEFeQGgavY4FS2do3QP8kcp2z"
-network_genesis_hashmap['uat']="kh_wUCideEB8aDtUaiHCtKcfywU6oHZW6gnyci8Mw6S1RSTCnCRu"
-declare -A network_id_hashmap
-network_id_hashmap['main']=ae_mainnet
-network_id_hashmap['uat']=ae_uat
+genesis_hash_main="kh_pbtwgLrNu23k9PA6XCZnUbtsvEFeQGgavY4FS2do3QP8kcp2z"
+genesis_hash_uat="kh_wUCideEB8aDtUaiHCtKcfywU6oHZW6gnyci8Mw6S1RSTCnCRu"
+network_id_main=ae_mainnet
+network_id_uat=ae_uat
 
 for arg in "$@"; do
     case $arg in
         --network=*)
         network="${arg#*=}"
-        network_id=${network_id_hashmap[$network]}
-        genesis_hash=${network_genesis_hashmap[$network]}
+        genesis_hash_var=genesis_hash_${network}
+        genesis_hash=${!genesis_hash_var}
+        network_id_var=network_id_${network}
+        network_id=${!network_id_var}
         shift # past argument=value
         ;;
         --network_id=*)
