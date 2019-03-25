@@ -12,7 +12,7 @@ RUN curl -sSO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${P
     && unzip packer_${PACKER_VERSION}_linux_amd64.zip -d /bin \
     && rm -f packer_${PACKER_VERSION}_linux_amd64.zip
 
-ENV TERRAFORM_VERSION 0.11.7
+ENV TERRAFORM_VERSION 0.11.13
 RUN curl -sSO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin \
     && rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip

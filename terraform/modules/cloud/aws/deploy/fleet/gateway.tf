@@ -1,0 +1,209 @@
+resource "aws_lb" "gateway" {
+  count              = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name               = "ae-${var.env}-gateway"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = ["${aws_security_group.ae-gateway-nodes-loadbalancer.id}"]
+  subnets            = ["${var.subnets}"]
+
+  enable_deletion_protection = false
+}
+
+resource "aws_acm_certificate" "cert" {
+  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  domain_name       = "${var.gateway_dns}"
+  validation_method = "DNS"
+}
+
+resource "aws_route53_record" "cert_validation" {
+  count   = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name    = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_name}"
+  type    = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_type}"
+  zone_id = "${var.dns_zone}"
+  records = ["${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"]
+  ttl     = 60
+}
+
+resource "aws_acm_certificate_validation" "cert" {
+  count                   = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  certificate_arn         = "${aws_acm_certificate.cert.arn}"
+  validation_record_fqdns = ["${aws_route53_record.cert_validation.fqdn}"]
+}
+
+output "gateway_lb_dns" {
+  value = "${element(concat(aws_lb.gateway.*.dns_name, list("")), 0)}"
+}
+
+output "gateway_lb_zone_id" {
+  value = "${element(concat(aws_lb.gateway.*.zone_id, list("")), 0)}"
+}
+
+resource "aws_alb_listener" "gateway" {
+  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  load_balancer_arn = "${aws_lb.gateway.arn}"
+  port              = 443
+  protocol          = "HTTPS"
+  certificate_arn   = "${aws_acm_certificate_validation.cert.certificate_arn}"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = "${aws_lb_target_group.gateway.arn}"
+  }
+}
+
+resource "aws_lb_target_group" "gateway" {
+  count    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name     = "ae-${var.env}-gateway"
+  port     = 3013
+  protocol = "HTTP"
+  vpc_id   = "${var.vpc_id}"
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    path                = "/v2/blocks/top"
+    interval            = 30
+  }
+}
+
+resource "aws_launch_configuration" "gateway" {
+  count                = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name_prefix          = "ae-${var.env}-gateway-nodes-"
+  iam_instance_profile = "ae-node"
+  image_id             = "${data.aws_ami.ami.id}"
+  instance_type        = "${var.instance_type}"
+  spot_price           = "${var.spot_price}"
+  security_groups      = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
+
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = "${var.root_volume_size}"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  user_data = "${data.template_file.spot_user_data.rendered}"
+}
+
+resource "aws_autoscaling_group" "gateway" {
+  count                = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name                 = "${aws_launch_configuration.gateway.name}"
+  min_size             = "${var.gateway_nodes_min}"
+  max_size             = "${var.gateway_nodes_max}"
+  launch_configuration = "${aws_launch_configuration.gateway.name}"
+  vpc_zone_identifier  = ["${var.subnets}"]
+
+  target_group_arns = ["${aws_lb_target_group.gateway.arn}"]
+
+  enabled_metrics = [
+    "GroupMinSize",
+    "GroupMaxSize",
+    "GroupDesiredCapacity",
+    "GroupInServiceInstances",
+    "GroupPendingInstances",
+    "GroupStandbyInstances",
+    "GroupTerminatingInstances",
+    "GroupTotalInstances",
+  ]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = [
+    {
+      key                 = "Name"
+      value               = "ae-${var.env}-gateway-nodes"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "kind"
+      value               = "api"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "env"
+      value               = "${var.env}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "role"
+      value               = "aenode"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "color"
+      value               = "${var.color}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "package"
+      value               = "${var.aeternity["package"]}"
+      propagate_at_launch = true
+    },
+  ]
+}
+
+resource "aws_autoscaling_policy" "gateway-cpu-policy-up" {
+  count                  = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name                   = "ae-${var.env}-gateway-cpu-up"
+  autoscaling_group_name = "${aws_autoscaling_group.gateway.name}"
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = "1"
+  cooldown               = "300"
+  policy_type            = "SimpleScaling"
+}
+
+resource "aws_cloudwatch_metric_alarm" "gateway-cpu-alarm-up" {
+  count               = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  alarm_name          = "ae-${var.env}-gateway-cpu-alarm-up"
+  alarm_description   = "cpu-alarm-up"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "30"
+
+  dimensions = {
+    "AutoScalingGroupName" = "${aws_autoscaling_group.gateway.name}"
+  }
+
+  actions_enabled = true
+  alarm_actions   = ["${aws_autoscaling_policy.gateway-cpu-policy-up.arn}"]
+}
+
+resource "aws_autoscaling_policy" "gateway-cpu-policy-down" {
+  count = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name  = "ae-${var.env}-gateway-cpu-down"
+
+  autoscaling_group_name = "${aws_autoscaling_group.gateway.name}"
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = "-1"
+  cooldown               = "300"
+  policy_type            = "SimpleScaling"
+}
+
+resource "aws_cloudwatch_metric_alarm" "gateway-cpu-alarm-down" {
+  count               = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  alarm_name          = "ae-${var.env}-gateway-cpu-alarm-down"
+  alarm_description   = "cpu-alarm-down"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "5"
+
+  dimensions = {
+    "AutoScalingGroupName" = "${aws_autoscaling_group.gateway.name}"
+  }
+
+  actions_enabled = true
+  alarm_actions   = ["${aws_autoscaling_policy.gateway-cpu-policy-down.arn}"]
+}
