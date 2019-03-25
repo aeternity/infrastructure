@@ -2,6 +2,10 @@ variable "static_nodes" {}
 
 variable "spot_nodes" {}
 
+variable "gateway_nodes_min" {}
+
+variable "gateway_nodes_max" {}
+
 variable "color" {}
 
 variable "env" {}
@@ -29,3 +33,11 @@ variable "vault_addr" {}
 variable "vault_role" {}
 
 variable "root_volume_size" {}
+
+variable "dns_zone" {
+  default = ""
+}
+
+variable "gateway_dns" {
+  default = ""
+}

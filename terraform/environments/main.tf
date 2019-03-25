@@ -324,28 +324,6 @@ module "aws_deploy-next-eu-west-2" {
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
-  static_nodes  = 0
-  spot_nodes    = 3
-  spot_price    = "0.125"
-  instance_type = "m4.large"
-  ami_name      = "aeternity-ubuntu-16.04-v1549009934"
-
-  aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-next-ubuntu-x86_64.tar.gz"
-  }
-
-  providers = {
-    aws = "aws.eu-west-2"
-  }
-}
-
-module "aws_deploy-unstable-eu-west-2" {
-  source            = "../modules/cloud/aws/deploy"
-  env               = "unstable"
-  bootstrap_version = "stable"
-  vault_role        = "ae-node"
-  vault_addr        = "${var.vault_addr}"
-
   static_nodes  = 1
   spot_nodes    = 2
   spot_price    = "0.125"
@@ -353,7 +331,7 @@ module "aws_deploy-unstable-eu-west-2" {
   ami_name      = "aeternity-ubuntu-16.04-v1549009934"
 
   aeternity = {
-    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-next-ubuntu-x86_64.tar.gz"
+    package = "https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
