@@ -123,11 +123,12 @@ ansible-playbook \
     deploy.yml
 
 RESTORE_ENV=${env}
+if [ "$env" = "api-main" ] ; then
+    RESTORE_ENV=main
+fi
+
 if [ "$RESTORE_DATABASE" = true ] ; then
-    if [ "$env" = "main" ] || [ "$env" == "uat" ] ; then # restore only main / uat
-        if [ "$env" = "api-main" ] ; then
-            RESTORE_ENV=main
-        fi
+    if [ "$RESTORE_ENV" = "main" ] || [ "$RESTORE_ENV" == "uat" ] ; then # restore only main / uat
 
         ansible-playbook \
             -i /tmp/local_inventory \

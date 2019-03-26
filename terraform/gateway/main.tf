@@ -12,7 +12,7 @@ variable "main_gateway_dns" {
 
 module "aws_deploy-main-us-west-2" {
   source            = "../modules/cloud/aws/deploy"
-  env               = "main"
+  env               = "api-main"
   bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
@@ -39,7 +39,7 @@ module "aws_deploy-main-us-west-2" {
 
 module "aws_deploy-main-eu-north-1" {
   source            = "../modules/cloud/aws/deploy"
-  env               = "main"
+  env               = "api-main"
   bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
