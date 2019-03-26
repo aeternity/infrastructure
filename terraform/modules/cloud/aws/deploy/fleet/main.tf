@@ -110,6 +110,11 @@ resource "aws_autoscaling_group" "spot_fleet" {
       propagate_at_launch = true
     },
     {
+      key                 = "kind"
+      value               = "peer"
+      propagate_at_launch = true
+    },
+    {
       key                 = "env"
       value               = "${var.env}"
       propagate_at_launch = true

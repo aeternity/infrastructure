@@ -1,5 +1,5 @@
 resource "aws_route53_health_check" "health" {
-  count             = "${length(var.loadbalancers)}"
+  count             = "${length(var.loadbalancers_regions)}"
   fqdn              = "${element(var.loadbalancers, count.index)}"
   port              = 443
   type              = "HTTPS"
@@ -9,14 +9,14 @@ resource "aws_route53_health_check" "health" {
   request_interval  = 30
 }
 
-resource "aws_route53_record" "api-eu-west-2" {
-  count   = "${length(var.loadbalancers)}"
+resource "aws_route53_record" "api" {
+  count   = "${length(var.loadbalancers_regions)}"
   zone_id = "${var.dns_zone}"
   name    = "${var.api_dns}"
   type    = "A"
 
   health_check_id = "${element( aws_route53_health_check.health.*.id, count.index)}"
-  set_identifier  = "eu-west-2"
+  set_identifier  = "${element(var.loadbalancers_regions, count.index)}"
 
   alias {
     name                   = "${element(var.loadbalancers, count.index)}"
@@ -25,6 +25,6 @@ resource "aws_route53_record" "api-eu-west-2" {
   }
 
   latency_routing_policy = {
-    region = "us-west-2"
+    region = "${element(var.loadbalancers_regions, count.index)}"
   }
 }
