@@ -26,32 +26,6 @@ module "aws_deploy-main-ap-southeast-1" {
   }
 }
 
-module "aws_deploy-main-eu-west-2" {
-  source            = "../modules/cloud/aws/deploy"
-  env               = "main"
-  bootstrap_version = "stable"
-  vault_role        = "ae-node"
-  vault_addr        = "${var.vault_addr}"
-
-  static_nodes = 5
-  spot_nodes   = 0
-
-  spot_price       = "0.15"
-  instance_type    = "t3.large"
-  ami_name         = "aeternity-ubuntu-16.04-v1549009934"
-  root_volume_size = 40
-
-  aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.2.0-ubuntu-x86_64.tar.gz"
-  }
-
-  providers = {
-    aws = "aws.eu-west-2"
-  }
-
-  depends_on = ["${module.aws_deploy-ap-southeast-1.static_node_ips}"]
-}
-
 module "aws_deploy-main-eu-north-1" {
   source            = "../modules/cloud/aws/deploy"
   env               = "main"
@@ -208,7 +182,7 @@ module "aws_deploy-uat-eu-west-2" {
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
-  static_nodes = 1
+  static_nodes = 0
   spot_nodes   = 9
 
   spot_price    = "0.125"

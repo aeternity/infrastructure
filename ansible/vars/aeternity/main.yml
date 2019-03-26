@@ -41,12 +41,6 @@ seed_peers:
   - "13.53.162.212"
   - "13.53.89.32"
   - "13.53.78.163"
-  # London (eu-west-2) - DEPRECATED
-  - "35.177.192.219"
-  - "3.8.105.183"
-  - "3.8.30.66"
-  - "35.177.165.232"
-  - "35.177.212.38"
 node_config:
   peers:
     - "aenode://pp_2L8A5vSjnkLtfFNpJNgP9HbmGLD7ZAGFxoof47N8L4yyLAyyMi@18.136.37.63:3015"
