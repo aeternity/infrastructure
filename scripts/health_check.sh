@@ -1,5 +1,6 @@
 #!/bin/bash
-#example usage: health_check.sh --network=main --min_height=52000 --version=2.1.0 18.136.37.63
+#example usage: health_check.sh --network=main --min_height=55000 --version=2.1.0 $HOSTNAME
+#--genesis_hash & --network_id override defaults for --network
 set -eo pipefail
 
 genesis_hash_main="kh_pbtwgLrNu23k9PA6XCZnUbtsvEFeQGgavY4FS2do3QP8kcp2z"
