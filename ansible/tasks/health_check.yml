@@ -11,3 +11,12 @@
     url: "{{ api_base_uri }}/blocks/top"
     timeout: 30
   connection: local
+
+- name: Copy test files
+  copy:
+    directory_mode: true
+    src: ../test/goss/local/
+    dest: /tmp/
+
+- name:  Run health checks
+  command: goss -g /tmp/health.yml validate
