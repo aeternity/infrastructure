@@ -52,7 +52,7 @@ fi
 min_height=${min_height:-1}
 
 get_node_status() {
-    curl -sS -m5 http://$HOST:3013/v2/status
+    curl -sS -m5 http://$HOST:3013/v2/status 2> /dev/null||echo failed
 }
 check_genesis_hash() {
     test $(echo $node_status| jq -r '.genesis_key_block_hash') == $genesis_hash
@@ -71,26 +71,42 @@ check_version() {
 }
 
 node_status=$(get_node_status)
-check_top_min_height || failed+=" min_height"
+if [ "$node_status" == "failed" ]; then
+    echo node status check failed
+    exit 1
+else
+    passed+=node_status
+fi
+
+check_top_min_height && passed+=" min_height"|| failed+=" min_height"
 
 if [ -n "$genesis_hash" ]; then
-    check_genesis_hash || failed+=" genesis"
+    check_genesis_hash && passed+=" genesis"|| failed+=" genesis"
 fi
 if [ -n "$network_id" ]; then
-    check_network_id || failed+=" network_id"
+    check_network_id  && passed+=" network_id"|| failed+=" network_id"
 fi
 if [ -n "$version" ]; then
-    check_version || failed+=" version"
+    check_version && passed+=" version"|| failed+=" version"
 fi
 if [ -n "$min_sync_pct" ]; then
     if [ "$(check_sync_progress)" -ne 1 ]; then
-       failed+=" sync_progress"
+        failed+=" sync_progress"
+    else
+        passed+=" sync_progress"
     fi
 fi
 
+if [ "$passed" != "" ]; then
+    printf "Passed tests:\n"
+    for pass in $passed; do
+        printf "%s\n" "- $pass"
+    done
+fi
 if [ "$failed" != "" ]; then
+    printf "\nFailed tests:\n" >&2
     for fail in $failed; do
-        echo "$fail" check failed
+        printf "%s\n" "- $fail" >&2
     done
     exit 1
 fi
