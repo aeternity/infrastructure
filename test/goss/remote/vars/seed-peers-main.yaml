@@ -7,10 +7,6 @@ hosts:
   pubkey: pp_2qPAV7cYcHBK8MDo7neB2p1ow5Bmu1o56EUtnVv19ytuZ3pTtX
 - ip_addr: 3.0.221.40
   pubkey: pp_26SjCczbcdG49nC8wWh3ZUZna6eyF9rbpFymSc6wKyCiten1LQ
-- ip_addr: 3.8.30.66
-  pubkey: pp_rwTYPQY8cvFebULRnpYZ3pVqK9xhnUW41SpRWr51R1bzp4x5
-- ip_addr: 3.8.105.183
-  pubkey: pp_2mWh671xYJRdzXFmJGy4M1Vhsy8y4ECadmoAcTYMw6pEGW5VCz
 - ip_addr: 3.16.242.93
   pubkey: pp_tVdaaX4bX54rkaVEwqE81hCgv6dRGPPwEVsiZk41GXG1A4gBN
 - ip_addr: 3.17.15.122
@@ -51,8 +47,6 @@ hosts:
   pubkey: pp_sGegC48UrvDA7cvvUU3GPTze9wNUnnK1P4q46mL5jAFddNrbD
 - ip_addr: 13.250.190.66
   pubkey: pp_vxK2ikV9djG8MXmDnYYs338ETEsaUPweZrc2S54L3scxBfncU
-- ip_addr: 18.130.106.60
-  pubkey: pp_4cHNMu9xgXE1DvDrqdaUypr1yzmwhHSUrTyT8o9u8954bYCau
 - ip_addr: 18.136.37.63
   pubkey: pp_2L8A5vSjnkLtfFNpJNgP9HbmGLD7ZAGFxoof47N8L4yyLAyyMi
 - ip_addr: 18.216.167.138
@@ -71,26 +65,12 @@ hosts:
   pubkey: pp_cVrCJWsg2vyWnRerEpLyB6ut6A8AA1MchQWAheRFNWpRWHXHJ
 - ip_addr: 35.166.231.86
   pubkey: pp_21DNLkjdBuoN7EajkK3ePfRMHbyMkhcuW5rJYBQsXNPDtu3v9n
-- ip_addr: 35.176.217.240
-  pubkey: pp_io8yyDuTfCUmLkLShXvvkZEJFnfC6oVMnrS2tUygLkbbnnJxd
-- ip_addr: 35.177.165.232
-  pubkey: pp_BPYCajukjRmJkPQ3nY4TyjPZ969aCMDqWZkZ3EDXkxJbvN2cH
-- ip_addr: 35.177.192.219
-  pubkey: pp_2KWhoNRdythXAmgCbM6QxFo95WM4XXGq2pjcbKitXFpUHnPQc3
-- ip_addr: 35.177.212.38
-  pubkey: pp_2GBVGpHdZzmxA5k92RiY39RpjVNgECQRNfeFQ6z7ruJ5PPn5hH
-- ip_addr: 35.178.61.73
-  pubkey: pp_5mmzrsoPh9owYMfKhZSkUihufDTB6TuayD173Ng464ukVm9xU
 - ip_addr: 52.11.110.179
   pubkey: pp_RKVZjm7UKPLGvyKWqVZN1pXN6CTCxfmYz2HkNL2xiAhLVd2ho
 - ip_addr: 52.26.157.37
   pubkey: pp_8nn6ypcwkaXxJfPGq7DCpBpf9FNfmkXPvGCjJFnLzvwjhCMEH
 - ip_addr: 52.40.117.141
   pubkey: pp_XpZVMtsbg39Rm69aBP3m2Q245ght8MNUGN1omBr7xJmd4goxR
-- ip_addr: 52.56.66.124
-  pubkey: pp_FLpSUrKwgBAu5uVRnB2iWKtwGAHZckxvtCbjVPeeCA3j33t3J
-- ip_addr: 52.56.252.75
-  pubkey: pp_frAKABjDnM3QZCUygbkaFvbd8yhv6xdufazDFLgJRc4fnGy3s
 - ip_addr: 52.77.168.79
   pubkey: pp_2jtDgarjfr7S5NBZpBBx3fgn3wdtLb24UmiYGtVCGzF6x7Bytb
 - ip_addr: 52.88.74.110

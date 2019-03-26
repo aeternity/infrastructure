@@ -44,6 +44,7 @@
 - name: Deploy aeternity package
   hosts: all
   remote_user: aeternity
+  serial: "{{ rolling_update | default('100%') }}"
   # Facts are already collected in the previous playbook
   gather_facts: no
   max_fail_percentage: 25
