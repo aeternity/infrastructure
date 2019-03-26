@@ -1,0 +1,9 @@
+{
+    "main" : {
+        "bootstrap_version": "v1.1.1",
+        "package": "https://https://releases.ops.aeternity.com/aeternity-2.2.0-ubuntu-x86_64.tar.gz"
+    }
+    "uat" : {
+        "bootstrap_version": "v1.1.1",
+        "package": "https://https://releases.ops.aeternity.com/aeternity-2.2.0-ubuntu-x86_64.tar.gz"
+}

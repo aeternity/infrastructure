@@ -3,6 +3,9 @@
 # set -x
 exec > >(tee /tmp/user-data.log|logger -t user-data ) 2>&1
 
+# bootstrap_version=`curl https://raw.githubusercontent.com/aeternity/infrastructure/raft-configuration-changes/bootstrap_config.json | jq main..bootstrap_version`
+#
+#
 if [ ! -d "/infrastructure" ] ; then
     git clone -b ${bootstrap_version} --single-branch https://github.com/aeternity/infrastructure.git /infrastructure
 else
