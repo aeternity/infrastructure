@@ -122,13 +122,18 @@ ansible-playbook \
     -e db_version=1 \
     deploy.yml
 
+RESTORE_ENV=${env}
 if [ "$RESTORE_DATABASE" = true ] ; then
     if [ "$env" = "main" ] || [ "$env" == "uat" ] ; then # restore only main / uat
+        if [ "$env" = "api-main" ] ; then
+            RESTORE_ENV=main
+        fi
+
         ansible-playbook \
             -i /tmp/local_inventory \
             -e ansible_python_interpreter=$(which python3) \
             --become-user aeternity -b \
-            -e env=${env} \
+            -e env=${RESTORE_ENV} \
             -e db_version=1 \
             mnesia_snapshot_restore.yml
     fi
