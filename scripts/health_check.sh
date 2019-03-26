@@ -52,7 +52,7 @@ fi
 min_height=${min_height:-1}
 
 get_node_status() {
-    curl -sS -m5 http://$HOST:3013/v2/status 2> /dev/null||echo failed
+    curl -sS -m5 http://$HOST:3013/v2/status
 }
 check_genesis_hash() {
     test $(echo $node_status| jq -r '.genesis_key_block_hash') == $genesis_hash
@@ -71,12 +71,7 @@ check_version() {
 }
 
 node_status=$(get_node_status)
-if [ "$node_status" == "failed" ]; then
-    echo node status check failed
-    exit 1
-else
-    passed+=node_status
-fi
+passed=node_status
 
 check_top_min_height && passed+=" min_height"|| failed+=" min_height"
 
