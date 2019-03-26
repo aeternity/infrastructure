@@ -185,6 +185,7 @@ make deploy DEPLOY_ENV=integration
 Additional parameters:
 - DEPLOY_DOWNTIME - schedule a downtime period (in seconds) to mute monitoring alerts (0 by default e.g. monitors are not muted)
 - DEPLOY_COLOR - some environments might be colored to enable blue/green deployments (not limits by default)
+- DEPLOY_KIND - deploy to different kind of nodes, current is seed / peer / api (not limit by default)
 - DEPLOY_DB_VERSION - chain db directory suffix that can be bumped to purge the old db (0 by default)
 
 #### Deploy to mainnet

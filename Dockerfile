@@ -4,7 +4,7 @@ FROM alpine:3.8
 # Some of the playbooks run on multiple hosts: local + remote.
 # If it's set in the inventory it will not work when a specific inventory is used.
 # OpenSSL required for a packer workaround: https://github.com/hashicorp/packer/issues/2526
-RUN apk add --no-cache bash curl unzip make python3 py-cryptography openssh-client openssl sshpass \
+RUN apk add --no-cache bash curl unzip make python3 py-cryptography openssh-client openssl sshpass jq bc\
     && ln -s /usr/bin/python3 /usr/bin/python
 
 ENV PACKER_VERSION=1.3.2
@@ -12,7 +12,7 @@ RUN curl -sSO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${P
     && unzip packer_${PACKER_VERSION}_linux_amd64.zip -d /bin \
     && rm -f packer_${PACKER_VERSION}_linux_amd64.zip
 
-ENV TERRAFORM_VERSION 0.11.7
+ENV TERRAFORM_VERSION 0.11.13
 RUN curl -sSO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin \
     && rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip

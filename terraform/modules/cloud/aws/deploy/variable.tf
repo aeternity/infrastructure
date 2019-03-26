@@ -6,7 +6,17 @@ variable "color" {
 
 variable "bootstrap_version" {}
 
-variable "spot_nodes" {}
+variable "spot_nodes" {
+  default = 0
+}
+
+variable "gateway_nodes_min" {
+  default = 0
+}
+
+variable "gateway_nodes_max" {
+  default = 0
+}
 
 variable "static_nodes" {
   default = 0
@@ -40,4 +50,12 @@ variable "vault_role" {}
 variable "root_volume_size" {
   description = "Number of gigabytes. Default to 8."
   default     = 8
+}
+
+variable "dns_zone" {
+  default = ""
+}
+
+variable "gateway_dns" {
+  default = ""
 }
