@@ -44,6 +44,12 @@
       register: instance_tags
       when: is_aws
 
+    - name: "Load a variable files for environment: {{ env }}"
+      include_vars: "{{ item }}"
+      with_first_found:
+        - "vars/aeternity/{{ env }}.yml"
+        - "vars/aeternity/default.yml"
+
     - name: Define ec2 dynamic variables based on tags
       set_fact:
         env: "{{ instance_tags['tags']['env'] | default('unknown') }}"
@@ -83,6 +89,7 @@
         - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
         - "public_ipv4:{{ public_ipv4 }}"
         - "role:{{ node_role|default('unknown') }}"
+        - "network_id:{{ node_config.fork_management.network_id|default('unknown') }}"
     datadog_checks:
       system_core:
         init_config:
