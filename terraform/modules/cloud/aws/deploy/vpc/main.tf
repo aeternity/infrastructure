@@ -14,7 +14,7 @@ resource "aws_subnet" "subnet" {
   vpc_id                  = "${aws_vpc.vpc.id}"
   count                   = "${length(split(",", lookup(var.availability_zones, data.aws_region.current.name)))}"
   availability_zone       = "${element(split(",",lookup(var.availability_zones, data.aws_region.current.name)), count.index)}"
-  cidr_block              = "10.0.${count.index+length(data.aws_availability_zones.available.names)}}.0/24" #small hack to be able to recreate subnets without conflict.
+  cidr_block              = "10.0.${count.index+length(data.aws_availability_zones.available.names)}.0/24" #small hack to be able to recreate subnets without conflict.
   map_public_ip_on_launch = true
 
   tags = {
