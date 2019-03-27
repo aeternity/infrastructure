@@ -10,5 +10,6 @@ variable "availability_zones" {
     "eu-central-1"   = "eu-central-1a,eu-central-1b,eu-central-1c"
     "eu-north-1"     = "eu-north-1a,eu-north-1b,eu-north-1c"
     "ap-southeast-1" = "ap-southeast-1a,ap-southeast-1b,ap-southeast-1c"
+    "ap-southeast-2" = "ap-southeast-2a,ap-southeast-2b,ap-southeast-2c"
   }
 }
