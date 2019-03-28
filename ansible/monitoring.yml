@@ -89,7 +89,7 @@
         - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
         - "public_ipv4:{{ public_ipv4 }}"
         - "role:{{ node_role|default('unknown') }}"
-        - "network_id:{{ node_config.fork_management.network_id|default('unknown') }}"
+        - "network_id:{{ (node_config['fork_management']|default(dict(network_id = 'unknown')))['network_id'] }}"
     datadog_checks:
       system_core:
         init_config:
@@ -144,6 +144,8 @@
             service: aeternity
             source: lager
             sourcecategory: sync
+    #workaround: the following var is not used but should be defined in order to environment variables file be loaded successfully
+    db_version: unused
 
   pre_tasks:
     - name: "Add dd-agent to {{ project_user }} group"
