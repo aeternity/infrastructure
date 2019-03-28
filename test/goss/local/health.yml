@@ -4,6 +4,10 @@ user:
   master:
     exists: true
 
+command:
+  bash /tmp/health_check.sh:
+    exit-status: 0
+
 service:
   sshd:
     enabled: true

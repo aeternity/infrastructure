@@ -18,5 +18,10 @@
     src: ../test/goss/local/
     dest: /tmp/
 
+- name: Copy health check script
+  copy:
+    src: ../scripts/health_check.sh
+    dest: /tmp/
+
 - name:  Run health checks
   command: goss -g /tmp/health.yml validate
