@@ -1,9 +1,10 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
-seed_peers: []
+seed_peers: [18.130.100.58]
 configure_peers: false
 
 node_config:
-  peers: []
+  peers:
+    - aenode://pp_viEW93PwdaTgNKiorj4qygpLzUi8qoAmYLiPaUYCMkKzqNng5@18.130.100.58:3015
   sync:
     port: 3015
 
