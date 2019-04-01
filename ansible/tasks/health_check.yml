@@ -16,12 +16,12 @@
   copy:
     directory_mode: true
     src: ../test/goss/local/
-    dest: {{ health_config_location }}
+    dest: "{{ health_config_location }}"
 
 - name: Copy health check script
   copy:
     src: ../scripts/health_check.sh
-    dest: {{ health_config_location }}
+    dest: "{{ health_config_location }}"
 
 - name:  Run health checks
   command: goss -g {{ health_config_location }}/health.yml validate

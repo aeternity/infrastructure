@@ -5,7 +5,7 @@ user:
     exists: true
 
 command:
-  bash /tmp/health_check.sh:
+  bash  {{ getEnv "health_check_location" "/tmp" }}/health_check.sh:
     exit-status: 0
 
 service:
