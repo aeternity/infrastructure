@@ -20,3 +20,5 @@
 
 - name:  Run health checks
   command: goss -g /tmp/health.yml validate
+  register: output
+  changed_when: "output.stdout is search('Failed: 0, Skipped: 0')"
