@@ -55,7 +55,6 @@ resource "aws_security_group_rule" "allow_outgoing-node" {
 }
 
 resource "aws_security_group" "ae-nodes-management" {
-  count = "${(var.spot_nodes + var.static_nodes + var.gateway_nodes_min) > 0 ? 1 : 0}"
   name  = "ae-${var.env}-management-terraform"
 
   lifecycle {
@@ -70,7 +69,6 @@ resource "aws_security_group" "ae-nodes-management" {
 }
 
 resource "aws_security_group_rule" "allow_ssh" {
-  count             = "${(var.spot_nodes + var.static_nodes + var.gateway_nodes_min) > 0 ? 1 : 0}"
   type              = "ingress"
   from_port         = 22
   to_port           = 22
@@ -80,7 +78,6 @@ resource "aws_security_group_rule" "allow_ssh" {
 }
 
 resource "aws_security_group_rule" "allow_icmp" {
-  count             = "${(var.spot_nodes + var.static_nodes + var.gateway_nodes_min) > 0 ? 1 : 0}"
   type              = "ingress"
   from_port         = 8
   to_port           = -1
@@ -90,7 +87,6 @@ resource "aws_security_group_rule" "allow_icmp" {
 }
 
 resource "aws_security_group_rule" "allow_outgoing-management" {
-  count             = "${(var.spot_nodes + var.static_nodes + var.gateway_nodes_min) > 0 ? 1 : 0}"
   type              = "egress"
   from_port         = 0
   to_port           = 65535
@@ -100,7 +96,6 @@ resource "aws_security_group_rule" "allow_outgoing-management" {
 }
 
 resource "aws_security_group_rule" "allow_outgoing-ntp" {
-  count             = "${(var.spot_nodes + var.static_nodes + var.gateway_nodes_min) > 0 ? 1 : 0}"
   type              = "egress"
   from_port         = 123
   to_port           = 123
