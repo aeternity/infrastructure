@@ -239,7 +239,7 @@
           port: "{{ node_config.http.external.port }}"
           host: "{{ public_ipv4 }}"
           timeout: 300
-        when: health_check
+        when: health_check and not api_gateway
         connection: local
         tags: [health-check]
 
@@ -247,7 +247,16 @@
         uri:
           url: "{{ api_base_uri }}/blocks/top"
           timeout: 30
-        when: health_check
+        when: health_check and not api_gateway
+        connection: local
+        tags: [health-check]
+
+      - name: Wait aeternity node API to boot gateway
+        wait_for:
+          port: "{{ node_config.http.external.port }}"
+          host: "localhost"
+          timeout: 300
+        when: api_gateway
         connection: local
         tags: [health-check]
 

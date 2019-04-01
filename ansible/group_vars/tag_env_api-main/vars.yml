@@ -1,2 +1,2 @@
 datadog_enabled: yes
-health_check: no
+api_gateway: yes
