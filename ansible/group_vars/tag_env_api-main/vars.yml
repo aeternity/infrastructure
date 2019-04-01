@@ -1,2 +1,2 @@
 datadog_enabled: yes
-health_check: yes
+health_check: no
