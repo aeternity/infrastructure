@@ -3,7 +3,7 @@ variable "vault_addr" {
 }
 
 variable "bootstrap_version" {
-  default = "close_3013_for_public_for_api_gateway_164955096"
+  default = "stable"
 }
 
 variable "main_gateway_dns" {
@@ -19,8 +19,8 @@ module "aws_deploy-main-us-west-2" {
 
   static_nodes      = 0
   spot_nodes        = 0
-  gateway_nodes_min = 1
-  gateway_nodes_max = 1
+  gateway_nodes_min = 2
+  gateway_nodes_max = 30
   dns_zone          = "${var.dns_zone}"
   gateway_dns       = "${var.main_gateway_dns}"
   spot_price        = "0.15"
@@ -46,8 +46,8 @@ module "aws_deploy-main-eu-north-1" {
 
   static_nodes      = 0
   spot_nodes        = 0
-  gateway_nodes_min = 1
-  gateway_nodes_max = 1
+  gateway_nodes_min = 2
+  gateway_nodes_max = 30
   dns_zone          = "${var.dns_zone}"
   gateway_dns       = "${var.main_gateway_dns}"
 

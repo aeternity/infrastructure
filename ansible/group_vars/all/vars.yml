@@ -1,2 +1,3 @@
 datadog_enabled: no
+api_gateway: no
 public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
