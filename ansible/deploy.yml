@@ -239,7 +239,7 @@
           port: "{{ node_config.http.external.port }}"
           host: "{{ public_ipv4 }}"
           timeout: 300
-        when: health_check and not api_gateway
+        when: health_check and not local_health_check
         connection: local
         tags: [health-check]
 
@@ -247,7 +247,7 @@
         uri:
           url: "{{ api_base_uri }}/blocks/top"
           timeout: 30
-        when: health_check and not api_gateway
+        when: health_check and not local_health_check
         connection: local
         tags: [health-check]
 
@@ -256,7 +256,7 @@
           port: "{{ node_config.http.external.port }}"
           host: "localhost"
           timeout: 300
-        when: api_gateway
+        when: local_health_check
         tags: [health-check]
 
       - name: Refresh aeternity facts
