@@ -257,7 +257,6 @@
           host: "localhost"
           timeout: 300
         when: api_gateway
-        connection: local
         tags: [health-check]
 
       - name: Refresh aeternity facts
