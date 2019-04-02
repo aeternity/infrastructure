@@ -1,0 +1,12 @@
+[Unit]
+Description=Goss
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/goss -g /etc/goss/health.yml serve &
+ExecStop=/bin/kill -WINCH ${MAINPID}
+KillSignal=SIGKILL
+User=aeternity
+
+[Install]
+WantedBy=multi-user.target

@@ -58,6 +58,7 @@
         node_role: "{{ instance_tags['tags']['role'] | default('unknown') }}"
       when: is_aws
 
+
 - name: Configure monitoring services (DataDog)
   hosts: all
   remote_user: master
