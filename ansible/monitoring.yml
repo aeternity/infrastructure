@@ -112,7 +112,6 @@
         systemd: no
       when: is_systemd.stdout is search("other")
 
-
     - name: Copy systemd goss config
       copy:
         src: files/goss/goss.service
@@ -128,7 +127,6 @@
         mode: 0750
       notify: restart goss
       when: not systemd
-
 
     - name: Set goss.log correct permissions for goss
       file:
@@ -151,7 +149,6 @@
       copy:
         src: ../scripts/health_check.sh
         dest: "/etc/goss/"
-
       notify: restart goss
 
   handlers:
