@@ -46,6 +46,15 @@ resource "aws_security_group_rule" "external_api_port" {
   security_group_id = "${aws_security_group.ae-nodes.id}"
 }
 
+resource "aws_security_group_rule" "external_healthz_port" {
+  type              = "ingress"
+  from_port         = 8080
+  to_port           = 8080
+  protocol          = "TCP"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${aws_security_group.ae-nodes.id}"
+}
+
 resource "aws_security_group_rule" "external_api_port_lb" {
   count                    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   type                     = "ingress"
