@@ -156,7 +156,8 @@
 
   handlers:
     - name: Reload systemd
-      command: systemctl daemon-reload
+      systemd:
+        daemon_reload: yes
       listen:
         - reload systemd
       notify: restart goss
