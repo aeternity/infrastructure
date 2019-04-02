@@ -62,7 +62,8 @@ resource "aws_lb_target_group" "gateway" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
-    path                = "/v2/blocks/top"
+    path                = "/healthz"
+    port                = 8080
     interval            = 30
   }
 }
