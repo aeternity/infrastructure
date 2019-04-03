@@ -12,13 +12,7 @@
     timeout: 30
   connection: local
 
-- name: Copy test files
-  copy:
-    directory_mode: true
-    src: ../test/goss/local/
-    dest: /tmp/
-
 - name:  Run health checks
-  command: goss -g /tmp/health.yml validate
+  command: goss -g /etc/goss/health.yml validate
   register: output
   changed_when: "output.stdout is search('Failed: 0, Skipped: 0')"
