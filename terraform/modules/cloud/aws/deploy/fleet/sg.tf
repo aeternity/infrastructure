@@ -43,16 +43,6 @@ resource "aws_security_group_rule" "external_healthz_port" {
   security_group_id = "${aws_security_group.ae-nodes.id}"
 }
 
-resource "aws_security_group_rule" "external_api_port_lb" {
-  count                    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  type                     = "ingress"
-  from_port                = 3013
-  to_port                  = 3013
-  protocol                 = "TCP"
-  security_group_id        = "${aws_security_group.ae-nodes.id}"
-  source_security_group_id = "${aws_security_group.ae-gateway-nodes-loadbalancer.id}"
-}
-
 resource "aws_security_group_rule" "sync_protocol_port" {
   count             = "${(var.spot_nodes + var.static_nodes) > 0 ? 1 : 0}"
   type              = "ingress"
