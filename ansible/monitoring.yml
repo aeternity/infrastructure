@@ -58,6 +58,114 @@
         node_role: "{{ instance_tags['tags']['role'] | default('unknown') }}"
       when: is_aws
 
+- name: Configure health check services (goss)
+  hosts: all
+  remote_user: master
+  become: yes
+  vars:
+    project_user: aeternity
+    goss_version: "0.3.6"
+
+  tasks:
+    - name: Create Goss source directory
+      file:
+        path: /usr/src/goss-{{ goss_version }}/
+        state: directory
+      tags:
+        - goss-install
+
+    - name: Download and unarchive Goss binary
+      get_url:
+        url: "https://github.com/aelsabbahy/goss/releases/download/v{{ goss_version }}/goss-linux-amd64"
+        dest: /usr/src/goss-{{ goss_version }}/goss
+      tags:
+        - goss-install
+
+    - name: Install Goss binary
+      copy:
+        src: /usr/src/goss-{{ goss_version }}/goss
+        dest: /usr/bin/goss
+        mode: 0755
+        remote_src: true
+      tags:
+        - goss-install
+
+    - name: Create Goss config directory
+      file:
+        path: /etc/goss/
+        state: directory
+      notify: restart goss
+
+    - name: Check is systemd enabled
+      shell: "pidof systemd && echo 'systemd' || echo 'other'"
+      register: is_systemd
+      failed_when: "'command not found' in is_systemd.stderr"
+      changed_when: False
+
+    - name: Setting fact for systemd
+      set_fact:
+        systemd: yes
+      when: is_systemd.stdout is search("systemd")
+
+    - name: Settign fact for non systemd
+      set_fact:
+        systemd: no
+      when: is_systemd.stdout is search("other")
+
+    - name: Copy systemd goss config
+      copy:
+        src: files/goss/goss.service
+        dest: "/etc/systemd/system"
+        mode: 0750
+      notify: reload systemd
+      when: systemd
+
+    - name: Copy init.d goss config
+      copy:
+        src: files/goss/goss.conf
+        dest: "/etc/init.d/goss"
+        mode: 0750
+      notify: restart goss
+      when: not systemd
+
+    - name: Set goss.log correct permissions for goss
+      file:
+        path: /var/log/goss.log
+        state: touch
+        mode: 0640
+        owner: "{{ project_user }}"
+        modification_time: "preserve"
+        access_time: "preserve"
+      notify: restart goss
+
+    - name: Copy test files
+      copy:
+        directory_mode: true
+        src: ../test/goss/local/
+        dest: "/etc/goss/"
+      notify: restart goss
+
+    - name: Copy health check script
+      copy:
+        src: ../scripts/health_check.sh
+        dest: "/etc/goss/"
+      notify: restart goss
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+      listen:
+        - reload systemd
+      notify: restart goss
+
+    - name: Restart goss
+      service:
+        name: goss
+        state: restarted
+      listen:
+        - restart goss
+
 - name: Configure monitoring services (DataDog)
   hosts: all
   remote_user: master
