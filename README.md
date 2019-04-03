@@ -295,6 +295,19 @@ Once the test node is running, start an infrastructure container in the same doc
 docker run -it --env-file env.list -v ${PWD}:/src -w /src --net aeternity aeternity/infrastructure
 ```
 
+Running/testing playbooks on localhost with docker-compose helpers.
+This will run infrastructure container link it to debian container.
+
+```bash
+docker-compose up -d
+#attach to local infrastrcuture container
+docker attach infrastructure-local
+cd /src
+./local_playbook_run.sh deploy.yml # + add required parameters
+```
+
+
+
 Running an Ansible playbook against the `aenode` container requires setting [additional Ansible parameters](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#list-of-behavioral-inventory-parameters):
 
 - inventory host - `aenode.aeternity`
