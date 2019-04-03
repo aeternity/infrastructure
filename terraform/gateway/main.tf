@@ -7,7 +7,7 @@ variable "bootstrap_version" {
 }
 
 variable "main_gateway_dns" {
-  default = "api.main.ops.aeternity.com"
+  default = "api.mainnet.ops.aeternity.com"
 }
 
 module "aws_deploy-main-us-west-2" {

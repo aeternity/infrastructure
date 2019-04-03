@@ -75,7 +75,7 @@ resource "aws_launch_configuration" "gateway" {
   image_id             = "${data.aws_ami.ami.id}"
   instance_type        = "${var.instance_type}"
   spot_price           = "${var.spot_price}"
-  security_groups      = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
+  security_groups      = ["${aws_security_group.ae-gateway-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
 
   root_block_device {
     volume_type = "gp2"
