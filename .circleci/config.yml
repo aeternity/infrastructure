@@ -132,7 +132,7 @@ jobs:
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
               -e datadog_api_key=test \
               -e datadog_enabled=yes \
-              -e env=test \
+              -e env=test
       - run:
           name: Test ansible/deploy.yml
           command: |
