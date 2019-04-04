@@ -70,6 +70,16 @@ resource "aws_security_group_rule" "allow_all_internal_gateway_nodes" {
   source_security_group_id = "${aws_security_group.ae-gateway-nodes.id}"
 }
 
+resource "aws_security_group_rule" "external_gateway_healthz_port" {
+  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  type              = "ingress"
+  from_port         = 8080
+  to_port           = 8080
+  protocol          = "TCP"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${aws_security_group.ae-gateway-nodes.id}"
+}
+
 resource "aws_security_group_rule" "external_sync_port" {
   count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   type              = "ingress"
