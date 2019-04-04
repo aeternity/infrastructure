@@ -13,6 +13,10 @@ resource "aws_acm_certificate" "cert" {
   count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   domain_name       = "${var.gateway_dns}"
   validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_route53_record" "cert_validation" {

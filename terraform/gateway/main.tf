@@ -22,7 +22,7 @@ module "aws_deploy-main-us-west-2" {
   gateway_nodes_min = 2
   gateway_nodes_max = 30
   dns_zone          = "${var.dns_zone}"
-  gateway_dns       = "${var.main_gateway_dns}"
+  gateway_dns       = "origin-${var.main_gateway_dns}"
   spot_price        = "0.15"
   instance_type     = "t3.large"
   ami_name          = "aeternity-ubuntu-16.04-v1549009934"
@@ -49,7 +49,7 @@ module "aws_deploy-main-eu-north-1" {
   gateway_nodes_min = 2
   gateway_nodes_max = 30
   dns_zone          = "${var.dns_zone}"
-  gateway_dns       = "${var.main_gateway_dns}"
+  gateway_dns       = "origin-${var.main_gateway_dns}"
 
   spot_price       = "0.15"
   instance_type    = "t3.large"
@@ -67,7 +67,7 @@ module "aws_deploy-main-eu-north-1" {
 
 module "aws_gateway" {
   providers = {
-    aws = "aws.us-west-2"
+    aws = "aws.us-east-1"
   }
 
   source   = "../modules/cloud/aws/gateway"
