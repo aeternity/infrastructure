@@ -35,6 +35,7 @@ resource "aws_security_group_rule" "external_api_port" {
 }
 
 resource "aws_security_group_rule" "external_healthz_port" {
+  count             = "${(var.spot_nodes + var.static_nodes) > 0 ? 1 : 0}"
   type              = "ingress"
   from_port         = 8080
   to_port           = 8080
