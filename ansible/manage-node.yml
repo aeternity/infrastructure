@@ -23,7 +23,6 @@
       include_vars: "{{ item }}"
       with_first_found:
         - "vars/aeternity/{{ env }}.yml"
-        - "vars/aeternity/default.yml"
 
     - name: Aeternity binary exists
       stat:
