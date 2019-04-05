@@ -48,7 +48,6 @@
       include_vars: "{{ item }}"
       with_first_found:
         - "vars/aeternity/{{ env }}.yml"
-        - "vars/aeternity/default.yml"
 
     - name: Define ec2 dynamic variables based on tags
       set_fact:
