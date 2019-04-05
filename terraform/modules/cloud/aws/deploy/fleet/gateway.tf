@@ -1,6 +1,6 @@
 resource "aws_lb" "gateway" {
   count              = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  name               = "ae-${var.env}-gateway"
+  name               = "ae-${replace(var.env,"_","0")}-gateway"
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["${aws_security_group.ae-gateway-nodes-loadbalancer.id}"]
@@ -31,7 +31,7 @@ resource "aws_alb_listener" "gateway" {
 
 resource "aws_lb_target_group" "gateway" {
   count    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  name     = "ae-${var.env}-gateway"
+  name     = "ae-${replace(var.env,"_","-")}-gateway"
   port     = 3013
   protocol = "HTTP"
   vpc_id   = "${var.vpc_id}"
