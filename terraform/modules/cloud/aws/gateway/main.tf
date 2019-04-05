@@ -33,17 +33,17 @@ resource "aws_cloudfront_distribution" "cf" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "match-viewer"
-      origin_ssl_protocols   = ["TLSv1.2", "SSLv3", "TLSv1", "TLSv1.1"]
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
 
   default_cache_behavior {
-    allowed_methods = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods = ["HEAD", "DELETE", "POST", "GET", "OPTIONS", "PUT", "PATCH"]
     cached_methods  = ["GET", "HEAD"]
 
     forwarded_values {
-      query_string = false
+      query_string = true
 
       cookies {
         forward = "none"
@@ -65,7 +65,8 @@ resource "aws_cloudfront_distribution" "cf" {
   viewer_certificate {
     acm_certificate_arn = "${aws_acm_certificate.cert.arn}"
 
-    ssl_support_method = "sni-only"
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.1_2016"
   }
 }
 
