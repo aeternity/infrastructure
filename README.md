@@ -186,7 +186,9 @@ Additional parameters:
 - DEPLOY_DOWNTIME - schedule a downtime period (in seconds) to mute monitoring alerts (0 by default e.g. monitors are not muted)
 - DEPLOY_COLOR - some environments might be colored to enable blue/green deployments (not limits by default)
 - DEPLOY_KIND - deploy to different kind of nodes, current is seed / peer / api (not limit by default)
+- DEPLOY_REGION - deploy to different AWS Region i.e.: eu_west_2 (notice _ instead of -)
 - DEPLOY_DB_VERSION - chain db directory suffix that can be bumped to purge the old db (0 by default)
+- ROLLING_UPDATE - Define batch size for rolling updates: https://docs.ansible.com/ansible/latest/user_guide/playbooks_delegation.html#rolling-update-batch-size default 100%
 
 #### Deploy to mainnet
 
