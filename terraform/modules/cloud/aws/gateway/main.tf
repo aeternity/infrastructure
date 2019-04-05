@@ -51,7 +51,7 @@ resource "aws_cloudfront_distribution" "cf" {
         forward = "none"
       }
     }
-
+    compress = true
     viewer_protocol_policy = "redirect-to-https"
     target_origin_id       = "main"
   }
