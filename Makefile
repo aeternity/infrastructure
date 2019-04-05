@@ -54,6 +54,10 @@ endif
 ifneq ($(DEPLOY_KIND),)
 	$(eval LIMIT=$(LIMIT):&tag_kind_$(DEPLOY_KIND))
 endif
+ifneq ($(DEPLOY_REGION),)
+	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
+endif
+
 	cd ansible && ansible-playbook \
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
