@@ -15,6 +15,12 @@ provider "aws" {
 
 provider "aws" {
   version = "1.55"
+  region  = "us-east-1"
+  alias   = "us-east-1"
+}
+
+provider "aws" {
+  version = "1.55"
   region  = "eu-north-1"
   alias   = "eu-north-1"
 }
