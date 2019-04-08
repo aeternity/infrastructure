@@ -123,7 +123,7 @@ ansible-playbook \
     deploy.yml
 
 RESTORE_ENV=${env}
-if [ "$env" = "api-main" ] ; then
+if [ "$env" = "api_main" ] ; then
     RESTORE_ENV=main
 fi
 
