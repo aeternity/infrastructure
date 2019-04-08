@@ -29,7 +29,7 @@ module "aws_deploy-main-us-west-2" {
   root_volume_size  = 40
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.2.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-2.3.0-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -57,7 +57,7 @@ module "aws_deploy-main-eu-north-1" {
   root_volume_size = 40
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.2.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-2.3.0-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
