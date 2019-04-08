@@ -41,9 +41,10 @@ resource "aws_cloudfront_distribution" "cf" {
   default_cache_behavior {
     allowed_methods = ["HEAD", "DELETE", "POST", "GET", "OPTIONS", "PUT", "PATCH"]
     cached_methods  = ["GET", "HEAD"]
-    min_ttl                = 0
-    default_ttl            = 0
-    max_ttl                = 86400
+    min_ttl         = 0
+    default_ttl     = 0
+    max_ttl         = 86400
+
     forwarded_values {
       query_string = true
 
@@ -51,7 +52,8 @@ resource "aws_cloudfront_distribution" "cf" {
         forward = "none"
       }
     }
-    compress = true
+
+    compress               = true
     viewer_protocol_policy = "redirect-to-https"
     target_origin_id       = "main"
   }

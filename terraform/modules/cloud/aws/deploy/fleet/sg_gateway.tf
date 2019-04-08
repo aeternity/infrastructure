@@ -23,11 +23,21 @@ resource "aws_security_group_rule" "allow_outgoing-node-gateway" {
   security_group_id = "${aws_security_group.ae-gateway-nodes.id}"
 }
 
-resource "aws_security_group_rule" "ssl_protocol_port" {
+resource "aws_security_group_rule" "http_protocol_port" {
   count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   type              = "ingress"
   from_port         = 80
   to_port           = 80
+  protocol          = "TCP"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${aws_security_group.ae-gateway-nodes-loadbalancer.id}"
+}
+
+resource "aws_security_group_rule" "healthz_protocol_port" {
+  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  type              = "ingress"
+  from_port         = 8080
+  to_port           = 8080
   protocol          = "TCP"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = "${aws_security_group.ae-gateway-nodes-loadbalancer.id}"

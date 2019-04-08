@@ -37,7 +37,7 @@ resource "aws_alb_listener" "gateway-healthz" {
 
   default_action {
     type             = "forward"
-    target_group_arn = "${aws_lb_target_group.gateway.arn}"
+    target_group_arn = "${aws_lb_target_group.gateway-healthz.arn}"
   }
 }
 
@@ -60,8 +60,8 @@ resource "aws_lb_target_group" "gateway" {
 
 resource "aws_lb_target_group" "gateway-healthz" {
   count    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  name     = "ae-${replace(var.env,"_","-")}-gateway"
-  port     = 3013
+  name     = "ae-${replace(var.env,"_","-")}-gateway-healtz"
+  port     = 8080
   protocol = "HTTP"
   vpc_id   = "${var.vpc_id}"
 
@@ -104,7 +104,7 @@ resource "aws_autoscaling_group" "gateway" {
   launch_configuration = "${aws_launch_configuration.gateway.name}"
   vpc_zone_identifier  = ["${var.subnets}"]
 
-  target_group_arns = ["${aws_lb_target_group.gateway.arn}"]
+  target_group_arns = ["${aws_lb_target_group.gateway.arn}", "${aws_lb_target_group.gateway-healthz.arn}"]
 
   enabled_metrics = [
     "GroupMinSize",
