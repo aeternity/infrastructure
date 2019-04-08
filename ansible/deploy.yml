@@ -86,7 +86,6 @@
         include_vars: "{{ item }}"
         with_first_found:
           - "vars/aeternity/{{ env }}.yml"
-          - "vars/aeternity/default.yml"
         tags: [config, node_config, peer_keys, health-check]
 
       - name: Fail on missing package variable
@@ -205,7 +204,7 @@
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
           dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key.pub"
           mode: 0600
-        when: public_ipv4 in seed_peers
+        when: seed_peers is defined and public_ipv4 in seed_peers
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 

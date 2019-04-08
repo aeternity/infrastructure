@@ -54,6 +54,10 @@ endif
 ifneq ($(DEPLOY_KIND),)
 	$(eval LIMIT=$(LIMIT):&tag_kind_$(DEPLOY_KIND))
 endif
+ifneq ($(DEPLOY_REGION),)
+	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
+endif
+
 	cd ansible && ansible-playbook \
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
@@ -134,7 +138,7 @@ integration-tests-run:
 	cd test/terraform && terraform init
 	cd test/terraform && terraform apply --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
-	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(TF_VAR_env_name)
+	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(TF_VAR_env_name) -e env=test
 
 health-check-env-local:
 	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(DEPLOY_ENV) \

@@ -1,0 +1,14 @@
+version: '3'
+services:
+  inf:
+    container_name: infrastructure-local
+    build: .
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/src
+    env_file:
+      - env.list
+  ssh:
+    image: "rastasheep/ubuntu-sshd:16.04"
+    ports: ["22:22","8080:8080"]
