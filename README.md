@@ -314,6 +314,17 @@ cd ansible && ansible-playbook -i aenode.aeternity, \
   setup.yml
 ```
 
+Running/testing playbooks on localhost with docker-compose helpers.
+This will run infrastructure container link it to debian container.
+
+```bash
+docker-compose up -d
+#attach to local infrastrcuture container
+docker attach infrastructure-local
+cd /src
+./local_playbook_run.sh deploy.yml # + add required parameters
+```
+
 ### Terraform configuration
 
 To test Terraform configuration changes, a new test configuration can be created then run.
