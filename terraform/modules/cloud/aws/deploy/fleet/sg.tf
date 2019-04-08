@@ -65,7 +65,7 @@ resource "aws_security_group_rule" "allow_outgoing-node" {
 }
 
 resource "aws_security_group" "ae-nodes-management" {
-  name  = "ae-${var.env}-management-terraform"
+  name = "ae-${var.env}-management-terraform"
 
   lifecycle {
     create_before_destroy = true

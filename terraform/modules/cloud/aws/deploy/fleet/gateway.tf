@@ -1,33 +1,12 @@
 resource "aws_lb" "gateway" {
   count              = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  name               = "ae-${var.env}-gateway"
+  name               = "ae-${replace(var.env,"_","-")}-gateway"
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["${aws_security_group.ae-gateway-nodes-loadbalancer.id}"]
   subnets            = ["${var.subnets}"]
 
   enable_deletion_protection = false
-}
-
-resource "aws_acm_certificate" "cert" {
-  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  domain_name       = "${var.gateway_dns}"
-  validation_method = "DNS"
-}
-
-resource "aws_route53_record" "cert_validation" {
-  count   = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  name    = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_name}"
-  type    = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_type}"
-  zone_id = "${var.dns_zone}"
-  records = ["${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"]
-  ttl     = 60
-}
-
-resource "aws_acm_certificate_validation" "cert" {
-  count                   = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  certificate_arn         = "${aws_acm_certificate.cert.arn}"
-  validation_record_fqdns = ["${aws_route53_record.cert_validation.fqdn}"]
 }
 
 output "gateway_lb_dns" {
@@ -41,9 +20,8 @@ output "gateway_lb_zone_id" {
 resource "aws_alb_listener" "gateway" {
   count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   load_balancer_arn = "${aws_lb.gateway.arn}"
-  port              = 443
-  protocol          = "HTTPS"
-  certificate_arn   = "${aws_acm_certificate_validation.cert.certificate_arn}"
+  port              = 80
+  protocol          = "HTTP"
 
   default_action {
     type             = "forward"
@@ -51,10 +29,39 @@ resource "aws_alb_listener" "gateway" {
   }
 }
 
+resource "aws_alb_listener" "gateway-healthz" {
+  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  load_balancer_arn = "${aws_lb.gateway.arn}"
+  port              = 8080
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = "${aws_lb_target_group.gateway-healthz.arn}"
+  }
+}
+
 resource "aws_lb_target_group" "gateway" {
   count    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  name     = "ae-${var.env}-gateway"
+  name     = "ae-${replace(var.env,"_","-")}-gateway"
   port     = 3013
+  protocol = "HTTP"
+  vpc_id   = "${var.vpc_id}"
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    path                = "/healthz"
+    port                = 8080
+    interval            = 30
+  }
+}
+
+resource "aws_lb_target_group" "gateway-healthz" {
+  count    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name     = "ae-${replace(var.env,"_","-")}-gateway-healtz"
+  port     = 8080
   protocol = "HTTP"
   vpc_id   = "${var.vpc_id}"
 
@@ -97,7 +104,7 @@ resource "aws_autoscaling_group" "gateway" {
   launch_configuration = "${aws_launch_configuration.gateway.name}"
   vpc_zone_identifier  = ["${var.subnets}"]
 
-  target_group_arns = ["${aws_lb_target_group.gateway.arn}"]
+  target_group_arns = ["${aws_lb_target_group.gateway.arn}", "${aws_lb_target_group.gateway-healthz.arn}"]
 
   enabled_metrics = [
     "GroupMinSize",

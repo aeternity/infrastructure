@@ -104,12 +104,12 @@
     - name: Setting fact for systemd
       set_fact:
         systemd: yes
-      when: is_systemd.stdout is search("systemd")
+      when: is_systemd.stdout is search("systemd") or is_aws
 
     - name: Settign fact for non systemd
       set_fact:
         systemd: no
-      when: is_systemd.stdout is search("other")
+      when: is_systemd.stdout is search("other") and not is_aws
 
     - name: Copy systemd goss config
       copy:
