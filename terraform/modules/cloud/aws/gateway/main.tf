@@ -75,9 +75,9 @@ resource "aws_cloudfront_distribution" "cf" {
 resource "aws_route53_health_check" "health" {
   count             = "${length(var.loadbalancers_regions)}"
   fqdn              = "${element(var.loadbalancers, count.index)}"
-  port              = 443
-  type              = "HTTPS"
-  resource_path     = "/v2/blocks/top"
+  port              = 8080
+  type              = "HTTP"
+  resource_path     = "/healthz"
   measure_latency   = false
   failure_threshold = "4"
   request_interval  = 30
