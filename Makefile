@@ -138,7 +138,7 @@ integration-tests-run:
 	cd test/terraform && terraform init
 	cd test/terraform && terraform apply --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
-	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(TF_VAR_env_name)
+	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(TF_VAR_env_name) -e env=test
 
 health-check-env-local:
 	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(DEPLOY_ENV) \
