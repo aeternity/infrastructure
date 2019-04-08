@@ -29,7 +29,36 @@ resource "aws_alb_listener" "gateway" {
   }
 }
 
+resource "aws_alb_listener" "gateway-healthz" {
+  count             = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  load_balancer_arn = "${aws_lb.gateway.arn}"
+  port              = 8080
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = "${aws_lb_target_group.gateway.arn}"
+  }
+}
+
 resource "aws_lb_target_group" "gateway" {
+  count    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name     = "ae-${replace(var.env,"_","-")}-gateway"
+  port     = 3013
+  protocol = "HTTP"
+  vpc_id   = "${var.vpc_id}"
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    path                = "/healthz"
+    port                = 8080
+    interval            = 30
+  }
+}
+
+resource "aws_lb_target_group" "gateway-healthz" {
   count    = "${var.gateway_nodes_min > 0 ? 1 : 0}"
   name     = "ae-${replace(var.env,"_","-")}-gateway"
   port     = 3013

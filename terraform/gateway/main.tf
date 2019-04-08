@@ -3,7 +3,7 @@ variable "vault_addr" {
 }
 
 variable "bootstrap_version" {
-  default = "add_cloudfront_to_api_gateway_165116365"
+  default = "stable"
 }
 
 variable "main_gateway_dns" {
