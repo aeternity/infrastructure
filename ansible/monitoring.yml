@@ -96,6 +96,13 @@
       notify: restart goss
 
     - name: Check is systemd enabled
+      shell: "pidof systemd"
+      register: systemd
+      failed_when: "'command not found' in is_systemd.stderr"
+      changed_when: False
+    - debug:
+        var: systemd
+    - name: Check is systemd enabled
       shell: "pidof systemd && echo 'systemd' || echo 'other'"
       register: is_systemd
       failed_when: "'command not found' in is_systemd.stderr"
