@@ -1,6 +1,6 @@
 resource "aws_lb" "gateway" {
   count              = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  name               = "ae-${replace(var.env,"_","0")}-gateway"
+  name               = "ae-${replace(var.env,"_","-")}-gateway"
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["${aws_security_group.ae-gateway-nodes-loadbalancer.id}"]
