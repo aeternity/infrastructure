@@ -98,7 +98,7 @@
     - name: Check is systemd enabled
       shell: "pidof systemd"
       register: systemd
-      failed_when: "'command not found' in is_systemd.stderr"
+      failed_when: "'command not found' in systemd.stderr"
       changed_when: False
     - debug:
         var: systemd
