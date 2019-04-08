@@ -114,7 +114,7 @@
     - name: Setting fact for systemd
       set_fact:
         systemd: yes
-      when: is_systemd.stdout is search("systemd")
+      when: is_systemd.stdout is search("systemd") or is_aws
 
     - name: Settign fact for non systemd
       set_fact:
