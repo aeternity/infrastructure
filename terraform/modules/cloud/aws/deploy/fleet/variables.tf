@@ -10,6 +10,10 @@ variable "color" {}
 
 variable "env" {}
 
+variable "envid" {
+  default = ""
+}
+
 variable "bootstrap_version" {}
 
 variable "instance_type" {}

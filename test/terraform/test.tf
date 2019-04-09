@@ -3,7 +3,11 @@ variable "vault_addr" {
 }
 
 variable "env_name" {
-  default = "tf_test"
+  default = "test"
+}
+
+variable "envid" {
+  description = "Unique test environment identifier to prevent collisions."
 }
 
 variable "bootstrap_version" {
@@ -25,6 +29,7 @@ provider "aws" {
 module "aws_deploy-test" {
   source            = "../../terraform/modules/cloud/aws/deploy"
   env               = "${var.env_name}"
+  envid             = "${var.envid}"
   bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
@@ -33,7 +38,7 @@ module "aws_deploy-test" {
   spot_nodes   = 1
 
   spot_price    = "0.04"
-  instance_type = "t3.medium"
+  instance_type = "t3.large"
   ami_name      = "aeternity-ubuntu-16.04-*"
 
   aeternity = {

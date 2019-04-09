@@ -80,11 +80,11 @@ commands:
       - run:
           name: Integration Tests
           command: |
-            make integration-tests TF_VAR_env_name="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
+            make integration-tests TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
       - run:
           name: Integration env cleanup
           command: |
-            make integration-tests-cleanup TF_VAR_env_name="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
+            make integration-tests-cleanup TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
           when: on_fail
 
 jobs:
@@ -130,7 +130,9 @@ jobs:
           name: Test ansible/monitoring.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
-              -e datadog_api_key=test -e datadog_enabled=yes
+              -e datadog_api_key=test \
+              -e datadog_enabled=yes \
+              -e env=test
       - run:
           name: Test ansible/deploy.yml
           command: |
@@ -316,8 +318,8 @@ workflows:
   chain_snapshot:
     triggers:
       - schedule:
-          # run At minute 0 past hour 0. UTC
-          cron: "0 0 * * *"
+          # run weekly at midnight UTC on Sunday.
+          cron: "0 0 * * 0"
           filters:
             branches:
               only:
