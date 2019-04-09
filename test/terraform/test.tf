@@ -3,7 +3,11 @@ variable "vault_addr" {
 }
 
 variable "env_name" {
-  default = "tf_test"
+  default = "test"
+}
+
+variable "envid" {
+  description = "Unique test environment identifier to prevent collisions."
 }
 
 variable "bootstrap_version" {
@@ -25,6 +29,7 @@ provider "aws" {
 module "aws_deploy-test" {
   source            = "../../terraform/modules/cloud/aws/deploy"
   env               = "${var.env_name}"
+  envid             = "${var.envid}"
   bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"

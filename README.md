@@ -336,10 +336,10 @@ terraform init && terraform apply
 ```
 
 After the fleet is create the expected functionality should be validated by using the AWS console or CLI.
-For fast health check the ansible playbook can be used, note that the above Terraform configuration creates an environment with name `tf_test`:
+For fast health check the ansible playbook can be used, note that the above Terraform configuration creates an environment with name `test`:
 
 ```bash
-cd ansible && ansible-playbook health-check.yml --limit=tag_env_tf_test
+cd ansible && ansible-playbook health-check.yml --limit=tag_env_test
 ```
 
 Don't forget to cleanup the test environment after the tests are completed:
@@ -354,10 +354,10 @@ All of the above can be run with single `make` wrapper:
 make integration-tests
 ```
 
-*Note these test are run automatically each day by the CI server, and can be run by other users as well. To prevent collisions you can specify unique environment name instead the default "tf_test" (do not use special symbols other than "_", otherwise tests will not pass):*
+*Note these test are run automatically each day by the CI server, and can be run by other users as well. To prevent collisions you can specify unique environment ID (do not use special symbols other than "_", otherwise tests will not pass):*
 
 ```bash
-make integration-tests TF_VAR_env_name=tf_test_my_test_env
+make integration-tests TF_VAR_envid=tf_test_my_test_env
 ```
 
 ### CircleCI configuration
