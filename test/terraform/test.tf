@@ -11,7 +11,7 @@ variable "envid" {
 }
 
 variable "bootstrap_version" {
-  default = "master"
+  default = "attach_optional_second_volume_to_nodes_164978224"
 }
 
 variable "package" {
