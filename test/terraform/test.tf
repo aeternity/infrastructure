@@ -38,7 +38,7 @@ module "aws_deploy-test" {
   spot_nodes   = 1
 
   spot_price    = "0.04"
-  instance_type = "t3.medium"
+  instance_type = "t3.large"
   ami_name      = "aeternity-ubuntu-16.04-*"
 
   aeternity = {
