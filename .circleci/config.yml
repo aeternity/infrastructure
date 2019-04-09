@@ -271,8 +271,6 @@ workflows:
               only: stable
 
       - integration_tests:
-          requires:
-            - build_check
 
       - check_terraform_changes:
           requires:
