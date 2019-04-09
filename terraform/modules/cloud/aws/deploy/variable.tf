@@ -1,5 +1,9 @@
 variable "env" {}
 
+variable "envid" {
+  default = ""
+}
+
 variable "color" {
   default = "unknown"
 }

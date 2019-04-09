@@ -23,6 +23,7 @@ module "aws_fleet" {
   gateway_nodes_max = "${var.gateway_nodes_max}"
   dns_zone          = "${var.dns_zone}"
   gateway_dns       = "${var.gateway_dns}"
+  envid             = "${var.envid}"
 
   aeternity = "${var.aeternity}"
 }
