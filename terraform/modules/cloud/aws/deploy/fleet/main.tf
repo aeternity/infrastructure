@@ -43,6 +43,28 @@ resource "aws_instance" "static_node" {
   }
 }
 
+resource "aws_ebs_volume" "ebs" {
+  count             = "${var.additional_storage > 0 ? var.static_nodes : 0}"
+  availability_zone = "${element(aws_instance.static_node.*.availability_zone, count.index)}"
+  size              = "${var.additional_storage_size}"
+
+  tags {
+    Name    = "ae-${var.env}-static-node"
+    env     = "${var.env}"
+    role    = "aenode"
+    color   = "${var.color}"
+    kind    = "seed"
+    package = "${var.aeternity["package"]}"
+  }
+}
+
+resource "aws_volume_attachment" "ebs_att" {
+  count       = "${var.additional_storage > 0 ? var.static_nodes : 0}"
+  device_name = "/dev/sdh"
+  volume_id   = "${element(aws_ebs_volume.ebs.*.id, count.index)}"
+  instance_id = "${element(aws_instance.static_node.*.id, count.index)}"
+}
+
 data "template_file" "user_data" {
   template = "${file("${path.module}/templates/user_data.bash")}"
 
@@ -56,7 +78,7 @@ data "template_file" "user_data" {
 }
 
 resource "aws_launch_configuration" "spot" {
-  count                = "${ var.spot_nodes > 0 ? 1 : 0 }"
+  count                = "${var.spot_nodes > 0 ? 1 : 0}"
   name_prefix          = "ae-${var.env}-spot-nodes-"
   iam_instance_profile = "ae-node"
   image_id             = "${data.aws_ami.ami.id}"
@@ -67,6 +89,32 @@ resource "aws_launch_configuration" "spot" {
   root_block_device {
     volume_type = "gp2"
     volume_size = "${var.root_volume_size}"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  user_data = "${data.template_file.spot_user_data.rendered}"
+}
+
+resource "aws_launch_configuration" "spot-with-additional-storage" {
+  count                = "${var.spot_nodes > 0 ? 1 : 0}"
+  name_prefix          = "ae-${var.env}-spot-nodes-"
+  iam_instance_profile = "ae-node"
+  image_id             = "${data.aws_ami.ami.id}"
+  instance_type        = "${var.instance_type}"
+  spot_price           = "${var.spot_price}"
+  security_groups      = ["${aws_security_group.ae-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
+
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = "${var.root_volume_size}"
+  }
+
+  ebs_block_device {
+    device_name = "/dev/sdh"
+    volume_size = "${var.additional_storage_size}"
   }
 
   lifecycle {
@@ -91,10 +139,10 @@ data "template_file" "spot_user_data" {
 
 resource "aws_autoscaling_group" "spot_fleet" {
   count                = "${ var.spot_nodes > 0 ? 1 : 0 }"
-  name                 = "${aws_launch_configuration.spot.name}"
+  name                 = "${var.additional_storage > 0 ? aws_launch_configuration.spot-with-additional-storage.name : aws_launch_configuration.spot.name}"
   min_size             = "${var.spot_nodes}"
   max_size             = "${var.spot_nodes}"
-  launch_configuration = "${aws_launch_configuration.spot.name}"
+  launch_configuration = "${var.additional_storage > 0 ? aws_launch_configuration.spot-with-additional-storage.name : aws_launch_configuration.spot.name}"
   vpc_zone_identifier  = ["${var.subnets}"]
 
   #  suspended_processes  = ["Terminate"]

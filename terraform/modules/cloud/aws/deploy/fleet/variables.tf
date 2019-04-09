@@ -2,6 +2,12 @@ variable "static_nodes" {}
 
 variable "spot_nodes" {}
 
+variable "additional_storage" {
+  default = 0
+}
+
+variable "additional_storage_size" {}
+
 variable "gateway_nodes_min" {}
 
 variable "gateway_nodes_max" {}

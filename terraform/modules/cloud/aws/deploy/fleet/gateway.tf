@@ -96,12 +96,38 @@ resource "aws_launch_configuration" "gateway" {
   user_data = "${data.template_file.spot_user_data.rendered}"
 }
 
+resource "aws_launch_configuration" "gateway-with-additional-storage" {
+  count                = "${var.gateway_nodes_min > 0 ? 1 : 0}"
+  name_prefix          = "ae-${var.env}-gateway-nodes-"
+  iam_instance_profile = "ae-node"
+  image_id             = "${data.aws_ami.ami.id}"
+  instance_type        = "${var.instance_type}"
+  spot_price           = "${var.spot_price}"
+  security_groups      = ["${aws_security_group.ae-gateway-nodes.id}", "${aws_security_group.ae-nodes-management.id}"]
+
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = "${var.root_volume_size}"
+  }
+
+  ebs_block_device {
+    device_name = "/dev/sdh"
+    volume_size = "${var.additional_storage_size}"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  user_data = "${data.template_file.spot_user_data.rendered}"
+}
+
 resource "aws_autoscaling_group" "gateway" {
   count                = "${var.gateway_nodes_min > 0 ? 1 : 0}"
-  name                 = "${aws_launch_configuration.gateway.name}"
+  name                 = "${var.additional_storage > 0 ? aws_launch_configuration.gateway-with-additional-storage.name : aws_launch_configuration.gateway.name}"
   min_size             = "${var.gateway_nodes_min}"
   max_size             = "${var.gateway_nodes_max}"
-  launch_configuration = "${aws_launch_configuration.gateway.name}"
+  launch_configuration = "${var.additional_storage > 0 ? aws_launch_configuration.gateway-with-additional-storage.name : aws_launch_configuration.gateway.name}"
   vpc_zone_identifier  = ["${var.subnets}"]
 
   target_group_arns = ["${aws_lb_target_group.gateway.arn}", "${aws_lb_target_group.gateway-healthz.arn}"]
