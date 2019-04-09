@@ -22,6 +22,14 @@ variable "gateway_nodes_max" {
   default = 0
 }
 
+variable "additional_storage" {
+  default = 0
+}
+
+variable "additional_storage_size" {
+  default = 0
+}
+
 variable "static_nodes" {
   default = 0
 }
