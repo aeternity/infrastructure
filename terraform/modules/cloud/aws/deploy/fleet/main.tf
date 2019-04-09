@@ -26,6 +26,7 @@ resource "aws_instance" "static_node" {
   tags {
     Name    = "ae-${var.env}-static-node"
     env     = "${var.env}"
+    envid   = "${var.envid}"
     role    = "aenode"
     color   = "${var.color}"
     kind    = "seed"
@@ -117,6 +118,11 @@ resource "aws_autoscaling_group" "spot_fleet" {
     {
       key                 = "env"
       value               = "${var.env}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "envid"
+      value               = "${var.envid}"
       propagate_at_launch = true
     },
     {
