@@ -9,6 +9,7 @@ terraform/.terraform
 !Makefile
 !requirements.txt
 !test/goss/
+!scripts/health_check.sh
 # Copy from .gitignore
 *.retry
 ansible/group_vars/**/*.local.*
