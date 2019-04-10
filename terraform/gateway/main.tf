@@ -94,5 +94,6 @@ module "aws_gateway" {
     "eu-north-1",
   ]
 
-  api_dns = "${var.main_gateway_dns}"
+  api_dns   = "${var.main_gateway_dns}"
+  api_alias = "sdk-mainnet.aepps.com"
 }

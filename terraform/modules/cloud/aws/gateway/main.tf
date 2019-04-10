@@ -1,14 +1,7 @@
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "${var.api_dns}"
-  validation_method = "DNS"
-}
-
-resource "aws_route53_record" "cert_validation" {
-  name    = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_name}"
-  type    = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_type}"
-  zone_id = "${var.dns_zone}"
-  records = ["${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"]
-  ttl     = 60
+  domain_name               = "${var.api_dns}"
+  validation_method         = "DNS"
+  subject_alternative_names = ["${var.api_alias}"]
 }
 
 resource "aws_route53_record" "main-api" {
@@ -54,7 +47,7 @@ resource "aws_cloudfront_distribution" "cf" {
     }
 
     compress               = true
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "allow-all"
     target_origin_id       = "main"
   }
 
@@ -64,7 +57,7 @@ resource "aws_cloudfront_distribution" "cf" {
     }
   }
 
-  aliases = ["${var.api_dns}"]
+  aliases = ["${var.api_dns}", "${var.api_alias}"]
 
   viewer_certificate {
     acm_certificate_arn = "${aws_acm_certificate.cert.arn}"
