@@ -26,5 +26,5 @@ port:
     - 0.0.0.0
 
 http:
-  http://localhost:3013/v2/blocks/top:
+  http://localhost:3013/v2/status:
     status: 200

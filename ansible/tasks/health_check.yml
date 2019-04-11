@@ -5,14 +5,11 @@
     host: "{{ public_ipv4 }}"
     timeout: 180
   connection: local
+  tags: [health-check]
 
-- name: API health check
+- name: Health check
   uri:
-    url: "{{ api_base_uri }}/blocks/top"
-    timeout: 30
+    url: "http://{{public_ipv4}}:8080/healthz"
+    timeout: 10
   connection: local
-
-- name:  Run health checks
-  command: goss -g /etc/goss/health.yml validate
-  register: output
-  changed_when: "output.stdout is search('Failed: 0, Skipped: 0')"
+  tags: [health-check]
