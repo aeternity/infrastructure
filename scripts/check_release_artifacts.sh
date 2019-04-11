@@ -1,6 +1,7 @@
 #!/bin/bash
 # should be run in CI or manually as:
 # ./check_release_artifacts.sh v2.3.1
+# DOCKER_USER and DOCKER_PASS need to be set for dockerhub checks when run manually
 set -e
 
 if [[ -n "$1" ]]; then
@@ -20,13 +21,15 @@ declare -a targets=(ubuntu macos)
 repo_name=aeternity/aeternity
 
 check_release_asset() {
-    curl -fs -o /dev/null --head $1|| echo $1 check failed; failed=true
+    curl -fsS -o /dev/null --head "$1" 2>&1
 }
 
 check_github_release_assets() {
     for target in "${targets[@]}"; do
         GH_ASSET=https://github.com/$repo_name/releases/download/$release/aeternity-$version-$target-x86_64.tar.gz
-        check_release_asset $GH_ASSET
+        if [[ $(check_release_asset $GH_ASSET) != "" ]]; then
+            echo $GH_ASSET check failed >&2; failed=true
+        fi
         # TODO: compare MD5 checksum with local build
     done
 }
@@ -64,17 +67,21 @@ get_docker_image_config() {
 
 check_dockerhub_assets() {
     token=$(get_dockerhub_token)
-    version_digest=$(get_docker_image_digest $repo_name $release $token)
-    latest_digest=$(get_docker_image_digest $repo_name latest $token)
-    if [[ "$version_digest" == null ]]; then
-        echo docker image tag $version not found >&2; failed=true
+    if [[ "$token" == "null" ]]; then
+        echo could not authenticate to dockerhub >&2; failed=true
     else
-        if [[ "$version_digest" != "$latest_digest" ]]; then
-            echo latest and $version docker image tag digests do not match >&2; failed=true
+        version_digest=$(get_docker_image_digest $repo_name $release $token)
+        latest_digest=$(get_docker_image_digest $repo_name latest $token)
+        if [[ "$version_digest" == "null" ]]; then
+            echo docker image tag $release not found >&2; failed=true
+        else
+            if [[ "$version_digest" != "$latest_digest" ]]; then
+                echo latest and $release docker image tag digests do not match >&2; failed=true
+            fi
         fi
-    fi
     # TODO: compare digest to local image build
     # get_docker_image_config $repo_name $token $digest
+    fi
 
 }
 
@@ -86,25 +93,27 @@ check_s3_artifacts() {
     for target in "${targets[@]}"; do
         local version_package=https://releases.ops.aeternity.com/aeternity-$version-$target-x86_64.tar.gz
         local latest_package=https://releases.ops.aeternity.com/aeternity-latest-$target-x86_64.tar.gz
-        # TODO: calculated ETAG from local package MD5sum and verify
+        # TODO: calculate ETAG from local package MD5 sum and verify
         # https://teppen.io/2018/10/23/aws_s3_verify_etags/
         local latest_etag=$(get_s3_package_etag $latest_package)
         local version_etag=$(get_s3_package_etag $version_package)
-        if [[ "$latest_etag" == "" ]]; then
-            echo $latest_package not found >&2; failed=true
-        fi
         if [[ "$version_etag" == "" ]]; then
             echo $version_package not found >&2; failed=true
-        fi
-        if [[ "$version_etag" != "$latest_etag" ]]; then
-            echo $latest_package and $version_package checksums do not match >&2; failed=true
+        else
+            if [[ "$latest_etag" == "" ]]; then
+                echo $latest_package not found >&2; failed=true
+            else
+                if [[ "$version_etag" != "$latest_etag" ]]; then
+                    echo $latest_package and $version_package checksums do not match >&2; failed=true
+                fi
+            fi
         fi
     done
 }
 
 check_github_release_assets
-#check_dockerhub_assets
-#check_s3_artifacts
+check_dockerhub_assets
+check_s3_artifacts
 
 if [ "$failed" = true ]; then
     exit 1
