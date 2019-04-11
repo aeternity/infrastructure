@@ -76,7 +76,6 @@ ifneq ($(DEPLOY_REGION),)
 	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
 endif
 		cd ansible && ansible-playbook \
-		--check \
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
