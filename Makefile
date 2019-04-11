@@ -32,6 +32,7 @@ setup-node: check-deploy-env
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e vault_addr=$(VAULT_ADDR) \
+		-e env=$(DEPLOY_ENV) \
 		setup.yml
 
 setup-monitoring: check-deploy-env
@@ -68,6 +69,24 @@ endif
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		-e rolling_update="${ROLLING_UPDATE}" \
 		deploy.yml
+
+attach: check-deploy-env
+	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
+ifneq ($(DEPLOY_REGION),)
+	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
+endif
+		cd ansible && ansible-playbook \
+		--limit="$(LIMIT)" \
+		-e ansible_python_interpreter=/usr/bin/python3 \
+		-e env=$(DEPLOY_ENV) \
+		attach.yml
+
+migrate: check-deploy-env
+	cd ansible && ansible-playbook \
+		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
+		-e ansible_python_interpreter=/usr/bin/python3 \
+		-e env=$(DEPLOY_ENV) \
+		migrate-storage.yml
 
 manage-node: check-deploy-env
 ifndef CMD
