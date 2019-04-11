@@ -71,11 +71,15 @@ endif
 		deploy.yml
 
 attach: check-deploy-env
-	cd ansible && ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
+	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
+ifneq ($(DEPLOY_REGION),)
+	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
+endif
+		cd ansible && ansible-playbook \
+		--check \
+		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
-		-e db_version=0 \
 		attach.yml
 
 migrate: check-deploy-env

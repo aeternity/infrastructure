@@ -6,9 +6,8 @@
   vars:
     env: unknown
     db_version: 0
-
-  vars:
     project_root: "{{ ansible_env.HOME }}/node"
+
   tasks:
     - name: "Load a variable files for environment: {{ env }}"
       include_vars: "{{ item }}"
@@ -18,6 +17,7 @@
     - name: Stop aeternity node
       command: "{{ project_root }}/bin/aeternity stop"
       tags: [daemon]
+      changed_when: false
 
 - name: Migrate dir
   hosts: all
@@ -35,4 +35,6 @@
 
     - name: mv
       command: "mv /home/aeternity/node/db1 {{ node_config.chain.db_path }}"
+      changed_when: false
+
 # run deploy
