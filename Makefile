@@ -85,14 +85,6 @@ migrate: check-deploy-env
 		-e env=$(DEPLOY_ENV) \
 		migrate-storage.yml
 
-restore: check-deploy-env
-	cd ansible && ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-		-e ansible_python_interpreter=/var/venv/bin/python \
-		-e env=$(DEPLOY_ENV) \
-		-e db_version=1 \
-		mnesia_snapshot_restore.yml
-
 manage-node: check-deploy-env
 ifndef CMD
 	$(error CMD is undefined, supported commands: start, stop, restart, ping)
