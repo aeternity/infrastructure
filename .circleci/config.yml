@@ -125,7 +125,8 @@ jobs:
       - run:
           name: Test ansible/setup.yml
           command: |
-            .circleci/test-ansible-playbook.sh ansible/setup.yml
+            .circleci/test-ansible-playbook.sh ansible/setup.yml \
+              -e env=test
       - run:
           name: Test ansible/monitoring.yml
           command: |
