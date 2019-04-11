@@ -111,7 +111,7 @@ resource "aws_launch_configuration" "gateway-with-additional-storage" {
   }
 
   ebs_block_device {
-    device_name = "/dev/sdh"
+    device_name = "/dev/nvme1"
     volume_size = "${var.additional_storage_size}"
   }
 

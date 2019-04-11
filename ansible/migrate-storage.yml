@@ -1,0 +1,38 @@
+---
+- name: Stop node
+  hosts: all
+  remote_user: aeternity
+
+  vars:
+    env: unknown
+    db_version: 0
+
+  vars:
+    project_root: "{{ ansible_env.HOME }}/node"
+  tasks:
+    - name: "Load a variable files for environment: {{ env }}"
+      include_vars: "{{ item }}"
+      with_first_found:
+        - "vars/aeternity/{{ env }}.yml"
+
+    - name: Stop aeternity node
+      command: "{{ project_root }}/bin/aeternity stop"
+      tags: [daemon]
+
+- name: Migrate dir
+  hosts: all
+  remote_user: master
+  become: yes
+  vars:
+    env: unknown
+    db_version: 0
+
+  tasks:
+    - name: "Load a variable files for environment: {{ env }}"
+      include_vars: "{{ item }}"
+      with_first_found:
+        - "vars/aeternity/{{ env }}.yml"
+
+    - name: mv
+      command: "mv /home/aeternity/node/db1 {{ node_config.chain.db_path }}"
+# run deploy

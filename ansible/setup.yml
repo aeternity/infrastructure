@@ -177,6 +177,11 @@
       # ldconfig should run in separate process, thus cannot be added in the above command list
       notify: run ldconfig
 
+
+    - name: Attach additional drive if needed
+      include_tasks: tasks/attach.yml
+
+
   handlers:
     - name: Run ldconfig
       command: ldconfig
