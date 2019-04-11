@@ -25,6 +25,9 @@ module "aws_fleet" {
   gateway_dns       = "${var.gateway_dns}"
   envid             = "${var.envid}"
 
+  additional_storage      = "${var.additional_storage}"
+  additional_storage_size = "${var.additional_storage_size}"
+
   aeternity = "${var.aeternity}"
 }
 
