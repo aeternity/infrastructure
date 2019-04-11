@@ -185,7 +185,7 @@ test/goss/remote/vars/seed-peers-%.yaml: ansible/inventory-list.json
 	cat ansible/inventory-list.json | python3 ansible/scripts/dump-seed-peers-keys.py --env $* > $@
 
 check-seed-peers-%: test/goss/remote/vars/seed-peers-%.yaml
-	goss -g test/goss/remote/check-seed-peers.yaml --vars $< validate
+	goss -g test/goss/remote/group-peer-keys.yaml --vars $< validate
 
 check-seed-peers-all: $(addprefix check-seed-peers-, $(SEED_CHECK_ENVS))
 
@@ -202,14 +202,14 @@ list-inventory: ansible/inventory-list.json
 
 health-check-%: ansible/inventory-list.json
 	ANSIBLE_TAG=tag_env_$* REGION=$(AWS_REGION) \
-	goss -g test/goss/remote/peers-health-check.yaml --vars ansible/inventory-list.json validate
+	goss -g test/goss/remote/group-health.yaml --vars ansible/inventory-list.json validate
 
 health-check-node:
-	goss -g test/goss/remote/health-check-node.yaml validate
+	goss -g test/goss/remote/node-health.yaml validate
 
 health-check-all: ansible/inventory-list.json
 	REGION=$(AWS_REGION) \
-	goss -g test/goss/remote/peers-health-check.yaml --vars ansible/inventory-list.json validate
+	goss -g test/goss/remote/group-health.yaml --vars ansible/inventory-list.json validate
 
 clean:
 	rm ~/.ssh/id_ae_infra*
