@@ -148,6 +148,7 @@
       copy:
         src: ../scripts/health_check.sh
         dest: "/etc/goss/"
+        mode: 0755
       notify: restart goss
 
   handlers:

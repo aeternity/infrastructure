@@ -28,3 +28,8 @@ port:
 http:
   http://localhost:3013/v2/status:
     status: 200
+
+command:
+  /etc/goss/health_check.sh --min_sync_pct=100:
+    exit-status: 0
+    timeout: 5000 # in milliseconds
