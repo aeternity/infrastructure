@@ -33,7 +33,7 @@
       unarchive:
         remote_src: yes
         src: /tmp/{{ backup_archive_filename_latest }}
-        dest: "{{ project_root }}/"
+        dest: "{{ additional_storage_mountpoint if additional_storage is defined and additional_storage else project_root }}/"
 
     - name: Remove Mnesia backups
       file:

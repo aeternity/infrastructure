@@ -1,5 +1,8 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 configure_peers: false
+additional_storage: true
+additional_storage_mountpoint: /data
+
 seed_peers:
   - "18.136.37.63"
   - "52.220.198.72"
@@ -100,7 +103,7 @@ node_config:
 
   chain:
     persist: true
-    db_path: "./db{{ db_version|mandatory }}"
+    db_path: "/data/db{{ db_version|mandatory }}"
 
   mining:
     autostart: false
