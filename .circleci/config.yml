@@ -113,10 +113,6 @@ jobs:
           command: |
             .circleci/docker-run.sh make lint
       - run:
-          name: Unit Tests
-          command: |
-            .circleci/docker-run.sh make unit-tests
-      - run:
           name: Setup ansible environment
           command: |
             apk add sshpass
@@ -278,8 +274,6 @@ workflows:
           requires: []
 
       - check_terraform_changes:
-          requires:
-            - build_check # because of the TF state locks
           filters:
             branches:
               ignore:
