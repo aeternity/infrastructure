@@ -5,7 +5,7 @@ user:
     exists: true
 
 service:
-  sshd:
+  ssh:
     enabled: true
     running: true
 
