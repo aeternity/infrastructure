@@ -30,3 +30,11 @@
     fstype: xfs
     state: mounted
   when: additional_storage is defined and additional_storage and is_aws
+
+- name: Make sure that node will be able to access storage
+  file:
+    path: "{{ additional_storage_mountpoint }}"
+    owner: "{{ project_user }}"
+    group: "{{ project_user }}"
+    mode: 0744
+  when: additional_storage is defined and additional_storage and is_aws
