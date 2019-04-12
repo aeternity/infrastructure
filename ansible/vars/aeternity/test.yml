@@ -40,3 +40,6 @@ node_config:
       # StatsD server and port
       host: 127.0.0.1
       port: 8125
+
+  fork_management:
+    network_id: "ae_test"
