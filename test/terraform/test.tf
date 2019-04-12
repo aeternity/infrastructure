@@ -11,7 +11,7 @@ variable "envid" {
 }
 
 variable "bootstrap_version" {
-  default = "master"
+  default = "fixing-permissions-issues"
 }
 
 variable "package" {

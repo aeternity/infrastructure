@@ -161,9 +161,9 @@
         notify: "restart aeternity daemon"
         tags: [package]
 
-      - name: "Make sure chain path ( {{ node_config.chain.db_path }} ) exists"
+      - name: "Make sure chain path ( {{ project_root + '/' + node_config.chain.db_path if additional_storage is not defined or not additional_storage else node_config.chain.db_path }} ) exists"
         file:
-          path: "{{ project_root }}/{{ node_config.chain.db_path }}"
+          path: "{{ project_root + '/' + node_config.chain.db_path if additional_storage is not defined or not additional_storage else node_config.chain.db_path }}"
           state: directory
         tags: [config]
 
