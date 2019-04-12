@@ -87,12 +87,8 @@ check_s3_artifacts() {
         if [[ "$version_etag" == "" ]]; then
             echo $version_package not found >&2; failed=true
         else
-            if [[ "$latest_etag" == "" ]]; then
-                echo $latest_package not found >&2; failed=true
-            else
-                if [[ "$version_etag" != "$latest_etag" ]]; then
-                    echo $latest_package and $version_package checksums do not match >&2; failed=true
-                fi
+            if [[ "$version_etag" != "$latest_etag" ]]; then
+                echo $latest_package and $version_package checksums do not match >&2; failed=true
             fi
         fi
     done
