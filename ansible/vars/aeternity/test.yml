@@ -25,13 +25,7 @@ node_config:
     db_path: "./db1"
 
   mining:
-    autostart: true
-    beneficiary: "ak_2VoAhMd7tVJrDYM5vPJwFRjueZyirDJumVJNeBWL9j1eNTHsRx"
-    cuckoo:
-      edge_bits: 29
-      miners:
-        - executable: mean29-avx2
-          extra_args: "-t {{ ansible_processor_vcpus }}"
+    autostart: false
 
   logging:
     level: debug
