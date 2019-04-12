@@ -9,21 +9,21 @@ SEED_CHECK_ENVS = main uat next
 
 check-terraform-changes-environments:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -detailed-exitcode
+	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
 
 check-terraform-changes-gateway:
 	cd terraform/gateway && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/gateway && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -detailed-exitcode
+	cd terraform/gateway && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
 
 check-terraform-changes: check-terraform-changes-environments check-terraform-changes-gateway
 
 setup-terraform-environments:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/environments && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) --auto-approve
+	cd terraform/environments && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
 
 setup-terraform-gatewway:
 	cd terraform/gateway && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/gateway && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) --auto-approve
+	cd terraform/gateway && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
 
 setup-terraform: setup-terraform-environments setup-terraform-gatewway
 
@@ -151,11 +151,11 @@ ssh: ssh-aeternity
 # TODO also add ansible idempotent tests here
 unit-tests:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
 
 integration-tests-run:
 	cd test/terraform && terraform init
-	cd test/terraform && terraform apply --auto-approve
+	cd test/terraform && terraform apply -parallelism=20 --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
 	cd ansible && ansible-playbook health-check.yml --limit=tag_envid_$(TF_VAR_envid) -e env=test
 
@@ -164,7 +164,7 @@ health-check-env-local:
 	-e env=$(DEPLOY_ENV) \
 
 integration-tests-cleanup:
-	cd test/terraform && terraform destroy --auto-approve
+	cd test/terraform && terraform destroy -parallelism=20 --auto-approve
 
 integration-tests: integration-tests-run integration-tests-cleanup
 
