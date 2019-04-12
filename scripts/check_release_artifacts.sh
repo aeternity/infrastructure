@@ -52,19 +52,6 @@ get_docker_image_digest() {
     | jq -r '.config.digest'
 }
 
-get_docker_image_config() {
-  local image=$1
-  local token=$2
-  local digest=$3
-
-  curl \
-    --silent \
-    --location \
-    --header "Authorization: Bearer $token" \
-    "https://registry-1.docker.io/v2/$image/blobs/$digest" \
-    | jq -r '.container_config'
-}
-
 check_dockerhub_assets() {
     token=$(get_dockerhub_token)
     if [[ "$token" == "null" ]]; then
