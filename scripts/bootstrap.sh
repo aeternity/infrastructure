@@ -104,6 +104,7 @@ fi
 ansible-playbook \
     -i /tmp/local_inventory \
     -e ansible_python_interpreter=$(which python3) \
+    -e env=${env} \
     setup.yml
 
 ansible-playbook \

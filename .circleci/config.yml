@@ -271,13 +271,7 @@ workflows:
               only: stable
 
       - integration_tests:
-          requires:
-            - build_check
-          filters:
-            branches:
-              only:
-                - master
-                - stable
+          requires: []
 
       - check_terraform_changes:
           requires:
@@ -290,6 +284,7 @@ workflows:
 
       - setup_terraform:
           requires:
+            - build_check
             - integration_tests
           filters:
             branches:
@@ -304,6 +299,7 @@ workflows:
 
       - docker_push_latest:
           requires:
+            - build_check
             - integration_tests
           filters:
             branches:
