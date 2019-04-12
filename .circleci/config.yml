@@ -203,12 +203,16 @@ jobs:
       - *fail_notification
 
   # Checks the compatibility of latest package build and master bootstrap
-  integration_tests:
+  branch_integration_tests:
     <<: *container_config
     working_directory: /src
     steps:
       - checkout
       - *setup_secrets
+      - run:
+          name: Setup integration tests parameters
+          command: |
+            echo "export TF_VAR_bootstrap_version=${CIRCLE_BRANCH:?}" >> $BASH_ENV
       - integration_tests
       - *fail_notification
 
@@ -270,7 +274,7 @@ workflows:
             branches:
               only: stable
 
-      - integration_tests:
+      - branch_integration_tests:
           requires: []
 
       - check_terraform_changes:
@@ -285,7 +289,7 @@ workflows:
       - setup_terraform:
           requires:
             - build_check
-            - integration_tests
+            - branch_integration_tests
           filters:
             branches:
               only: master
@@ -300,7 +304,7 @@ workflows:
       - docker_push_latest:
           requires:
             - build_check
-            - integration_tests
+            - branch_integration_tests
           filters:
             branches:
               only: master
@@ -334,12 +338,8 @@ workflows:
               only:
                 - master
     jobs:
-      - integration_tests:
+      - branch_integration_tests:
           requires: []
-
-      # - setup_terraform:
-      #     requires:
-      #       - integration_tests
 
   hourly_seeds_check:
     triggers:
