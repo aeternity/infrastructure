@@ -233,9 +233,8 @@
           # it also includes the playbook vars
         when: skip_db_migrations is not defined
 
-      - name: Ensure node is running
-        command: "/bin/true"
-        notify: "start aeternity daemon"
+      - name: Start aeternity node
+        command: "{{ project_root }}/bin/aeternity start"
         changed_when: false
         tags: [daemon]
 
