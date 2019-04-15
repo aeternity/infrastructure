@@ -7,6 +7,7 @@ services:
     tty: true
     volumes:
       - ./:/src
+    working_dir: /src
     env_file:
       - env.list
   ssh:
