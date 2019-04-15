@@ -94,22 +94,30 @@
         path: /etc/goss/
         state: directory
       notify: restart goss
+      tags:
+        - goss-install
 
     - name: Check is systemd enabled
       shell: "pidof systemd && echo 'systemd' || echo 'other'"
       register: is_systemd
       failed_when: "'command not found' in is_systemd.stderr"
       changed_when: False
+      tags:
+        - goss-install
 
     - name: Setting fact for systemd
       set_fact:
         systemd: yes
-      when: is_systemd.stdout is search("systemd") or is_aws
+      when: is_systemd.stdout is search("systemd")
+      tags:
+        - goss-install
 
     - name: Settign fact for non systemd
       set_fact:
         systemd: no
-      when: is_systemd.stdout is search("other") and not is_aws
+      when: is_systemd.stdout is search("other")
+      tags:
+        - goss-install
 
     - name: Copy systemd goss config
       copy:
@@ -118,6 +126,8 @@
         mode: 0750
       notify: reload systemd
       when: systemd
+      tags:
+        - goss-install
 
     - name: Copy init.d goss config
       copy:
@@ -126,6 +136,8 @@
         mode: 0750
       notify: restart goss
       when: not systemd
+      tags:
+        - goss-install
 
     - name: Set goss.log correct permissions for goss
       file:
@@ -136,6 +148,8 @@
         modification_time: "preserve"
         access_time: "preserve"
       notify: restart goss
+      tags:
+        - goss-install
 
     - name: Copy test files
       copy:
@@ -143,6 +157,8 @@
         src: ../test/goss/local/
         dest: "/etc/goss/"
       notify: restart goss
+      tags:
+        - goss-install
 
     - name: Copy health check script
       copy:
@@ -150,6 +166,8 @@
         dest: "/etc/goss/"
         mode: 0755
       notify: restart goss
+      tags:
+        - goss-install
 
   handlers:
     - name: Reload systemd
@@ -158,6 +176,8 @@
       listen:
         - reload systemd
       notify: restart goss
+      tags:
+        - goss-install
 
     - name: Restart goss
       service:
@@ -165,6 +185,8 @@
         state: restarted
       listen:
         - restart goss
+      tags:
+        - goss-install
 
 - name: Configure monitoring services (DataDog)
   hosts: all
