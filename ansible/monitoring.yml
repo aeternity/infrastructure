@@ -98,10 +98,9 @@
         - goss-install
 
     - name: Check is systemd enabled
-      shell: "pidof systemd && echo 'systemd' || echo 'other'"
+      stat:
+        path: /run/systemd/system
       register: is_systemd
-      failed_when: "'command not found' in is_systemd.stderr"
-      changed_when: False
       tags:
         - goss-install
 
