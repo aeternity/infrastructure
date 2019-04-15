@@ -98,9 +98,8 @@
         - goss-install
 
     - name: Check is systemd enabled
-      file:
+      stat:
         path: /run/systemd/system
-        state: directory
       register: is_systemd
       tags:
         - goss-install
@@ -108,14 +107,14 @@
     - name: Setting fact for systemd
       set_fact:
         systemd: yes
-      when: is_systemd.stdout is search("systemd")
+      when: is_systemd.stat.exists and is_systemd.stat.isdir
       tags:
         - goss-install
 
     - name: Settign fact for non systemd
       set_fact:
         systemd: no
-      when: is_systemd.stdout is search("other")
+      when: is_systemd.exists == False 
       tags:
         - goss-install
 
