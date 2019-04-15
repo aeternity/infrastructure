@@ -11,5 +11,10 @@
   uri:
     url: "http://{{public_ipv4}}:8080/healthz"
     timeout: 10
+    status_code: 200
   connection: local
+  register: result
+  until: result.status == 200
+  retries: 10
+  delay: 3
   tags: [health-check]
