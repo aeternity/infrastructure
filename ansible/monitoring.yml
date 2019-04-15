@@ -98,8 +98,9 @@
         - goss-install
 
     - name: Check is systemd enabled
-      stat:
+      file:
         path: /run/systemd/system
+        state: directory
       register: is_systemd
       tags:
         - goss-install
