@@ -100,21 +100,7 @@
     - name: Check is systemd enabled
       stat:
         path: /run/systemd/system
-      register: is_systemd
-      tags:
-        - goss-install
-
-    - name: Setting fact for systemd
-      set_fact:
-        systemd: yes
-      when: is_systemd.stat.exists and is_systemd.stat.isdir
-      tags:
-        - goss-install
-
-    - name: Settign fact for non systemd
-      set_fact:
-        systemd: no
-      when: is_systemd.exists == False 
+      register: systemd_run_dir
       tags:
         - goss-install
 
@@ -124,7 +110,7 @@
         dest: "/etc/systemd/system"
         mode: 0750
       notify: reload systemd
-      when: systemd
+      when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
       tags:
         - goss-install
 
@@ -134,7 +120,7 @@
         dest: "/etc/init.d/goss"
         mode: 0750
       notify: restart goss
-      when: not systemd
+      when: not systemd_run_dir.stat.exists
       tags:
         - goss-install
 
