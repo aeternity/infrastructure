@@ -50,7 +50,7 @@ else
     HOST=${@:$#}
 fi
 
-min_height=${min_height:-1}
+min_height=${min_height:-0}
 
 get_node_status() {
     curl -sS -m5 http://$HOST:3013/v2/status

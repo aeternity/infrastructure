@@ -233,38 +233,15 @@
           # it also includes the playbook vars
         when: skip_db_migrations is not defined
 
-      - name: Ensure node is running
-        command: "/bin/true"
-        notify: "start aeternity daemon"
+      - name: Start aeternity node
+        command: "{{ project_root }}/bin/aeternity start"
         changed_when: false
         tags: [daemon]
 
       - meta: flush_handlers
 
-      - name: Wait aeternity node API to boot
-        wait_for:
-          port: "{{ node_config.http.external.port }}"
-          host: "{{ public_ipv4 }}"
-          timeout: 300
-        when: health_check and (local_health_check is not defined or not local_health_check)
-        connection: local
-        tags: [health-check]
-
-      - name: API health check
-        uri:
-          url: "{{ api_base_uri }}/blocks/top"
-          timeout: 30
-        when: health_check and (local_health_check is not defined or not local_health_check)
-        connection: local
-        tags: [health-check]
-
-      - name: Wait aeternity node API to boot gateway
-        wait_for:
-          port: "{{ node_config.http.external.port }}"
-          host: "localhost"
-          timeout: 300
-        when: local_health_check is defined and local_health_check
-        tags: [health-check]
+      - name: Run health checks
+        include_tasks: tasks/health_check.yml
 
       - name: Refresh aeternity facts
         setup:
