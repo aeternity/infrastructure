@@ -93,8 +93,7 @@
       tags: [daemon]
 
   post_tasks:
-    - name: Prepare health checks
+    - name: Run health checks
       include_tasks: tasks/health_check.yml
       vars:
         node_config: "{{ node_vars }}"
-        api_base_uri: http://{{ public_ipv4 }}:{{ node_vars.http.external.port }}/v2

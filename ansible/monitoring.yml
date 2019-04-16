@@ -94,22 +94,15 @@
         path: /etc/goss/
         state: directory
       notify: restart goss
+      tags:
+        - goss-install
 
     - name: Check is systemd enabled
-      shell: "pidof systemd && echo 'systemd' || echo 'other'"
-      register: is_systemd
-      failed_when: "'command not found' in is_systemd.stderr"
-      changed_when: False
-
-    - name: Setting fact for systemd
-      set_fact:
-        systemd: yes
-      when: is_systemd.stdout is search("systemd") or is_aws
-
-    - name: Settign fact for non systemd
-      set_fact:
-        systemd: no
-      when: is_systemd.stdout is search("other") and not is_aws
+      stat:
+        path: /run/systemd/system
+      register: systemd_run_dir
+      tags:
+        - goss-install
 
     - name: Copy systemd goss config
       copy:
@@ -117,7 +110,9 @@
         dest: "/etc/systemd/system"
         mode: 0750
       notify: reload systemd
-      when: systemd
+      when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
+      tags:
+        - goss-install
 
     - name: Copy init.d goss config
       copy:
@@ -125,7 +120,9 @@
         dest: "/etc/init.d/goss"
         mode: 0750
       notify: restart goss
-      when: not systemd
+      when: not systemd_run_dir.stat.exists
+      tags:
+        - goss-install
 
     - name: Set goss.log correct permissions for goss
       file:
@@ -136,6 +133,8 @@
         modification_time: "preserve"
         access_time: "preserve"
       notify: restart goss
+      tags:
+        - goss-install
 
     - name: Copy test files
       copy:
@@ -143,12 +142,17 @@
         src: ../test/goss/local/
         dest: "/etc/goss/"
       notify: restart goss
+      tags:
+        - goss-install
 
     - name: Copy health check script
       copy:
         src: ../scripts/health_check.sh
         dest: "/etc/goss/"
+        mode: 0755
       notify: restart goss
+      tags:
+        - goss-install
 
   handlers:
     - name: Reload systemd
@@ -157,6 +161,8 @@
       listen:
         - reload systemd
       notify: restart goss
+      tags:
+        - goss-install
 
     - name: Restart goss
       service:
@@ -164,6 +170,8 @@
         state: restarted
       listen:
         - restart goss
+      tags:
+        - goss-install
 
 - name: Configure monitoring services (DataDog)
   hosts: all
@@ -219,7 +227,7 @@
         init_config:
         instances:
           - name: API
-            url: "{{ api_base_uri|default('http://127.0.0.1:3013/v2') }}/blocks/top"
+            url: "http://localhost:8080/healthz"
             # Default is false, i.e. emit events instead of service checks.
             # Recommend to set to true.
             skip_event: true

@@ -9,7 +9,7 @@ http:
     {{$host_region := index $hostvars $host "placement" "region"}}
     {{$host_env := index $hostvars $host "tags" "env"}}
       {{if or (eq $region $host_region) (not $region)}}
-      http://{{$host}}:3013/v2/status:
+      http://{{$host}}:8080/healthz:
         status: 200
         allow-insecure: true
         no-follow-redirects: true

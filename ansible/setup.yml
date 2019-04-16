@@ -91,6 +91,7 @@
         - jq
         - unzip
         - bc
+        - curl
       tags:
         - dev-tools
 

@@ -321,9 +321,10 @@ This will run infrastructure container link it to debian container.
 docker-compose up -d
 #attach to local infrastrcuture container
 docker attach infrastructure-local
-cd /src
 ./local_playbook_run.sh deploy.yml # + add required parameters
 ```
+
+Use <kbd>CTRL</kbd> + <kbd>p</kbd>, <kbd>q</kbd> sequence to detach from the container.
 
 ### Terraform configuration
 
