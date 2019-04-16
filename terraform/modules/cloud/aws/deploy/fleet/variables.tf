@@ -51,3 +51,7 @@ variable "dns_zone" {
 variable "gateway_dns" {
   default = ""
 }
+
+variable "user_data_file" {}
+
+variable "spot_user_data_file" {}
