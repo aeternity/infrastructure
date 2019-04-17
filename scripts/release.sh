@@ -5,7 +5,7 @@ set -eo pipefail
 
 USAGE="Usage:
 ${0} x.x.x start|end description, E.g. to start a release run:
-${0} 2.4.0 start Maintainance release
+${0} 2.4.0 start Maintenance release
 then to finish the release run:
 ${0} 2.4.0 end"
 
