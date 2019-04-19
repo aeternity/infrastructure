@@ -13,15 +13,15 @@ usage_exit() {
     echo -e "$USAGE" >&2; exit 1
 }
 
-protocol_repo=valerifilipov/repo2
-node_repo=valerifilipov/repo1
+protocol_repo=${PROTOCOL_REPO:-valerifilipov/repo2}
+node_repo=${NODE_REPO:-valerifilipov/repo1}
 
 #generate_post_data release commitish description
 generate_post_data() {
 cat <<EOF
 {
   "tag_name": "$1",
-  "target_commitish": "${2:?}",
+  "target_commitish": "${2}"
   "name": "$3",
   "body": "$1",
   "draft": false,
@@ -95,45 +95,45 @@ node_release=v$version
 if [[ -n "$1" ]]; then
     case "$1" in
         start)
-        prerelease=true
-        shift
-        for arg in "$@"; do
-            case $arg in
-                --protocol-commitish=*)
-                protocol_commitish="${arg#*=}"
-                shift
-                ;;
-                --node-commitish=*)
-                node_commitish="${arg#*=}"
-                shift
-                ;;
-                *)
-                description+=(${arg})
-                ;;
-            esac
-        done
-        if [[ -z "$description" ]]; then
-            usage_exit
-        fi
-        protocol_commitish=${protocol_commitish:-master}
-        node_commitish=${node_commitish:-master}
-        description=${description[@]}
-        echo "Creating pre-release $protocol_release $description in $protocol_repo from commitish $protocol_commitish"
-        create_release $protocol_repo $protocol_release $protocol_commitish "$description"
-        echo "Creating pre-release $node_release $description in $node_repo from commitish $node_commitish"
-        create_release $node_repo $node_release $node_commitish "$description"
-        ;;
+            prerelease=true
+            shift
+            for arg in "$@"; do
+                case $arg in
+                    --protocol-commitish=*)
+                        protocol_commitish="${arg#*=}"
+                        shift
+                        ;;
+                    --node-commitish=*)
+                        node_commitish="${arg#*=}"
+                        shift
+                        ;;
+                    *)
+                        description+=(${arg})
+                        ;;
+                esac
+            done
+            if [[ -z "$description" ]]; then
+                usage_exit
+            fi
+            protocol_commitish=${protocol_commitish:-master}
+            node_commitish=${node_commitish:-master}
+            description=${description[@]}
+            echo "Creating pre-release $protocol_release $description in $protocol_repo from commitish $protocol_commitish"
+            create_release $protocol_repo $protocol_release $protocol_commitish "$description"
+            echo "Creating pre-release $node_release $description in $node_repo from commitish $node_commitish"
+            create_release $node_repo $node_release $node_commitish "$description"
+            ;;
         finish)
-        prerelease=false
-        shift
-        echo "Publishing release $protocol_release for repo: $protocol_repo"
-        finish_release $protocol_repo $protocol_release
-        echo "Publishing release $node_release for repo: $node_repo"
-        finish_release $node_repo $node_release
-        ;;
+            prerelease=false
+            shift
+            echo "Publishing release $protocol_release for repo: $protocol_repo"
+            finish_release $protocol_repo $protocol_release
+            echo "Publishing release $node_release for repo: $node_repo"
+            finish_release $node_repo $node_release
+            ;;
         *)
-        usage_exit
-        ;;
+            usage_exit
+            ;;
     esac
 else
     usage_exit
