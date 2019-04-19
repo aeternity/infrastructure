@@ -1,24 +1,28 @@
 #!/bin/bash
 # should be run as:
-# ./release.sh x.x.x start|finish description
+# ./release.sh x.x.x start|finish description [--protocol-commitish=master] [--node-commitish=master]
 set -eo pipefail
 
 USAGE="Usage:
-${0} x.x.x start|finish description, E.g. to start a release run:
+${0} x.x.x start|finish description [--protocol-commitish=master] [--node-commitish=master], e.g. to start a release run:
 ${0} 2.4.0 start Maintenance release
 then to finish the release run:
 ${0} 2.4.0 finish"
 
+usage_exit() {
+    echo -e "$USAGE" >&2; exit 1
+}
+
 protocol_repo=valerifilipov/repo2
 node_repo=valerifilipov/repo1
 
-#generate_post_data release description
+#generate_post_data release commitish description
 generate_post_data() {
 cat <<EOF
 {
   "tag_name": "$1",
-  "target_commitish": "master",
-  "name": "$2",
+  "target_commitish": "${2:?}",
+  "name": "$3",
   "body": "$1",
   "draft": false,
   "prerelease": $prerelease
@@ -33,9 +37,9 @@ curl_headers=(
     '-H' "cache-control: no-cache"
 )
 
-#create_release repo release description
+#create_release repo release commitish description
 create_release() {
-    postdata=$(generate_post_data "$2" "$3")
+    postdata=$(generate_post_data "$2" "$3" "$4")
     released=$(curl -s -X POST \
         "${curl_headers[@]}" \
         https://api.github.com/repos/${1}/releases \
@@ -81,46 +85,56 @@ if [[ -n "$1" && "$1" =~ ^([0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+)*)$ ]]; then
     version=${1}
     shift
 else
-    echo -e "$USAGE" >&2; exit 1
+    usage_exit
 fi
 
 protocol_release=aeternity-node-v$version
 node_release=v$version
 
-echo protocol release: $protocol_release
-echo node release: $node_release
-
-#check for action
+#check for action and description then create release
 if [[ -n "$1" ]]; then
-    if [[ "$1" == start ]]; then
+    case "$1" in
+        start)
         prerelease=true
         shift
-    else
-        if [[ "$1" == finish ]]; then
-            prerelease=false
-        else
-            echo -e "$USAGE" >&2; exit 1
+        for arg in "$@"; do
+            case $arg in
+                --protocol-commitish=*)
+                protocol_commitish="${arg#*=}"
+                shift
+                ;;
+                --node-commitish=*)
+                node_commitish="${arg#*=}"
+                shift
+                ;;
+                *)
+                description+=(${arg})
+                ;;
+            esac
+        done
+        if [[ -z "$description" ]]; then
+            usage_exit
         fi
-    fi
+        protocol_commitish=${protocol_commitish:-master}
+        node_commitish=${node_commitish:-master}
+        description=${description[@]}
+        echo "Creating pre-release $protocol_release $description in $protocol_repo from commitish $protocol_commitish"
+        create_release $protocol_repo $protocol_release $protocol_commitish "$description"
+        echo "Creating pre-release $node_release $description in $node_repo from commitish $node_commitish"
+        create_release $node_repo $node_release $node_commitish "$description"
+        ;;
+        finish)
+        prerelease=false
+        shift
+        echo "Publishing release $protocol_release for repo: $protocol_repo"
+        finish_release $protocol_repo $protocol_release
+        echo "Publishing release $node_release for repo: $node_repo"
+        finish_release $node_repo $node_release
+        ;;
+        *)
+        usage_exit
+        ;;
+    esac
 else
-    echo -e "$USAGE" >&2; exit 1
-fi
-
-#check for description
-if [[ $# -gt 0 ]]; then
-    desription="$@"
-else
-    echo -e "$USAGE" >&2; exit 1
-fi
-
-if [[ $prerelease == true ]]; then
-    echo "Creating pre-release $protocol_release in $protocol_repo"
-    create_release $protocol_repo $protocol_release "$desription"
-    echo "Creating pre-release $node_release in $node_repo"
-    create_release $node_repo $node_release "$desription"
-else
-    echo "Creating release $protocol_release for repo: $protocol_repo"
-    finish_release $protocol_repo $protocol_release
-    echo "Creating release $node_release for repo: $node_repo"
-    finish_release $node_repo $node_release
+    usage_exit
 fi
