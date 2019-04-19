@@ -26,31 +26,6 @@ provider "aws" {
   profile                 = "aeternity"
 }
 
-# Temporary test until all environments/regions are migrated to the new user data
-module "aws_deploy-test_legacy" {
-  source            = "../../terraform/modules/cloud/aws/deploy"
-  env               = "${var.env_name}"
-  envid             = "${var.envid}"
-  bootstrap_version = "${var.bootstrap_version}"
-  vault_role        = "ae-node"
-  vault_addr        = "${var.vault_addr}"
-
-  static_nodes = 1
-  spot_nodes   = 1
-
-  spot_price    = "0.04"
-  instance_type = "t3.large"
-  ami_name      = "aeternity-ubuntu-16.04-*"
-
-  aeternity = {
-    package = "${var.package}"
-  }
-
-  providers = {
-    aws = "aws.ap-southeast-2"
-  }
-}
-
 module "aws_deploy-test" {
   source              = "../../terraform/modules/cloud/aws/deploy"
   env                 = "${var.env_name}"

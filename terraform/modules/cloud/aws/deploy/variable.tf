@@ -73,9 +73,9 @@ variable "gateway_dns" {
 }
 
 variable "user_data_file" {
-  default = "legacy_user_data.bash"
+  default = "user_data.bash"
 }
 
 variable "spot_user_data_file" {
-  default = "spot_user_data.bash"
+  default = "user_data.bash"
 }
