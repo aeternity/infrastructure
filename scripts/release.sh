@@ -28,7 +28,7 @@ EOF
 
 curl_headers=(
     '-H' "Accept: application/vnd.github.v3+json"
-    '-H' "Authorization: token $VAULT_GITHUB_TOKEN"
+    '-H' "Authorization: token ${GITHUB_TOKEN:?}"
     '-H' "Content-Type: application/json"
     '-H' "cache-control: no-cache"
 )
