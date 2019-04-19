@@ -1,13 +1,13 @@
 #!/bin/bash
 # should be run as:
-# ./release.sh x.x.x start|end description
+# ./release.sh x.x.x start|finish description
 set -eo pipefail
 
 USAGE="Usage:
-${0} x.x.x start|end description, E.g. to start a release run:
+${0} x.x.x start|finish description, E.g. to start a release run:
 ${0} 2.4.0 start Maintenance release
 then to finish the release run:
-${0} 2.4.0 end"
+${0} 2.4.0 finish"
 
 protocol_repo=valerifilipov/repo2
 node_repo=valerifilipov/repo1
@@ -59,8 +59,8 @@ edit_release() {
         -d '{"prerelease":'$prerelease'}'
 }
 
-#end_release repo release
-end_release() {
+#finish_release repo release
+finish_release() {
     release_id=$(get_release_by_tag "$1" "$2")
     if [[ "$release_id" != null ]]; then
         released=$(edit_release $1 $release_id)
@@ -96,7 +96,7 @@ if [[ -n "$1" ]]; then
         prerelease=true
         shift
     else
-        if [[ "$1" == end ]]; then
+        if [[ "$1" == finish ]]; then
             prerelease=false
         else
             echo -e "$USAGE" >&2; exit 1
@@ -120,7 +120,7 @@ if [[ $prerelease == true ]]; then
     create_release $node_repo $node_release "$desription"
 else
     echo "Creating release $protocol_release for repo: $protocol_repo"
-    end_release $protocol_repo $protocol_release
+    finish_release $protocol_repo $protocol_release
     echo "Creating release $node_release for repo: $node_repo"
-    end_release $node_repo $node_release
+    finish_release $node_repo $node_release
 fi
