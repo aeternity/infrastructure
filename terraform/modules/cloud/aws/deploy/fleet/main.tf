@@ -24,13 +24,16 @@ resource "aws_instance" "static_node" {
   }
 
   tags {
-    Name    = "ae-${var.env}-static-node"
-    env     = "${var.env}"
-    envid   = "${var.envid}"
-    role    = "aenode"
-    color   = "${var.color}"
-    kind    = "seed"
-    package = "${var.aeternity["package"]}"
+    Name              = "ae-${var.env}-static-node"
+    env               = "${var.env}"
+    envid             = "${var.envid}"
+    role              = "aenode"
+    color             = "${var.color}"
+    kind              = "seed"
+    package           = "${var.aeternity["package"]}"
+    bootstrap_version = "${var.bootstrap_version}"
+    vault_addr        = "${var.vault_addr}"
+    vault_role        = "${var.vault_role}"
   }
 
   user_data = "${data.template_file.user_data.rendered}"
@@ -49,12 +52,15 @@ resource "aws_ebs_volume" "ebs" {
   size              = "${var.additional_storage_size}"
 
   tags {
-    Name    = "ae-${var.env}-static-node"
-    env     = "${var.env}"
-    role    = "aenode"
-    color   = "${var.color}"
-    kind    = "seed"
-    package = "${var.aeternity["package"]}"
+    Name              = "ae-${var.env}-static-node"
+    env               = "${var.env}"
+    role              = "aenode"
+    color             = "${var.color}"
+    kind              = "seed"
+    package           = "${var.aeternity["package"]}"
+    bootstrap_version = "${var.bootstrap_version}"
+    vault_addr        = "${var.vault_addr}"
+    vault_role        = "${var.vault_role}"
   }
 }
 
@@ -66,7 +72,7 @@ resource "aws_volume_attachment" "ebs_att" {
 }
 
 data "template_file" "user_data" {
-  template = "${file("${path.module}/templates/user_data.bash")}"
+  template = "${file("${path.module}/templates/${var.user_data_file}")}"
 
   vars = {
     region            = "${data.aws_region.current.name}"
@@ -125,7 +131,7 @@ resource "aws_launch_configuration" "spot-with-additional-storage" {
 }
 
 data "template_file" "spot_user_data" {
-  template = "${file("${path.module}/templates/spot_user_data.bash")}"
+  template = "${file("${path.module}/templates/${var.spot_user_data_file}")}"
 
   vars = {
     region            = "${data.aws_region.current.name}"
@@ -186,6 +192,21 @@ resource "aws_autoscaling_group" "spot_fleet" {
     {
       key                 = "package"
       value               = "${var.aeternity["package"]}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "bootstrap_version"
+      value               = "${var.bootstrap_version}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "vault_addr"
+      value               = "${var.vault_addr}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "vault_role"
+      value               = "${var.vault_role}"
       propagate_at_launch = true
     },
   ]
