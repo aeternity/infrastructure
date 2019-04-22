@@ -6,6 +6,7 @@
   vars:
     env: unknown
     db_version: 0
+    goss_health_check: true
 
   tasks:
     - name: "Load a variable files for environment: {{ env }}"
