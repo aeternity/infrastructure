@@ -1,7 +1,4 @@
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
-additional_storage: true
-additional_storage_mountpoint: /data
-
 genesis_accounts:
   "ak_UAzhn9rAQg568v6Hwt3w2HPaQb9X9Nw6JbLmnv7trhmGmWGGp": 100000000001
 package: https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-latest-ubuntu-x86_64.tar.gz
@@ -25,7 +22,7 @@ node_config:
 
   chain:
     persist: true
-    db_path: "/data/db1"
+    db_path: "./db1"
 
   mining:
     autostart: false
