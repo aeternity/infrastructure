@@ -15,17 +15,19 @@ usage_exit() {
 
 protocol_repo=${PROTOCOL_REPO:-valerifilipov/repo2}
 node_repo=${NODE_REPO:-valerifilipov/repo1}
+protocol_commitish=master
+node_commitish=master
 
 #generate_post_data release commitish description
 generate_post_data() {
 cat <<EOF
 {
   "tag_name": "$1",
-  "target_commitish": "${2}"
+  "target_commitish": "${2}",
   "name": "$3",
   "body": "$1",
   "draft": false,
-  "prerelease": $prerelease
+  "prerelease": true
 }
 EOF
 }
@@ -60,7 +62,7 @@ edit_release() {
     curl -s -X PATCH \
         "${curl_headers[@]}" \
         https://api.github.com/repos/$1/releases/$2 \
-        -d '{"prerelease":'$prerelease'}'
+        -d '{"prerelease":false}'
 }
 
 #finish_release repo release
@@ -76,20 +78,19 @@ finish_release() {
             exit 1
         fi
     else
-        echo Release $protocol_release not found >&2; exit 1
+        echo Release "$2" not found >&2; exit 1
     fi
 }
 
 #check for release version
 if [[ -n "$1" && "$1" =~ ^([0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+)*)$ ]]; then
-    version=${1}
+    protocol_release=aeternity-node-v${1}
+    node_release=v${1}
     shift
 else
     usage_exit
 fi
 
-protocol_release=aeternity-node-v$version
-node_release=v$version
 
 #check for action and description then create release
 if [[ -n "$1" ]]; then
@@ -115,21 +116,19 @@ if [[ -n "$1" ]]; then
             if [[ -z "$description" ]]; then
                 usage_exit
             fi
-            protocol_commitish=${protocol_commitish:-master}
-            node_commitish=${node_commitish:-master}
             description=${description[@]}
-            echo "Creating pre-release $protocol_release $description in $protocol_repo from commitish $protocol_commitish"
-            create_release $protocol_repo $protocol_release $protocol_commitish "$description"
-            echo "Creating pre-release $node_release $description in $node_repo from commitish $node_commitish"
-            create_release $node_repo $node_release $node_commitish "$description"
+            echo "Creating pre-release ${protocol_release:?} $description in $protocol_repo from commitish $protocol_commitish"
+            create_release $protocol_repo ${protocol_release:?} $protocol_commitish "$description"
+            echo "Creating pre-release ${node_release:?} $description in $node_repo from commitish $node_commitish"
+            create_release $node_repo ${node_release:?} $node_commitish "$description"
             ;;
         finish)
             prerelease=false
             shift
-            echo "Publishing release $protocol_release for repo: $protocol_repo"
-            finish_release $protocol_repo $protocol_release
-            echo "Publishing release $node_release for repo: $node_repo"
-            finish_release $node_repo $node_release
+            echo "Publishing release ${protocol_release:?} for repo: $protocol_repo"
+            finish_release $protocol_repo ${protocol_release:?}
+            echo "Publishing release ${node_release:?} for repo: $node_repo"
+            finish_release $node_repo ${node_release:?}
             ;;
         *)
             usage_exit
