@@ -25,7 +25,7 @@ node_config:
 
   chain:
     persist: true
-    db_path: "./db1"
+    db_path: "/data/db1"
 
   mining:
     autostart: false
