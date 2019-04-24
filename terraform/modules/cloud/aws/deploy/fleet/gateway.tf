@@ -178,6 +178,21 @@ resource "aws_autoscaling_group" "gateway" {
       value               = "${var.aeternity["package"]}"
       propagate_at_launch = true
     },
+    {
+      key                 = "bootstrap_version"
+      value               = "${var.bootstrap_version}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "vault_addr"
+      value               = "${var.vault_addr}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "vault_role"
+      value               = "${var.vault_role}"
+      propagate_at_launch = true
+    },
   ]
 }
 

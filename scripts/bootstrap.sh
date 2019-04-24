@@ -31,7 +31,45 @@ case $i in
 esac
 done
 
-cd $(dirname $0)/../ansible/
+# Backward compatibility with user_data that does not activate the environment
+if [ -z $VIRTUAL_ENV ]; then
+    # Run Ansible in virtual environment
+    source /var/venv/bin/activate
+
+    # Dirty ugly hack to workaround missing python-apt in the virtualenv
+    # It cannot be (?!) installed in the virtualenv
+    # If --system-site-packages is used all the packages are copied and specifically python-cryptography
+    # Distro python-cryptography is OLD and if copied to the virtualenv,
+    # it prevents pip to installed newer package version for some reason,
+    # but ansible (paramico) does not work with the OLD One
+    cp -r /usr/lib/python3/dist-packages/apt* /var/venv/lib/python3.5/site-packages/
+fi
+
+# Fetch parameters from EC2 tags if not provided by the caller
+# Legacy instance configuration pass those parameters in user_data
+# To be removed when legacy instances are out
+if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_package" ]]; then
+    INSTANCE_ID=$(ec2metadata --instance-id)
+    AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
+    AWS_TAGS='[]'
+
+    # Pull AWS tags until available. Retries in 10s intervals total 150s
+    WAIT_TIME=0
+    while [[ $AWS_TAGS == '[]' && $WAIT_TIME -lt 60 ]]; do
+        AWS_TAGS=$(aws ec2 describe-tags \
+          --region=$AWS_REGION \
+          --filters "Name=resource-id,Values=$INSTANCE_ID" \
+          --query 'Tags' \
+        )
+        sleep $WAIT_TIME
+        let WAIT_TIME=WAIT_TIME+10
+    done
+
+    vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
+    vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
+    env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
+    aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
+fi
 
 # Temporary fix/workaround for non-executable vault install
 chmod +x /usr/bin/vault
@@ -60,19 +98,10 @@ fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
 
-# Run Ansible in virtual environment
-source /var/venv/bin/activate
+cd $(dirname $0)/../ansible/
 
 # Install ansible roles
 ansible-galaxy install -r requirements.yml
-
-# Dirty ugly hack to workaround missing python-apt in the virtualenv
-# It cannot be (?!) installed in the virtualenv
-# If --system-site-packages is used all the packages are copied and specifically python-cryptography
-# Distro python-cryptography is OLD and if copied to the virtualenv,
-# it prevents pip to installed newer package version for some reason,
-# but ansible (paramico) does not work with the OLD One
-cp -r /usr/lib/python3/dist-packages/apt* /var/venv/lib/python3.5/site-packages/
 
 # Create temporary inventory just because of the group_vars
 cat > /tmp/local_inventory << EOF
@@ -86,15 +115,6 @@ local
 local
 
 EOF
-
-# Fetch package from EC2 tags if not provided as parameter
-# Spot instances pass this parameter in user_data because they don't have tags assigned during boot yet
-# Static instances rely on tags
-if [ -z "$aeternity_package" ]; then
-    INSTANCE_ID=$(ec2metadata --instance-id)
-    REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | grep region | awk -F\" '{print $4}')
-    aeternity_package=$(aws ec2 describe-tags --region=$REGION --filters "Name=resource-id,Values=$INSTANCE_ID" "Name=key,Values=package" --query 'Tags[0].Value' --output=text)
-fi
 
 # While Ansible is run by Python 3 because of the virtual environment
 # the "remote" (which is in this case the same) host interpreter must also be set to python3
