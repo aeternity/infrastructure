@@ -1,3 +1,4 @@
+datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 configure_peers: false
 seed_peers: []

@@ -12,7 +12,6 @@ terraform/.terraform
 !scripts/
 # Copy from .gitignore
 *.retry
-ansible/group_vars/**/*.local.*
 ansible/inventory/*.rc.sh
 ansible/callback_plugins/datadog_callback.yml
 .virtualenv/
