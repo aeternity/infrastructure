@@ -13,8 +13,8 @@ usage_exit() {
     echo -e "$USAGE" >&2; exit 1
 }
 
-protocol_repo=${PROTOCOL_REPO:-valerifilipov/repo2}
-node_repo=${NODE_REPO:-valerifilipov/repo1}
+protocol_repo=${PROTOCOL_REPO:-aeternity/protocol}
+node_repo=${NODE_REPO:-aeternity/aeternity}
 protocol_commitish=master
 node_commitish=master
 
