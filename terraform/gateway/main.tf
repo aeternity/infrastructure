@@ -26,7 +26,7 @@ module "aws_deploy-main-us-west-2" {
   spot_price        = "0.15"
   instance_type     = "t3.large"
   ami_name          = "aeternity-ubuntu-16.04-v1549009934"
-  root_volume_size  = 40
+  root_volume_size  = 8
 
   additional_storage      = 1
   additional_storage_size = 30
@@ -57,7 +57,7 @@ module "aws_deploy-main-eu-north-1" {
   spot_price       = "0.15"
   instance_type    = "t3.large"
   ami_name         = "aeternity-ubuntu-16.04-v1549009934"
-  root_volume_size = 40
+  root_volume_size = 8
 
   additional_storage      = 1
   additional_storage_size = 30
