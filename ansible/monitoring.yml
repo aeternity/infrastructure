@@ -117,7 +117,7 @@
     - name: Enable goss systemd service start on boot
       systemd:
         name: goss
-        enable: yes
+        enabled: yes
       notify: reload systemd
       when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
       tags:
