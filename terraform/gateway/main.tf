@@ -3,7 +3,7 @@ variable "vault_addr" {
 }
 
 variable "bootstrap_version" {
-  default = "stable"
+  default = "v2.0.1"
 }
 
 variable "main_gateway_dns" {
