@@ -17,6 +17,12 @@
   with_first_found:
     - "vars/aeternity/{{ env }}.yml"
 
+- name: "Wait for /dev/nvme1n1 to become present"
+  wait_for:
+    path: /dev/nvme1n1
+    state: present
+  when: additional_storage is defined and additional_storage and is_aws
+
 - name: Create a xfs filesystem on /dev/nvme1n1
   filesystem:
     fstype: xfs
