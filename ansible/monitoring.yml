@@ -114,6 +114,15 @@
       tags:
         - goss-install
 
+    - name: Enable goss systemd service start on boot
+      systemd:
+        name: goss
+        enable: yes
+      notify: reload systemd
+      when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
+      tags:
+        - goss-install
+
     - name: Copy init.d goss config
       copy:
         src: files/goss/goss.conf
