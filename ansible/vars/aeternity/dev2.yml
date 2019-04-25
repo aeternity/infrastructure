@@ -1,3 +1,5 @@
+public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
+datadog_enabled: no
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 configure_peers: true
 seed_peers: []
