@@ -5,7 +5,7 @@
   become: yes
 
   vars:
-    var_bootstrap_version: "{{ bootstrap_version | default('stable', true) }}"
+    var_bootstrap_version: "{{ bootstrap_version | default('v2.0.1, true) }}"
     vault_role: ae-node
     var_package: "{{ package | default('http://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz', true) }}"
 
