@@ -187,8 +187,9 @@ jobs:
           name: Tag and push Docker image to DockerHub on Git tags
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} .
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} -t ${DOCKERHUB_REPO:?}:stable .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?}
+            docker push ${DOCKERHUB_REPO:?}:stable
       - *fail_notification
 
   check_seed_peers:
