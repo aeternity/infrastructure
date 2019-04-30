@@ -223,7 +223,7 @@ jobs:
         - run:
             name: Setup integration tests parameters
             command: |
-              echo "export TF_VAR_bootstrap_version=stable" >> $BASH_ENV
+              echo "export TF_VAR_bootstrap_version=${CIRCLE_TAG:?}" >> $BASH_ENV
               echo "export TF_VAR_package=https://releases.ops.aeternity.com/aeternity-latest-ubuntu-x86_64.tar.gz" >> $BASH_ENV
         - integration_tests
         - *fail_notification
@@ -269,7 +269,8 @@ workflows:
             - build_check
           filters:
             branches:
-              only: stable
+              ignore: /.*/
+              only: /^v.*$/
 
       - branch_integration_tests:
           requires: []
