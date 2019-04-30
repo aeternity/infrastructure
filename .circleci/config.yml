@@ -280,7 +280,6 @@ workflows:
             branches:
               ignore:
                 - master
-                - stable
 
       - setup_terraform:
           requires:
