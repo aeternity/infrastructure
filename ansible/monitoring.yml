@@ -108,7 +108,16 @@
       copy:
         src: files/goss/goss.service
         dest: "/etc/systemd/system"
-        mode: 0750
+        mode: 0640
+      notify: reload systemd
+      when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
+      tags:
+        - goss-install
+
+    - name: Enable goss systemd service start on boot
+      systemd:
+        name: goss
+        enabled: yes
       notify: reload systemd
       when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
       tags:
