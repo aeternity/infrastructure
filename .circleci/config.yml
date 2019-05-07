@@ -270,6 +270,7 @@ workflows:
           filters:
             branches:
               ignore: /.*/
+            tags:
               only: /^v.*$/
 
       - branch_integration_tests:
