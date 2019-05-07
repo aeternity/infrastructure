@@ -11,7 +11,7 @@ variable "main_gateway_dns" {
 }
 
 module "aws_deploy-main-us-west-2" {
-  source            = "../modules/cloud/aws/deploy"
+  source            = "git::https://github.com/aeternity/terraform-aws-aenode-deploy.git"
   env               = "api_main"
   bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
@@ -41,7 +41,7 @@ module "aws_deploy-main-us-west-2" {
 }
 
 module "aws_deploy-main-eu-north-1" {
-  source            = "../modules/cloud/aws/deploy"
+  source            = "git::https://github.com/aeternity/terraform-aws-aenode-deploy.git"
   env               = "api_main"
   bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
