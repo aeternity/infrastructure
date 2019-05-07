@@ -76,7 +76,7 @@ module "aws_gateway" {
     aws = "aws.us-east-1"
   }
 
-  source   = "../modules/cloud/aws/gateway"
+  source   = "git::https://github.com/aeternity/terraform-aws-api-gateway.git"
   dns_zone = "${var.dns_zone}"
 
   loadbalancers = [
