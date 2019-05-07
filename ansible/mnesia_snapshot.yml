@@ -24,7 +24,7 @@
     - name: Archive Mnesia Directory
       archive:
         format: "{{ format }}"
-        path: "{{ project_root }}/{{ node_config.chain.db_path }}"
+        path: "{{ project_root + '/' if additional_storage is not defined else '' }}{{ node_config.chain.db_path }}"
         dest: /tmp/{{ backup_archive_filename }}
 
     - name: Upload backup to S3 bucket
