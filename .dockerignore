@@ -8,7 +8,7 @@
 terraform/.terraform
 !Makefile
 !requirements.txt
-!test/goss/
+!test
 !scripts/
 # Copy from .gitignore
 *.retry
