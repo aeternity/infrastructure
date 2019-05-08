@@ -187,8 +187,9 @@ jobs:
           name: Tag and push Docker image to DockerHub on Git tags
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} .
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} -t ${DOCKERHUB_REPO:?}:stable .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?}
+            docker push ${DOCKERHUB_REPO:?}:stable
       - *fail_notification
 
   check_seed_peers:
@@ -222,7 +223,7 @@ jobs:
         - run:
             name: Setup integration tests parameters
             command: |
-              echo "export TF_VAR_bootstrap_version=stable" >> $BASH_ENV
+              echo "export TF_VAR_bootstrap_version=${CIRCLE_TAG:?}" >> $BASH_ENV
               echo "export TF_VAR_package=https://releases.ops.aeternity.com/aeternity-latest-ubuntu-x86_64.tar.gz" >> $BASH_ENV
         - integration_tests
         - *fail_notification
@@ -268,7 +269,9 @@ workflows:
             - build_check
           filters:
             branches:
-              only: stable
+              ignore: /.*/
+            tags:
+              only: /^v.*$/
 
       - branch_integration_tests:
           requires: []
@@ -278,7 +281,6 @@ workflows:
             branches:
               ignore:
                 - master
-                - stable
 
       - setup_terraform:
           requires:
