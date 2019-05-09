@@ -2,6 +2,7 @@
 - name: Health check remote nodes
   hosts: all
   remote_user: aeternity
+  gather_facts: false
 
   vars:
     env: unknown
