@@ -262,9 +262,11 @@ workflows:
   check_deploy:
     jobs:
       - build_check:
+          context: ae-infra-manage
           requires: []
 
       - stable_integration_tests:
+          context: ae-infra-manage
           requires:
             - build_check
           filters:
@@ -274,15 +276,18 @@ workflows:
               only: /^v.*$/
 
       - branch_integration_tests:
+          context: ae-infra-manage
           requires: []
 
       - check_terraform_changes:
+          context: ae-infra-manage
           filters:
             branches:
               ignore:
                 - master
 
       - setup_terraform:
+          context: ae-infra-manage
           requires:
             - build_check
             - branch_integration_tests
@@ -291,6 +296,7 @@ workflows:
               only: master
 
       - check_seed_peers:
+          context: ae-infra-manage
           requires:
             - setup_terraform
           filters:
@@ -298,6 +304,7 @@ workflows:
               only: master
 
       - docker_push_latest:
+          context: ae-infra-manage
           requires:
             - build_check
             - branch_integration_tests
@@ -306,6 +313,7 @@ workflows:
               only: master
 
       - docker_push_tag:
+          context: ae-infra-manage
           filters:
             branches:
               ignore: /.*/
@@ -322,8 +330,10 @@ workflows:
               only:
                 - master
     jobs:
-      - chain_snapshot_uat
-      - chain_snapshot_main
+      - chain_snapshot_uat:
+          context: ae-infra-manage
+      - chain_snapshot_main:
+          context: ae-infra-manage
 
   daily_check_deploy:
     triggers:
@@ -335,6 +345,7 @@ workflows:
                 - master
     jobs:
       - branch_integration_tests:
+          context: ae-infra-manage
           requires: []
 
   hourly_seeds_check:
@@ -346,4 +357,5 @@ workflows:
               only:
                 - master
     jobs:
-      - check_seed_peers
+      - check_seed_peers:
+          context: ae-infra-manage
