@@ -40,6 +40,8 @@ if [ -n "$VAULT_TOKEN" ]; then
     export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.gcp.json
     vault read -field json secret/google/${VAULT_SECRETS_ROLE} > $GOOGLE_APPLICATION_CREDENTIALS
 
+    export GITHUB_API_TOKEN=$(vault read -field=value secret/github/prod/token)
+
     if [ "$VAULT_SECRETS_ROLE" = "ae-fleet-manager" ]; then
         DOCKERHUB_CREDS=$(vault read secret/dockerhub/prod)
         export DOCKER_USER=$(echo $DOCKERHUB_CREDS | grep -o 'username [^ ]*' | awk '{print $2}')
