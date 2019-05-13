@@ -7,6 +7,9 @@ TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
 SEED_CHECK_ENVS = main uat next
 
+secrets: scripts/secrets/dump.sh
+	SECRETS_OUTPUT_DIR=secrets scripts/secrets/dump.sh
+
 check-terraform-changes-environments:
 	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
 	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
@@ -212,8 +215,12 @@ health-check-all: ansible/inventory-list.json
 	goss -g test/goss/remote/group-health.yaml --vars ansible/inventory-list.json validate
 
 clean:
-	rm ~/.ssh/id_ae_infra*
+	rm -f ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
+	rm -rf secrets/
+
+secrets-test: secrets
+	printenv
 
 .PHONY: \
 	images setup-terraform setup-node setup-monitoring setup \
