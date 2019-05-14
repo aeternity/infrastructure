@@ -11,7 +11,7 @@ variable "main_gateway_dns" {
 }
 
 module "aws_deploy-main-us-west-2" {
-  source            = "../modules/cloud/aws/deploy"
+  source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "api_main"
   bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
@@ -41,7 +41,7 @@ module "aws_deploy-main-us-west-2" {
 }
 
 module "aws_deploy-main-eu-north-1" {
-  source            = "../modules/cloud/aws/deploy"
+  source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "api_main"
   bootstrap_version = "${var.bootstrap_version}"
   vault_role        = "ae-node"
@@ -76,7 +76,7 @@ module "aws_gateway" {
     aws = "aws.us-east-1"
   }
 
-  source   = "../modules/cloud/aws/gateway"
+  source   = "github.com/aeternity/terraform-aws-api-gateway?ref=v1.0.0"
   dns_zone = "${var.dns_zone}"
 
   loadbalancers = [
