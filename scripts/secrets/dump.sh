@@ -16,14 +16,13 @@ if [ -z "${VAULT_TOKEN:-}" ]; then
 fi
 
 function dump_var {
-    # echo 'export' $1'="'${!1}'"' >> $OUTPUT_FILE
     echo ${!1} > $SECRETS_OUTPUT_DIR/${1:?}
     echo "Written:" $SECRETS_OUTPUT_DIR/${1:?}
 }
 
 mkdir -p $SECRETS_OUTPUT_DIR
 
-# dump based on Vault (token) policy
+# Dump based on Vault (token) policy
 POLICY=$(vault token lookup -format=json | jq -r '.data.policies | .[]' | grep -v default)
 POLICY_FILE=${DIR}/policies/$POLICY.sh
 if [ -e $POLICY_FILE ]; then
