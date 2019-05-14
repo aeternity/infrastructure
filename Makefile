@@ -17,23 +17,15 @@ secrets: $(SECRETS_OUTPUT_DIR)
 envshell: secrets
 	@envshell $(SECRETS_OUTPUT_DIR)
 
-check-terraform-changes-environments: secrets
-	cd terraform/environments && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/environments && $(ENV) terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
-
-check-terraform-changes-gateway: secrets
-	cd terraform/gateway && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/gateway && $(ENV) terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
+check-terraform-changes-%: secrets
+	cd terraform/$* && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/$* && $(ENV) terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
 
 check-terraform-changes: check-terraform-changes-environments check-terraform-changes-gateway
 
-setup-terraform-environments: secrets
-	cd terraform/environments && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/environments && $(ENV) terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
-
-setup-terraform-gatewway: secrets
-	cd terraform/gateway && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/gateway && $(ENV) terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
+setup-terraform-%: secrets
+	cd terraform/$* && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/$* && $(ENV) terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
 
 setup-terraform: setup-terraform-environments setup-terraform-gatewway
 
@@ -181,11 +173,8 @@ integration-tests: integration-tests-run integration-tests-cleanup
 lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
 
-terraform-validate-environments:
-	cd terraform/environments && terraform init && terraform validate && terraform fmt -check=true -diff=true
-
-terraform-validate-gateway:
-	cd terraform/gateway && terraform init && terraform validate && terraform fmt -check=true -diff=true
+terraform-validate-%:
+	cd terraform/$* && terraform init && terraform validate && terraform fmt -check=true -diff=true
 
 terraform-validate: terraform-validate-environments terraform-validate-gateway
 
