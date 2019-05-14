@@ -10,7 +10,8 @@ DIR=`dirname $SCRIPT_PATH`
 source ${DIR}/authenticate.sh
 
 # Early exit if in non-authenticated environment
-if [ -z "$VAULT_TOKEN" ]; then
+if [ -z "${VAULT_TOKEN:-}" ]; then
+    echo "Not authenticated (no VAULT_TOKEN). Won't dump secrets."
     exit 0
 fi
 

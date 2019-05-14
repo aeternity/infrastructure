@@ -48,5 +48,5 @@ ADD docker/ssh_config /etc/ssh/ssh_config
 ADD . /infrastructure
 WORKDIR /infrastructure
 
-ENTRYPOINT ["/infrastructure/docker-entrypoint.sh"]
+ENV SHELL /bin/bash
 CMD ["/bin/bash", "--login"]

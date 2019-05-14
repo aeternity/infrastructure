@@ -6,40 +6,47 @@ BACKUP_DIR ?= /tmp/mnesia_backups
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
 SEED_CHECK_ENVS = main uat next
+SECRETS_OUTPUT_DIR = /secrets
+ENV = envdir $(SECRETS_OUTPUT_DIR)
 
-secrets: scripts/secrets/dump.sh
-	SECRETS_OUTPUT_DIR=secrets scripts/secrets/dump.sh
+$(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
+	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
 
-check-terraform-changes-environments:
-	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
+secrets: $(SECRETS_OUTPUT_DIR)
 
-check-terraform-changes-gateway:
-	cd terraform/gateway && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/gateway && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
+envshell: secrets
+	@envshell $(SECRETS_OUTPUT_DIR)
+
+check-terraform-changes-environments: secrets
+	cd terraform/environments && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/environments && $(ENV) terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
+
+check-terraform-changes-gateway: secrets
+	cd terraform/gateway && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/gateway && $(ENV) terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
 
 check-terraform-changes: check-terraform-changes-environments check-terraform-changes-gateway
 
-setup-terraform-environments:
-	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/environments && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
+setup-terraform-environments: secrets
+	cd terraform/environments && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/environments && $(ENV) terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
 
-setup-terraform-gatewway:
-	cd terraform/gateway && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/gateway && terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
+setup-terraform-gatewway: secrets
+	cd terraform/gateway && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
+	cd terraform/gateway && $(ENV) terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
 
 setup-terraform: setup-terraform-environments setup-terraform-gatewway
 
-setup-node: check-deploy-env
-	cd ansible && ansible-playbook \
+setup-node: check-deploy-env secrets
+	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e vault_addr=$(VAULT_ADDR) \
 		-e env=$(DEPLOY_ENV) \
 		setup.yml
 
-setup-monitoring: check-deploy-env
-	cd ansible && ansible-playbook \
+setup-monitoring: check-deploy-env secrets
+	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e env=$(DEPLOY_ENV) \
@@ -47,7 +54,7 @@ setup-monitoring: check-deploy-env
 
 setup: setup-node setup-monitoring
 
-deploy: check-deploy-env
+deploy: check-deploy-env secrets
 ifeq ($(DEPLOY_DB_VERSION),)
 	$(error DEPLOY_DB_VERSION should be provided)
 endif
@@ -62,7 +69,7 @@ ifneq ($(DEPLOY_REGION),)
 	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
 endif
 
-	cd ansible && ansible-playbook \
+	cd ansible && $(ENV) ansible-playbook \
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e package=$(PACKAGE) \
@@ -73,29 +80,29 @@ endif
 		-e rolling_update="${ROLLING_UPDATE}" \
 		deploy.yml
 
-attach: check-deploy-env
+attach: check-deploy-env secrets
 	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
 ifneq ($(DEPLOY_REGION),)
 	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
 endif
-		cd ansible && ansible-playbook \
+		cd ansible && $(ENV) ansible-playbook \
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
 		attach.yml
 
-migrate: check-deploy-env
-	cd ansible && ansible-playbook \
+migrate: check-deploy-env secrets
+	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
 		migrate-storage.yml
 
-manage-node: check-deploy-env
+manage-node: check-deploy-env secrets
 ifndef CMD
 	$(error CMD is undefined, supported commands: start, stop, restart, ping)
 endif
-	cd ansible && ansible-playbook \
+	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
@@ -103,20 +110,20 @@ endif
 		-e cmd=$(CMD) \
 		manage-node.yml
 
-reset-net: check-deploy-env
-	cd ansible && ansible-playbook \
+reset-net: check-deploy-env secrets
+	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		reset-net.yml
 
-mnesia_snapshot:
+mnesia_snapshot: secrets
 ifeq ($(BACKUP_DB_VERSION),)
 	$(error BACKUP_DB_VERSION should be provided)
 endif
 ifeq ($(BACKUP_ENV),)
 	$(error BACKUP_ENV should be provided)
 endif
-	cd ansible && ansible-playbook \
+	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e download_dir=$(BACKUP_DIR) \
@@ -125,8 +132,8 @@ endif
 		-e env=$(BACKUP_ENV) \
 		mnesia_snapshot.yml
 
-provision: check-deploy-env
-	cd ansible && ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
+provision: check-deploy-env secrets
+	cd ansible && $(ENV) ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 	-e ansible_python_interpreter=/usr/bin/python3 \
 	-e env=$(DEPLOY_ENV) \
 	-e vault_addr=$(VAULT_ADDR) \
@@ -138,8 +145,8 @@ provision: check-deploy-env
 	@ssh-keygen -t ed25519 -N "" -f $@
 
 .PRECIOUS: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
-~/.ssh/id_ae_infra_ed25519-%-cert.pub: ~/.ssh/id_ae_infra_ed25519
-	@vault write -field=signed_key ssh/sign/$* ttl=$(VAULT_TOKENS_TTL) public_key=@$<.pub > $@
+~/.ssh/id_ae_infra_ed25519-%-cert.pub: ~/.ssh/id_ae_infra_ed25519 secrets
+	@$(ENV) vault write -field=signed_key ssh/sign/$* ttl=$(VAULT_TOKENS_TTL) public_key=@$<.pub > $@
 
 cert-%: ~/.ssh/id_ae_infra_ed25519-%-cert.pub
 	@
@@ -151,23 +158,23 @@ ssh-%: cert-%
 
 ssh: ssh-aeternity
 
-# TODO also add ansible idempotent tests here
-unit-tests:
-	cd terraform/environments && terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/environments && terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
-
-integration-tests-run:
+integration-tests-run: secrets
 	cd test/terraform && terraform init
-	cd test/terraform && terraform apply -parallelism=20 --auto-approve
+	cd test/terraform && $(ENV) terraform apply -parallelism=20 --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
-	cd ansible && ansible-playbook health-check.yml --limit=tag_envid_$(TF_VAR_envid) -e env=test
+	cd ansible && $(ENV) ansible-playbook \
+		--limit=tag_envid_$(TF_VAR_envid) \
+		-e env=test \
+		health-check.yml
 
-health-check-env-local:
-	cd ansible && ansible-playbook health-check.yml --limit=tag_env_$(DEPLOY_ENV) \
-	-e env=$(DEPLOY_ENV) \
+health-check-env-local: secrets
+	cd ansible && $(ENV) ansible-playbook \
+		--limit=tag_env_$(DEPLOY_ENV) \
+		-e env=$(DEPLOY_ENV) \
+		health-check.yml
 
-integration-tests-cleanup:
-	cd test/terraform && terraform destroy -parallelism=20 --auto-approve
+integration-tests-cleanup: secrets
+	cd test/terraform && $(ENV) terraform destroy -parallelism=20 --auto-approve
 
 integration-tests: integration-tests-run integration-tests-cleanup
 
@@ -197,8 +204,8 @@ ifndef DEPLOY_ENV
 	$(error DEPLOY_ENV is undefined)
 endif
 
-ansible/inventory-list.json:
-	cd ansible && ansible-inventory --list > inventory-list.json
+ansible/inventory-list.json: secrets
+	cd ansible && $(ENV) ansible-inventory --list > inventory-list.json
 
 list-inventory: ansible/inventory-list.json
 	cat ansible/inventory-list.json | ansible/scripts/dump_inventory.py
@@ -217,13 +224,10 @@ health-check-all: ansible/inventory-list.json
 clean:
 	rm -f ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
-	rm -rf secrets/
-
-secrets-test: secrets
-	printenv
+	rm -rf $(SECRETS_OUTPUT_DIR)
 
 .PHONY: \
-	images setup-terraform setup-node setup-monitoring setup \
+	secrets images setup-terraform setup-node setup-monitoring setup \
 	setup-terraform-gatewway setup-terraform-environments \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
 	check-seed-peers check-deploy-env list-inventory \
