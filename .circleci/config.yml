@@ -58,7 +58,7 @@ commands:
       - run:
           name: Login to Docker Hub
           command: |
-            envdir /secrets docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker login -u $(</secrets/DOCKER_USER) -p $(< /secrets/DOCKER_PASS)
 
   integration_tests:
     description: "Integration Tests"
