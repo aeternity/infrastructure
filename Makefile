@@ -174,7 +174,9 @@ lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
 
 terraform-validate-%:
-	cd terraform/$* && terraform init && terraform validate && terraform fmt -check=true -diff=true
+	cd terraform/$* && terraform init -backend=false
+	cd terraform/$* && terraform fmt -check=true -diff=true
+	cd terraform/$* && terraform validate -var vault_addr=localhost
 
 terraform-validate: terraform-validate-environments terraform-validate-gateway
 
