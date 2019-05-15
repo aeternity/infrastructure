@@ -21,7 +21,7 @@ node_config:
     peer_password: secret
 
   chain:
-    persist: true
+    persist: false
     db_path: "./db{{ db_version|mandatory }}"
     hard_forks:
       "1": 0
