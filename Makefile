@@ -6,8 +6,10 @@ BACKUP_DIR ?= /tmp/mnesia_backups
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
 SEED_CHECK_ENVS = main uat next
-SECRETS_OUTPUT_DIR = /secrets
+SECRETS_OUTPUT_DIR ?= /secrets
 ENV = envdir $(SECRETS_OUTPUT_DIR)
+VAULT_ADDR ?= $(AE_VAULT_ADDR)
+TF_COMMON_PARAMS = -var vault_addr=$(VAULT_ADDR) -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
 
 $(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
 	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
@@ -19,13 +21,13 @@ envshell: secrets
 
 check-terraform-changes-%: secrets
 	cd terraform/$* && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/$* && $(ENV) terraform plan -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 -detailed-exitcode
+	cd terraform/$* && $(ENV) terraform plan $(TF_COMMON_PARAMS) -detailed-exitcode
 
 check-terraform-changes: check-terraform-changes-environments check-terraform-changes-gateway
 
 setup-terraform-%: secrets
 	cd terraform/$* && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/$* && $(ENV) terraform apply -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20 --auto-approve
+	cd terraform/$* && $(ENV) terraform apply $(TF_COMMON_PARAMS) --auto-approve
 
 setup-terraform: setup-terraform-environments setup-terraform-gatewway
 
@@ -152,7 +154,7 @@ ssh: ssh-aeternity
 
 integration-tests-run: secrets
 	cd test/terraform && terraform init
-	cd test/terraform && $(ENV) terraform apply -parallelism=20 --auto-approve
+	cd test/terraform && $(ENV) terraform apply $(TF_COMMON_PARAMS) --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
 	cd ansible && $(ENV) ansible-playbook \
 		--limit=tag_envid_$(TF_VAR_envid) \
@@ -166,7 +168,7 @@ health-check-env-local: secrets
 		health-check.yml
 
 integration-tests-cleanup: secrets
-	cd test/terraform && $(ENV) terraform destroy -parallelism=20 --auto-approve
+	cd test/terraform && $(ENV) terraform destroy $(TF_COMMON_PARAMS) --auto-approve
 
 integration-tests: integration-tests-run integration-tests-cleanup
 
