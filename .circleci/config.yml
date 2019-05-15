@@ -28,7 +28,7 @@ references:
     run:
       name: Pull current branch Docker image
       command: |
-        docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
+        docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_}
 
   setup_terraform: &setup_terraform
     run:
@@ -106,7 +106,7 @@ jobs:
           # Used in .circleci/docker-run.sh
           name: Build docker branch image
           command: |
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} .
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_} .
       - run:
           name: Configuration lint
           # Secrets are auto-imported by the docker entry-point
@@ -142,7 +142,7 @@ jobs:
           command: |
             source import-secrets.sh
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?}
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_}
 
   setup_terraform:
     <<: *container_config
@@ -173,7 +173,7 @@ jobs:
           name: Tag and push Docker "latest" image to DockerHub
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH:?} ${DOCKERHUB_REPO:?}:latest
+            docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_} ${DOCKERHUB_REPO:?}:latest
             docker push ${DOCKERHUB_REPO:?}:latest
       - *fail_notification
 
@@ -187,8 +187,9 @@ jobs:
           name: Tag and push Docker image to DockerHub on Git tags
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} .
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} -t ${DOCKERHUB_REPO:?}:stable .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?}
+            docker push ${DOCKERHUB_REPO:?}:stable
       - *fail_notification
 
   check_seed_peers:
@@ -222,7 +223,7 @@ jobs:
         - run:
             name: Setup integration tests parameters
             command: |
-              echo "export TF_VAR_bootstrap_version=stable" >> $BASH_ENV
+              echo "export TF_VAR_bootstrap_version=${CIRCLE_TAG:?}" >> $BASH_ENV
               echo "export TF_VAR_package=https://releases.ops.aeternity.com/aeternity-latest-ubuntu-x86_64.tar.gz" >> $BASH_ENV
         - integration_tests
         - *fail_notification
@@ -261,26 +262,32 @@ workflows:
   check_deploy:
     jobs:
       - build_check:
+          context: ae-infra-manage
           requires: []
 
       - stable_integration_tests:
+          context: ae-infra-manage
           requires:
             - build_check
           filters:
             branches:
-              only: stable
+              ignore: /.*/
+            tags:
+              only: /^v.*$/
 
       - branch_integration_tests:
+          context: ae-infra-manage
           requires: []
 
       - check_terraform_changes:
+          context: ae-infra-manage
           filters:
             branches:
               ignore:
                 - master
-                - stable
 
       - setup_terraform:
+          context: ae-infra-manage
           requires:
             - build_check
             - branch_integration_tests
@@ -289,6 +296,7 @@ workflows:
               only: master
 
       - check_seed_peers:
+          context: ae-infra-manage
           requires:
             - setup_terraform
           filters:
@@ -296,6 +304,7 @@ workflows:
               only: master
 
       - docker_push_latest:
+          context: ae-infra-manage
           requires:
             - build_check
             - branch_integration_tests
@@ -304,6 +313,7 @@ workflows:
               only: master
 
       - docker_push_tag:
+          context: ae-infra-manage
           filters:
             branches:
               ignore: /.*/
@@ -320,8 +330,10 @@ workflows:
               only:
                 - master
     jobs:
-      - chain_snapshot_uat
-      - chain_snapshot_main
+      - chain_snapshot_uat:
+          context: ae-infra-manage
+      - chain_snapshot_main:
+          context: ae-infra-manage
 
   daily_check_deploy:
     triggers:
@@ -333,6 +345,7 @@ workflows:
                 - master
     jobs:
       - branch_integration_tests:
+          context: ae-infra-manage
           requires: []
 
   hourly_seeds_check:
@@ -344,4 +357,5 @@ workflows:
               only:
                 - master
     jobs:
-      - check_seed_peers
+      - check_seed_peers:
+          context: ae-infra-manage
