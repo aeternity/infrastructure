@@ -1,6 +1,3 @@
-#!/bin/bash
-set -Eeuo pipefail
-
 VAULT_SECRETS_ROLE=${VAULT_SECRETS_ROLE:-ae-inventory}
 
 AWS_CREDS=$(vault write -f aws/sts/${VAULT_SECRETS_ROLE} ttl=${VAULT_TOKENS_TTL})

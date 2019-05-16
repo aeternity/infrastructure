@@ -1,6 +1,3 @@
-#!/bin/bash
-set -Eeuo pipefail
-
 VAULT_SECRETS_ROLE=${VAULT_SECRETS_ROLE:-ae-fleet-manager}
 
 source ${DIR}/policies/ci.sh
