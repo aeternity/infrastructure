@@ -27,7 +27,7 @@ provider "aws" {
 }
 
 module "aws_deploy-test" {
-  source              = "../../terraform/modules/cloud/aws/deploy"
+  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env                 = "${var.env_name}"
   envid               = "${var.envid}"
   bootstrap_version   = "${var.bootstrap_version}"

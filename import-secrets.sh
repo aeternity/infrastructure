@@ -10,6 +10,8 @@ VAULT_GITHUB_TOKEN=${VAULT_GITHUB_TOKEN:-$AE_VAULT_GITHUB_TOKEN}
 VAULT_AUTH_TOKEN=${VAULT_AUTH_TOKEN:-$AE_VAULT_AUTH_TOKEN}
 VAULT_TOKENS_TTL=${VAULT_TOKENS_TTL:-$AE_VAULT_TOKENS_TTL}
 
+export GITHUB_TOKEN=${GITHUB_TOKEN:-$VAULT_GITHUB_TOKEN}
+
 # Vault address secret used by Terraform, because it cannot be sourced in TF
 if [ -n "$VAULT_ADDR" ]; then
     export VAULT_ADDR
@@ -39,6 +41,8 @@ if [ -n "$VAULT_TOKEN" ]; then
 
     export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.gcp.json
     vault read -field json secret/google/${VAULT_SECRETS_ROLE} > $GOOGLE_APPLICATION_CREDENTIALS
+
+    export GITHUB_API_TOKEN=$(vault read -field=value secret/github/prod/token)
 
     if [ "$VAULT_SECRETS_ROLE" = "ae-fleet-manager" ]; then
         DOCKERHUB_CREDS=$(vault read secret/dockerhub/prod)
