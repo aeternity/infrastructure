@@ -334,28 +334,3 @@ workflows:
           context: ae-infra-manage
       - chain_snapshot_main:
           context: ae-infra-manage
-
-  daily_check_deploy:
-    triggers:
-      - schedule:
-          cron: "0 12 * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - branch_integration_tests:
-          context: ae-infra-manage
-          requires: []
-
-  hourly_seeds_check:
-    triggers:
-      - schedule:
-          cron: "0 * * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - check_seed_peers:
-          context: ae-infra-manage
