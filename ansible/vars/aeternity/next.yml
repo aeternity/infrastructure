@@ -37,7 +37,7 @@ node_config:
       edge_bits: 15
       miners:
         - executable: mean15-generic
-          extra_args: "-t {{ ansible_processor_vcpus }}"
+          extra_args: "-t 1"
 
   logging:
     level: warning
