@@ -45,35 +45,21 @@ references:
       name: Check seed peers
       command: make check-seed-peers-all
 
-  fail_notification: &fail_notification
-    run:
-      name: Send failure notification
-      environment:
-        NOTIFY_BRANCH: master
-        HOOK_TEMPLATE: |
-          {
-            "text": "CircleCI job **%s** failed on branch **%s** by @%s",
-            "attachments": [
-              {
-                "title": "Build Link",
-                "title_link": "%s",
-                "color": "#FAD6D6"
-              }
-            ]
-          }
-      command: |
-        if [ -n "$CIRCLE_BRANCH" -a "$CIRCLE_BRANCH" = "${NOTIFY_BRANCH:?}" ]; then
-          HOOK_DATA=$(printf "$HOOK_TEMPLATE" "${CIRCLE_JOB:?}" "${CIRCLE_BRANCH:?}" "${CIRCLE_USERNAME:-unknown}" "${CIRCLE_BUILD_URL:?}")
-          curl -X POST -H 'Content-Type: application/json' ${ROCKET_HOOK_DEVOPS_URL:?} --data "${HOOK_DATA:?}"
-        fi
-      when: on_fail
-
-  setup_secrets: &setup_secrets
-    run:
-      name: Setup Environment
-      command: echo "source import-secrets.sh" >> $BASH_ENV
-
 commands:
+  setup_secrets:
+    steps:
+      - run:
+          name: Setup Secrets
+          command: make secrets
+
+  docker_login:
+    steps:
+      - setup_secrets
+      - run:
+          name: Login to Docker Hub
+          command: |
+            docker login -u $(</secrets/DOCKER_USER) -p $(< /secrets/DOCKER_PASS)
+
   integration_tests:
     description: "Integration Tests"
     steps:
@@ -85,6 +71,32 @@ commands:
           name: Integration env cleanup
           command: |
             make integration-tests-cleanup TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
+          when: on_fail
+
+  fail_notification:
+    description: Sends notification to RocketChat devops alert group on failure (master only)
+    steps:
+      - setup_secrets
+      - run:
+          name: Send failure notification
+          environment:
+            NOTIFY_BRANCH: master
+            HOOK_TEMPLATE: |
+              {
+                "text": "CircleCI job **%s** failed on branch **%s** by @%s",
+                "attachments": [
+                  {
+                    "title": "Build Link",
+                    "title_link": "%s",
+                    "color": "#FAD6D6"
+                  }
+                ]
+              }
+          command: |
+            if [ -n "$CIRCLE_BRANCH" -a "$CIRCLE_BRANCH" = "${NOTIFY_BRANCH:?}" ]; then
+              HOOK_DATA=$(printf "$HOOK_TEMPLATE" "${CIRCLE_JOB:?}" "${CIRCLE_BRANCH:?}" "${CIRCLE_USERNAME:-unknown}" "${CIRCLE_BUILD_URL:?}")
+              envdir /secrets curl -X POST -H 'Content-Type: application/json' ${ROCKET_HOOK_DEVOPS_URL:?} --data "${HOOK_DATA:?}"
+            fi
           when: on_fail
 
 jobs:
@@ -137,26 +149,23 @@ jobs:
               -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key=
+      - docker_login
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
-            source import-secrets.sh
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_}
 
   setup_terraform:
     <<: *container_config
     steps:
-      - *setup_secrets
       - *setup_terraform
-      - *fail_notification
+      - fail_notification
 
   check_terraform_changes:
     <<: *container_config
     working_directory: /src
     steps:
       - checkout
-      - *setup_secrets
       - run:
           name: Fail on Terraform changes
           command: |
@@ -167,37 +176,34 @@ jobs:
     steps:
       - checkout
       - *install_vault
-      - *setup_secrets
       - *pull_current_image
+      - docker_login
       - run:
           name: Tag and push Docker "latest" image to DockerHub
           command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_} ${DOCKERHUB_REPO:?}:latest
             docker push ${DOCKERHUB_REPO:?}:latest
-      - *fail_notification
+      - fail_notification
 
   docker_push_tag:
     <<: *machine_config
     steps:
       - checkout
       - *install_vault
-      - *setup_secrets
+      - docker_login
       - run:
           name: Tag and push Docker image to DockerHub on Git tags
           command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} -t ${DOCKERHUB_REPO:?}:stable .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?}
             docker push ${DOCKERHUB_REPO:?}:stable
-      - *fail_notification
+      - fail_notification
 
   check_seed_peers:
     <<: *container_config
     steps:
-      - *setup_secrets
       - *check_seed_peers
-      - *fail_notification
+      - fail_notification
 
   # Checks the compatibility of latest package build and master bootstrap
   branch_integration_tests:
@@ -205,13 +211,12 @@ jobs:
     working_directory: /src
     steps:
       - checkout
-      - *setup_secrets
       - run:
           name: Setup integration tests parameters
           command: |
             echo "export TF_VAR_bootstrap_version=${CIRCLE_BRANCH:?}" >> $BASH_ENV
       - integration_tests
-      - *fail_notification
+      - fail_notification
 
   # Checks the compatibility of latest package release and stable bootstrap
   stable_integration_tests:
@@ -219,19 +224,17 @@ jobs:
       working_directory: /src
       steps:
         - checkout
-        - *setup_secrets
         - run:
             name: Setup integration tests parameters
             command: |
               echo "export TF_VAR_bootstrap_version=${CIRCLE_TAG:?}" >> $BASH_ENV
               echo "export TF_VAR_package=https://releases.ops.aeternity.com/aeternity-latest-ubuntu-x86_64.tar.gz" >> $BASH_ENV
         - integration_tests
-        - *fail_notification
+        - fail_notification
 
   chain_snapshot_uat:
     <<: *container_config
     steps:
-      - *setup_secrets
       - run:
           name: Snapshot of environment blockchain
           no_output_timeout: 2h
@@ -246,7 +249,6 @@ jobs:
   chain_snapshot_main:
     <<: *container_config
     steps:
-      - *setup_secrets
       - run:
           name: Snapshot of environment blockchain
           no_output_timeout: 2h

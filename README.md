@@ -42,7 +42,7 @@ ssh aeternity@192.168.1.1
 ## Credentials
 
 All secrets are managed with [Hashicorp Vault](https://www.vaultproject.io),
-so that only authentication to Vault must be configured explicitly, it needs an address, authentication secret(s) and role:
+so that only authentication to Vault must be configured explicitly, it needs an address and authentication secret(s):
 
 - Vault address (can be found in the private communication channels)
     * The Vault server address can be set by `AE_VAULT_ADDR` environment variable.
@@ -51,20 +51,16 @@ so that only authentication to Vault must be configured explicitly, it needs an 
     set as `AE_VAULT_GITHUB_TOKEN` environment variable. Any valid GitHub access token with the read:org scope can be used for authentication.
     - [AppRole Auth](https://www.vaultproject.io/docs/auth/approle.html) set as `VAULT_ROLE_ID` and `VAULT_SECRET_ID` environment variables.
     - [Token Auth](https://www.vaultproject.io/docs/auth/token.html) by setting `VAULT_AUTH_TOKEN` environment variable (translates to `VAULT_TOKEN` by docker entry point). `VAULT_AUTH_TOKEN` is highest priority compared to other credentials.
-- Vault credentials role by setting `VAULT_SECRETS_ROLE` (defaults to `ae-inventory`)
-    - `ae-inventory` allows SSH as `aeternity` user to all nodes and using Ansible dynamic inventories, together allowing a deployment. All developers are authorized.
-    - `ae-fleet-manager` allows SSH as `master` user to all nodes and managing the infrastructure (AWS and GCP) - creating, dropping and changing environments (running Terraform). Only devops.
+
+Access to secrets is automatically set based on Vault policies of the authenticated account.
 
 ### Token refresh
 
-Vault tokens expire after a certain amount of time. To continue working one MUST refresh the token. The only workable option is to source the `refresh-secrets.sh` script.
+Vault tokens expire after a certain amount of time. To continue working one MUST refresh the token.
 
 ```
-cd /infrastructure
-source refresh-secrets.sh
+make -B secrets
 ```
-
-***Note*** Using `source` is the only way to have all variables set-up correctly. Running the script with `bash`, `./`, or adding the commands as Makefile rule **WILL NOT** work. Only `source` will be executed in the same shell process as your active terminal. Running it in any other way will not set required variables and your Vault session will be broken.
 
 ## Docker image
 
@@ -319,7 +315,7 @@ This will run infrastructure container link it to debian container.
 
 ```bash
 docker-compose up -d
-#attach to local infrastrcuture container
+#attach to local infrastructure container
 docker attach infrastructure-local
 ./local_playbook_run.sh deploy.yml # + add required parameters
 ```

@@ -10,3 +10,4 @@ ansible/callback_plugins/datadog_callback.yml
 .terraform
 test/terraform/terraform.tfstate*
 ansible/inventory-list.json
+secrets/*
