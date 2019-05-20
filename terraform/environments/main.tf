@@ -5,7 +5,7 @@ variable "vault_addr" {
 module "aws_deploy-main-ap-southeast-1" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "main"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -32,7 +32,7 @@ module "aws_deploy-main-ap-southeast-1" {
 module "aws_deploy-main-eu-north-1" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "main"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -61,7 +61,7 @@ module "aws_deploy-main-eu-north-1" {
 module "aws_deploy-main-us-west-2" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "main"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -88,7 +88,7 @@ module "aws_deploy-main-us-west-2" {
 module "aws_deploy-main-us-east-2" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "main"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -116,7 +116,7 @@ module "aws_deploy-ap-southeast-1" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "uat"
   color             = "blue"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -140,7 +140,7 @@ module "aws_deploy-eu-central-1" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "uat"
   color             = "blue"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -166,7 +166,7 @@ module "aws_deploy-us-west-2" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "uat"
   color             = "green"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -190,7 +190,7 @@ module "aws_deploy-uat-eu-north-1" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "uat"
   color             = "green"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -215,7 +215,7 @@ module "aws_deploy-uat-eu-north-1" {
 module "aws_deploy-dev1-eu-west-2" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "dev1"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -237,7 +237,7 @@ module "aws_deploy-dev1-eu-west-2" {
 module "aws_deploy-dev2-eu-west-2" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "dev2"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -258,7 +258,7 @@ module "aws_deploy-dev2-eu-west-2" {
 module "aws_deploy-integration-eu-west-2" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "integration"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
@@ -280,7 +280,7 @@ module "aws_deploy-integration-eu-west-2" {
 module "aws_deploy-next-eu-west-2" {
   source            = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
   env               = "next"
-  bootstrap_version = "v2.0.1"
+  bootstrap_version = "v2.2.0"
   vault_role        = "ae-node"
   vault_addr        = "${var.vault_addr}"
 
