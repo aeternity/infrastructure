@@ -21,7 +21,7 @@ module "aws_deploy-main-ap-southeast-1" {
   additional_storage_size = 30
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.4.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-2.5.0-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -48,7 +48,7 @@ module "aws_deploy-main-eu-north-1" {
   additional_storage_size = 30
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.4.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-2.5.0-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -77,7 +77,7 @@ module "aws_deploy-main-us-west-2" {
   additional_storage_size = 30
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.4.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-2.5.0-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -104,7 +104,7 @@ module "aws_deploy-main-us-east-2" {
   additional_storage_size = 30
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.4.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-2.5.0-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -128,7 +128,7 @@ module "aws_deploy-ap-southeast-1" {
   ami_name      = "aeternity-ubuntu-16.04-v1549009934"
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.4.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-3.0.0-rc.1-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -152,7 +152,7 @@ module "aws_deploy-eu-central-1" {
   ami_name      = "aeternity-ubuntu-16.04-v1549009934"
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.4.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-3.0.0-rc.1-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -178,7 +178,7 @@ module "aws_deploy-us-west-2" {
   ami_name      = "aeternity-ubuntu-16.04-v1549009934"
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.4.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-3.0.0-rc.1-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -202,7 +202,7 @@ module "aws_deploy-uat-eu-north-1" {
   ami_name      = "aeternity-ubuntu-16.04-v1549009934"
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.4.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-3.0.0-rc.1-ubuntu-x86_64.tar.gz"
   }
 
   providers = {

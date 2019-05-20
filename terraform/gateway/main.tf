@@ -32,7 +32,7 @@ module "aws_deploy-main-us-west-2" {
   additional_storage_size = 30
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.3.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-2.5.0-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
@@ -63,7 +63,7 @@ module "aws_deploy-main-eu-north-1" {
   additional_storage_size = 30
 
   aeternity = {
-    package = "https://releases.ops.aeternity.com/aeternity-2.3.0-ubuntu-x86_64.tar.gz"
+    package = "https://releases.ops.aeternity.com/aeternity-2.5.0-ubuntu-x86_64.tar.gz"
   }
 
   providers = {
