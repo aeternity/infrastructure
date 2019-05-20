@@ -33,6 +33,7 @@ node_config:
   mining:
     autostart: true
     beneficiary: "ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688"
+    expected_mine_rate: 30000
     cuckoo:
       edge_bits: 15
       miners:
