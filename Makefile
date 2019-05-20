@@ -6,7 +6,7 @@ BACKUP_DIR ?= /tmp/mnesia_backups
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
 SEED_CHECK_ENVS = main uat next
-SECRETS_OUTPUT_DIR ?= /secrets
+SECRETS_OUTPUT_DIR ?= /tmp/secrets
 ENV = envdir $(SECRETS_OUTPUT_DIR)
 VAULT_ADDR ?= $(AE_VAULT_ADDR)
 TF_COMMON_PARAMS = -var vault_addr=$(VAULT_ADDR) -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
