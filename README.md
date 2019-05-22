@@ -1,8 +1,13 @@
 # Infrastructure management automation for æternity nodes
 
-Infrastructure is automatically created and managed by Ansible playbooks run by CircleCI.
-Only changes to master branch are deployed.
-Infrastructure is orchestrated with [Terraform](https://www.terraform.io).
+Infrastructure is orchestrated with [Terraform](https://www.terraform.io) in the following repositories:
+- [Mainnet seed nodes](https://github.com/aeternity/terraform-aws-mainnet)
+- [Mainnet API gateway](https://github.com/aeternity/terraform-aws-mainnet-api)
+- [Testnet seed and miner nodes](https://github.com/aeternity/terraform-aws-testnet)
+- [Devnet environments (integration, next, dev1, dev2, etc...)](https://github.com/aeternity/terraform-aws-devnet)
+- [Miscellaneous services (release repository, backups, etc...)](https://github.com/aeternity/terraform-aws-misc)
+
+This repository contains Ansible playbooks and scripts to bootstrap, manage, maintenance and deploy nodes.
 Ansible playbooks are run against [dynamic host inventories](http://docs.ansible.com/ansible/latest/user_guide/intro_dynamic_inventory.html).
 
 Below documentation is meant for manual testing and additional details. It's already integrated in CircleCI workflow.
@@ -145,20 +150,15 @@ make list-inventory
 
 Inventory data is stored in local file `ansible/inventory-list.json`. To refresh it you can `make -B list-inventory`
 
-### Infrastructure setup
+### Setup
 
-An environment infrastructure can be setup with `make setup`,
-for example to setup `integration` environment infrastructure run:
+To setup environment of nodes, `make setup` can be used,
+for example to setup `integration` environment nodes run:
 ```bash
 make setup DEPLOY_ENV=integration
 ```
 
-Also the configuration is in process of migration to Terraform, thus it should be run as well:
-```bash
-make setup-terraform
-```
-
-To create new environment edit the `ansible/environments.yml` playbook and `terraform/main.tf`.
+Nodes are usually already setup during the bootstrap process of environment creation and maintenance.
 
 ### Manage nodes
 
@@ -322,18 +322,21 @@ docker attach infrastructure-local
 
 Use <kbd>CTRL</kbd> + <kbd>p</kbd>, <kbd>q</kbd> sequence to detach from the container.
 
-### Terraform configuration
+### Integration tests
 
-To test Terraform configuration changes, a new test configuration can be created then run.
-Another option would be changing the `test/terraform/test.tf` configuration and applying it:
+As this repository Anisble playbooks and scripts are used to bootstrap the infrastructure, integration tests are mandatory.
+By default it tests the integration of `master` branch of this repository with the latest stable version of deploy Terraform module.
+In the continuous integration service (CircleCI), the integration tests will be run against the branch under test.
+
+It can be run by:
 
 ```
 cd test/terraform
 terraform init && terraform apply
 ```
 
-After the fleet is create the expected functionality should be validated by using the AWS console or CLI.
-For fast health check the ansible playbook can be used, note that the above Terraform configuration creates an environment with name `test`:
+After the fleet is created the expected functionality should be validated by using the AWS console or CLI.
+For fast health check the Ansible playbook can be run, note that the above Terraform configuration creates an environment with name `test`:
 
 ```bash
 cd ansible && ansible-playbook health-check.yml --limit=tag_env_test
@@ -355,6 +358,12 @@ make integration-tests
 
 ```bash
 make integration-tests TF_VAR_envid=tf_test_my_test_env
+```
+
+To run the tests against your branch locally, first push your branch to the remote and then:
+
+```bash
+make integration-tests TF_VAR_envid=tf_test_my_test_env TF_VAR_bootstrap_version=my_branch
 ```
 
 ### CircleCI configuration

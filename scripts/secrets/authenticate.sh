@@ -11,10 +11,8 @@ VAULT_GITHUB_TOKEN=${VAULT_GITHUB_TOKEN:-$AE_VAULT_GITHUB_TOKEN}
 VAULT_AUTH_TOKEN=${VAULT_AUTH_TOKEN:-$AE_VAULT_AUTH_TOKEN}
 VAULT_TOKENS_TTL=${VAULT_TOKENS_TTL:-$AE_VAULT_TOKENS_TTL}
 
-# Vault address secret used by Terraform, because it cannot be sourced in TF
 if [ -n "$VAULT_ADDR" ]; then
     export VAULT_ADDR
-    export TF_VAR_vault_addr=$VAULT_ADDR
 fi
 
 if [ -n "$VAULT_GITHUB_TOKEN" ]; then
