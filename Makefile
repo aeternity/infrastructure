@@ -19,18 +19,6 @@ secrets: $(SECRETS_OUTPUT_DIR)
 envshell: secrets
 	@envshell $(SECRETS_OUTPUT_DIR)
 
-check-terraform-changes-%: secrets
-	cd terraform/$* && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/$* && $(ENV) terraform plan $(TF_COMMON_PARAMS) -detailed-exitcode
-
-check-terraform-changes: check-terraform-changes-environments check-terraform-changes-gateway
-
-setup-terraform-%: secrets
-	cd terraform/$* && $(ENV) terraform init -lock-timeout=$(TF_LOCK_TIMEOUT)
-	cd terraform/$* && $(ENV) terraform apply $(TF_COMMON_PARAMS) --auto-approve
-
-setup-terraform: setup-terraform-environments setup-terraform-gatewway
-
 setup-node: check-deploy-env secrets
 	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
@@ -175,14 +163,7 @@ integration-tests: integration-tests-run integration-tests-cleanup
 lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
 
-terraform-validate-%:
-	cd terraform/$* && terraform init -backend=false
-	cd terraform/$* && terraform fmt -check=true -diff=true
-	cd terraform/$* && terraform validate -var vault_addr=localhost
-
-terraform-validate: terraform-validate-environments terraform-validate-gateway
-
-lint: lint-ansible terraform-validate
+lint: lint-ansible
 
 test/goss/remote/vars/seed-peers-%.yaml: ansible/inventory-list.json
 	cat ansible/inventory-list.json | python3 ansible/scripts/dump-seed-peers-keys.py --env $* > $@
@@ -220,8 +201,7 @@ clean:
 	rm -rf $(SECRETS_OUTPUT_DIR)
 
 .PHONY: \
-	secrets images setup-terraform setup-node setup-monitoring setup \
-	setup-terraform-gatewway setup-terraform-environments \
+	secrets images setup-node setup-monitoring setup \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
 	check-seed-peers check-deploy-env list-inventory \
 	check-seed-peers-% check-seed-peers-all \
