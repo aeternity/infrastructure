@@ -81,22 +81,9 @@ commands:
           name: Send failure notification
           environment:
             NOTIFY_BRANCH: master
-            HOOK_TEMPLATE: |
-              {
-                "text": "CircleCI job **%s** failed on branch **%s** by @%s",
-                "attachments": [
-                  {
-                    "title": "Build Link",
-                    "title_link": "%s",
-                    "color": "#FAD6D6"
-                  }
-                ]
-              }
           command: |
-            if [ -n "$CIRCLE_BRANCH" -a "$CIRCLE_BRANCH" = "${NOTIFY_BRANCH:?}" ]; then
-              HOOK_DATA=$(printf "$HOOK_TEMPLATE" "${CIRCLE_JOB:?}" "${CIRCLE_BRANCH:?}" "${CIRCLE_USERNAME:-unknown}" "${CIRCLE_BUILD_URL:?}")
-              envdir /tmp/secrets curl -X POST -H 'Content-Type: application/json' ${ROCKET_HOOK_DEVOPS_URL:?} --data "${HOOK_DATA:?}"
-            fi
+            export ROCKET_HOOK_URL="$(</tmp/secrets/ROCKET_HOOK_DEVOPS_URL)"
+            ./scripts/circleci/rocket_fail_notification.sh
           when: on_fail
 
 jobs:
