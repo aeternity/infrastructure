@@ -4,8 +4,6 @@
 !import-secrets.sh
 !ansible
 !aws
-!terraform
-terraform/.terraform
 !Makefile
 !requirements.txt
 !test/goss/

@@ -30,21 +30,6 @@ references:
       command: |
         docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_}
 
-  setup_terraform: &setup_terraform
-    run:
-      name: Setup Terraform
-      command: make setup-terraform
-
-  check_terraform_changes: &check_terraform_changes
-    run:
-      name: Fail on Terraform changes
-      command: make check-terraform-changes
-
-  check_seed_peers: &check_seed_peers
-    run:
-      name: Check seed peers
-      command: make check-seed-peers-all
-
 commands:
   setup_secrets:
     steps:
@@ -58,7 +43,7 @@ commands:
       - run:
           name: Login to Docker Hub
           command: |
-            docker login -u $(</secrets/DOCKER_USER) -p $(< /secrets/DOCKER_PASS)
+            docker login -u $(</tmp/secrets/DOCKER_USER) -p $(< /tmp/secrets/DOCKER_PASS)
 
   integration_tests:
     description: "Integration Tests"
@@ -95,7 +80,7 @@ commands:
           command: |
             if [ -n "$CIRCLE_BRANCH" -a "$CIRCLE_BRANCH" = "${NOTIFY_BRANCH:?}" ]; then
               HOOK_DATA=$(printf "$HOOK_TEMPLATE" "${CIRCLE_JOB:?}" "${CIRCLE_BRANCH:?}" "${CIRCLE_USERNAME:-unknown}" "${CIRCLE_BUILD_URL:?}")
-              envdir /secrets curl -X POST -H 'Content-Type: application/json' ${ROCKET_HOOK_DEVOPS_URL:?} --data "${HOOK_DATA:?}"
+              envdir /tmp/secrets curl -X POST -H 'Content-Type: application/json' ${ROCKET_HOOK_DEVOPS_URL:?} --data "${HOOK_DATA:?}"
             fi
           when: on_fail
 
@@ -155,22 +140,6 @@ jobs:
           command: |
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_}
 
-  setup_terraform:
-    <<: *container_config
-    steps:
-      - *setup_terraform
-      - fail_notification
-
-  check_terraform_changes:
-    <<: *container_config
-    working_directory: /src
-    steps:
-      - checkout
-      - run:
-          name: Fail on Terraform changes
-          command: |
-            make check-terraform-changes
-
   docker_push_latest:
     <<: *machine_config
     steps:
@@ -197,12 +166,6 @@ jobs:
             docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} -t ${DOCKERHUB_REPO:?}:stable .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?}
             docker push ${DOCKERHUB_REPO:?}:stable
-      - fail_notification
-
-  check_seed_peers:
-    <<: *container_config
-    steps:
-      - *check_seed_peers
       - fail_notification
 
   # Checks the compatibility of latest package build and master bootstrap
@@ -280,30 +243,6 @@ workflows:
       - branch_integration_tests:
           context: ae-infra-manage
           requires: []
-
-      - check_terraform_changes:
-          context: ae-infra-manage
-          filters:
-            branches:
-              ignore:
-                - master
-
-      - setup_terraform:
-          context: ae-infra-manage
-          requires:
-            - build_check
-            - branch_integration_tests
-          filters:
-            branches:
-              only: master
-
-      - check_seed_peers:
-          context: ae-infra-manage
-          requires:
-            - setup_terraform
-          filters:
-            branches:
-              only: master
 
       - docker_push_latest:
           context: ae-infra-manage
