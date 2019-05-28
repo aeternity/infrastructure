@@ -8,8 +8,8 @@
   max_fail_percentage: 25
 
   vars:
-    project_root: "/home/{{ ansible_user }}/node"
-    packages_path: "/home/{{ ansible_user }}"
+    project_root: "/home/aeternity/node"
+    packages_path: "/home/aeternity"
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
@@ -110,13 +110,6 @@
             mode: 0750
 
       - meta: flush_handlers
-
-      - name: Create erlang cookie file
-        copy:
-          dest: "/home/{{ ansible_user }}/.erlang.cookie"
-          content: "aeternity_cookie"
-          mode: 0400
-        tags: [config, erlang_cookie]
 
       - name: Extract aeternity package
         unarchive:
