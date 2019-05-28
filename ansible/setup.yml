@@ -179,7 +179,7 @@
       notify: run ldconfig
 
     - name: Attach additional drive if needed
-      include_tasks: tasks/attach.yml
+      include_tasks: tasks/additional_storage.yml
 
   handlers:
     - name: Run ldconfig
