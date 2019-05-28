@@ -8,5 +8,6 @@ ansible/callback_plugins/datadog_callback.yml
 *.pyc
 .venv
 test/terraform/terraform.tfstate*
+test/terraform/.terraform
 ansible/inventory-list.json
 secrets/*
