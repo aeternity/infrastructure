@@ -55,7 +55,6 @@ endif
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e package=$(PACKAGE) \
-		-e hosts_group=tag_env_$(DEPLOY_ENV) \
 		-e env=$(DEPLOY_ENV) \
 		-e downtime=$(DEPLOY_DOWNTIME) \
 		-e db_version=$(DEPLOY_DB_VERSION) \
