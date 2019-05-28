@@ -10,7 +10,6 @@
   vars:
     project_root: "/home/{{ ansible_user }}/node"
     packages_path: "/home/{{ ansible_user }}"
-    local_peer_keys_dir: "files/peer_keys/{{ public_ipv4 }}"
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
