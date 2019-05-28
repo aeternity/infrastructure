@@ -10,7 +10,6 @@
   vars:
     project_root: "/home/{{ ansible_user }}/node"
     packages_path: "/home/{{ ansible_user }}"
-    genesis_accounts_path: "{{ project_root }}/data/aecore/.genesis/accounts.json"
     local_peer_keys_dir: "files/peer_keys/{{ public_ipv4 }}"
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
@@ -140,16 +139,6 @@
           mode: 0700
         tags: [config, peer_keys]
 
-      - name: "Copy node keys to {{ node_config['keys']['dir'] }}"
-        copy:
-          src: "{{ item }}"
-          dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}"
-          mode: 0600
-        with_items: "{{ keypair }}"
-        when: keypair is defined
-        notify: "restart aeternity daemon"
-        tags: [config]
-
       - name: Update node configuration
         copy:
           content: "{{ node_config | to_nice_yaml }}"
@@ -158,13 +147,6 @@
         when: node_config is defined
         notify: "restart aeternity daemon"
         tags: [config, node_config]
-
-      - name: Update accounts configuration
-        copy:
-          content: "{{ genesis_accounts | to_nice_json }}"
-          dest: "{{ genesis_accounts_path }}"
-        when: genesis_accounts is defined
-        tags: [config]
 
       - name: "Copy node public peer key to {{ node_config['keys']['dir'] }}/peer_key.pub"
         copy:
