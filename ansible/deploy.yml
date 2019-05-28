@@ -176,7 +176,8 @@
 
       - name: Update node configuration
         copy:
-          content: "{{ node_config | to_nice_yaml }}"
+          # node_config has default just because of ansible-lint, otherwise it crashes badly
+          content: "{{ node_config | default({}) | to_nice_yaml }}"
           dest: "{{ project_root }}/aeternity.yaml"
           mode: '0600'
         when: node_config is defined
