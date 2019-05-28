@@ -1,6 +1,3 @@
-# Collect and prepare datadog tags from instance metadata and tags on AWS
-# Couple of the tags defaults to OS values,
-# still color and env must be passed externally for that platform
 - name: Collect cloud instance metadata
   hosts: all
   remote_user: master
@@ -24,38 +21,10 @@
       ec2_metadata_facts:
       when: is_aws
 
-    - name: Define ec2 dynamic variables
-      set_fact:
-        platform: aws
-        region: "{{ ansible_ec2_placement_region }}"
-      when: is_aws
-
-    - name: Get instance tags
-      ec2_tag:
-        resource: "{{ ansible_ec2_instance_id }}"
-        state: list
-        region: "{{ ansible_ec2_placement_region }}"
-        # Backward compatibility for boto2/botocore because of session token.
-        # Maybe https://github.com/ansible/ansible/pull/43350 will fix that
-        # AWS_SECURITY_TOKEN does not work either ?!
-        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
-      register: instance_tags
-      when: is_aws
-
     - name: "Load a variable files for environment: {{ env }}"
       include_vars: "{{ item }}"
       with_first_found:
         - "vars/aeternity/{{ env }}.yml"
-
-    - name: Define ec2 dynamic variables based on tags
-      set_fact:
-        env: "{{ instance_tags['tags']['env'] | default('unknown') }}"
-        color: "{{ instance_tags['tags']['color'] | default('unknown') }}"
-        kind: "{{ instance_tags['tags']['kind'] | default('peer') }}"
-        node_role: "{{ instance_tags['tags']['role'] | default('unknown') }}"
-      when: is_aws
 
 - name: Configure health check services (goss)
   hosts: all
@@ -204,15 +173,8 @@
         enabled: false
       logs_enabled: true
       tags:
-        - "platform:{{ platform|default('unknown') }}"
-        - "region:{{ region|default('unknown') }}"
-        - "env:{{ env|default('unknown') }}"
-        - "color:{{ color|default('unknown') }}"
-        - "kind:{{ kind|default('peer') }}"
         - "lsb:{{ ansible_lsb.description }}"
-        - "flavor:c{{ ansible_processor_vcpus }}.m{{ (ansible_memtotal_mb/1024)|round|int }}"
         - "public_ipv4:{{ public_ipv4 }}"
-        - "role:{{ node_role|default('unknown') }}"
         - "network_id:{{ (node_config['fork_management']|default(dict(network_id = 'unknown')))['network_id'] }}"
     datadog_checks:
       system_core:
