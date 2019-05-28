@@ -139,15 +139,6 @@
           mode: 0700
         tags: [config, peer_keys]
 
-      - name: Update node configuration
-        copy:
-          content: "{{ node_config | to_nice_yaml }}"
-          dest: "{{ project_root }}/aeternity.yaml"
-          mode: '0600'
-        when: node_config is defined
-        notify: "restart aeternity daemon"
-        tags: [config, node_config]
-
       - name: "Copy node public peer key to {{ node_config['keys']['dir'] }}/peer_key.pub"
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
@@ -165,6 +156,15 @@
         when: public_ipv4 in seed_peers
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
+
+      - name: Update node configuration
+        copy:
+          content: "{{ node_config | to_nice_yaml }}"
+          dest: "{{ project_root }}/aeternity.yaml"
+          mode: '0600'
+        when: node_config is defined
+        notify: "restart aeternity daemon"
+        tags: [config, node_config]
 
       - name: Start aeternity node
         command: "{{ project_root }}/bin/aeternity start"
