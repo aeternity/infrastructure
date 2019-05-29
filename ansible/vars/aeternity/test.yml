@@ -5,6 +5,9 @@ package: https://s3.eu-central-1.amazonaws.com/aeternity-node-builds/aeternity-l
 configure_peers: true
 seed_peers: []
 db_version: 1
+additional_storage: true
+additional_storage_mountpoint: /data
+
 node_config:
   sync:
     port: 3015
@@ -21,7 +24,7 @@ node_config:
 
   chain:
     persist: true
-    db_path: "./db1"
+    db_path: "/data/db1"
 
   mining:
     autostart: false

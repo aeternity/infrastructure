@@ -146,8 +146,8 @@ lint-ansible:
 
 lint: lint-ansible
 
-test/goss/remote/vars/seed-peers-%.yaml: ansible/inventory-list.json
-	cat ansible/inventory-list.json | python3 ansible/scripts/dump-seed-peers-keys.py --env $* > $@
+test/goss/remote/vars/seed-peers-%.yaml: secrets ansible/inventory-list.json
+	cat ansible/inventory-list.json | $(ENV) python3 ansible/scripts/dump-seed-peers-keys.py --env $* > $@
 
 check-seed-peers-%: test/goss/remote/vars/seed-peers-%.yaml
 	goss -g test/goss/remote/group-peer-keys.yaml --vars $< validate
