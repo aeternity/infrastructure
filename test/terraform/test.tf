@@ -43,6 +43,9 @@ module "aws_deploy-test" {
   instance_type = "t3.large"
   ami_name      = "aeternity-ubuntu-16.04-*"
 
+  additional_storage      = 1
+  additional_storage_size = 5
+
   aeternity = {
     package = "${var.package}"
   }
