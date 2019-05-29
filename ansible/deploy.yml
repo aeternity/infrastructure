@@ -1,28 +1,26 @@
 ---
-# Additional playbook that runs on a group first host only and gather facts from all hosts
-# This is required to allow deploying on fraction of group hosts
-# For example rolling updates and deploying only to single hosts of a group
-#
-# For example below command will deploy only to ae-dev2-aeternity-n0 host in tag_env_dev2 group
-# ansible-playbook --limit="ae-dev2-aeternity-n0" --extra-vars "hosts_group=tag_env_dev2" deploy.yml
-
-- name: Facts setup
+- name: Deploy aeternity package
   hosts: all
-  serial: "{{ rolling_update | default('100%') }}"
   remote_user: aeternity
-  # Gather fact the usual way when hosts_group is not defined for delegated way
-  gather_facts: "{{ (hosts_group is not defined) }}"
-  tasks:
-    - name: Gather facts from all hosts in {{ hosts_group }} group
-      setup:
-      run_once: yes
-      delegate_to: "{{ item }}"
-      delegate_facts: yes
-      with_items: "{{ groups[hosts_group] }}"
-      # http://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html#special-tags
-      tags: [always]
-      when: hosts_group is defined
+  serial: "{{ rolling_update | default('100%') }}"
+  # Facts are already collected in the previous playbook
+  gather_facts: no
+  max_fail_percentage: 25
 
+  vars:
+    project_root: "/home/aeternity/node"
+    packages_path: "/home/aeternity"
+    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
+    datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
+    datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
+    downtime: "0"
+    health_check: yes
+    node_vars: "{{ ansible_local.aeternity }}"
+
+    # Label used for datadog tagging and ENV file planting
+    env: unknown
+
+  tasks:
     - name: Check if running on AWS instance
       uri:
         url: http://169.254.169.254/latest/meta-data
@@ -41,30 +39,6 @@
       tags: [always]
       when: is_aws
 
-- name: Deploy aeternity package
-  hosts: all
-  remote_user: aeternity
-  serial: "{{ rolling_update | default('100%') }}"
-  # Facts are already collected in the previous playbook
-  gather_facts: no
-  max_fail_percentage: 25
-
-  vars:
-    project_root: "{{ ansible_env.HOME }}/node"
-    packages_path: "{{ ansible_env.HOME }}"
-    genesis_accounts_path: "{{ project_root }}/data/aecore/.genesis/accounts.json"
-    local_peer_keys_dir: "files/peer_keys/{{ public_ipv4 }}"
-    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
-    datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
-    datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
-    downtime: "0"
-    health_check: yes
-    node_vars: "{{ ansible_local.aeternity }}"
-
-    # Label used for datadog tagging and ENV file planting
-    env: unknown
-
-  tasks:
     - block:
       - name: Schedule downtime
         run_once: yes
@@ -128,7 +102,7 @@
         notify: "stop aeternity daemon"
         tags: [package]
 
-      - name: "Make sure {{ project_root }} exists"
+      - name: "Make sure 'project_root' exists"
         file:
             path: "{{ project_root }}"
             state: directory
@@ -137,14 +111,7 @@
 
       - meta: flush_handlers
 
-      - name: Create erlang cookie file
-        copy:
-          dest: "{{ ansible_env.HOME }}/.erlang.cookie"
-          content: "aeternity_cookie"
-          mode: 0400
-        tags: [config, erlang_cookie]
-
-      - name: Extract aeternity package into {{ project_root }}
+      - name: Extract aeternity package
         unarchive:
           remote_src: true
           keep_newer: true
@@ -161,7 +128,7 @@
         notify: "restart aeternity daemon"
         tags: [package]
 
-      - name: "Make sure chain path ( {{ project_root }}/{{node_config.chain.db_path }} ) exists"
+      - name: "Make sure chain path exists"
         file:
           path: "{{ project_root }}/{{ node_config.chain.db_path }}"
           state: directory
@@ -182,32 +149,7 @@
           mode: 0700
         tags: [config, peer_keys]
 
-      - name: "Copy node keys to {{ project_root }}/{{ node_config['keys']['dir'] }}"
-        copy:
-          src: "{{ item }}"
-          dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}"
-          mode: 0600
-        with_items: "{{ keypair }}"
-        when: keypair is defined
-        notify: "restart aeternity daemon"
-        tags: [config]
-
-      - name: Update node configuration
-        template:
-          src: templates/aeternity.yaml
-          dest: "{{ project_root }}/aeternity.yaml"
-          mode: '0600'
-        notify: "restart aeternity daemon"
-        tags: [config, node_config]
-
-      - name: Update accounts configuration
-        copy:
-          content: "{{ genesis_accounts | to_nice_json }}"
-          dest: "{{ genesis_accounts_path }}"
-        when: genesis_accounts is defined
-        tags: [config]
-
-      - name: "Copy node public peer key to {{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key.pub"
+      - name: "Copy node public peer key to {{ node_config['keys']['dir'] }}/peer_key.pub"
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
           dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key.pub"
@@ -216,7 +158,7 @@
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
-      - name: "Copy node private peer key to {{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key"
+      - name: "Copy node private peer key to {{ node_config['keys']['dir'] }}/peer_key"
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/private:base64')|b64decode }}"
           dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key"
@@ -225,13 +167,15 @@
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
-      - name: Database migration
-        include_tasks: tasks/migrate-db-name.yml
-        vars:
-          aeternity_bin: "{{ project_root }}/bin/aeternity"
-          db_path: "{{ project_root }}/db{{ db_version|mandatory }}"
-          # it also includes the playbook vars
-        when: skip_db_migrations is not defined
+      - name: Update node configuration
+        copy:
+          # node_config has default just because of ansible-lint, otherwise it crashes badly
+          content: "{{ node_config | default({}) | to_nice_yaml }}"
+          dest: "{{ project_root }}/aeternity.yaml"
+          mode: '0600'
+        when: node_config is defined
+        notify: "restart aeternity daemon"
+        tags: [config, node_config]
 
       - name: Start aeternity node
         command: "{{ project_root }}/bin/aeternity start"

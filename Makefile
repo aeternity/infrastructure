@@ -55,30 +55,11 @@ endif
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e package=$(PACKAGE) \
-		-e hosts_group=tag_env_$(DEPLOY_ENV) \
 		-e env=$(DEPLOY_ENV) \
 		-e downtime=$(DEPLOY_DOWNTIME) \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		-e rolling_update="${ROLLING_UPDATE}" \
 		deploy.yml
-
-attach: check-deploy-env secrets
-	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
-ifneq ($(DEPLOY_REGION),)
-	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
-endif
-		cd ansible && $(ENV) ansible-playbook \
-		--limit="$(LIMIT)" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
-		-e env=$(DEPLOY_ENV) \
-		attach.yml
-
-migrate: check-deploy-env secrets
-	cd ansible && $(ENV) ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
-		-e env=$(DEPLOY_ENV) \
-		migrate-storage.yml
 
 manage-node: check-deploy-env secrets
 ifndef CMD
@@ -116,12 +97,12 @@ endif
 
 provision: check-deploy-env secrets
 	cd ansible && $(ENV) ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-	-e ansible_python_interpreter=/usr/bin/python3 \
-	-e env=$(DEPLOY_ENV) \
-	-e vault_addr=$(VAULT_ADDR) \
-	-e package=$(PACKAGE) \
-	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
-	async_provision.yml
+		-e ansible_python_interpreter=/usr/bin/python3 \
+		-e env=$(DEPLOY_ENV) \
+		-e vault_addr=$(VAULT_ADDR) \
+		-e package=$(PACKAGE) \
+		-e bootstrap_version=$(BOOTSTRAP_VERSION) \
+		async_provision.yml
 
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@

@@ -120,7 +120,9 @@ jobs:
             .circleci/test-ansible-playbook.sh ansible/deploy.yml \
               -e env=test \
               -e datadog_api_key= \
-              -e datadog_app_key=
+              -e datadog_app_key= \
+              -e project_root=/root/node \
+              -e packages_path=/tmp
       - docker_login
       - run:
           name: Push (branch) Docker image to DockerHub

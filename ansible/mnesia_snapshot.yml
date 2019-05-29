@@ -6,7 +6,7 @@
   remote_user: aeternity
   tasks:
     - name: Include configuration variables
-      include_vars: tasks/config.yml
+      include_vars: vars/snapshot.yml
 
     - name: "Load a variable files for environment: {{ env }}"
       include_vars: "{{ item }}"
