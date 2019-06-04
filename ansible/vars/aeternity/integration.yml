@@ -38,7 +38,7 @@ node_config:
       edge_bits: 29
       miners:
         - executable: mean29-avx2
-          extra_args: "-t {{ ansible_processor_vcpus }}"
+          extra_args: "-t 1"
 
   logging:
     level: debug
