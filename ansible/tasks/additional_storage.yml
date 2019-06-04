@@ -15,7 +15,9 @@
 - name: "Load a variable files for environment: {{ env }}"
   include_vars: "{{ item }}"
   with_first_found:
-    - "vars/aeternity/{{ env }}.yml"
+    - files:
+        - "vars/aeternity/{{ env }}.yml"
+      skip: true
 
 - name: "Wait for /dev/nvme1n1 to become present"
   wait_for:
