@@ -24,7 +24,9 @@
     - name: "Load a variable files for environment: {{ env }}"
       include_vars: "{{ item }}"
       with_first_found:
-        - "vars/aeternity/{{ env }}.yml"
+        - files:
+            - "vars/aeternity/{{ env }}.yml"
+          skip: true
 
 - name: Configure health check services (goss)
   hosts: all
@@ -161,6 +163,7 @@
   vars:
     project_user: aeternity
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
+    network_id: "{{ (node_config['fork_management']|default(dict(network_id = 'unknown')))['network_id'] }}"
     datadog_agent6: true
     datadog_config:
       log_level: warning
@@ -174,8 +177,8 @@
       logs_enabled: true
       tags:
         - "lsb:{{ ansible_lsb.description }}"
-        - "public_ipv4:{{ public_ipv4 }}"
-        - "network_id:{{ (node_config['fork_management']|default(dict(network_id = 'unknown')))['network_id'] }}"
+        - "public_ipv4:{{ public_ipv4|default('unknown') }}"
+        - "network_id:{{ network_id }}"
     datadog_checks:
       system_core:
         init_config:
