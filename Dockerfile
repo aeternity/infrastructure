@@ -36,7 +36,7 @@ RUN curl -L https://github.com/aelsabbahy/goss/releases/download/${GOSS_VER}/gos
 ADD requirements.txt /infrastructure/
 RUN apk add --no-cache --virtual build-deps \
         gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers \
-    && pip3 install --upgrade pip==18.0 \
+    && pip3 install --upgrade pip==18.1 \
     && pip3 install --no-cache-dir -r /infrastructure/requirements.txt \
     && apk del build-deps
 

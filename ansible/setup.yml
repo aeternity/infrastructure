@@ -104,7 +104,7 @@
         - ansible
         - boto
         - boto3
-        - datadog
+        - datadog==0.28.0
         - hvac
       tags:
         - dev-tools
