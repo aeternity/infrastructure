@@ -1,4 +1,4 @@
-# Source: https://github.com/DataDog/ansible-datadog-callback/tree/2.4.2
+# Source: https://github.com/DataDog/ansible-datadog-callback/commit/f70c645594e505f888025a332ae9a6575060509f
 
 from __future__ import absolute_import, print_function
 
@@ -10,23 +10,28 @@ import time
 try:
     import datadog
     import yaml
+    from packaging import version
     HAS_MODULES = True
 except ImportError:
     HAS_MODULES = False
 
 
+import ansible
 from ansible.plugins.callback import CallbackBase
 from __main__ import cli
 
+ANSIBLE_ABOVE_28 = False
+if HAS_MODULES and version.parse(ansible.__version__) >= version.parse('2.8.0'):
+    ANSIBLE_ABOVE_28 = True
+    from ansible.context import CLIARGS
+
+DEFAULT_DD_URL = "https://api.datadoghq.com"
 
 class CallbackModule(CallbackBase):
-    CALLBACK_NAME = 'datadog'
-    CALLBACK_NEEDS_WHITELIST = True
-
     def __init__(self):
         if not HAS_MODULES:
             self.disabled = True
-            print('Datadog callback disabled: missing "datadog" and/or "yaml" python package.')
+            print('Datadog callback disabled: missing "datadog", "yaml", and/or "packaging" python package.')
         else:
             self.disabled = False
             # Set logger level - datadog api and urllib3
@@ -36,8 +41,11 @@ class CallbackModule(CallbackBase):
         self._playbook_name = None
         self._start_time = time.time()
         self._options = None
-        if cli:
-            self._options = cli.options
+        if HAS_MODULES and cli:
+            if ANSIBLE_ABOVE_28:
+                self._options = CLIARGS
+            else:
+                self._options = cli.options
 
         # self.playbook is set in the `v2_playbook_on_start` callback method
         self.playbook = None
@@ -60,9 +68,12 @@ class CallbackModule(CallbackBase):
         conf_dict = {}
         if os.path.isfile(file_path):
             with open(file_path, 'r') as conf_file:
-                conf_dict = yaml.load(conf_file)
+                conf_dict = yaml.load(conf_file, Loader=yaml.FullLoader)
 
-        return os.environ.get('DATADOG_API_KEY', conf_dict.get('api_key', '')), conf_dict.get('url', 'https://app.datadoghq.com')
+        api_key = os.environ.get('DATADOG_API_KEY', conf_dict.get('api_key', ''))
+        dd_url = os.environ.get('DATADOG_URL', conf_dict.get('url', ''))
+        dd_site = os.environ.get('DATADOG_SITE', conf_dict.get('site', ''))
+        return api_key, dd_url, dd_site
 
     # Send event to Datadog
     def _send_event(self, title, alert_type=None, text=None, tags=None, host=None, event_type=None, event_object=None):
@@ -218,14 +229,17 @@ class CallbackModule(CallbackBase):
         self.playbook = playbook
 
         playbook_file_name = self.playbook._file_name
-        inventory = self._options.inventory
+        if ANSIBLE_ABOVE_28:
+            inventory = self._options['inventory']
+        else:
+            inventory = self._options.inventory
 
         self.start_timer()
 
         # Set the playbook name from its filename
         self._playbook_name, _ = os.path.splitext(
             os.path.basename(playbook_file_name))
-        if isinstance(inventory, list):
+        if isinstance(inventory, (list, tuple)):
             inventory = ','.join(inventory)
         self._inventory_name = ','.join([os.path.basename(os.path.realpath(name)) for name in inventory.split(',') if name])
 
@@ -237,7 +251,7 @@ class CallbackModule(CallbackBase):
 
         # Read config and hostvars
         config_path = os.environ.get('ANSIBLE_DATADOG_CALLBACK_CONF_FILE', os.path.join(os.path.dirname(__file__), "datadog_callback.yml"))
-        api_key, url = self._load_conf(config_path)
+        api_key, dd_url, dd_site = self._load_conf(config_path)
 
         # If there is no api key defined in config file, try to get it from hostvars
         if api_key == '':
@@ -249,13 +263,23 @@ class CallbackModule(CallbackBase):
             else:
                 try:
                     api_key = hostvars['localhost']['datadog_api_key']
+                    if not dd_url:
+                        dd_url = hostvars['localhost'].get('datadog_url')
+                    if not dd_site:
+                        dd_site = hostvars['localhost'].get('datadog_site')
                 except Exception as e:
                     print('No "api_key" found in the config file ({0}) and "datadog_api_key" is not set in the hostvars: disabling Datadog callback plugin'.format(config_path))
                     self.disabled = True
 
+        if not dd_url:
+            if dd_site:
+                dd_url = "https://api."+ dd_site
+            else:
+                dd_url = DEFAULT_DD_URL # default to Datadog US
+
         # Set up API client and send a start event
         if not self.disabled:
-            datadog.initialize(api_key=api_key, api_host=url)
+            datadog.initialize(api_key=api_key, api_host=dd_url)
 
             self.send_playbook_event(
                 'Ansible play "{0}" started in playbook "{1}" by "{2}" against "{3}"'.format(
