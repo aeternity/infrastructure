@@ -100,7 +100,7 @@ jobs:
           name: Setup ansible environment
           command: |
             apk add sshpass
-            pip install -r requirements.txt
+            pip3 install -r requirements.txt
             ansible-galaxy install -r ansible/requirements.yml
       - run:
           name: Test ansible/setup.yml
