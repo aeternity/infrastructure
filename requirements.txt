@@ -1,8 +1,34 @@
-ansible == 2.7.0
-ansible-lint ~= 3.4
-datadog == 0.28.0
-boto
-boto3
-hvac == 0.6.4
-awscli
-envdir == 1.0.1
+ansible==2.7.0
+ansible-lint==3.5.1
+datadog==0.28.0
+boto==2.49.0
+boto3==1.9.156
+hvac==0.6.4
+awscli==1.16.166
+envdir==1.0.1
+jinja2==2.10.1
+PyYAML==5.1
+paramiko==2.4.2
+cryptography==2.1.4
+setuptools==40.6.2
+six==1.11.0
+decorator==4.4.0
+requests==2.22.0
+botocore==1.12.156
+s3transfer==0.2.0
+jmespath==0.9.4
+docutils==0.14
+colorama==0.3.9
+rsa==3.4.2
+MarkupSafe==1.1.1
+bcrypt==3.1.6
+pyasn1==0.4.5
+pynacl==1.3.0
+idna==2.7
+asn1crypto==0.24.0
+cffi==1.10.0
+chardet==3.0.4
+certifi==2019.3.9
+urllib3==1.25.3
+python-dateutil==2.8.0
+pycparser==2.18
