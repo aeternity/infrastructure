@@ -27,6 +27,7 @@ node_config:
 
   chain:
     persist: true
+    db_path: "./db{{ db_version|mandatory }}"
     protocol_beneficiaries: ["ak_2A3PZPfMC2X7ZVy4qGXz2xh2Lbh79Q4UvZ5fdH7QVFocEgcKzU:109"]
 
   logging:
