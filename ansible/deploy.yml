@@ -131,7 +131,10 @@
       - name: Fail on missing 'node_config.chain.db_path' variable
         fail:
           msg: 'Chain persistence is enabled, but "node_config.chain.db_path" is not defined'
-        when: node_config.chain.persist is defined and node_config.chain.persist and node_config.chain.db_path is not defined
+        when:
+          - node_config.chain.persist is defined
+          - node_config.chain.persist
+          - node_config.chain.db_path is not defined
         tags: [config]
 
       - name: "Make sure chain path exists"
