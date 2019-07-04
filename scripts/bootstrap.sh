@@ -135,6 +135,10 @@ if [ "$env" = "api_main" ] ; then
     RESTORE_ENV=main
 fi
 
+if [ "$env" = "api_uat" ] ; then
+    RESTORE_ENV=uat
+fi
+
 if [ "$RESTORE_DATABASE" = true ] ; then
     if [ "$RESTORE_ENV" = "main" ] || [ "$RESTORE_ENV" == "uat" ] ; then # restore only main / uat
 
