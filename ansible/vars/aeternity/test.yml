@@ -17,6 +17,13 @@ node_config:
       port: 3013
     internal:
       port: 3113
+      listen_address: 0.0.0.0
+      debug_endpoints: true
+
+  websocket:
+    channel:
+      port: 3014
+      listen_address: 0.0.0.0
 
   keys:
     dir: keys
