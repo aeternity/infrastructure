@@ -172,7 +172,7 @@
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/private:base64')|b64decode }}"
           dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key"
           mode: 0600
-        when: public_ipv4 in seed_peers
+        when: seed_peers is defined and public_ipv4 in seed_peers
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
