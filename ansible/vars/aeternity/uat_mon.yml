@@ -37,7 +37,7 @@ node_config:
     active: true
     publisher:
       autostart: true
-      pubkey: "{{ monitoring_privkey }}"
+      pubkey: "{{ monitoring_pubkey }}"
       privkey: "{{ monitoring_privkey }}"
       amount: 20000
       interval: 10000
