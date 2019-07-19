@@ -1,7 +1,8 @@
 public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
 datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
-monitoring_privkey: "{{ lookup('hashi_vault', 'secret=secret/mon/uat_' + region + ':privkey') }}"
+monitoring_pubkey: "{{ lookup('hashi_vault', 'secret=secret/aenode/monitor/uat/' + region + '/publisher:pubkey') }}"
+monitoring_privkey: "{{ lookup('hashi_vault', 'secret=secret/aenode/monitor/uat/' + region + '/publisher:privkey') }}"
 
 node_config:
   sync:
@@ -36,7 +37,7 @@ node_config:
     active: true
     publisher:
       autostart: true
-      pubkey: ak_JGMjbAS6UBCmsZR3ck1UR5KXLaBp1bsckf7cJiMDw6av5C3ie
+      pubkey: "{{ monitoring_privkey }}"
       privkey: "{{ monitoring_privkey }}"
       amount: 20000
       interval: 10000
