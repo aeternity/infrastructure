@@ -21,6 +21,10 @@ case $i in
     aeternity_package="${i#*=}"
     shift # past argument=value
     ;;
+    --region=*)
+    region="${i#*=}"
+    shift # past argument=value
+    ;;
     --default)
     DEFAULT=YES
     shift # past argument with no value
@@ -48,7 +52,7 @@ fi
 # Fetch parameters from EC2 tags if not provided by the caller
 # Legacy instance configuration pass those parameters in user_data
 # To be removed when legacy instances are out
-if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_package" ]]; then
+if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_package"  || -z "region" ]]; then
     INSTANCE_ID=$(ec2metadata --instance-id)
     AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
     AWS_TAGS='[]'
@@ -69,6 +73,7 @@ if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_packag
     vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
     env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
     aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
+    region=${AWS_REGION}
 fi
 
 # Temporary fix/workaround for non-executable vault install
@@ -127,6 +132,7 @@ ansible-playbook \
     --become-user aeternity -b \
     -e package=${aeternity_package} \
     -e env=${env} \
+    -e region=${region} \
     -e db_version=1 \
     deploy.yml
 

@@ -19,7 +19,7 @@ variable "package" {
 }
 
 provider "aws" {
-  version                 = "1.55"
+  version                 = "2.19.0"
   region                  = "ap-southeast-2"
   alias                   = "ap-southeast-2"
   shared_credentials_file = "/aws/credentials"
@@ -27,14 +27,13 @@ provider "aws" {
 }
 
 module "aws_deploy-test" {
-  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v1.0.0"
+  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v2.0.0"
   env                 = "${var.env_name}"
   envid               = "${var.envid}"
   bootstrap_version   = "${var.bootstrap_version}"
   vault_role          = "ae-node"
   vault_addr          = "${var.vault_addr}"
   user_data_file      = "user_data.bash"
-  spot_user_data_file = "user_data.bash"
 
   static_nodes = 1
   spot_nodes   = 1
@@ -43,7 +42,7 @@ module "aws_deploy-test" {
   instance_type = "t3.large"
   ami_name      = "aeternity-ubuntu-16.04-*"
 
-  additional_storage      = 1
+  additional_storage      = true
   additional_storage_size = 5
 
   aeternity = {

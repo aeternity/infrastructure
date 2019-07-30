@@ -1,8 +1,8 @@
 public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
 datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
-monitoring_pubkey: "{{ lookup('hashi_vault', 'secret=secret/aenode/monitor/uat/' + region + '/publisher:pubkey') }}"
-monitoring_privkey: "{{ lookup('hashi_vault', 'secret=secret/aenode/monitor/uat/' + region + '/publisher:privkey') }}"
+monitoring_pubkey: "{{ lookup('hashi_vault', 'secret=secret/aenode/monitor/main/' + region + '/publisher:pubkey') }}"
+monitoring_privkey: "{{ lookup('hashi_vault', 'secret=secret/aenode/monitor/main/' + region + '/publisher:privkey') }}"
 
 node_config:
   sync:
@@ -20,7 +20,7 @@ node_config:
 
   chain:
     persist: true
-    db_path: "./db{{ db_version|mandatory }}"
+    db_path: "/data/db{{ db_version|mandatory }}"
 
   logging:
     level: warning
@@ -31,7 +31,7 @@ node_config:
       port: 8125
 
   fork_management:
-    network_id: "ae_uat"
+    network_id: "ae_mainnet"
 
   monitoring:
     active: true
