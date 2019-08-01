@@ -1,5 +1,5 @@
 ---
-# Playbook used to download mnesia snapshoot for env from S3 and restore it to give node
+# Playbook used to download mnesia snapshot for env from S3 and restore it to give node
 
 - name: Backup, archive and download Mnesia database
   hosts: all
@@ -17,9 +17,9 @@
 
     - name: Download backup to S3 bucket latest
       aws_s3:
-        bucket: "{{ backup_bucket }}"
-        object: "{{ backup_archive_filename_latest }}"
-        dest: /tmp/{{ backup_archive_filename_latest }}
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ restore_snapshot_filename }}"
+        dest: /tmp/{{ restore_snapshot_filename }}
         mode: get
 
     - name: Stop node
@@ -32,8 +32,19 @@
     - name: Restore Mnesia database
       unarchive:
         remote_src: yes
-        src: /tmp/{{ backup_archive_filename_latest }}
-        dest: "{{ additional_storage_mountpoint if additional_storage is defined and additional_storage else project_root }}/"
+        src: /tmp/{{ restore_snapshot_filename }}
+        dest: "{{ additional_storage_mountpoint }}/"
+      when:
+        - additional_storage is defined
+        - additional_storage
+
+    - name: Restore Mnesia database
+      unarchive:
+        remote_src: yes
+        src: /tmp/{{ restore_snapshot_filename }}
+        dest: "{{ project_root }}/"
+      when:
+        - additional_storage is not defined or not additional_storage
 
     - name: Remove Mnesia backups
       file:
@@ -41,7 +52,7 @@
         state: absent
       loop:
         - /tmp/backup
-        - /tmp/{{ backup_archive_filename_latest }}
+        - /tmp/{{ restore_snapshot_filename }}
 
     - name: Start node
       command: "/bin/true"

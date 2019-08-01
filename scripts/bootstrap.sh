@@ -73,6 +73,7 @@ if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_packag
     vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
     env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
     aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
+    snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
     region=${AWS_REGION}
 fi
 
@@ -136,24 +137,13 @@ ansible-playbook \
     -e db_version=1 \
     deploy.yml
 
-RESTORE_ENV=${env}
-if [[ "$env" = *"main"* ]] ; then
-    RESTORE_ENV=main
-fi
-
-if [[ "$env" = *"uat"* ]] ; then
-    RESTORE_ENV=uat
-fi
-
-if [ "$RESTORE_DATABASE" = true ] ; then
-    if [ "$RESTORE_ENV" = "main" ] || [ "$RESTORE_ENV" == "uat" ] ; then # restore only main / uat
-
-        ansible-playbook \
-            -i localhost, -c local \
-            -e ansible_python_interpreter=$(which python3) \
-            --become-user aeternity -b \
-            -e env=${RESTORE_ENV} \
-            -e db_version=1 \
-            mnesia_snapshot_restore.yml
-    fi
+if [ "$RESTORE_DATABASE" = true ] && [ -n "$snapshot_filename" ]; then
+    ansible-playbook \
+        -i localhost, -c local \
+        -e ansible_python_interpreter=$(which python3) \
+        --become-user aeternity -b \
+        -e env=${env} \
+        -e db_version=1 \
+        -e restore_snapshot_filename=${snapshot_filename} \
+        mnesia_snapshot_restore.yml
 fi

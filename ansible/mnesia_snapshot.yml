@@ -1,9 +1,14 @@
 ---
-# Playbook used create mnesia snapshoot and upload it to S3
+# Playbook used create mnesia snapshot and upload it to S3
 
 - name: Backup, archive and download Mnesia database
   hosts: "{{ ansible_play_hosts | last }}"
   remote_user: aeternity
+
+  vars:
+    snapshot_suffix: snapshot
+    snapshot_filename: "mnesia_{{ env }}_v-{{ db_version }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ snapshot_suffix }}.tgz"
+
   tasks:
     - name: Include configuration variables
       include_vars: vars/snapshot.yml
@@ -21,17 +26,25 @@
 
     - meta: flush_handlers
 
-    - name: Archive Mnesia Directory
+    - name: Archive Mnesia Directory (no additional storage)
       archive:
-        format: "{{ format }}"
-        path: "{{ project_root + '/' if additional_storage is not defined else '' }}{{ node_config.chain.db_path }}"
-        dest: /tmp/{{ backup_archive_filename }}
+        format: gz
+        path: "{{ project_root }}/{{ node_config.chain.db_path }}"
+        dest: /tmp/{{ snapshot_filename }}
+      when: additional_storage is not defined
+
+    - name: Archive Mnesia Directory (with additional storage)
+      archive:
+        format: gz
+        path: "{{ project_root }}/{{ node_config.chain.db_path }}"
+        dest: /tmp/{{ snapshot_filename }}
+      when: additional_storage is defined
 
     - name: Upload backup to S3 bucket
       aws_s3:
-        bucket: "{{ backup_bucket }}"
-        object: "{{ backup_archive_filename }}"
-        src: /tmp/{{ backup_archive_filename }}
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ snapshot_filename }}"
+        src: /tmp/{{ snapshot_filename }}
         mode: put
         aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
@@ -39,9 +52,9 @@
 
     - name: Upload backup to S3 bucket latest
       aws_s3:
-        bucket: "{{ backup_bucket }}"
-        object: "{{ backup_archive_filename_latest }}"
-        src: /tmp/{{ backup_archive_filename }}
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ snapshots_filename_latest }}"
+        src: /tmp/{{ snapshot_filename }}
         mode: put
         aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
@@ -53,7 +66,7 @@
         state: absent
       loop:
         - /tmp/backup
-        - /tmp/{{ backup_archive_filename }}
+        - /tmp/{{ snapshot_filename }}
 
     - name: Start node
       command: "/bin/true"
