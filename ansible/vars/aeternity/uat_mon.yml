@@ -3,6 +3,8 @@ datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 monitoring_pubkey: "{{ lookup('hashi_vault', 'secret=secret/aenode/monitor/uat/' + region + '/publisher:pubkey') }}"
 monitoring_privkey: "{{ lookup('hashi_vault', 'secret=secret/aenode/monitor/uat/' + region + '/publisher:privkey') }}"
+additional_storage: true
+additional_storage_mountpoint: /data
 
 node_config:
   sync:
