@@ -20,7 +20,7 @@ node_config:
 
   chain:
     persist: true
-    db_path: "./db{{ db_version|mandatory }}"
+    db_path: "/data/db{{ db_version|mandatory }}"
 
   logging:
     level: warning
