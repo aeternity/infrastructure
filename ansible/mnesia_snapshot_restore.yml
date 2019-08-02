@@ -29,7 +29,7 @@
 
     - meta: flush_handlers
 
-    - name: Restore Mnesia database
+    - name: Restore Mnesia database (with additional storage)
       unarchive:
         remote_src: yes
         src: /tmp/{{ restore_snapshot_filename }}
@@ -38,7 +38,7 @@
         - additional_storage is defined
         - additional_storage
 
-    - name: Restore Mnesia database
+    - name: Restore Mnesia database (without additional storage)
       unarchive:
         remote_src: yes
         src: /tmp/{{ restore_snapshot_filename }}
