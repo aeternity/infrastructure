@@ -2,6 +2,9 @@ public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansib
 datadog_enabled: yes
 api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
 configure_peers: false
+additional_storage: true
+additional_storage_mountpoint: /data
+
 seed_peers:
   - "35.177.40.45"
 
@@ -27,7 +30,7 @@ node_config:
 
   chain:
     persist: true
-    db_path: "./db{{ db_version|mandatory }}"
+    db_path: "/data/db{{ db_version|mandatory }}"
     protocol_beneficiaries_enabled: true
     protocol_beneficiaries: ["ak_2A3PZPfMC2X7ZVy4qGXz2xh2Lbh79Q4UvZ5fdH7QVFocEgcKzU:109"]
 
