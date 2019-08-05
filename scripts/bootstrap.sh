@@ -137,7 +137,7 @@ ansible-playbook \
     -e db_version=1 \
     deploy.yml
 
-if [ "$RESTORE_DATABASE" = true ] && [ -n "$snapshot_filename" ]; then
+if [ "$RESTORE_DATABASE" = true ] && [ -n "$snapshot_filename" ] && [ "$snapshot_filename" != "empty" ]; then
     ansible-playbook \
         -i localhost, -c local \
         -e ansible_python_interpreter=$(which python3) \
