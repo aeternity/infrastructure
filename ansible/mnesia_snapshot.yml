@@ -37,14 +37,16 @@
         format: gz
         path: "{{ project_root }}/{{ node_config.chain.db_path }}"
         dest: "{{ snapshot_path }}"
-      when: additional_storage is not defined
+      when: additional_storage is not defined or not addtional_storage
 
     - name: Archive Mnesia Directory ({{ node_config.chain.db_path }})
       archive:
         format: gz
         path: "{{ node_config.chain.db_path }}"
         dest: "{{ snapshot_path }}"
-      when: additional_storage is defined
+      when:
+        - additional_storage is defined
+        - additional_storage
 
     - name: Upload snapshot to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_filename }})
       aws_s3:
