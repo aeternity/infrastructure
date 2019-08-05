@@ -8,6 +8,7 @@
   vars:
     snapshot_suffix: snapshot
     snapshot_filename: "mnesia_{{ env }}_v-{{ db_version }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ snapshot_suffix }}.tgz"
+    snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}"
 
   tasks:
     - name: Include configuration variables
@@ -26,25 +27,30 @@
 
     - meta: flush_handlers
 
-    - name: Archive Mnesia Directory (no additional storage)
+    - name: Ensure Mnesia snapshots dir exists ({{ snapshots_dir }})
+      file:
+        path: "{{ snapshots_dir }}"
+        state: directory
+
+    - name: Archive Mnesia Directory ({{ project_root }}/{{ node_config.chain.db_path }})
       archive:
         format: gz
         path: "{{ project_root }}/{{ node_config.chain.db_path }}"
-        dest: /tmp/{{ snapshot_filename }}
+        dest: "{{ snapshot_path }}"
       when: additional_storage is not defined
 
-    - name: Archive Mnesia Directory (with additional storage)
+    - name: Archive Mnesia Directory ({{ node_config.chain.db_path }})
       archive:
         format: gz
-        path: "{{ project_root }}/{{ node_config.chain.db_path }}"
-        dest: /tmp/{{ snapshot_filename }}
+        path: "{{ node_config.chain.db_path }}"
+        dest: "{{ snapshot_path }}"
       when: additional_storage is defined
 
-    - name: Upload backup to S3 bucket
+    - name: Upload snapshot to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_filename }})
       aws_s3:
         bucket: "{{ snapshots_bucket }}"
         object: "{{ snapshot_filename }}"
-        src: /tmp/{{ snapshot_filename }}
+        src: "{{ snapshot_path }}"
         mode: put
         aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
@@ -54,19 +60,16 @@
       aws_s3:
         bucket: "{{ snapshots_bucket }}"
         object: "{{ snapshots_filename_latest }}"
-        src: /tmp/{{ snapshot_filename }}
+        src: "{{ snapshot_path }}"
         mode: put
         aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
         security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
 
-    - name: Remove Mnesia backups
+    - name: Delete local Mnesia snapshots ({{ snapshots_dir }})
       file:
-        path:  "{{ item }}"
+        path: "{{ snapshots_dir }}"
         state: absent
-      loop:
-        - /tmp/backup
-        - /tmp/{{ snapshot_filename }}
 
     - name: Start node
       command: "/bin/true"

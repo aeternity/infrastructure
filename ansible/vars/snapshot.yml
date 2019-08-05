@@ -3,3 +3,4 @@ aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
 snapshots_bucket: aeternity-database-backups
 snapshots_filename_latest: "mnesia_{{ env }}_v-{{ db_version }}_latest.tgz"
 restore_snapshot_filename: "{{ snapshots_filename_latest }}" # default for BC
+snapshots_dir: "{{ additional_storage_mountpoint|default('/tmp') }}/snapshots"
