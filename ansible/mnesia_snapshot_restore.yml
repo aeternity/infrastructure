@@ -1,9 +1,12 @@
 ---
-# Playbook used to download mnesia snapshoot for env from S3 and restore it to give node
+# Playbook used to download mnesia snapshot for env from S3 and restore it to give node
 
 - name: Backup, archive and download Mnesia database
   hosts: all
   remote_user: aeternity
+
+  vars:
+    snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ restore_snapshot_filename|mandatory }}"
 
   tasks:
     - name: Include configuration variables
@@ -15,11 +18,16 @@
         - "../vars/aeternity/{{ env }}.yml"
       tags: [config, node_config]
 
-    - name: Download backup to S3 bucket latest
+    - name: Ensure Mnesia snapshots dir exists ({{ snapshots_dir }})
+      file:
+        path: "{{ snapshots_dir }}"
+        state: directory
+
+    - name: Download Mnesia snapshot {{ restore_snapshot_filename }}
       aws_s3:
-        bucket: "{{ backup_bucket }}"
-        object: "{{ backup_archive_filename_latest }}"
-        dest: /tmp/{{ backup_archive_filename_latest }}
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ restore_snapshot_filename }}"
+        dest: "{{ snapshot_path }}"
         mode: get
 
     - name: Stop node
@@ -29,19 +37,27 @@
 
     - meta: flush_handlers
 
-    - name: Restore Mnesia database
+    - name: Restore Mnesia database to {{ additional_storage_mountpoint }}/
       unarchive:
         remote_src: yes
-        src: /tmp/{{ backup_archive_filename_latest }}
-        dest: "{{ additional_storage_mountpoint if additional_storage is defined and additional_storage else project_root }}/"
+        src: "{{ snapshot_path }}"
+        dest: "{{ additional_storage_mountpoint }}/"
+      when:
+        - additional_storage is defined
+        - additional_storage
 
-    - name: Remove Mnesia backups
+    - name: Restore Mnesia database to {{ project_root }}/
+      unarchive:
+        remote_src: yes
+        src: "{{ snapshot_path }}"
+        dest: "{{ project_root }}/"
+      when:
+        - additional_storage is not defined or not additional_storage
+
+    - name: Delete local Mnesia snapshots ({{ snapshots_dir }})
       file:
-        path:  "{{ item }}"
+        path: "{{ snapshots_dir }}"
         state: absent
-      loop:
-        - /tmp/backup
-        - /tmp/{{ backup_archive_filename_latest }}
 
     - name: Start node
       command: "/bin/true"

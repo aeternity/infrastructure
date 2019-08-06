@@ -2,7 +2,6 @@
 DEPLOY_DOWNTIME ?= 0
 ROLLING_UPDATE ?= 100%
 BACKUP_SUFFIX ?= backup
-BACKUP_DIR ?= /tmp/mnesia_backups
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
 SEED_CHECK_ENVS = main uat next
@@ -89,8 +88,7 @@ endif
 	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
-		-e download_dir=$(BACKUP_DIR) \
-		-e backup_suffix=$(BACKUP_SUFFIX) \
+		-e snapshot_suffix=$(BACKUP_SUFFIX) \
 		-e db_version=$(BACKUP_DB_VERSION) \
 		-e env=$(BACKUP_ENV) \
 		mnesia_snapshot.yml
