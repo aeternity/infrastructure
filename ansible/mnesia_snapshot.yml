@@ -37,7 +37,7 @@
         format: gz
         path: "{{ project_root }}/{{ node_config.chain.db_path }}"
         dest: "{{ snapshot_path }}"
-      when: additional_storage is not defined or not addtional_storage
+      when: additional_storage is not defined or not additional_storage
 
     - name: Archive Mnesia Directory ({{ node_config.chain.db_path }})
       archive:
