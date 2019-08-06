@@ -19,25 +19,46 @@
         - "vars/aeternity/{{ env }}.yml"
       skip: true
 
-- name: "Wait for /dev/nvme1n1 to become present"
+- name: Check that the /dev/xvdh exists
+  stat:
+    path: /dev/xvda1
+  register: xvdh_dev
+  when:
+    - additional_storage is defined
+    - additional_storage
+    - additional_storage_mountpoint is defined
+    - is_aws
+
+- name: Detect additional storage device name
+  set_fact:
+    additional_storage_dev: "{{ (xvdh_dev.stat is defined and xvdh_dev.stat.exists) | ternary('/dev/xvdh', '/dev/nvme1n1') }}"
+  tags: [always]
+  when:
+    - xvdh_dev is defined
+    - additional_storage is defined
+    - additional_storage
+    - additional_storage_mountpoint is defined
+    - is_aws
+
+- name: "Wait for {{ additional_storage_dev }} to become present"
   wait_for:
-    path: /dev/nvme1n1
+    path: "{{ additional_storage_dev }}"
     state: present
-  when: additional_storage is defined and additional_storage and is_aws
+  when: additional_storage_dev is defined
 
 - name: Create a xfs filesystem on /dev/nvme1n1
   filesystem:
     fstype: xfs
-    dev: /dev/nvme1n1
-  when: additional_storage is defined and additional_storage and is_aws
+    dev: "{{ additional_storage_dev }}"
+  when: additional_storage_dev is defined
 
 - name: Mount disk {{ additional_storage_mountpoint }}
   mount:
     path: "{{ additional_storage_mountpoint }}"
-    src: /dev/nvme1n1
+    src: "{{ additional_storage_dev }}"
     fstype: xfs
     state: mounted
-  when: additional_storage is defined and additional_storage and is_aws
+  when: additional_storage_dev is defined
 
 - name: Make sure that node will be able to access storage
   file:
@@ -45,4 +66,4 @@
     owner: "{{ project_user }}"
     group: "{{ project_user }}"
     mode: 0744
-  when: additional_storage is defined and additional_storage and is_aws
+  when: additional_storage_dev is defined
