@@ -52,7 +52,7 @@ fi
 # Fetch parameters from EC2 tags if not provided by the caller
 # Legacy instance configuration pass those parameters in user_data
 # To be removed when legacy instances are out
-if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_package"  || -z "region" ]]; then
+if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_package"  || -z "$region" ]]; then
     INSTANCE_ID=$(ec2metadata --instance-id)
     AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
     AWS_TAGS='[]'
@@ -117,12 +117,14 @@ ansible-galaxy install -r requirements.yml
 ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
+    -e region=${region} \
     -e env=${env} \
     setup.yml
 
 ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
+    -e region=${region} \
     -e env=${env} \
     monitoring.yml
 
