@@ -15,6 +15,8 @@ node_config:
       port: 3013
     internal:
       port: 3113
+      listen_address: 0.0.0.0
+      debug_endpoints: true
 
   keys:
     dir: keys
