@@ -119,6 +119,7 @@ ansible-playbook \
     -e ansible_python_interpreter=$(which python3) \
     -e region=${region} \
     -e env=${env} \
+    -e vault_addr=${vault_addr} \
     setup.yml
 
 ansible-playbook \
