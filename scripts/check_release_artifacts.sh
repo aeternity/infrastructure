@@ -17,7 +17,7 @@ else
     version=$release
 fi
 
-declare -a targets=(ubuntu macos)
+declare -a targets=(ubuntu-x86_64.tar.gz macos-x86_64.tar.gz windows-x86_64.zip)
 repo_name=aeternity/aeternity
 
 check_release_asset() {
@@ -26,7 +26,7 @@ check_release_asset() {
 
 check_github_release_assets() {
     for target in "${targets[@]}"; do
-        GH_ASSET=https://github.com/$repo_name/releases/download/$release/aeternity-$version-$target-x86_64.tar.gz
+        GH_ASSET=https://github.com/$repo_name/releases/download/$release/aeternity-$version-$target
         if [[ $(check_release_asset $GH_ASSET) != "" ]]; then
             echo $GH_ASSET check failed >&2; failed=true
         fi
@@ -78,8 +78,8 @@ get_s3_package_etag(){
 
 check_s3_artifacts() {
     for target in "${targets[@]}"; do
-        local version_package=https://releases.ops.aeternity.com/aeternity-$version-$target-x86_64.tar.gz
-        local latest_package=https://releases.ops.aeternity.com/aeternity-latest-$target-x86_64.tar.gz
+        local version_package=https://releases.ops.aeternity.com/aeternity-$version-$target
+        local latest_package=https://releases.ops.aeternity.com/aeternity-latest-$target
         # TODO: calculate ETAG from local package MD5 sum and verify
         # https://teppen.io/2018/10/23/aws_s3_verify_etags/
         local latest_etag=$(get_s3_package_etag $latest_package)
