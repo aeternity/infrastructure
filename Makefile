@@ -93,6 +93,17 @@ endif
 		-e env=$(BACKUP_ENV) \
 		mnesia_snapshot.yml
 
+ebs-grow-volume: check-deploy-env secrets
+	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
+ifneq ($(DEPLOY_REGION),)
+	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
+endif
+	cd ansible && $(ENV) ansible-playbook --limit="$(LIMIT)" \
+		-e ansible_python_interpreter=/var/venv/bin/python \
+		-e env=$(DEPLOY_ENV) \
+		-e vault_addr=$(VAULT_ADDR) \
+		ebs-grow-volume.yml
+
 provision: check-deploy-env secrets
 	cd ansible && $(ENV) ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
