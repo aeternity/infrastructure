@@ -17,7 +17,7 @@ else
     version=$release
 fi
 
-declare -a targets=(ubuntu-x86_64.tar.gz macos-x86_64.tar.gz windows-x86_64.zip)
+declare -a targets=(ubuntu-x86_64.tar.gz macos-x86_64.tar.gz windows-x86_64-experimental.zip)
 repo_name=aeternity/aeternity
 
 check_release_asset() {
