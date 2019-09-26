@@ -63,5 +63,5 @@ do
   # Construct url
   GH_ASSET="https://uploads.github.com/repos/$owner/$repo/releases/$id/assets?name=$(basename $filename)"
 
-  curl --data-binary @"$filename" -H "Authorization: token $github_api_token" -H "Content-Type: application/octet-stream" $GH_ASSET
+  curl -f --data-binary @"$filename" -H "$AUTH" -H "Content-Type: application/octet-stream" "$GH_ASSET"
 done
