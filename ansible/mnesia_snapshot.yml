@@ -54,6 +54,7 @@
         object: "{{ snapshot_filename }}"
         src: "{{ snapshot_path }}"
         mode: put
+        permission: "public-read"
         aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
         security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
@@ -64,6 +65,7 @@
         object: "{{ snapshots_filename_latest }}"
         src: "{{ snapshot_path }}"
         mode: put
+        permission: "public-read"
         aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
         aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
         security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
