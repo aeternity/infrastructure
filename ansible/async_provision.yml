@@ -5,29 +5,20 @@
   become: yes
 
   vars:
-    var_bootstrap_version: "{{ bootstrap_version | default('master, true) }}"
-    vault_role: ae-node
-    var_package: "{{ package | default('http://s3.eu-central-1.amazonaws.com/aeternity-node-releases/aeternity-latest-ubuntu-x86_64.tar.gz', true) }}"
-    var_region: "{{ region | default('', true) }}"
+    bootstrap_version: master
 
   tasks:
     - name: Clone infrastructure repo
       git:
-        repo:  https://github.com/aeternity/infrastructure.git
+        repo: https://github.com/aeternity/infrastructure.git
         dest: /infrastructure
-        version: "{{ var_bootstrap_version }}"
+        version: "{{ bootstrap_version }}"
         depth: 1
         force: yes
 
     - name: Run bootstrap.sh
       shell: |
-        /infrastructure/scripts/bootstrap.sh \
-         --vault_addr={{ vault_addr }} \
-         --vault_role={{ vault_role }} \
-         --env={{ env }} \
-         --aeternity_package={{ var_package }} \
-         --region={{ var_region }} \
-         >> /tmp/provision.log 2>&1
+        /infrastructure/scripts/bootstrap.sh >> /tmp/provision.log 2>&1
       async: 600
       poll: 15
       changed_when: False

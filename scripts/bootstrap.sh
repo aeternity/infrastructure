@@ -2,83 +2,30 @@
 # Do not run after first error
 set -eo pipefail
 
-for i in "$@"
-do
-case $i in
-    --vault_addr=*)
-    vault_addr="${i#*=}"
-    shift # past argument=value
-    ;;
-    --vault_role=*)
-    vault_role="${i#*=}"
-    shift # past argument=value
-    ;;
-    --env=*)
-    env="${i#*=}"
-    shift # past argument=value
-    ;;
-    --aeternity_package=*)
-    aeternity_package="${i#*=}"
-    shift # past argument=value
-    ;;
-    --region=*)
-    region="${i#*=}"
-    shift # past argument=value
-    ;;
-    --default)
-    DEFAULT=YES
-    shift # past argument with no value
-    ;;
-    *)
-          # unknown option
-    ;;
-esac
+
+INSTANCE_ID=$(ec2metadata --instance-id)
+AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
+AWS_TAGS='[]'
+
+# Pull AWS tags until available. Retries in 10s intervals total 150s
+WAIT_TIME=0
+while [[ $AWS_TAGS == '[]' && $WAIT_TIME -lt 60 ]]; do
+    AWS_TAGS=$(aws ec2 describe-tags \
+      --region=$AWS_REGION \
+      --filters "Name=resource-id,Values=$INSTANCE_ID" \
+      --query 'Tags' \
+    )
+    sleep $WAIT_TIME
+    let WAIT_TIME=WAIT_TIME+10
 done
 
-# Backward compatibility with user_data that does not activate the environment
-if [ -z $VIRTUAL_ENV ]; then
-    # Run Ansible in virtual environment
-    source /var/venv/bin/activate
+vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
+vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
+env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
+aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
+snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
+region=${AWS_REGION}
 
-    # Dirty ugly hack to workaround missing python-apt in the virtualenv
-    # It cannot be (?!) installed in the virtualenv
-    # If --system-site-packages is used all the packages are copied and specifically python-cryptography
-    # Distro python-cryptography is OLD and if copied to the virtualenv,
-    # it prevents pip to installed newer package version for some reason,
-    # but ansible (paramico) does not work with the OLD One
-    cp -r /usr/lib/python3/dist-packages/apt* /var/venv/lib/python3.5/site-packages/
-fi
-
-# Fetch parameters from EC2 tags if not provided by the caller
-# Legacy instance configuration pass those parameters in user_data
-# To be removed when legacy instances are out
-if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_package"  || -z "$region" ]]; then
-    INSTANCE_ID=$(ec2metadata --instance-id)
-    AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
-    AWS_TAGS='[]'
-
-    # Pull AWS tags until available. Retries in 10s intervals total 150s
-    WAIT_TIME=0
-    while [[ $AWS_TAGS == '[]' && $WAIT_TIME -lt 60 ]]; do
-        AWS_TAGS=$(aws ec2 describe-tags \
-          --region=$AWS_REGION \
-          --filters "Name=resource-id,Values=$INSTANCE_ID" \
-          --query 'Tags' \
-        )
-        sleep $WAIT_TIME
-        let WAIT_TIME=WAIT_TIME+10
-    done
-
-    vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
-    vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
-    env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
-    aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
-    snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
-    region=${AWS_REGION}
-fi
-
-# Temporary fix/workaround for non-executable vault install
-chmod +x /usr/bin/vault
 
 # Authenticate the instance to CSM
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
