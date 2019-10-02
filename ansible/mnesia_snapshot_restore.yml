@@ -7,6 +7,7 @@
 
   vars:
     snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ restore_snapshot_filename|mandatory }}"
+    restore_dir: "{{ additional_storage_mountpoint|default(project_root) }}"
 
   tasks:
     - name: Include configuration variables
@@ -37,22 +38,11 @@
 
     - meta: flush_handlers
 
-    - name: Restore Mnesia database to {{ additional_storage_mountpoint }}/
+    - name: Restore Mnesia database to {{ restore_dir }}/
       unarchive:
         remote_src: yes
         src: "{{ snapshot_path }}"
-        dest: "{{ additional_storage_mountpoint }}/"
-      when:
-        - additional_storage is defined
-        - additional_storage
-
-    - name: Restore Mnesia database to {{ project_root }}/
-      unarchive:
-        remote_src: yes
-        src: "{{ snapshot_path }}"
-        dest: "{{ project_root }}/"
-      when:
-        - additional_storage is not defined or not additional_storage
+        dest: "{{ restore_dir }}/"
 
     - name: Delete local Mnesia snapshots ({{ snapshots_dir }})
       file:
