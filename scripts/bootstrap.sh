@@ -1,7 +1,9 @@
 #!/bin/bash
-# Do not run after first error
 set -eo pipefail
 
+###
+#### Receive bootstrap configuration from AWS
+###
 
 INSTANCE_ID=$(ec2metadata --instance-id)
 AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
@@ -24,13 +26,13 @@ vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value
 env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
 aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
 snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
-region=${AWS_REGION}
 
 
-# Authenticate the instance to CSM
+###
+### Vault - Authenticate the instance to CSM
+###
+
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
-
-RESTORE_DATABASE=false
 
 export VAULT_ADDR=$vault_addr
 if [ -f "/root/.vault_nonce" ] ; then
@@ -43,17 +45,17 @@ else
     fi
 
     echo $NONCE > /root/.vault_nonce
-
     chmod 0600 /root/.vault_nonce
-
-    RESTORE_DATABASE=true
 fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
 
-cd $(dirname $0)/../ansible/
 
-# Install ansible roles
+###
+### Boostrap the instance with Ansible playbooks
+###
+
+cd $(dirname $0)/../ansible/
 ansible-galaxy install -r requirements.yml
 
 # While Ansible is run by Python 3 because of the virtual environment
@@ -64,16 +66,9 @@ ansible-galaxy install -r requirements.yml
 ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
-    -e region=${region} \
     -e env=${env} \
     -e vault_addr=${vault_addr} \
-    setup.yml
-
-ansible-playbook \
-    -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3) \
-    -e region=${region} \
-    -e env=${env} \
+    setup.yml \
     monitoring.yml
 
 # Keep db_version in sync with the value in file deployment/DB_VERSION from aeternity/aeternity repo!
@@ -81,19 +76,9 @@ ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
     --become-user aeternity -b \
-    -e package=${aeternity_package} \
     -e env=${env} \
-    -e region=${region} \
     -e db_version=1 \
-    deploy.yml
-
-if [ "$RESTORE_DATABASE" = true ] && [ -n "$snapshot_filename" ] && [ "$snapshot_filename" != "empty" ]; then
-    ansible-playbook \
-        -i localhost, -c local \
-        -e ansible_python_interpreter=$(which python3) \
-        --become-user aeternity -b \
-        -e env=${env} \
-        -e db_version=1 \
-        -e restore_snapshot_filename=${snapshot_filename} \
-        mnesia_snapshot_restore.yml
-fi
+    -e package=${aeternity_package} \
+    -e restore_snapshot_filename=${snapshot_filename} \
+    deploy.yml \
+    mnesia_snapshot_restore.yml
