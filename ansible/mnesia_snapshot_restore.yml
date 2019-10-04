@@ -7,6 +7,9 @@
 
   vars:
     snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ restore_snapshot_filename|mandatory }}"
+    restore_dir: "{{ additional_storage_mountpoint|default(project_root) }}"
+    should_restore: true
+    force_restore: false
 
   tasks:
     - name: Include configuration variables
@@ -18,10 +21,28 @@
         - "../vars/aeternity/{{ env }}.yml"
       tags: [config, node_config]
 
+    - name: Check if snapshot was restored in {{ restore_dir }}/
+      stat:
+        path: "{{ restore_dir }}/snapshot_restore"
+      register: marker
+
+    - name: Disable restoring (marker exists)
+      set_fact:
+        should_restore: false
+      when:
+        - not force_restore
+        - marker.stat.exists
+
+    - name: Disable restoring (empty filename)
+      set_fact:
+        should_restore: false
+      when: restore_snapshot_filename == "empty" or restore_snapshot_filename == ""
+
     - name: Ensure Mnesia snapshots dir exists ({{ snapshots_dir }})
       file:
         path: "{{ snapshots_dir }}"
         state: directory
+      when: should_restore
 
     - name: Download Mnesia snapshot {{ restore_snapshot_filename }}
       aws_s3:
@@ -29,40 +50,35 @@
         object: "{{ restore_snapshot_filename }}"
         dest: "{{ snapshot_path }}"
         mode: get
+      when: should_restore
 
     - name: Stop node
       command: "/bin/true"
       changed_when: true
       notify: "stop aeternity daemon"
+      when: should_restore
 
     - meta: flush_handlers
 
-    - name: Restore Mnesia database to {{ additional_storage_mountpoint }}/
+    - name: Restore Mnesia database to {{ restore_dir }}/
       unarchive:
         remote_src: yes
         src: "{{ snapshot_path }}"
-        dest: "{{ additional_storage_mountpoint }}/"
-      when:
-        - additional_storage is defined
-        - additional_storage
+        dest: "{{ restore_dir }}/"
+      notify: "start aeternity daemon"
+      when: should_restore
 
-    - name: Restore Mnesia database to {{ project_root }}/
-      unarchive:
-        remote_src: yes
-        src: "{{ snapshot_path }}"
-        dest: "{{ project_root }}/"
-      when:
-        - additional_storage is not defined or not additional_storage
+    - name: Create restore marker
+      file:
+        path: "{{ restore_dir }}/snapshot_restore"
+        state: touch
+      when: should_restore
 
     - name: Delete local Mnesia snapshots ({{ snapshots_dir }})
       file:
         path: "{{ snapshots_dir }}"
         state: absent
-
-    - name: Start node
-      command: "/bin/true"
-      changed_when: true
-      notify: "start aeternity daemon"
+      when: should_restore
 
   handlers:
   - import_tasks: tasks/handlers.yml

@@ -1,89 +1,38 @@
 #!/bin/bash
-# Do not run after first error
 set -eo pipefail
 
-for i in "$@"
-do
-case $i in
-    --vault_addr=*)
-    vault_addr="${i#*=}"
-    shift # past argument=value
-    ;;
-    --vault_role=*)
-    vault_role="${i#*=}"
-    shift # past argument=value
-    ;;
-    --env=*)
-    env="${i#*=}"
-    shift # past argument=value
-    ;;
-    --aeternity_package=*)
-    aeternity_package="${i#*=}"
-    shift # past argument=value
-    ;;
-    --region=*)
-    region="${i#*=}"
-    shift # past argument=value
-    ;;
-    --default)
-    DEFAULT=YES
-    shift # past argument with no value
-    ;;
-    *)
-          # unknown option
-    ;;
-esac
+###
+#### Receive bootstrap configuration from AWS
+###
+
+INSTANCE_ID=$(ec2metadata --instance-id)
+AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
+AWS_TAGS='[]'
+
+# Pull AWS tags until available. Retries in 10s intervals total 150s
+WAIT_TIME=0
+while [[ $AWS_TAGS == '[]' && $WAIT_TIME -lt 60 ]]; do
+    AWS_TAGS=$(aws ec2 describe-tags \
+      --region=$AWS_REGION \
+      --filters "Name=resource-id,Values=$INSTANCE_ID" \
+      --query 'Tags' \
+    )
+    sleep $WAIT_TIME
+    let WAIT_TIME=WAIT_TIME+10
 done
 
-# Backward compatibility with user_data that does not activate the environment
-if [ -z $VIRTUAL_ENV ]; then
-    # Run Ansible in virtual environment
-    source /var/venv/bin/activate
+vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
+vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
+env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
+aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
+snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
 
-    # Dirty ugly hack to workaround missing python-apt in the virtualenv
-    # It cannot be (?!) installed in the virtualenv
-    # If --system-site-packages is used all the packages are copied and specifically python-cryptography
-    # Distro python-cryptography is OLD and if copied to the virtualenv,
-    # it prevents pip to installed newer package version for some reason,
-    # but ansible (paramico) does not work with the OLD One
-    cp -r /usr/lib/python3/dist-packages/apt* /var/venv/lib/python3.5/site-packages/
-fi
 
-# Fetch parameters from EC2 tags if not provided by the caller
-# Legacy instance configuration pass those parameters in user_data
-# To be removed when legacy instances are out
-if [[ -z "$vault_addr" || -z "$vault_role" || -z "$env" || -z "$aeternity_package"  || -z "$region" ]]; then
-    INSTANCE_ID=$(ec2metadata --instance-id)
-    AWS_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
-    AWS_TAGS='[]'
+###
+### Vault - Authenticate the instance to CSM
+###
 
-    # Pull AWS tags until available. Retries in 10s intervals total 150s
-    WAIT_TIME=0
-    while [[ $AWS_TAGS == '[]' && $WAIT_TIME -lt 60 ]]; do
-        AWS_TAGS=$(aws ec2 describe-tags \
-          --region=$AWS_REGION \
-          --filters "Name=resource-id,Values=$INSTANCE_ID" \
-          --query 'Tags' \
-        )
-        sleep $WAIT_TIME
-        let WAIT_TIME=WAIT_TIME+10
-    done
-
-    vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
-    vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
-    env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
-    aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
-    snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
-    region=${AWS_REGION}
-fi
-
-# Temporary fix/workaround for non-executable vault install
-chmod +x /usr/bin/vault
-
-# Authenticate the instance to CSM
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
-
-RESTORE_DATABASE=false
 
 export VAULT_ADDR=$vault_addr
 if [ -f "/root/.vault_nonce" ] ; then
@@ -96,17 +45,17 @@ else
     fi
 
     echo $NONCE > /root/.vault_nonce
-
     chmod 0600 /root/.vault_nonce
-
-    RESTORE_DATABASE=true
 fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
 
-cd $(dirname $0)/../ansible/
 
-# Install ansible roles
+###
+### Boostrap the instance with Ansible playbooks
+###
+
+cd $(dirname $0)/../ansible/
 ansible-galaxy install -r requirements.yml
 
 # While Ansible is run by Python 3 because of the virtual environment
@@ -117,16 +66,9 @@ ansible-galaxy install -r requirements.yml
 ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
-    -e region=${region} \
     -e env=${env} \
     -e vault_addr=${vault_addr} \
-    setup.yml
-
-ansible-playbook \
-    -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3) \
-    -e region=${region} \
-    -e env=${env} \
+    setup.yml \
     monitoring.yml
 
 # Keep db_version in sync with the value in file deployment/DB_VERSION from aeternity/aeternity repo!
@@ -134,19 +76,9 @@ ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
     --become-user aeternity -b \
-    -e package=${aeternity_package} \
     -e env=${env} \
-    -e region=${region} \
     -e db_version=1 \
-    deploy.yml
-
-if [ "$RESTORE_DATABASE" = true ] && [ -n "$snapshot_filename" ] && [ "$snapshot_filename" != "empty" ]; then
-    ansible-playbook \
-        -i localhost, -c local \
-        -e ansible_python_interpreter=$(which python3) \
-        --become-user aeternity -b \
-        -e env=${env} \
-        -e db_version=1 \
-        -e restore_snapshot_filename=${snapshot_filename} \
-        mnesia_snapshot_restore.yml
-fi
+    -e package=${aeternity_package} \
+    -e restore_snapshot_filename=${snapshot_filename} \
+    deploy.yml \
+    mnesia_snapshot_restore.yml
