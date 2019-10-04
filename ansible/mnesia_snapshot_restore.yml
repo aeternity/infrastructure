@@ -15,13 +15,6 @@
     - name: Include configuration variables
       include_vars: vars/snapshot.yml
 
-    - name: "Load a variable files for environment: {{ env }}"
-      include_vars: "{{ item }}"
-      with_first_found:
-        - "../vars/node_config.yml"
-        - "../vars/aeternity/{{ env }}.yml"
-      tags: [config, node_config]
-
     - name: Check if snapshot was restored in {{ restore_dir }}/
       stat:
         path: "{{ restore_dir }}/snapshot_restore"

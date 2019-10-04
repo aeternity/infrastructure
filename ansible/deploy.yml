@@ -57,13 +57,6 @@
           - downtime is defined
           - downtime != "0"
 
-      - name: "Load a variable files for environment: {{ env }}"
-        include_vars: "{{ item }}"
-        with_first_found:
-          - "vars/node_config.yml"
-          - "vars/aeternity/{{ env }}.yml"
-        tags: [config, node_config, peer_keys, health-check]
-
       - name: Fail on missing package variable
         fail:
           msg: '"package" variable must be defined'

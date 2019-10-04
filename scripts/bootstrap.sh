@@ -51,18 +51,20 @@ fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
 
+# Generate node config from ${env}.yml (or create empty)
+cat "@$(dirname $0)/../ansible/${env}.yml" > /tmp/node_config.yml 2>/dev/null || /bin/true
+
+# Override the env defaults with ones stored in $vault_config
+if [[ ! -z "$vault_config" && "$vault_config" != "none" ]]; then
+    vault read secret/$(vault_config) > /tmp/node_config.yml
+fi
 
 ###
-### Boostrap the instance with Ansible playbooks
+### Bootstrap the instance with Ansible playbooks
 ###
 
 cd $(dirname $0)/../ansible/
 ansible-galaxy install -r requirements.yml
-
-# Dump vault stored config vars if exist as file that will be included in playbooks
-if [[ ! -z "$vault_config" ]]; then
-    vault read secret/$(vault_config) > vars/node_config.yml
-fi
 
 # While Ansible is run by Python 3 because of the virtual environment
 # the "remote" (which is in this case the same) host interpreter must also be set to python3
@@ -74,6 +76,7 @@ ansible-playbook \
     -e ansible_python_interpreter=$(which python3) \
     -e env=${env} \
     -e vault_addr=${vault_addr} \
+    -e "@/tmp/node_config.yml" \
     setup.yml \
     monitoring.yml
 
@@ -86,5 +89,6 @@ ansible-playbook \
     -e db_version=1 \
     -e package=${aeternity_package} \
     -e restore_snapshot_filename=${snapshot_filename} \
+    -e "@/tmp/node_config.yml" \
     deploy.yml \
     mnesia_snapshot_restore.yml
