@@ -1,6 +1,7 @@
 # Make sure to copy the modifications to .dockerignore
 *.retry
 ansible/group_vars/**/*.local.*
+ansible/vars/node_config.*
 ansible/inventory/*.rc.sh
 ansible/callback_plugins/datadog_callback.yml
 .virtualenv/

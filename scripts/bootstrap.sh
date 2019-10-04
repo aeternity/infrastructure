@@ -23,6 +23,7 @@ done
 
 vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
 vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
+vault_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_config") | .Value')
 env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
 aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
 snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
@@ -57,6 +58,11 @@ export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$
 
 cd $(dirname $0)/../ansible/
 ansible-galaxy install -r requirements.yml
+
+# Dump vault stored config vars if exist as file that will be included in playbooks
+if [[ ! -z "$vault_config" ]]; then
+    vault read secret/$(vault_config) > vars/node_config.yml
+fi
 
 # While Ansible is run by Python 3 because of the virtual environment
 # the "remote" (which is in this case the same) host interpreter must also be set to python3
