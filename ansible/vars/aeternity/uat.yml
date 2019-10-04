@@ -1,10 +1,7 @@
 public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
 datadog_enabled: yes
-api_base_uri: http://{{ public_ipv4 }}:{{ node_config.http.external.port }}/v2
-configure_peers: false
 additional_storage: true
 additional_storage_mountpoint: /data
-
 seed_peers:
   - "52.10.46.160"
   - "18.195.109.60"
@@ -12,11 +9,6 @@ seed_peers:
   - "13.53.161.215"
 
 node_config:
-  peers:
-    - "aenode://pp_QU9CvhAQH56a2kA15tCnWPRJ2srMJW8ZmfbbFTAy7eG4o16Bf@52.10.46.160:3015"
-    - "aenode://pp_2vhFb3HtHd1S7ynbpbFnEdph1tnDXFSfu4NGtq46S2eM5HCdbC@18.195.109.60:3015"
-    - "aenode://pp_27xmgQ4N1E3QwHyoutLtZsHW5DSW4zneQJ3CxT5JbUejxtFuAu@13.250.162.250:3015"
-    - "aenode://pp_DMLqy7Zuhoxe2FzpydyQTgwCJ52wouzxtHWsPGo51XDcxc5c8@13.53.161.215:3015"
   sync:
     port: 3015
 
@@ -33,8 +25,6 @@ node_config:
   chain:
     persist: true
     db_path: "/data/db{{ db_version|mandatory }}"
-    protocol_beneficiaries_enabled: true
-    protocol_beneficiaries: ["ak_2A3PZPfMC2X7ZVy4qGXz2xh2Lbh79Q4UvZ5fdH7QVFocEgcKzU:109"]
 
   mining:
     autostart: true
