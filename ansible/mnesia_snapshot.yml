@@ -17,6 +17,7 @@
     - name: "Load a variable files for environment: {{ env }}"
       include_vars: "{{ item }}"
       with_first_found:
+        - "../vars/node_config.yml"
         - "../vars/aeternity/{{ env }}.yml"
       tags: [config, node_config]
 

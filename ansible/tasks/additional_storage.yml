@@ -16,6 +16,7 @@
   include_vars: "{{ item }}"
   with_first_found:
     - files:
+        - "vars/node_config.yml"
         - "vars/aeternity/{{ env }}.yml"
       skip: true
 
