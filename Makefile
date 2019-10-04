@@ -136,12 +136,14 @@ integration-tests-run: secrets
 	# TODO this is actually a smoke test that can be migrated to "goss"
 	cd ansible && $(ENV) ansible-playbook \
 		--limit=tag_envid_$(TF_VAR_envid) \
+		-e "@vars/aeternity/test.yml" \
 		-e env=test \
 		health-check.yml
 
 health-check-env-local: secrets
 	cd ansible && $(ENV) ansible-playbook \
 		--limit=tag_env_$(DEPLOY_ENV) \
+		-e "@vars/aeternity/$(DEPLOY_ENV).yml" \
 		-e env=$(DEPLOY_ENV) \
 		health-check.yml
 
