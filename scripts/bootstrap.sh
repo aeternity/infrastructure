@@ -51,10 +51,15 @@ fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
 
-cd $(dirname $0)/../ansible
+###
+### Dynamic node config
+###
 
-# Generate node config from ${env}.yml (or create empty)
-cat "vars/aeternity/${env}.yml" > /tmp/node_config.yml 2>/dev/null || /bin/true
+# Generate node config from tracked ${env}.yml
+env_config="$(dirname $0)/../ansible/vars/aeternity/${env}.yml"
+if [[ -f "${env_config}" ]]; then
+    cp "${env_config}" /tmp/node_config.yml
+fi
 
 # Override the env defaults with ones stored in $vault_config
 if [[ ! -z "$vault_config" && "$vault_config" != "none" ]]; then
@@ -65,6 +70,7 @@ fi
 ### Bootstrap the instance with Ansible playbooks
 ###
 
+cd $(dirname $0)/../ansible
 ansible-galaxy install -r requirements.yml
 
 # While Ansible is run by Python 3 because of the virtual environment
