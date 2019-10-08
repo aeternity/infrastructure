@@ -221,6 +221,57 @@ The playbook does:
 - delete logs
 - delete chain keys
 
+### Vault node configuration
+
+Node configurations are stored in Vault under `secret/aenode/config/<<ENV>>`
+
+#### List of all stored configurations:
+
+To get a list of all stored configurations (environment names) in Vault use:
+
+```bash
+make vault-configs-list
+```
+
+#### Dumping configurations
+
+Configurations will be saved as a YAML file with filename format `<CONFIG_OUTPUT_DIR>/<ENV>.yml` 
+
+By default `CONFIG_OUTPUT_DIR` is `/tmp/config`. You can provide it as make env variable.
+
+To dump the contents of all configurations files as separate files (defaults to `/tmp/config/*.yml`):
+
+```bash
+make vault-configs-dump
+make vault-configs-dump CONFIG_OUTPUT_DIR=/some/dir
+
+```
+
+To dump a single configuration use `make vault-config-<<env>>`. Examples:
+
+```bash
+make vault-config-test
+make vault-config-dev1 CONFIG_OUTPUT_DIR=/some/dir
+```
+
+#### Additional shortcuts
+
+To dump and display the contents of single env use `make show-config-<env>`:
+
+```bash
+make show-config-test
+```
+
+To dump and export as `/tmp/node_config.yml` use `make node-config-<env>`:
+
+```bash
+make node-config-test
+```
+You can change the target file by providing `NODE_CONFIG=<full_filename_path>`
+
+Note: Vault root path for configs can be changed by `VAULT_CONFIG_ROOT` (default is `secret/aenode/config`)
+
+
 ### Mnesia backups
 
 To backup a Mnesia database (snapshot) run:

@@ -9,6 +9,9 @@ SECRETS_OUTPUT_DIR ?= /tmp/secrets
 ENV = envdir $(SECRETS_OUTPUT_DIR)
 VAULT_ADDR ?= $(AE_VAULT_ADDR)
 TF_COMMON_PARAMS = -var vault_addr=$(VAULT_ADDR) -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
+CONFIG_OUTPUT_DIR ?= /tmp/config
+VAULT_CONFIG_ROOT ?= secret/aenode/config
+NODE_CONFIG ?= /tmp/node_config.yml
 
 $(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
 	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
@@ -191,10 +194,38 @@ clean:
 	rm -f ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
 	rm -rf $(SECRETS_OUTPUT_DIR)
+	rm -rf $(CONFIG_OUTPUT_DIR)
+
+$(CONFIG_OUTPUT_DIR): secrets
+	@mkdir -p $(CONFIG_OUTPUT_DIR)
+
+vault-configs-list: $(CONFIG_OUTPUT_DIR)
+	@$(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
+
+vault-configs-dump: $(CONFIG_OUTPUT_DIR)
+	### Dump all configs
+	@$(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3 | xargs -IENV make --no-print-directory $(CONFIG_OUTPUT_DIR)/ENV.yml
+
+vault-config-%: $(CONFIG_OUTPUT_DIR) $(CONFIG_OUTPUT_DIR)/%.yml ;
+
+vault-show-%: vault-config-%
+	@cat $(CONFIG_OUTPUT_DIR)/$*.yml
+
+node-config-%: vault-config-%
+	cp $(CONFIG_OUTPUT_DIR)/$*.yml $(NODE_CONFIG)
+
+.PRECIOUS: $(CONFIG_OUTPUT_DIR)/%.yml
+$(CONFIG_OUTPUT_DIR)/%.yml:
+	### - $(CONFIG_OUTPUT_DIR)/$*.yml
+	@$(ENV) vault kv get -field=node_config $(VAULT_CONFIG_ROOT)/$* > $(CONFIG_OUTPUT_DIR)/$*.yml
+
+# List of all available targets
+.PHONY help: ; @$(MAKE) -pq | awk '/^[^.%][-A-Za-z0-9_%*]*:/{ print substr($$1, 1, length($$1)-1) }' | sort -u
 
 .PHONY: \
 	secrets images setup-node setup-monitoring setup \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
 	check-seed-peers check-deploy-env list-inventory \
 	check-seed-peers-% check-seed-peers-all \
-	health-check-node health-check-% health-check-all
+	health-check-node health-check-% health-check-all \
+	vault-config-clean vault-config-all
