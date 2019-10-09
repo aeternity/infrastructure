@@ -78,8 +78,8 @@ get_s3_package_etag(){
 
 check_s3_artifacts() {
     for target in "${targets[@]}"; do
-        local version_package=https://releases.ops.aeternity.com/aeternity-$version-$target
-        local latest_package=https://releases.ops.aeternity.com/aeternity-latest-$target
+        local version_package=https://releases.aeternity.io/aeternity-$version-$target
+        local latest_package=https://releases.aeternity.io/aeternity-latest-$target
         # TODO: calculate ETAG from local package MD5 sum and verify
         # https://teppen.io/2018/10/23/aws_s3_verify_etags/
         local latest_etag=$(get_s3_package_etag $latest_package)
