@@ -221,13 +221,25 @@ The playbook does:
 - delete logs
 - delete chain keys
 
-### Vault node configuration
+### Vault node ansible configuration
 
-Node configurations are stored in Vault under `secret/aenode/config/<<ENV>>`
+Node configurations are stored in YAML format by the Vault's KV store named 'secret'
+under path `secret/aenode/config/<ENV_TAG>` as field `node_config`
+
+`<ENV_TAG>` should be considered to be a node's "configuration" environment. 
+For instance 'terraform' setups certain nodes to look for `<env@region>`, e.g. `main_mon@us-west-1`. 
+
+Each AWS instance `<ENV_TAG>` is generated from the EC2 `env` tag or is fully specified by `vault_config` tag.
+It should point to the location of the vault's `node_config` field (path only).
+If `vault_config` is missing, empty or is set to the string `none` it will use the instance's `env` as fallback. 
+
+When there is no env config stored in the KV database (and instance have no vault_config tag), the bootstrapper will try to use a file in `/ansible/vars/<env>.yml`.
+
+For quick debugging of KV config repository there are few tools provided by make.
 
 #### List of all stored configurations:
 
-To get a list of all stored configurations (environment names) in Vault use:
+To get a list of all Vault stored configuration <ENV_TAG>'s (environments) use:
 
 ```bash
 make vault-configs-list
@@ -235,42 +247,43 @@ make vault-configs-list
 
 #### Dumping configurations
 
-Configurations will be saved as a YAML file with filename format `<CONFIG_OUTPUT_DIR>/<ENV>.yml` 
+Configurations will be downloaded as a YAML file with filename format `<CONFIG_OUTPUT_DIR>/<ENV_TAG>.yml` 
 
 By default `CONFIG_OUTPUT_DIR` is `/tmp/config`. You can provide it as make env variable.
 
-To dump the contents of all configurations files as separate files (defaults to `/tmp/config/*.yml`):
+You can save all configurations as separate `.yml` files in `/tmp/config`:
 
 ```bash
 make vault-configs-dump
-make vault-configs-dump CONFIG_OUTPUT_DIR=/some/dir
-
 ```
 
-To dump a single configuration use `make vault-config-<<env>>`. Examples:
+To dump a single configuration use `make vault-config-<ENV_TAG>`. Example for `dev1`:
 
 ```bash
-make vault-config-test
-make vault-config-dev1 CONFIG_OUTPUT_DIR=/some/dir
+make vault-config-dev1
 ```
 
-#### Additional shortcuts
-
-To dump and display the contents of single env use `make show-config-<env>`:
+Tip: To get and dump the contents in the console you can use:
 
 ```bash
-make show-config-test
+cat `make -s vault-config-test`
 ```
 
-To dump and export as `/tmp/node_config.yml` use `make node-config-<env>`:
+#### Additional options
+
+ENV vars can control the defaults:
+- `CONFIG_OUTPUT_DIR` - To override the output path where configs are dumped (default: `/tmp/config`)
+- `VAULT_CONFIG_ROOT` - Vault root path where config envs are stored (default: `secret/aenode/config`)
+- `VAULT_CONFIG_FIELD` - Name of the field where the configuration YAML is stored (default: `node_config`)
+
+Example:
 
 ```bash
-make node-config-test
+make vault-configs-dump \
+    CONFIG_OUTPUT_DIR=/some/dir \
+    VAULT_CONFIG_ROOT=secret/some/config \
+    VAULT_CONFIG_FIELD=special_config
 ```
-You can change the target file by providing `NODE_CONFIG=<full_filename_path>`
-
-Note: Vault root path for configs can be changed by `VAULT_CONFIG_ROOT` (default is `secret/aenode/config`)
-
 
 ### Mnesia backups
 

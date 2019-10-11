@@ -62,8 +62,8 @@ if [[ -f "${env_config}" ]]; then
 fi
 
 # Override the env defaults with ones stored in $vault_config
-if [[ ! -z "$vault_config" && "$vault_config" != "none" ]]; then
-    vault read secret/$(vault_config) > /tmp/node_config.yml
+if [[ -n "$(vault_config)" && "$(vault_config)" != "none" ]]; then
+    vault read $(vault_config) -field=node_config > /tmp/node_config.yml
 fi
 
 ###
