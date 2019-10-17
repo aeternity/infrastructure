@@ -384,7 +384,17 @@ docker attach infrastructure-local
 ./local_playbook_run.sh deploy.yml # + add required parameters
 ```
 
-Use <kbd>CTRL</kbd> + <kbd>p</kbd>, <kbd>q</kbd> sequence to detach from the container.
+Certain playbooks require a `node_config` var to be provided. The most convenient way is to import a `.yml` file in the ansible env:
+
+```bash
+./local_playbook_run.sh deploy.yml \ 
+    -e "@/tmp/config/test.yml" # + add required parameters
+```
+
+*Note: To create a .yml for the 'test' deployment env, you can use `make vault-config-test`.
+See [Dumping configurations](#Dumping configurations) section for more.*
+
+Use <kbd>CTRL+p</kbd>, <kbd>q</kbd> sequence to detach from the container.
 
 ### Integration tests
 
