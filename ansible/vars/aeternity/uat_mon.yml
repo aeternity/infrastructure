@@ -1,4 +1,3 @@
-public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
 datadog_enabled: yes
 monitoring_vault_path: "{{ 'secret/aenode/monitor/uat/' + ansible_ec2_placement_region|default('global') + '/publisher' }}"
 monitoring_pubkey: "{{ lookup('hashi_vault', 'secret=' + monitoring_vault_path + ':pubkey') }}"

@@ -19,11 +19,6 @@
         - aeternity_action != "restart"
       connection: local
 
-    - name: "Load a variable files for environment: {{ env }}"
-      include_vars: "{{ item }}"
-      with_first_found:
-        - "vars/aeternity/{{ env }}.yml"
-
     - name: Aeternity binary exists
       stat:
         path: "{{ aeternity_bin }}"

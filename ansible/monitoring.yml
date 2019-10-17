@@ -162,6 +162,7 @@
 
   vars:
     project_user: aeternity
+    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
     network_id: "{{ (node_config['fork_management']|default(dict(network_id = 'unknown')))['network_id'] }}"
     datadog_agent6: true

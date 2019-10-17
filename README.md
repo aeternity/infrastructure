@@ -221,6 +221,70 @@ The playbook does:
 - delete logs
 - delete chain keys
 
+### Vault node ansible configuration
+
+Node configurations are stored in YAML format by the Vault's KV store named 'secret'
+under path `secret/aenode/config/<ENV_TAG>` as field `node_config`
+
+`<ENV_TAG>` should be considered to be a node's "configuration" environment. 
+For instance 'terraform' setups certain nodes to look for `<env@region>`, e.g. `main_mon@us-west-1`. 
+
+Each AWS instance `<ENV_TAG>` is generated from the EC2 `env` tag or is fully specified by `vault_config` tag.
+It should point to the location of the vault's `node_config` field (path only).
+If `vault_config` is missing, empty or is set to the string `none` it will use the instance's `env` as fallback. 
+
+When there is no env config stored in the KV database (and instance have no vault_config tag), the bootstrapper will try to use a file in `/ansible/vars/<env>.yml`.
+
+For quick debugging of KV config repository there are few tools provided by make.
+
+#### List of all stored configurations:
+
+To get a list of all Vault stored configuration <ENV_TAG>'s (environments) use:
+
+```bash
+make vault-configs-list
+```
+
+#### Dumping configurations
+
+Configurations will be downloaded as a YAML file with filename format `<CONFIG_OUTPUT_DIR>/<ENV_TAG>.yml` 
+
+By default `CONFIG_OUTPUT_DIR` is `/tmp/config`. You can provide it as make env variable.
+
+You can save all configurations as separate `.yml` files in `/tmp/config`:
+
+```bash
+make vault-configs-dump
+```
+
+To dump a single configuration use `make vault-config-<ENV_TAG>`. Example for `dev1`:
+
+```bash
+make vault-config-dev1
+```
+
+Tip: To get and dump the contents in the console you can use:
+
+```bash
+cat `make -s vault-config-test`
+```
+
+#### Additional options
+
+ENV vars can control the defaults:
+- `CONFIG_OUTPUT_DIR` - To override the output path where configs are dumped (default: `/tmp/config`)
+- `VAULT_CONFIG_ROOT` - Vault root path where config envs are stored (default: `secret/aenode/config`)
+- `VAULT_CONFIG_FIELD` - Name of the field where the configuration YAML is stored (default: `node_config`)
+
+Example:
+
+```bash
+make vault-configs-dump \
+    CONFIG_OUTPUT_DIR=/some/dir \
+    VAULT_CONFIG_ROOT=secret/some/config \
+    VAULT_CONFIG_FIELD=special_config
+```
+
 ### Mnesia backups
 
 To backup a Mnesia database (snapshot) run:
@@ -320,7 +384,17 @@ docker attach infrastructure-local
 ./local_playbook_run.sh deploy.yml # + add required parameters
 ```
 
-Use <kbd>CTRL</kbd> + <kbd>p</kbd>, <kbd>q</kbd> sequence to detach from the container.
+Certain playbooks require a `node_config` var to be provided. The most convenient way is to import a `.yml` file in the ansible env:
+
+```bash
+./local_playbook_run.sh deploy.yml \ 
+    -e "@/tmp/config/test.yml" # + add required parameters
+```
+
+*Note: To create a .yml for the 'test' deployment env, you can use `make vault-config-test`.
+See [Dumping configurations](#Dumping configurations) section for more.*
+
+Use <kbd>CTRL+p</kbd>, <kbd>q</kbd> sequence to detach from the container.
 
 ### Integration tests
 

@@ -12,13 +12,6 @@
     is_aws: "{{ aws_uri_check.status == 200 }}"
   tags: [always]
 
-- name: "Load a variable files for environment: {{ env }}"
-  include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/aeternity/{{ env }}.yml"
-      skip: true
-
 - name: Check that the /dev/xvdh exists
   stat:
     path: /dev/xvda1

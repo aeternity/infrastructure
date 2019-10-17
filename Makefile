@@ -9,6 +9,10 @@ SECRETS_OUTPUT_DIR ?= /tmp/secrets
 ENV = envdir $(SECRETS_OUTPUT_DIR)
 VAULT_ADDR ?= $(AE_VAULT_ADDR)
 TF_COMMON_PARAMS = -var vault_addr=$(VAULT_ADDR) -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
+CONFIG_OUTPUT_DIR ?= /tmp/config
+VAULT_CONFIG_ROOT ?= secret/aenode/config
+VAULT_CONFIG_FIELD ?= node_config
+LIST_CONFIG_ENVS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
 
 $(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
 	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
@@ -18,24 +22,26 @@ secrets: $(SECRETS_OUTPUT_DIR)
 envshell: secrets
 	@envshell $(SECRETS_OUTPUT_DIR)
 
-setup-node: check-deploy-env secrets
+setup-node: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e vault_addr=$(VAULT_ADDR) \
 		-e env=$(DEPLOY_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		setup.yml
 
-setup-monitoring: check-deploy-env secrets
+setup-monitoring: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e env=$(DEPLOY_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		monitoring.yml
 
 setup: setup-node setup-monitoring
 
-deploy: check-deploy-env secrets
+deploy: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 ifeq ($(DEPLOY_DB_VERSION),)
 	$(error DEPLOY_DB_VERSION should be provided)
 endif
@@ -55,12 +61,13 @@ endif
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e package=$(PACKAGE) \
 		-e env=$(DEPLOY_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		-e downtime=$(DEPLOY_DOWNTIME) \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		-e rolling_update="${ROLLING_UPDATE}" \
 		deploy.yml
 
-manage-node: check-deploy-env secrets
+manage-node: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 ifndef CMD
 	$(error CMD is undefined, supported commands: start, stop, restart, ping)
 endif
@@ -68,17 +75,20 @@ endif
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		-e db_version=0 \
 		-e cmd=$(CMD) \
 		manage-node.yml
 
-reset-net: check-deploy-env secrets
+reset-net: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 	cd ansible && $(ENV) ansible-playbook \
 		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
+		-e env=$(DEPLOY_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		reset-net.yml
 
-mnesia_snapshot: secrets
+mnesia_snapshot: secrets vault-config-$(DEPLOY_ENV)
 ifeq ($(BACKUP_DB_VERSION),)
 	$(error BACKUP_DB_VERSION should be provided)
 endif
@@ -91,9 +101,10 @@ endif
 		-e snapshot_suffix=$(BACKUP_SUFFIX) \
 		-e db_version=$(BACKUP_DB_VERSION) \
 		-e env=$(BACKUP_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		mnesia_snapshot.yml
 
-ebs-grow-volume: check-deploy-env secrets
+ebs-grow-volume: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
 ifneq ($(DEPLOY_REGION),)
 	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
@@ -101,13 +112,15 @@ endif
 	cd ansible && $(ENV) ansible-playbook --limit="$(LIMIT)" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e env=$(DEPLOY_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		-e vault_addr=$(VAULT_ADDR) \
 		ebs-grow-volume.yml
 
-provision: check-deploy-env secrets
+provision: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 	cd ansible && $(ENV) ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
 		-e ansible_python_interpreter=/usr/bin/python3 \
 		-e env=$(DEPLOY_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		-e vault_addr=$(VAULT_ADDR) \
 		-e package=$(PACKAGE) \
 		-e bootstrap_version=$(BOOTSTRAP_VERSION) \
@@ -130,19 +143,21 @@ ssh-%: cert-%
 
 ssh: ssh-aeternity
 
-integration-tests-run: secrets
+integration-tests-run: secrets vault-config-test
 	cd test/terraform && terraform init
 	cd test/terraform && $(ENV) terraform apply $(TF_COMMON_PARAMS) --auto-approve
 	# TODO this is actually a smoke test that can be migrated to "goss"
 	cd ansible && $(ENV) ansible-playbook \
 		--limit=tag_envid_$(TF_VAR_envid) \
 		-e env=test \
+		-e "@$(CONFIG_OUTPUT_DIR)/test.yml" \
 		health-check.yml
 
-health-check-env-local: secrets
+health-check-env-local: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 	cd ansible && $(ENV) ansible-playbook \
 		--limit=tag_env_$(DEPLOY_ENV) \
 		-e env=$(DEPLOY_ENV) \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		health-check.yml
 
 integration-tests-cleanup: secrets
@@ -189,6 +204,28 @@ clean:
 	rm -f ~/.ssh/id_ae_infra*
 	rm -f ansible/inventory-list.json
 	rm -rf $(SECRETS_OUTPUT_DIR)
+	rm -rf $(CONFIG_OUTPUT_DIR)
+
+# Vault config
+$(CONFIG_OUTPUT_DIR):
+	@mkdir -p $(CONFIG_OUTPUT_DIR)
+
+vault-configs-list: secrets
+	@$(LIST_CONFIG_ENVS)
+
+vault-configs-dump: secrets
+	@$(MAKE) --no-print-directory $(addprefix vault-config-, $(shell $(LIST_CONFIG_ENVS)))
+
+vault-config-% : $(CONFIG_OUTPUT_DIR)/%.yml ;
+
+.PRECIOUS: $(CONFIG_OUTPUT_DIR)/%.yml
+$(CONFIG_OUTPUT_DIR)/%.yml: YML=$(CONFIG_OUTPUT_DIR)/$*.yml
+$(CONFIG_OUTPUT_DIR)/%.yml: secrets $(CONFIG_OUTPUT_DIR)
+	@($(ENV) vault read -field=$(VAULT_CONFIG_FIELD) $(VAULT_CONFIG_ROOT)/$* > $(YML) && echo $(YML) ) || rm $(YML)
+
+# List of all available targets
+.PHONY help:
+	@$(MAKE) vault-configs-dump -pq | awk '/^[^.%][-A-Za-z0-9_@]*:/{ print substr($$1, 1, length($$1)-1) }' | sort -u
 
 .PHONY: \
 	secrets images setup-node setup-monitoring setup \

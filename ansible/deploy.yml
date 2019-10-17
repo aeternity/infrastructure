@@ -8,6 +8,7 @@
   max_fail_percentage: 25
 
   vars:
+    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
     project_root: "/home/aeternity/node"
     packages_path: "/home/aeternity"
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
@@ -55,12 +56,6 @@
         when:
           - downtime is defined
           - downtime != "0"
-
-      - name: "Load a variable files for environment: {{ env }}"
-        include_vars: "{{ item }}"
-        with_first_found:
-          - "vars/aeternity/{{ env }}.yml"
-        tags: [config, node_config, peer_keys, health-check]
 
       - name: Fail on missing package variable
         fail:

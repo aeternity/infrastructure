@@ -3,6 +3,9 @@
   remote_user: aeternity
   gather_facts: no
 
+  vars:
+    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
+
   tasks:
     - name: Get the base58c public key
       command: "/home/aeternity/node/bin/aeternity peer_key"

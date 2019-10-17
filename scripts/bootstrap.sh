@@ -23,6 +23,7 @@ done
 
 vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
 vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
+vault_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_config") | .Value')
 env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
 aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
 snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
@@ -50,12 +51,26 @@ fi
 
 export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$vault_role nonce=$NONCE)
 
+###
+### Dynamic node config
+###
+
+# Generate node config from tracked ${env}.yml
+env_config="$(dirname $0)/../ansible/vars/aeternity/${env}.yml"
+if [[ -f "${env_config}" ]]; then
+    cp "${env_config}" /tmp/node_config.yml
+fi
+
+# Override the env defaults with ones stored in $vault_config
+if [[ -n "$(vault_config)" && "$(vault_config)" != "none" ]]; then
+    vault read $(vault_config) -field=node_config > /tmp/node_config.yml
+fi
 
 ###
-### Boostrap the instance with Ansible playbooks
+### Bootstrap the instance with Ansible playbooks
 ###
 
-cd $(dirname $0)/../ansible/
+cd $(dirname $0)/../ansible
 ansible-galaxy install -r requirements.yml
 
 # While Ansible is run by Python 3 because of the virtual environment
@@ -68,6 +83,7 @@ ansible-playbook \
     -e ansible_python_interpreter=$(which python3) \
     -e env=${env} \
     -e vault_addr=${vault_addr} \
+    -e "@/tmp/node_config.yml" \
     setup.yml \
     monitoring.yml
 
@@ -80,5 +96,6 @@ ansible-playbook \
     -e db_version=1 \
     -e package=${aeternity_package} \
     -e restore_snapshot_filename=${snapshot_filename} \
+    -e "@/tmp/node_config.yml" \
     deploy.yml \
     mnesia_snapshot_restore.yml
