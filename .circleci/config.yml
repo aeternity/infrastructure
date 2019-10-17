@@ -103,14 +103,20 @@ jobs:
             pip3 install -r requirements.txt
             ansible-galaxy install -r ansible/requirements.yml
       - run:
+          name: Dump node configuration
+          command: |
+            make vault-config-test
+      - run:
           name: Test ansible/setup.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/setup.yml \
+              -e "@/tmp/config/test.yml" \
               -e env=test
       - run:
           name: Test ansible/monitoring.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
+              -e "@/tmp/config/test.yml" \
               -e datadog_api_key=test \
               -e datadog_enabled=yes \
               -e env=test
@@ -118,6 +124,7 @@ jobs:
           name: Test ansible/deploy.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/deploy.yml \
+              -e "@/tmp/config/test.yml" \
               -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key= \
