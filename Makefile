@@ -14,17 +14,12 @@ VAULT_CONFIG_ROOT ?= secret/aenode/config
 VAULT_CONFIG_FIELD ?= node_config
 LIST_CONFIG_ENVS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
 CONFIG_ENV ?= $(DEPLOY_ENV)
-LIMT ?= tag_env_$(DEPLOY_ENV):&tag_role_aenode
+LIMIT ?= tag_env_$(DEPLOY_ENV):&tag_role_aenode
 PYTHON ?= /usr/bin/python3
 DEPLOY_DB_VERSION ?= 1
 
-ANSIBLE_EXTRA_VARS ?= ""
-SETUP_EXTRA_VARS = "-e vault_addr=$(VAULT_ADDR)"
-DEPLOY_EXTRA_VARS = "-e package=$(PACKAGE) -e downtime=$(DEPLOY_DOWNTIME) -e rolling_update=${ROLLING_UPDATE}"
-MANAGE_NODE_EXTRA_VARS = "-e cmd=$(CMD)"
-MNESIA_SNAPSHOT_EXTRA_VARS = "-e snapshot_suffix=$(BACKUP_SUFFIX)"
-EBS-GROW-VOLUME_EXTRA_VARS = "-e vault_addr=$(VAULT_ADDR)"
-ASYNC_PROVISION_EXTRA_VARS = "-e vault_addr=$(VAULT_ADDR) -e package=$(PACKAGE) -e bootstrap_version=$(BOOTSTRAP_VERSION)"
+ANSIBLE_EXTRA_VARS = ""
+EXTRA_VARS ?= ""
 
 ifdef REGION
 	CONFIG_ENV ?= $(DEPLOY_ENV)@$(REGION)
@@ -33,7 +28,13 @@ endif
 $(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
 	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
 
-ansible/%.yml: check-deploy-env secrets $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
+secrets: $(SECRETS_OUTPUT_DIR)
+
+envshell: secrets
+	@envshell $(SECRETS_OUTPUT_DIR)
+
+# ansible playbooks
+ansible/%.yml: secrets $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
 	cd ansible && $(ENV) ansible-playbook \
 		--limit=$(LIMIT) \
 		-e ansible_python_interpreter=$(PYTHON) \
@@ -41,25 +42,14 @@ ansible/%.yml: check-deploy-env secrets $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
 		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
+		$(EXTRA_VARS) \
 		$*.yml
 
-secrets: $(SECRETS_OUTPUT_DIR)
+ansible/setup.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
 
-envshell: secrets
-	@envshell $(SECRETS_OUTPUT_DIR)
+ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 
-setup-node: ANSIBLE_EXTRA_VARS=$(SETUP_EXTRA_VARS)
-setup-node: check-deploy-env secrets vault-config-$(DEPLOY_ENV) ansible/setup.yml
-
-setup-monitoring: PYTHON=/var/venv/bin/python
-setup-monitoring: check-deploy-env secrets vault-config-$(DEPLOY_ENV) ansible/monitoring.yml
-
-setup: setup-node setup-monitoring
-
-deploy: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-ifeq ($(DEPLOY_DB_VERSION),)
-	$(error DEPLOY_DB_VERSION should be provided)
-endif
+ansible/deploy.yml:
 	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
 ifneq ($(DEPLOY_COLOR),)
 	$(eval LIMIT=$(LIMIT):&tag_color_$(DEPLOY_COLOR))
@@ -71,47 +61,43 @@ ifneq ($(DEPLOY_REGION),)
 	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
 endif
 
-	ANSIBLE_EXTRA_VARS=$(DEPLOY_EXTRA_VARS)
+ansible/deploy.yml:	ANSIBLE_EXTRA_VARS="-e package=$(PACKAGE) -e downtime=$(DEPLOY_DOWNTIME) -e rolling_update=${ROLLING_UPDATE}"
 
-deploy: ansible/deploy.yml
-
-manage-node: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
+ansible/manage-node.yml:
 ifndef CMD
 	$(error CMD is undefined, supported commands: start, stop, restart, ping)
 endif
 
-	ANSIBLE_EXTRA_VARS=$(MANAGE_NODE_EXTRA_VARS)
+ansible/manage-node.yml: ANSIBLE_EXTRA_VARS="-e cmd=$(CMD)"
 
-manage-node: ansible/manage-node.yml
+ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_env_$(BACKUP_ENV)
+ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
+ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS="-e snapshot_suffix=$(BACKUP_SUFFIX)"
 
-reset-net: check-deploy-env secrets vault-config-$(DEPLOY_ENV) ansible/reset-net.yml
-
-mnesia_snapshot: secrets vault-config-$(DEPLOY_ENV)
-ifeq ($(BACKUP_DB_VERSION),)
-	$(error BACKUP_DB_VERSION should be provided)
-endif
-ifeq ($(BACKUP_ENV),)
-	$(error BACKUP_ENV should be provided)
-endif
-
-	LIMIT=tag_role_aenode:&tag_env_$(BACKUP_ENV)
-	PYTHON=/var/venv/bin/python
-	ANSIBLE_EXTRA_VARS=$(MNESIA_SNAPSHOT_EXTRA_VARS)
-
-mnesia_snapshot: ansible/mnesia_snapshot.yml
-
-ebs-grow-volume: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
+ansible/ebs-grow-volume.yml:
 ifneq ($(DEPLOY_REGION),)
 	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
 endif
 
-	PYTHON=/var/venv/bin/python
+ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
+ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
 
+ansible/async_provision.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR) -e package=$(PACKAGE) -e bootstrap_version=$(BOOTSTRAP_VERSION)"
+
+ansible/health-check.yml: LIMIT=tag_env_$(DEPLOY_ENV)
+
+# ansible playbook aliases
+health-check-env-local: ansible/health-check.yml
+provision: ansible/async_provision.yml
 ebs-grow-volume: ansible/ebs-grow-volume.yml
+mnesia_snapshot: ansible/mnesia_snapshot.yml
+reset-net: ansible/reset-net.yml
+manage-node: ansible/manage-node.yml
+setup-monitoring: ansible/monitoring.yml
+setup-node: ansible/setup.yml
+deploy: ansible/deploy.yml
 
-provision: ANSIBLE_EXTRA_VARS=$(ASYNC_PROVISION_EXTRA_VARS)
-provision: check-deploy-env secrets vault-config-$(DEPLOY_ENV) ansible/async_provision.yml
+setup: setup-node setup-monitoring
 
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
@@ -140,9 +126,6 @@ integration-tests-run: secrets vault-config-test
 		-e "@$(CONFIG_OUTPUT_DIR)/test.yml" \
 		health-check.yml
 
-health-check-env-local: LIMIT=tag_env_$(DEPLOY_ENV)
-health-check-env-local: check-deploy-env secrets vault-config-$(DEPLOY_ENV) ansible/health-check.yml
-
 integration-tests-cleanup: secrets
 	cd test/terraform && $(ENV) terraform destroy $(TF_COMMON_PARAMS) --auto-approve
 
@@ -160,11 +143,6 @@ check-seed-peers-%: test/goss/remote/vars/seed-peers-%.yaml
 	goss -g test/goss/remote/group-peer-keys.yaml --vars $< validate
 
 check-seed-peers-all: $(addprefix check-seed-peers-, $(SEED_CHECK_ENVS))
-
-check-deploy-env:
-ifndef DEPLOY_ENV
-	$(error DEPLOY_ENV is undefined)
-endif
 
 ansible/inventory-list.json: secrets
 	cd ansible && $(ENV) ansible-inventory --list > inventory-list.json
@@ -213,6 +191,7 @@ $(CONFIG_OUTPUT_DIR)/%.yml: secrets $(CONFIG_OUTPUT_DIR)
 .PHONY: \
 	secrets images setup-node setup-monitoring setup \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
-	check-seed-peers check-deploy-env list-inventory \
+	check-seed-peers list-inventory \
 	check-seed-peers-% check-seed-peers-all \
-	health-check-node health-check-% health-check-all
+	health-check-node health-check-% health-check-all \
+	ansible/%.yml
