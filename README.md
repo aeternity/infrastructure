@@ -183,7 +183,7 @@ Additional parameters:
 - DEPLOY_COLOR - some environments might be colored to enable blue/green deployments (not limits by default)
 - DEPLOY_KIND - deploy to different kind of nodes, current is seed / peer / api (not limit by default)
 - DEPLOY_REGION - deploy to different AWS Region i.e.: eu_west_2 (notice _ instead of -)
-- DEPLOY_DB_VERSION - chain db directory suffix that can be bumped to purge the old db (0 by default)
+- DEPLOY_DB_VERSION - chain db directory suffix that can be bumped to purge the old db (1 by default)
 - ROLLING_UPDATE - Define batch size for rolling updates: https://docs.ansible.com/ansible/latest/user_guide/playbooks_delegation.html#rolling-update-batch-size default 100%
 
 #### Deploy to mainnet
@@ -275,6 +275,9 @@ ENV vars can control the defaults:
 - `CONFIG_OUTPUT_DIR` - To override the output path where configs are dumped (default: `/tmp/config`)
 - `VAULT_CONFIG_ROOT` - Vault root path where config envs are stored (default: `secret/aenode/config`)
 - `VAULT_CONFIG_FIELD` - Name of the field where the configuration YAML is stored (default: `node_config`)
+- `CONFIG_ENV` - Vault configuration env (default: `$(DEPLOY_ENV)`)
+- `LIMIT` - Ansible --limit option (default: `tag_env_$(DEPLOY_ENV):&tag_role_aenode`)
+- `PYTHON` - Full path of the python interpreter (default: `/usr/bin/python3`)
 
 Example:
 

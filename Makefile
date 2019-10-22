@@ -19,11 +19,7 @@ PYTHON ?= /usr/bin/python3
 DEPLOY_DB_VERSION ?= 1
 
 ANSIBLE_EXTRA_VARS = ""
-EXTRA_VARS ?= ""
-
-ifdef REGION
-	CONFIG_ENV ?= $(DEPLOY_ENV)@$(REGION)
-endif
+ANSIBLE_EXTRA_PARAMS ?= ""
 
 $(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
 	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
@@ -42,7 +38,7 @@ ansible/%.yml: secrets $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
 		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
-		$(EXTRA_VARS) \
+		$(ANSIBLE_EXTRA_PARAMS) \
 		$*.yml
 
 ansible/setup.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
@@ -61,7 +57,11 @@ ifneq ($(DEPLOY_REGION),)
 	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
 endif
 
-ansible/deploy.yml:	ANSIBLE_EXTRA_VARS="-e package=$(PACKAGE) -e downtime=$(DEPLOY_DOWNTIME) -e rolling_update=${ROLLING_UPDATE}"
+ansible/deploy.yml:	ANSIBLE_EXTRA_VARS=" \
+	-e package=$(PACKAGE) \
+	-e downtime=$(DEPLOY_DOWNTIME) \
+	-e rolling_update=${ROLLING_UPDATE} \
+	"
 
 ansible/manage-node.yml:
 ifndef CMD
@@ -82,7 +82,11 @@ endif
 ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
 ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
 
-ansible/async_provision.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR) -e package=$(PACKAGE) -e bootstrap_version=$(BOOTSTRAP_VERSION)"
+ansible/async_provision.yml: ANSIBLE_EXTRA_VARS=" \
+	-e vault_addr=$(VAULT_ADDR) \
+	-e package=$(PACKAGE) \
+	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
+	"
 
 ansible/health-check.yml: LIMIT=tag_env_$(DEPLOY_ENV)
 
@@ -90,12 +94,15 @@ ansible/health-check.yml: LIMIT=tag_env_$(DEPLOY_ENV)
 health-check-env-local: ansible/health-check.yml
 provision: ansible/async_provision.yml
 ebs-grow-volume: ansible/ebs-grow-volume.yml
-mnesia_snapshot: ansible/mnesia_snapshot.yml
 reset-net: ansible/reset-net.yml
 manage-node: ansible/manage-node.yml
 setup-monitoring: ansible/monitoring.yml
 setup-node: ansible/setup.yml
 deploy: ansible/deploy.yml
+mnesia_snapshot: ansible/mnesia_snapshot.yml
+ifeq ($(BACKUP_ENV),)
+	$(error BACKUP_ENV should be provided)
+endif
 
 setup: setup-node setup-monitoring
 
