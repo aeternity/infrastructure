@@ -60,7 +60,7 @@ endif
 ansible/deploy.yml:	ANSIBLE_EXTRA_VARS=" \
 	-e package=$(PACKAGE) \
 	-e downtime=$(DEPLOY_DOWNTIME) \
-	-e rolling_update=${ROLLING_UPDATE} \
+	-e rolling_update=$(ROLLING_UPDATE) \
 	"
 
 ansible/manage-node.yml:

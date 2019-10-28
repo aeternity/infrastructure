@@ -278,6 +278,7 @@ ENV vars can control the defaults:
 - `CONFIG_ENV` - Vault configuration env (default: `$(DEPLOY_ENV)`)
 - `LIMIT` - Ansible --limit option (default: `tag_env_$(DEPLOY_ENV):&tag_role_aenode`)
 - `PYTHON` - Full path of the python interpreter (default: `/usr/bin/python3`)
+- `ANSIBLE_EXTRA_PARAMS` - Additional params to pass to `ansible-playbook` (i.e `-i {host},`)
 
 Example:
 
