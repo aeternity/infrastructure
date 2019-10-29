@@ -115,6 +115,23 @@ make ssh-master HOST=192.168.1.1
 
 ## Ansible playbooks
 
+You can run any playbook from `ansible/` using `make ansible/<playbook>.yml`.
+
+Most of the playbooks can be run with aliases (used in the following examples)
+
+The playbooks can be controlled by certain environment variables.
+
+Most playbooks requre to provide `DEPLOY_ENV` which is the deployment environment of the node instance.
+
+Here is a list of other optional vars that can be passed to all playbooks:
+
+- `CONFIG_ENV` - Vault configuration env, in cases when config env includes region or does not match `DEPLOY_ENV` (default: `${DEPLOY_ENV}`)
+- `LIMIT` - Ansible's `--limit` option (default: `tag_env_${DEPLOY_ENV}:&tag_role_aenode`)
+- `PYTHON` - Full path of the python interpreter (default: `/usr/bin/python3`)
+- `ANSIBLE_EXTRA_PARAMS` - Additional params to pass to the `ansible-playbook` command (i.e `-i <host_ip>,`)
+
+Certain playbooks require additional vars, see below.
+
 ### SSH setup
 
 To run any of the Ansible playbooks a SSH certificate (and keys) must be setup in advance.
@@ -275,10 +292,6 @@ ENV vars can control the defaults:
 - `CONFIG_OUTPUT_DIR` - To override the output path where configs are dumped (default: `/tmp/config`)
 - `VAULT_CONFIG_ROOT` - Vault root path where config envs are stored (default: `secret/aenode/config`)
 - `VAULT_CONFIG_FIELD` - Name of the field where the configuration YAML is stored (default: `node_config`)
-- `CONFIG_ENV` - Vault configuration env (default: `$(DEPLOY_ENV)`)
-- `LIMIT` - Ansible --limit option (default: `tag_env_$(DEPLOY_ENV):&tag_role_aenode`)
-- `PYTHON` - Full path of the python interpreter (default: `/usr/bin/python3`)
-- `ANSIBLE_EXTRA_PARAMS` - Additional params to pass to `ansible-playbook` (i.e `-i {host},`)
 
 Example:
 
