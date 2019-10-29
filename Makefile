@@ -41,6 +41,8 @@ ansible/%.yml: secrets $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
 		$(ANSIBLE_EXTRA_PARAMS) \
 		$*.yml
 
+# playbook specifics
+
 ansible/setup.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
 
 ansible/monitoring.yml: PYTHON=/var/venv/bin/python
@@ -70,17 +72,20 @@ endif
 
 ansible/manage-node.yml: ANSIBLE_EXTRA_VARS="-e cmd=$(CMD)"
 
+ansible/mnesia_snapshot.yml:
+ifeq ($(BACKUP_ENV),)
+	$(error BACKUP_ENV should be provided)
+endif
 ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_env_$(BACKUP_ENV)
 ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
 ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS="-e snapshot_suffix=$(BACKUP_SUFFIX)"
 
+ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
+ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
 ansible/ebs-grow-volume.yml:
 ifneq ($(DEPLOY_REGION),)
 	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
 endif
-
-ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
-ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
 
 ansible/async_provision.yml: ANSIBLE_EXTRA_VARS=" \
 	-e vault_addr=$(VAULT_ADDR) \
@@ -100,10 +105,6 @@ setup-monitoring: ansible/monitoring.yml
 setup-node: ansible/setup.yml
 deploy: ansible/deploy.yml
 mnesia_snapshot: ansible/mnesia_snapshot.yml
-ifeq ($(BACKUP_ENV),)
-	$(error BACKUP_ENV should be provided)
-endif
-
 setup: setup-node setup-monitoring
 
 ~/.ssh/id_ae_infra_ed25519:
