@@ -51,6 +51,9 @@ ansible/deploy.yml:
 ifeq ($(DEPLOY_ENV),)
 	$(error DEPLOY_ENV should be provided)
 endif
+ifeq ($(PACKAGE),)
+	$(error PACKAGE should be provided)
+endif
 
 ansible/deploy.yml: LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV)
 ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_COLOR),$(LIMIT):&tag_color_$(DEPLOY_COLOR),$(LIMIT))
