@@ -18,8 +18,8 @@ LIMIT ?= tag_env_$(DEPLOY_ENV):&tag_role_aenode
 PYTHON ?= /usr/bin/python3
 DEPLOY_DB_VERSION ?= 1
 
-ANSIBLE_EXTRA_VARS = ""
-ANSIBLE_EXTRA_PARAMS ?= ""
+ANSIBLE_EXTRA_VARS =
+ANSIBLE_EXTRA_PARAMS ?=
 
 $(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
 	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
@@ -32,10 +32,10 @@ envshell: secrets
 # ansible playbooks
 ansible/%.yml: secrets $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
 	cd ansible && $(ENV) ansible-playbook \
-		--limit=$(LIMIT) \
+		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=$(PYTHON) \
 		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml" \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
 		$(ANSIBLE_EXTRA_PARAMS) \
@@ -43,34 +43,30 @@ ansible/%.yml: secrets $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
 
 # playbook specifics
 
-ansible/setup.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
+ansible/setup.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
 
 ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 
 ansible/deploy.yml:
-	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
-ifneq ($(DEPLOY_COLOR),)
-	$(eval LIMIT=$(LIMIT):&tag_color_$(DEPLOY_COLOR))
-endif
-ifneq ($(DEPLOY_KIND),)
-	$(eval LIMIT=$(LIMIT):&tag_kind_$(DEPLOY_KIND))
-endif
-ifneq ($(DEPLOY_REGION),)
-	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
+ifeq ($(DEPLOY_ENV),)
+	$(error DEPLOY_ENV should be provided)
 endif
 
-ansible/deploy.yml:	ANSIBLE_EXTRA_VARS=" \
-	-e package=$(PACKAGE) \
-	-e downtime=$(DEPLOY_DOWNTIME) \
-	-e rolling_update=$(ROLLING_UPDATE) \
-	"
+ansible/deploy.yml: LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV)
+ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_COLOR),$(LIMIT):&tag_color_$(DEPLOY_COLOR),$(LIMIT))
+ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_KIND),$(LIMIT):&tag_kind_$(DEPLOY_KIND),$(LIMIT))
+ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_REGION),$(LIMIT):&region_$(DEPLOY_REGION),$(LIMIT))
+ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
+	-e package="$(PACKAGE)" \
+	-e downtime="$(DEPLOY_DOWNTIME)" \
+	-e rolling_update="$(ROLLING_UPDATE)" \
 
 ansible/manage-node.yml:
 ifndef CMD
 	$(error CMD is undefined, supported commands: start, stop, restart, ping)
 endif
 
-ansible/manage-node.yml: ANSIBLE_EXTRA_VARS="-e cmd=$(CMD)"
+ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=-e cmd=$(CMD)
 
 ansible/mnesia_snapshot.yml:
 ifeq ($(BACKUP_ENV),)
@@ -78,20 +74,16 @@ ifeq ($(BACKUP_ENV),)
 endif
 ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_env_$(BACKUP_ENV)
 ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
-ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS="-e snapshot_suffix=$(BACKUP_SUFFIX)"
+ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=-e snapshot_suffix="$(BACKUP_SUFFIX)"
 
-ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS="-e vault_addr=$(VAULT_ADDR)"
+ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
 ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
-ansible/ebs-grow-volume.yml:
-ifneq ($(DEPLOY_REGION),)
-	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
-endif
+ansible/ebs-grow-volume.yml: LIMIT:=$(if $(DEPLOY_REGION),$(LIMIT):$region_$(DEPLOY_REGION))
 
-ansible/async_provision.yml: ANSIBLE_EXTRA_VARS=" \
-	-e vault_addr=$(VAULT_ADDR) \
-	-e package=$(PACKAGE) \
-	-e bootstrap_version=$(BOOTSTRAP_VERSION) \
-	"
+ansible/async_provision.yml: ANSIBLE_EXTRA_VARS= \
+	-e vault_addr="$(VAULT_ADDR)" \
+	-e package="$(PACKAGE)" \
+	-e bootstrap_version="$(BOOTSTRAP_VERSION)" \
 
 ansible/health-check.yml: LIMIT=tag_env_$(DEPLOY_ENV)
 
