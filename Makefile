@@ -17,6 +17,8 @@ CONFIG_ENV ?= $(DEPLOY_ENV)
 LIMIT ?= tag_env_$(DEPLOY_ENV):&tag_role_aenode
 PYTHON ?= /usr/bin/python3
 DEPLOY_DB_VERSION ?= 1
+DEPLOY_CONFIG ?= $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
+,:=,
 
 ANSIBLE_EXTRA_VARS =
 ANSIBLE_EXTRA_PARAMS ?=
@@ -29,13 +31,20 @@ secrets: $(SECRETS_OUTPUT_DIR)
 envshell: secrets
 	@envshell $(SECRETS_OUTPUT_DIR)
 
+.PRECIOUS: $(DEPLOY_CONFIG)
+$(DEPLOY_CONFIG):
+ifeq ($(DEPLOY_ENV),)
+	$(error DEPLOY_ENV should be provided)
+endif
+
 # ansible playbooks
-ansible/%.yml: secrets $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
+ansible/%.yml: ANSIBLE_EXTRA_PARAMS=$(if $(HOST),-i $(HOST)$(,) $(ANSIBLE_EXTRA_PARAMS),$(ANSIBLE_EXTRA_PARAMS))
+ansible/%.yml: secrets | $(DEPLOY_CONFIG)
 	cd ansible && $(ENV) ansible-playbook \
 		--limit="$(LIMIT)" \
 		-e ansible_python_interpreter=$(PYTHON) \
 		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml" \
+		-e "@$(DEPLOY_CONFIG)" \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
 		$(ANSIBLE_EXTRA_PARAMS) \
@@ -48,14 +57,11 @@ ansible/setup.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
 ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 
 ansible/deploy.yml:
-ifeq ($(DEPLOY_ENV),)
-	$(error DEPLOY_ENV should be provided)
-endif
 ifeq ($(PACKAGE),)
 	$(error PACKAGE should be provided)
 endif
 
-ansible/deploy.yml: LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV)
+ansible/deploy.yml: LIMIT?=tag_role_aenode:&tag_env_$(DEPLOY_ENV)
 ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_COLOR),$(LIMIT):&tag_color_$(DEPLOY_COLOR),$(LIMIT))
 ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_KIND),$(LIMIT):&tag_kind_$(DEPLOY_KIND),$(LIMIT))
 ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_REGION),$(LIMIT):&region_$(DEPLOY_REGION),$(LIMIT))
@@ -75,7 +81,7 @@ ansible/mnesia_snapshot.yml:
 ifeq ($(BACKUP_ENV),)
 	$(error BACKUP_ENV should be provided)
 endif
-ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_env_$(BACKUP_ENV)
+ansible/mnesia_snapshot.yml: LIMIT?=tag_role_aenode:&tag_env_$(BACKUP_ENV)
 ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
 ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=-e snapshot_suffix="$(BACKUP_SUFFIX)"
 
@@ -88,7 +94,7 @@ ansible/async_provision.yml: ANSIBLE_EXTRA_VARS= \
 	-e package="$(PACKAGE)" \
 	-e bootstrap_version="$(BOOTSTRAP_VERSION)" \
 
-ansible/health-check.yml: LIMIT=tag_env_$(DEPLOY_ENV)
+ansible/health-check.yml: LIMIT?=tag_env_$(DEPLOY_ENV)
 
 # ansible playbook aliases
 health-check-env-local: ansible/health-check.yml
@@ -119,20 +125,18 @@ ssh-%: cert-%
 
 ssh: ssh-aeternity
 
-integration-tests-run: secrets vault-config-test
+integration-tests-init: secrets vault-config-test
 	cd test/terraform && terraform init
 	cd test/terraform && $(ENV) terraform apply $(TF_COMMON_PARAMS) --auto-approve
-	# TODO this is actually a smoke test that can be migrated to "goss"
-	cd ansible && $(ENV) ansible-playbook \
-		--limit=tag_envid_$(TF_VAR_envid) \
-		-e env=test \
-		-e "@$(CONFIG_OUTPUT_DIR)/test.yml" \
-		health-check.yml
 
 integration-tests-cleanup: secrets
 	cd test/terraform && $(ENV) terraform destroy $(TF_COMMON_PARAMS) --auto-approve
 
-integration-tests: integration-tests-run integration-tests-cleanup
+integration-tests-run: DEPLOY_ENV=test
+integration-tests-run: LIMIT=tag_envid_$(TF_VAR_envid)
+integration-tests-run: ansible/health-check.yml
+
+integration-tests: | integration-tests-init integration-tests-run integration-tests-cleanup
 
 lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
