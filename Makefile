@@ -38,7 +38,7 @@ ifeq ($(DEPLOY_ENV),)
 endif
 
 # ansible playbooks
-ansible/%.yml: ANSIBLE_EXTRA_PARAMS=$(if $(HOST),-i $(HOST)$(,) $(ANSIBLE_EXTRA_PARAMS),$(ANSIBLE_EXTRA_PARAMS))
+ansible/%.yml: ANSIBLE_EXTRA_PARAMS:=$(if $(HOST),-i $(HOST)$(,) $(ANSIBLE_EXTRA_PARAMS),$(ANSIBLE_EXTRA_PARAMS))
 ansible/%.yml: secrets | $(DEPLOY_CONFIG)
 	cd ansible && $(ENV) ansible-playbook \
 		--limit="$(LIMIT)" \
@@ -132,9 +132,8 @@ integration-tests-init: secrets vault-config-test
 integration-tests-cleanup: secrets
 	cd test/terraform && $(ENV) terraform destroy $(TF_COMMON_PARAMS) --auto-approve
 
-integration-tests-run: DEPLOY_ENV=test
-integration-tests-run: LIMIT=tag_envid_$(TF_VAR_envid)
-integration-tests-run: ansible/health-check.yml
+integration-tests-run:
+	@$(MAKE) ansible/health-check.yml DEPLOY_ENV=test LIMIT=tag_envid_$(TF_VAR_envid)
 
 integration-tests: | integration-tests-init integration-tests-run integration-tests-cleanup
 
