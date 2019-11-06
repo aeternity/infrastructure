@@ -38,7 +38,7 @@ ifeq ($(DEPLOY_ENV),)
 endif
 
 # ansible playbooks
-ansible/%.yml: ANSIBLE_EXTRA_PARAMS:=$(if $(HOST),-i $(HOST)$(,) $(ANSIBLE_EXTRA_PARAMS),$(ANSIBLE_EXTRA_PARAMS))
+ansible/%.yml: EXTRA_PARAMS:=$(if $(HOST),-i $(HOST)$(,) $(ANSIBLE_EXTRA_PARAMS),$(ANSIBLE_EXTRA_PARAMS))
 ansible/%.yml: secrets | $(DEPLOY_CONFIG)
 	cd ansible && $(ENV) ansible-playbook \
 		--limit="$(LIMIT)" \
@@ -47,7 +47,7 @@ ansible/%.yml: secrets | $(DEPLOY_CONFIG)
 		-e "@$(DEPLOY_CONFIG)" \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
-		$(ANSIBLE_EXTRA_PARAMS) \
+		$(EXTRA_PARAMS) \
 		$*.yml
 
 # playbook specifics
