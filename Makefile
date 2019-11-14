@@ -1,7 +1,4 @@
 .DEFAULT_GOAL := lint
-DEPLOY_DOWNTIME ?= 0
-ROLLING_UPDATE ?= 100%
-BACKUP_SUFFIX ?= backup
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
 SEED_CHECK_ENVS = main uat next
@@ -13,90 +10,83 @@ CONFIG_OUTPUT_DIR ?= /tmp/config
 VAULT_CONFIG_ROOT ?= secret/aenode/config
 VAULT_CONFIG_FIELD ?= node_config
 LIST_CONFIG_ENVS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
-CONFIG_ENV ?= $(DEPLOY_ENV)
-LIMIT ?= tag_env_$(DEPLOY_ENV):&tag_role_aenode
-PYTHON ?= /usr/bin/python3
-DEPLOY_DB_VERSION ?= 1
-DEPLOY_CONFIG ?= $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
-,:=,
 
+# char escaping
+,:=,
+empty :=
+space := $(empty) $(empty)
+
+### Ansible playbooks
+
+# helper functions
+make_tag=$(if $($(2)),:&tag_$(1)_$($(2)))
+require_env=$(if $($(1)),$($(1)),$(error $(1) should be provided$(2)))
+
+# prepare ansible filter
+override LIMIT += $(call make_tag,env,DEPLOY_ENV)
+override LIMIT += $(call make_tag,role,DEPLOY_ROLE)
+override LIMIT += $(call make_tag,color,DEPLOY_COLOR)
+override LIMIT += $(call make_tag,kind,DEPLOY_KIND)
+override LIMIT += $(if $(DEPLOY_REGION),:&region_$(DEPLOY_REGION),)
+# sanitize
+override LIMIT := $(subst $(space),$(empty),$(LIMIT))
+override LIMIT := $(subst -,_,$(LIMIT))
+
+# ENV defaults
+PYTHON ?= /usr/bin/python3
+DEPLOY_DOWNTIME ?= 0
+ROLLING_UPDATE ?= 100%
+BACKUP_SUFFIX ?= backup
+DEPLOY_ENV ?=
+DEPLOY_ROLE ?= aenode
+DEPLOY_DB_VERSION ?= 1
+CONFIG_ENV ?= $(DEPLOY_ENV)
+DEPLOY_CONFIG ?= $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
 ANSIBLE_EXTRA_VARS =
 ANSIBLE_EXTRA_PARAMS ?=
 
-$(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
-	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
-
-secrets: $(SECRETS_OUTPUT_DIR)
-
-envshell: secrets
-	@envshell $(SECRETS_OUTPUT_DIR)
-
 .PRECIOUS: $(DEPLOY_CONFIG)
-$(DEPLOY_CONFIG):
-ifeq ($(DEPLOY_ENV),)
-	$(error DEPLOY_ENV should be provided)
-endif
-
-# ansible playbooks
-ansible/%.yml: EXTRA_PARAMS:=$(if $(HOST),-i $(HOST)$(,) $(ANSIBLE_EXTRA_PARAMS),$(ANSIBLE_EXTRA_PARAMS))
 ansible/%.yml: secrets | $(DEPLOY_CONFIG)
 	cd ansible && $(ENV) ansible-playbook \
-		--limit="$(LIMIT)" \
+		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
 		-e ansible_python_interpreter=$(PYTHON) \
-		-e env=$(DEPLOY_ENV) \
+		-e env="$(if $(BACKUP_ENV),$(BACKUP_ENV),$(DEPLOY_ENV))" \
 		-e "@$(DEPLOY_CONFIG)" \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
-		$(EXTRA_PARAMS) \
+		$(ANSIBLE_EXTRA_PARAMS) \
 		$*.yml
 
-# playbook specifics
+### Ansible playbook specific rquirements
 
 ansible/setup.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
 
 ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 
-ansible/deploy.yml:
-ifeq ($(PACKAGE),)
-	$(error PACKAGE should be provided)
-endif
-
-ansible/deploy.yml: LIMIT?=tag_role_aenode:&tag_env_$(DEPLOY_ENV)
-ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_COLOR),$(LIMIT):&tag_color_$(DEPLOY_COLOR),$(LIMIT))
-ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_KIND),$(LIMIT):&tag_kind_$(DEPLOY_KIND),$(LIMIT))
-ansible/deploy.yml: LIMIT:=$(if $(DEPLOY_REGION),$(LIMIT):&region_$(DEPLOY_REGION),$(LIMIT))
 ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
-	-e package="$(PACKAGE)" \
+	-e package="$(call require_env,PACKAGE)" \
 	-e downtime="$(DEPLOY_DOWNTIME)" \
 	-e rolling_update="$(ROLLING_UPDATE)" \
 
-ansible/manage-node.yml:
-ifndef CMD
-	$(error CMD is undefined, supported commands: start, stop, restart, ping)
-endif
 
-ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=-e cmd=$(CMD)
+ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
+	-e cmd="$(call require_env,CMD, supported: start|stop|restart|ping)"
 
-ansible/mnesia_snapshot.yml:
-ifeq ($(BACKUP_ENV),)
-	$(error BACKUP_ENV should be provided)
-endif
-ansible/mnesia_snapshot.yml: LIMIT?=tag_role_aenode:&tag_env_$(BACKUP_ENV)
+ansible/mnesia_snapshot.yml: DEPLOY_ENV=$(call require_env,BACKUP_ENV)
+ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV)
 ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
 ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=-e snapshot_suffix="$(BACKUP_SUFFIX)"
 
-ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
 ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
-ansible/ebs-grow-volume.yml: LIMIT:=$(if $(DEPLOY_REGION),$(LIMIT):$region_$(DEPLOY_REGION))
+ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS=\
+	-e vault_addr="$(call require_env,VAULT_ADDR)"
 
-ansible/async_provision.yml: ANSIBLE_EXTRA_VARS= \
-	-e vault_addr="$(VAULT_ADDR)" \
-	-e package="$(PACKAGE)" \
-	-e bootstrap_version="$(BOOTSTRAP_VERSION)" \
+ansible/async_provision.yml: ANSIBLE_EXTRA_VARS=\
+	-e vault_addr="$(call require_env,VAULT_ADDR)" \
+	-e package="$(call require_env,PACKAGE)" \
+	-e bootstrap_version="$(call require_env,BOOTSTRAP_VERSION)"
 
-ansible/health-check.yml: LIMIT?=tag_env_$(DEPLOY_ENV)
-
-# ansible playbook aliases
+### Ansible playbook aliases
 health-check-env-local: ansible/health-check.yml
 provision: ansible/async_provision.yml
 ebs-grow-volume: ansible/ebs-grow-volume.yml
@@ -107,6 +97,16 @@ setup-node: ansible/setup.yml
 deploy: ansible/deploy.yml
 mnesia_snapshot: ansible/mnesia_snapshot.yml
 setup: setup-node setup-monitoring
+
+### Secrets
+
+$(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
+	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
+
+secrets: $(SECRETS_OUTPUT_DIR)
+
+envshell: secrets
+	@envshell $(SECRETS_OUTPUT_DIR)
 
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
@@ -135,7 +135,7 @@ integration-tests-cleanup: secrets
 integration-tests-run:
 	@$(MAKE) ansible/health-check.yml DEPLOY_ENV=test LIMIT=tag_envid_$(TF_VAR_envid)
 
-integration-tests: | integration-tests-init integration-tests-run integration-tests-cleanup
+integration-tests: integration-tests-init integration-tests-run integration-tests-cleanup
 
 lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
