@@ -66,8 +66,7 @@ ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
 	-e package="$(call require_env,PACKAGE)" \
 	-e downtime="$(DEPLOY_DOWNTIME)" \
-	-e rolling_update="$(ROLLING_UPDATE)" \
-
+	-e rolling_update="$(ROLLING_UPDATE)"
 
 ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
 	-e cmd="$(call require_env,CMD, supported: start|stop|restart|ping)"
@@ -75,7 +74,8 @@ ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
 ansible/mnesia_snapshot.yml: DEPLOY_ENV=$(call require_env,BACKUP_ENV)
 ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV)
 ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
-ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=-e snapshot_suffix="$(BACKUP_SUFFIX)"
+ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=\
+	-e snapshot_suffix="$(BACKUP_SUFFIX)"
 
 ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
 ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS=\
