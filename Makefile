@@ -41,7 +41,7 @@ DEPLOY_ENV ?=
 DEPLOY_ROLE ?= aenode
 DEPLOY_DB_VERSION ?= 1
 CONFIG_ENV ?= $(DEPLOY_ENV)
-DEPLOY_CONFIG ?= $(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml
+DEPLOY_CONFIG ?= $(if $(CONFIG_ENV),$(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml)
 ANSIBLE_EXTRA_VARS =
 ANSIBLE_EXTRA_PARAMS ?=
 
@@ -51,7 +51,7 @@ ansible/%.yml: secrets | $(DEPLOY_CONFIG)
 		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
 		-e ansible_python_interpreter=$(PYTHON) \
 		-e env="$(if $(BACKUP_ENV),$(BACKUP_ENV),$(DEPLOY_ENV))" \
-		-e "@$(DEPLOY_CONFIG)" \
+		$(if $(DEPLOY_CONFIG),-e "@$(DEPLOY_CONFIG)") \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
 		$(ANSIBLE_EXTRA_PARAMS) \
