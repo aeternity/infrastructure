@@ -1,0 +1,22 @@
+---
+- name: Report aeternity node version
+  hosts: all
+  remote_user: aeternity
+  gather_facts: no
+
+  vars:
+    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
+    project_root: "/home/aeternity/node"
+    packages_path: "/home/aeternity"
+    downtime: "0"
+
+    # Label used for datadog tagging and ENV file planting
+    env: unknown
+
+  tasks:
+    - name: Dump {{ project_root }}/VERSION file
+      slurp:
+        src: "{{ project_root }}/VERSION"
+      register: slurpfile
+
+    - debug: msg="{{ slurpfile['content'] | b64decode }}"

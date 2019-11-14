@@ -191,10 +191,16 @@
       - name: Run health checks
         include_tasks: tasks/health_check.yml
 
+      - name: Dump {{ project_root }}/VERSION file
+        slurp:
+          src: "{{ project_root }}/VERSION"
+        register: slurpfile
+
+      - debug: msg="{{ slurpfile['content'] | b64decode }}"
+
       - name: Refresh aeternity facts
         setup:
         tags: [datadog-event]
-
       - name: Send Datadog event
         datadog_event:
           host: "{{ public_ipv4 }}"
@@ -204,6 +210,7 @@
             %%%
             Revision: [{{ node_vars.revision }}](https://github.com/aeternity/aeternity/commit/{{ node_vars.revision }})
             Package: {{ package|default('unknown') }}
+            VERSION: {{ slurpfile['content'] | b64decode }}
             %%%
           api_key: "{{ datadog_api_key }}"
           app_key: "{{ datadog_app_key }}"
