@@ -88,7 +88,7 @@ reset-net: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
 		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
 		reset-net.yml
 
-mnesia_snapshot: secrets vault-config-$(DEPLOY_ENV)
+mnesia_snapshot: secrets vault-config-$(BACKUP_ENV)
 ifeq ($(BACKUP_DB_VERSION),)
 	$(error BACKUP_DB_VERSION should be provided)
 endif
