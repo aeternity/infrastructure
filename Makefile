@@ -101,7 +101,7 @@ endif
 		-e snapshot_suffix=$(BACKUP_SUFFIX) \
 		-e db_version=$(BACKUP_DB_VERSION) \
 		-e env=$(BACKUP_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
+		-e "@$(CONFIG_OUTPUT_DIR)/$(BACKUP_ENV).yml" \
 		mnesia_snapshot.yml
 
 ebs-grow-volume: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
