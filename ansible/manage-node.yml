@@ -11,12 +11,13 @@
   tasks:
     - name: Fail on unsupported command
       fail:
-        msg: "Invalid command. Supported commands are: ping, start, stop, restart"
+        msg: "Invalid command. Supported commands are: ping, start, stop, restart, status"
       when:
         - aeternity_action != "ping"
         - aeternity_action != "start"
         - aeternity_action != "stop"
         - aeternity_action != "restart"
+        - aeternity_action != "status"
       connection: local
 
     - name: Aeternity binary exists
@@ -62,6 +63,18 @@
       when:
         - node_running
         - aeternity_action == "restart"
+
+    - name: Dump node status
+      block:
+        - name: Get node status
+          uri:
+            url: "http://localhost:{{ node_config.http.external.port | default('3013') }}/v2/status"
+          register: status
+        - debug:
+            var: status.json
+      when:
+        - node_running
+        - aeternity_action == "status"
 
   post_tasks:
     - name: Prepare health checks
