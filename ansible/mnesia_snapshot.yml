@@ -11,110 +11,109 @@
     snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}"
 
   tasks:
-    - block:
-      - name: Get node status
-        uri:
-          url: "http://localhost:{{ node_config.http.external.port | default('3013') }}/v2/status"
-        register: status
-        failed_when: status.json.syncing == true
+    - name: Include configuration variables
+      include_vars: vars/snapshot.yml
+      tags: [always]
 
-      - name: Include configuration variables
-        include_vars: vars/snapshot.yml
-        tags: [always]
+    - name: Get node status
+      uri:
+        url: "http://localhost:{{ node_config.http.external.port | default('3013') }}/v2/status"
+      register: status
+      failed_when: status.json.syncing == true
 
-      - name: Stop node
-        command: "/bin/true"
-        changed_when: false
-        notify: "stop aeternity daemon"
-        tags: [archive]
+    - name: Stop node
+      command: "/bin/true"
+      changed_when: false
+      notify: "stop aeternity daemon"
+      tags: [archive]
 
-      - meta: flush_handlers
-        tags: [archive]
+    - meta: flush_handlers
+      tags: [archive]
 
-      - name: Ensure Mnesia snapshots dir exists ({{ snapshots_dir }})
-        file:
-          path: "{{ snapshots_dir }}"
-          state: directory
-        tags: [archive]
+    - name: Ensure Mnesia snapshots dir exists ({{ snapshots_dir }})
+      file:
+        path: "{{ snapshots_dir }}"
+        state: directory
+      tags: [archive]
 
-      - name: Start archive
-        block:
-          - name: Archive Mnesia Directory ({{ project_root }}/{{ node_config.chain.db_path }})
-            archive:
-              format: gz
-              path: "{{ project_root }}/{{ node_config.chain.db_path }}"
-              dest: "{{ snapshot_path }}"
-            when: additional_storage is not defined or not additional_storage
+    - name: Start archive
+      block:
+        - name: Archive Mnesia Directory ({{ project_root }}/{{ node_config.chain.db_path }})
+          archive:
+            format: gz
+            path: "{{ project_root }}/{{ node_config.chain.db_path }}"
+            dest: "{{ snapshot_path }}"
+          when: additional_storage is not defined or not additional_storage
 
-          - name: Archive Mnesia Directory ({{ node_config.chain.db_path }})
-            archive:
-              format: gz
-              path: "{{ node_config.chain.db_path }}"
-              dest: "{{ snapshot_path }}"
-            when:
-              - additional_storage is defined
-              - additional_storage
-        rescue:
-          - name: Cleanup on fail
-            command: /bin/true
-            changed_when: true
-            notify: "clean snapshot"
-          - meta: flush_handlers
-        tags: [archive]
+        - name: Archive Mnesia Directory ({{ node_config.chain.db_path }})
+          archive:
+            format: gz
+            path: "{{ node_config.chain.db_path }}"
+            dest: "{{ snapshot_path }}"
+          when:
+            - additional_storage is defined
+            - additional_storage
+      rescue:
+        - name: Cleanup on fail
+          command: /bin/true
+          changed_when: true
+          notify: "clean snapshot"
+        - meta: flush_handlers
+      tags: [archive]
 
-      - name: Start node
-        command: /bin/true
-        changed_when: false
-        notify: "start aeternity daemon"
-        tags: [archive]
+    - name: Start node
+      command: /bin/true
+      changed_when: false
+      notify: "start aeternity daemon"
+      tags: [archive]
 
-      - meta: flush_handlers
-        tags: [archive]
+    - meta: flush_handlers
+      tags: [archive]
 
-      - name: Stat {{ snapshot_path }}
-        stat:
-          path: "{{ snapshot_path }}"
-        register: snapshot_file
-        tags: [upload]
+    - name: Stat {{ snapshot_path }}
+      stat:
+        path: "{{ snapshot_path }}"
+      register: snapshot_file
+      tags: [upload]
 
-      - name: Upload snapshot to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_filename }})
-        aws_s3:
-          bucket: "{{ snapshots_bucket }}"
-          object: "{{ snapshot_filename }}"
-          src: "{{ snapshot_path }}"
-          mode: put
-          permission: "public-read"
-          aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-          aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-          security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
-        when:
-          - snapshot_file.stat.readable is defined
-          - snapshot_file.stat.readable
-        tags: [upload]
+    - name: Upload snapshot to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_filename }})
+      aws_s3:
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ snapshot_filename }}"
+        src: "{{ snapshot_path }}"
+        mode: put
+        permission: "public-read"
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      when:
+        - snapshot_file.stat.readable is defined
+        - snapshot_file.stat.readable
+      tags: [upload]
 
-      - name: Upload backup to S3 bucket latest
-        aws_s3:
-          bucket: "{{ snapshots_bucket }}"
-          object: "{{ snapshots_filename_latest }}"
-          src: "{{ snapshot_path }}"
-          mode: put
-          permission: "public-read"
-          aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-          aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-          security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
-        when:
-          - snapshot_file.stat is defined
-          - snapshot_file.stat.readable
-        tags: [latest]
+    - name: Upload backup to S3 bucket latest
+      aws_s3:
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ snapshots_filename_latest }}"
+        src: "{{ snapshot_path }}"
+        mode: put
+        permission: "public-read"
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      when:
+        - snapshot_file.stat is defined
+        - snapshot_file.stat.readable
+      tags: [latest]
 
-      - name: Cleanup
-        command: /bin/true
-        changed_when: false
-        when:
-          - snapshot_file.stat.readable is defined
-          - snapshot_file.stat.readable
-        notify: "clean snapshot"
-        tags: [clean]
+    - name: Cleanup
+      command: /bin/true
+      changed_when: false
+      when:
+        - snapshot_file.stat.readable is defined
+        - snapshot_file.stat.readable
+      notify: "clean snapshot"
+      tags: [clean]
 
   handlers:
   - import_tasks: tasks/handlers.yml
