@@ -229,11 +229,11 @@ under path `secret/aenode/config/<ENV_TAG>` as field `node_config`
 `<ENV_TAG>` should be considered to be a node's "configuration" environment. 
 For instance 'terraform' setups certain nodes to look for `<env@region>`, e.g. `main_mon@us-west-1`. 
 
-Each AWS instance `<ENV_TAG>` is generated from the EC2 `env` tag or is fully specified by `vault_config` tag.
+Each AWS instance `<ENV_TAG>` is generated from the EC2 `env` tag or is fully specified by `node_config` tag.
 It should point to the location of the vault's `node_config` field (path only).
-If `vault_config` is missing, empty or is set to the string `none` it will use the instance's `env` as fallback. 
+If `node_config` is missing, empty or is set to the string `none` it will use the instance's `env` as fallback. 
 
-When there is no env config stored in the KV database (and instance have no vault_config tag), the bootstrapper will try to use a file in `/ansible/vars/<env>.yml`.
+When there is no env config stored in the KV database (and instance have no `node_config` tag), the bootstrapper will try to use a file in `/ansible/vars/<env>.yml`.
 
 For quick debugging of KV config repository there are few tools provided by make.
 
