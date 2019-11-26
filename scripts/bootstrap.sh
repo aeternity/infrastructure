@@ -23,7 +23,7 @@ done
 
 vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
 vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
-vault_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_config") | .Value')
+node_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "node_config") | .Value')
 env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
 aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
 snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
@@ -62,8 +62,8 @@ if [[ -f "${env_config}" ]]; then
 fi
 
 # Override the env defaults with ones stored in $vault_config
-if [[ -n "$(vault_config)" && "$(vault_config)" != "none" ]]; then
-    vault read $(vault_config) -field=node_config > /tmp/node_config.yml
+if [[ -n "$(node_config)" && "$(node_config)" != "none" ]]; then
+    vault read $(node_config) -field=node_config > /tmp/node_config.yml
 fi
 
 ###
