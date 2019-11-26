@@ -96,7 +96,7 @@ ifeq ($(BACKUP_ENV),)
 	$(error BACKUP_ENV should be provided)
 endif
 	cd ansible && $(ENV) ansible-playbook \
-		--limit="tag_role_aenode:&tag_env_$(BACKUP_ENV)" \
+		--limit="tag_role_aenode:&tag_kind_backup:&tag_env_$(BACKUP_ENV)" \
 		-e ansible_python_interpreter=/var/venv/bin/python \
 		-e snapshot_suffix=$(BACKUP_SUFFIX) \
 		-e db_version=$(BACKUP_DB_VERSION) \
