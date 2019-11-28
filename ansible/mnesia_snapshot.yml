@@ -15,6 +15,12 @@
       include_vars: vars/snapshot.yml
       tags: [always]
 
+    - name: Get node status
+      uri:
+        url: "http://localhost:{{ node_config.http.external.port | default('3013') }}/v2/status"
+      register: status
+      failed_when: status.json.syncing == true
+
     - name: Stop node
       command: "/bin/true"
       changed_when: false
