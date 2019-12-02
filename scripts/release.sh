@@ -83,9 +83,9 @@ finish_release() {
 }
 
 #check for release version
-if [[ -n "$1" && "$1" =~ ^([0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+)*)$ ]]; then
-    protocol_release=aeternity-node-v${1}
-    node_release=v${1}
+if [[ -n "$1" && "$1" =~ ^v([0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9\.\+]+)*)$ ]]; then
+    protocol_release=aeternity-node-${1}
+    node_release=${1}
     shift
 else
     usage_exit
