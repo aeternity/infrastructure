@@ -1,7 +1,4 @@
 .DEFAULT_GOAL := lint
-DEPLOY_DOWNTIME ?= 0
-ROLLING_UPDATE ?= 100%
-BACKUP_SUFFIX ?= backup
 TF_LOCK_TIMEOUT=5m
 VAULT_TOKENS_TTL ?= 4h
 SEED_CHECK_ENVS = main uat next
@@ -14,6 +11,95 @@ VAULT_CONFIG_ROOT ?= secret/aenode/config
 VAULT_CONFIG_FIELD ?= node_config
 LIST_CONFIG_ENVS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
 
+# char escaping
+,:=,
+empty :=
+space := $(empty) $(empty)
+
+### Ansible playbooks
+
+# helper functions
+make_tag=$(if $($(2)),:&tag_$(1)_$($(2)))
+require_env=$(if $($(1)),$($(1)),$(error $(1) should be provided$(2)))
+
+# prepare ansible filter
+override LIMIT += $(call make_tag,env,DEPLOY_ENV)
+override LIMIT += $(call make_tag,role,DEPLOY_ROLE)
+override LIMIT += $(call make_tag,color,DEPLOY_COLOR)
+override LIMIT += $(call make_tag,kind,DEPLOY_KIND)
+override LIMIT += $(if $(DEPLOY_REGION),:&region_$(DEPLOY_REGION),)
+# sanitize
+override LIMIT := $(subst $(space),$(empty),$(LIMIT))
+override LIMIT := $(subst -,_,$(LIMIT))
+
+# ENV defaults
+PYTHON ?= /usr/bin/python3
+DEPLOY_DOWNTIME ?= 0
+ROLLING_UPDATE ?= 100%
+BACKUP_SUFFIX ?= backup
+DEPLOY_ENV ?=
+DEPLOY_ROLE ?= aenode
+DEPLOY_DB_VERSION ?= 1
+CONFIG_ENV ?= $(DEPLOY_ENV)
+DEPLOY_CONFIG ?= $(if $(CONFIG_ENV),$(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml)
+ANSIBLE_EXTRA_VARS =
+ANSIBLE_EXTRA_PARAMS ?=
+
+.PRECIOUS: $(DEPLOY_CONFIG)
+ansible/%.yml: secrets | $(DEPLOY_CONFIG)
+	cd ansible && $(ENV) ansible-playbook \
+		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
+		-e ansible_python_interpreter=$(PYTHON) \
+		-e env="$(if $(BACKUP_ENV),$(BACKUP_ENV),$(DEPLOY_ENV))" \
+		$(if $(DEPLOY_CONFIG),-e "@$(DEPLOY_CONFIG)") \
+		-e db_version=$(DEPLOY_DB_VERSION) \
+		$(ANSIBLE_EXTRA_VARS) \
+		$(ANSIBLE_EXTRA_PARAMS) \
+		$*.yml
+
+### Ansible playbook specific rquirements
+
+ansible/setup.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
+
+ansible/monitoring.yml: PYTHON=/var/venv/bin/python
+
+ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
+	-e package="$(call require_env,PACKAGE)" \
+	-e downtime="$(DEPLOY_DOWNTIME)" \
+	-e rolling_update="$(ROLLING_UPDATE)"
+
+ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
+	-e cmd="$(call require_env,CMD, supported: start|stop|restart|ping)"
+
+ansible/mnesia_snapshot.yml: DEPLOY_ENV=$(call require_env,BACKUP_ENV)
+ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV)
+ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
+ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=\
+	-e snapshot_suffix="$(BACKUP_SUFFIX)"
+
+ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
+ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS=\
+	-e vault_addr="$(call require_env,VAULT_ADDR)"
+
+ansible/async_provision.yml: ANSIBLE_EXTRA_VARS=\
+	-e vault_addr="$(call require_env,VAULT_ADDR)" \
+	-e package="$(call require_env,PACKAGE)" \
+	-e bootstrap_version="$(call require_env,BOOTSTRAP_VERSION)"
+
+### Ansible playbook aliases
+health-check-env-local: ansible/health-check.yml
+provision: ansible/async_provision.yml
+ebs-grow-volume: ansible/ebs-grow-volume.yml
+reset-net: ansible/reset-net.yml
+manage-node: ansible/manage-node.yml
+setup-monitoring: ansible/monitoring.yml
+setup-node: ansible/setup.yml
+deploy: ansible/deploy.yml
+mnesia_snapshot: ansible/mnesia_snapshot.yml
+setup: setup-node setup-monitoring
+
+### Secrets
+
 $(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
 	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
 
@@ -21,110 +107,6 @@ secrets: $(SECRETS_OUTPUT_DIR)
 
 envshell: secrets
 	@envshell $(SECRETS_OUTPUT_DIR)
-
-setup-node: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-	cd ansible && $(ENV) ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
-		-e vault_addr=$(VAULT_ADDR) \
-		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
-		setup.yml
-
-setup-monitoring: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-	cd ansible && $(ENV) ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-		-e ansible_python_interpreter=/var/venv/bin/python \
-		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
-		monitoring.yml
-
-setup: setup-node setup-monitoring
-
-deploy: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-ifeq ($(DEPLOY_DB_VERSION),)
-	$(error DEPLOY_DB_VERSION should be provided)
-endif
-	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
-ifneq ($(DEPLOY_COLOR),)
-	$(eval LIMIT=$(LIMIT):&tag_color_$(DEPLOY_COLOR))
-endif
-ifneq ($(DEPLOY_KIND),)
-	$(eval LIMIT=$(LIMIT):&tag_kind_$(DEPLOY_KIND))
-endif
-ifneq ($(DEPLOY_REGION),)
-	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
-endif
-
-	cd ansible && $(ENV) ansible-playbook \
-		--limit="$(LIMIT)" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
-		-e package=$(PACKAGE) \
-		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
-		-e downtime=$(DEPLOY_DOWNTIME) \
-		-e db_version=$(DEPLOY_DB_VERSION) \
-		-e rolling_update="${ROLLING_UPDATE}" \
-		deploy.yml
-
-manage-node: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-ifndef CMD
-	$(error CMD is undefined, supported commands: start, stop, restart, ping)
-endif
-	cd ansible && $(ENV) ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
-		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
-		-e db_version=0 \
-		-e cmd=$(CMD) \
-		manage-node.yml
-
-reset-net: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-	cd ansible && $(ENV) ansible-playbook \
-		--limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
-		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
-		reset-net.yml
-
-mnesia_snapshot: secrets vault-config-$(BACKUP_ENV)
-ifeq ($(BACKUP_DB_VERSION),)
-	$(error BACKUP_DB_VERSION should be provided)
-endif
-ifeq ($(BACKUP_ENV),)
-	$(error BACKUP_ENV should be provided)
-endif
-	cd ansible && $(ENV) ansible-playbook \
-		--limit="tag_role_aenode:&tag_kind_backup:&tag_env_$(BACKUP_ENV)" \
-		-e ansible_python_interpreter=/var/venv/bin/python \
-		-e snapshot_suffix=$(BACKUP_SUFFIX) \
-		-e db_version=$(BACKUP_DB_VERSION) \
-		-e env=$(BACKUP_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(BACKUP_ENV).yml" \
-		mnesia_snapshot.yml
-
-ebs-grow-volume: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-	$(eval LIMIT=tag_role_aenode:&tag_env_$(DEPLOY_ENV))
-ifneq ($(DEPLOY_REGION),)
-	$(eval LIMIT=$(LIMIT):&region_$(DEPLOY_REGION))
-endif
-	cd ansible && $(ENV) ansible-playbook --limit="$(LIMIT)" \
-		-e ansible_python_interpreter=/var/venv/bin/python \
-		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
-		-e vault_addr=$(VAULT_ADDR) \
-		ebs-grow-volume.yml
-
-provision: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-	cd ansible && $(ENV) ansible-playbook --limit="tag_env_$(DEPLOY_ENV):&tag_role_aenode" \
-		-e ansible_python_interpreter=/usr/bin/python3 \
-		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
-		-e vault_addr=$(VAULT_ADDR) \
-		-e package=$(PACKAGE) \
-		-e bootstrap_version=$(BOOTSTRAP_VERSION) \
-		async_provision.yml
 
 ~/.ssh/id_ae_infra_ed25519:
 	@ssh-keygen -t ed25519 -N "" -f $@
@@ -143,27 +125,17 @@ ssh-%: cert-%
 
 ssh: ssh-aeternity
 
-integration-tests-run: secrets vault-config-test
+integration-tests-init: secrets vault-config-test
 	cd test/terraform && terraform init
 	cd test/terraform && $(ENV) terraform apply $(TF_COMMON_PARAMS) --auto-approve
-	# TODO this is actually a smoke test that can be migrated to "goss"
-	cd ansible && $(ENV) ansible-playbook \
-		--limit=tag_envid_$(TF_VAR_envid) \
-		-e env=test \
-		-e "@$(CONFIG_OUTPUT_DIR)/test.yml" \
-		health-check.yml
-
-health-check-env-local: check-deploy-env secrets vault-config-$(DEPLOY_ENV)
-	cd ansible && $(ENV) ansible-playbook \
-		--limit=tag_env_$(DEPLOY_ENV) \
-		-e env=$(DEPLOY_ENV) \
-		-e "@$(CONFIG_OUTPUT_DIR)/$(DEPLOY_ENV).yml" \
-		health-check.yml
 
 integration-tests-cleanup: secrets
 	cd test/terraform && $(ENV) terraform destroy $(TF_COMMON_PARAMS) --auto-approve
 
-integration-tests: integration-tests-run integration-tests-cleanup
+integration-tests-run:
+	@$(MAKE) ansible/health-check.yml DEPLOY_ENV=test LIMIT=tag_envid_$(TF_VAR_envid)
+
+integration-tests: integration-tests-init integration-tests-run integration-tests-cleanup
 
 lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
@@ -177,11 +149,6 @@ check-seed-peers-%: test/goss/remote/vars/seed-peers-%.yaml
 	goss -g test/goss/remote/group-peer-keys.yaml --vars $< validate
 
 check-seed-peers-all: $(addprefix check-seed-peers-, $(SEED_CHECK_ENVS))
-
-check-deploy-env:
-ifndef DEPLOY_ENV
-	$(error DEPLOY_ENV is undefined)
-endif
 
 ansible/inventory-list.json: secrets
 	cd ansible && $(ENV) ansible-inventory --list > inventory-list.json
@@ -230,6 +197,7 @@ $(CONFIG_OUTPUT_DIR)/%.yml: secrets $(CONFIG_OUTPUT_DIR)
 .PHONY: \
 	secrets images setup-node setup-monitoring setup \
 	manage-node reset-net lint cert-% ssh-% ssh clean \
-	check-seed-peers check-deploy-env list-inventory \
+	check-seed-peers list-inventory \
 	check-seed-peers-% check-seed-peers-all \
-	health-check-node health-check-% health-check-all
+	health-check-node health-check-% health-check-all \
+	ansible/%.yml
