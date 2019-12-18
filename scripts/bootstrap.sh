@@ -63,7 +63,7 @@ fi
 
 # Override the env defaults with ones stored in $vault_config
 if [[ -n "${node_config}" && "${node_config}" != "none" ]]; then
-    vault read ${node_config} -field=node_config > /tmp/node_config.yml
+    vault read -field=node_config ${node_config} > /tmp/node_config.yml
 fi
 
 ###
