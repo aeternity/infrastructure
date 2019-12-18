@@ -123,6 +123,7 @@ jobs:
       - run:
           name: Test ansible/deploy.yml
           command: |
+            make cert
             .circleci/test-ansible-playbook.sh ansible/deploy.yml \
               -e "@/tmp/config/test.yml" \
               -e env=test \
