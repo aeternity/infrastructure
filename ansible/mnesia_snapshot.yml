@@ -23,7 +23,7 @@
 
     - name: Stop node
       command: "/bin/true"
-      changed_when: false
+      changed_when: true
       notify: "stop aeternity daemon"
       tags: [archive]
 
@@ -63,7 +63,7 @@
 
     - name: Start node
       command: /bin/true
-      changed_when: false
+      changed_when: true
       notify: "start aeternity daemon"
       tags: [archive]
 
@@ -108,7 +108,7 @@
 
     - name: Cleanup
       command: /bin/true
-      changed_when: false
+      changed_when: true
       when:
         - snapshot_file.stat.readable is defined
         - snapshot_file.stat.readable
