@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -Eeuo pipefail
 
 SECRETS_OUTPUT_DIR=${SECRETS_OUTPUT_DIR:-/secrets}

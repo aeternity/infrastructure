@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #example usage: health_check.sh --network=main --min_height=55000 --version=2.1.0 $HOSTNAME
 #--genesis_hash & --network_id override defaults for --network
 set -eo pipefail

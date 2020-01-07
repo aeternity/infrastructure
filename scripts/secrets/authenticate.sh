@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -Eeuo pipefail
 
 AE_VAULT_ADDR=${AE_VAULT_ADDR:-}
