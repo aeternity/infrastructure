@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # should be run in CI or manually as:
 # ./check_release_artifacts.sh v2.3.1
 # DOCKER_USER and DOCKER_PASS need to be set for dockerhub checks when run manually

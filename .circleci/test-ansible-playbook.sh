@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ansible-playbook -i localhost, \
   -e ansible_python_interpreter=/usr/bin/python3 \

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -e
 
 CREDS_ROLE="${CREDS_ROLE:-ae-inventory}"

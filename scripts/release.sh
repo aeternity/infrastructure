@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # should be run as:
 # ./release.sh x.x.x start|finish description [--protocol-commitish=master] [--node-commitish=master]
 set -eo pipefail
