@@ -5,9 +5,9 @@ set -eo pipefail
 
 USAGE="Usage:
 ${0} x.x.x start|finish description [--protocol-commitish=master] [--node-commitish=master], e.g. to start a release run:
-${0} 2.4.0 start Maintenance release
+${0} v2.4.0 start Maintenance release
 then to finish the release run:
-${0} 2.4.0 finish"
+${0} v2.4.0 finish"
 
 usage_exit() {
     echo -e "$USAGE" >&2; exit 1
