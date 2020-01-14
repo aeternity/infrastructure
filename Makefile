@@ -46,7 +46,7 @@ ANSIBLE_EXTRA_VARS =
 ANSIBLE_EXTRA_PARAMS ?=
 
 .PRECIOUS: $(DEPLOY_CONFIG)
-ansible/%.yml: secrets | $(DEPLOY_CONFIG)
+ansible/%.yml: cert | $(DEPLOY_CONFIG)
 	cd ansible && $(ENV) ansible-playbook \
 		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
 		-e ansible_python_interpreter=$(PYTHON) \
@@ -63,7 +63,6 @@ ansible/setup.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
 
 ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 
-ansible/deploy.yml: cert
 ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
 	-e package="$(call require_env,PACKAGE)" \
 	-e downtime="$(DEPLOY_DOWNTIME)" \
