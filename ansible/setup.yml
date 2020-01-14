@@ -35,28 +35,6 @@
       tags:
         - master-user
 
-    # Automatic cleanup is not supported. You must remove old keys manually.
-    - name: "Add CI master keys"
-      authorized_key:
-        user: master
-        key: "{{ lookup('file', item) }}"
-      with_items:
-        - files/circleci/master_key.pub
-      tags:
-        - ssh-keys
-        - master-ssh-keys
-
-    # Automatic cleanup is not supported. You must remove old keys manually.
-    - name: Add CI deploy key to authorized keys
-      authorized_key:
-        user: "{{ project_user }}"
-        key: "{{ lookup('file', item) }}"
-      with_items:
-        - files/circleci/deploy_key.pub
-      tags:
-        - ssh-keys
-        - deploy-ssh-keys
-
     - name: Download Vault public key
       get_url:
         url: "{{ vault_addr }}/v1/ssh/public_key"
