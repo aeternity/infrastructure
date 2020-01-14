@@ -63,6 +63,7 @@ ansible/setup.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
 
 ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 
+ansible/deploy.yml: cert
 ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
 	-e package="$(call require_env,PACKAGE)" \
 	-e downtime="$(DEPLOY_DOWNTIME)" \
@@ -103,7 +104,7 @@ setup: setup-node setup-monitoring
 $(SECRETS_OUTPUT_DIR): scripts/secrets/dump.sh
 	@SECRETS_OUTPUT_DIR=$(SECRETS_OUTPUT_DIR) scripts/secrets/dump.sh
 
-secrets: cert $(SECRETS_OUTPUT_DIR)
+secrets: $(SECRETS_OUTPUT_DIR)
 
 envshell: secrets
 	@envshell $(SECRETS_OUTPUT_DIR)
