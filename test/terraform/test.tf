@@ -27,13 +27,14 @@ provider "aws" {
 }
 
 module "aws_deploy-test" {
-  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v2.0.0"
+  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v2.3.1"
   env                 = "${var.env_name}"
   envid               = "${var.envid}"
   bootstrap_version   = "${var.bootstrap_version}"
   vault_role          = "ae-node"
   vault_addr          = "${var.vault_addr}"
   user_data_file      = "user_data.bash"
+  node_config         = "secret/aenode/config/test"
 
   static_nodes = 1
   spot_nodes   = 1

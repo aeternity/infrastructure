@@ -56,12 +56,6 @@ export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$
 ### Dynamic node config
 ###
 
-# Generate node config from tracked ${env}.yml
-env_config="$(dirname $0)/../ansible/vars/aeternity/${env}.yml"
-if [[ -f "${env_config}" ]]; then
-    cp "${env_config}" /tmp/node_config.yml
-fi
-
 # Override the env defaults with ones stored in $vault_config
 if [[ -n "${node_config}" && "${node_config}" != "none" ]]; then
     vault read -field=node_config ${node_config} > /tmp/node_config.yml
