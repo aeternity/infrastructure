@@ -187,7 +187,7 @@ jobs:
             name: Setup integration tests parameters
             command: |
               echo "export TF_VAR_bootstrap_version=${CIRCLE_TAG:?}" >> $BASH_ENV
-              echo "export TF_VAR_package=https://releases.ops.aeternity.com/aeternity-latest-ubuntu-x86_64.tar.gz" >> $BASH_ENV
+              echo "export TF_VAR_package=https://releases.aeternity.io/aeternity-latest-ubuntu-x86_64.tar.gz" >> $BASH_ENV
         - integration_tests
         - fail_notification
 
