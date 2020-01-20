@@ -41,6 +41,16 @@ if [[ $mainmonchoice == "y" ]]; then
     DEPLOY_ENV=main_mon DEPLOY_REGION=us-east-2 CONFIG_ENV=main_mon@us-east-2 make deploy
 fi
 
+read -n 1 -p "Deploy UAT backup nodes? (y/N):" backupuatchoice
+if [[ $backupuatchoice == "y" ]]; then
+    DEPLOY_ENV=uat DEPLOY_KIND=backup make deploy
+fi
+
+read -n 1 -p "Deploy MAIN backup nodes? (y/N):" backupmainchoice
+if [[ $backupmainchoice == "y" ]]; then
+    DEPLOY_ENV=main DEPLOY_KIND=backup make deploy
+fi
+
 # restore the working dir
 cd -
 
