@@ -37,7 +37,8 @@ PYTHON ?= /usr/bin/python3
 DEPLOY_DOWNTIME ?= 0
 ROLLING_UPDATE ?= 100%
 BACKUP_SUFFIX ?= backup
-DEPLOY_ENV ?=
+BACKUP_ENV ?=
+DEPLOY_ENV ?= $(BACKUP_ENV)
 DEPLOY_ROLE ?= aenode
 DEPLOY_DB_VERSION ?= 1
 CONFIG_ENV ?= $(DEPLOY_ENV)
@@ -46,7 +47,7 @@ ANSIBLE_EXTRA_VARS =
 ANSIBLE_EXTRA_PARAMS ?=
 
 .PRECIOUS: $(DEPLOY_CONFIG)
-ansible/%.yml: cert | $(DEPLOY_CONFIG)
+ansible/%.yml: cert $(DEPLOY_CONFIG)
 	cd ansible && $(ENV) ansible-playbook \
 		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
 		-e ansible_python_interpreter=$(PYTHON) \
