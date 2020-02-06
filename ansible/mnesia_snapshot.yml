@@ -9,6 +9,8 @@
     snapshot_suffix: snapshot
     snapshot_filename: "mnesia_{{ env }}_v-{{ db_version }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ snapshot_suffix }}.tgz"
     snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}"
+    snapshot_hash_filename: "{{ snapshot_filename }}.md5"
+    snapshot_hash_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_hash_filename }}"
 
   tasks:
     - name: Include configuration variables
@@ -73,6 +75,7 @@
     - name: Stat {{ snapshot_path }}
       stat:
         path: "{{ snapshot_path }}"
+        checksum_algorithm: md5
       register: snapshot_file
       tags: [upload]
 
@@ -91,11 +94,50 @@
         - snapshot_file.stat.readable
       tags: [upload]
 
+    - name: Add hash into ({{ snapshot_hash_path }})
+      copy:
+        dest: "{{ snapshot_hash_path }}"
+        content: "{{ snapshot_file.stat.checksum }}"
+      when:
+        - snapshot_file.stat.readable is defined
+        - snapshot_file.stat.readable
+      tags: [upload]
+
+    - name: Upload snapshot hash to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_hash_filename }})
+      aws_s3:
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ snapshot_hash_filename }}"
+        src: "{{ snapshot_hash_path }}"
+        mode: put
+        permission: "public-read"
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      when:
+        - snapshot_file.stat.readable is defined
+        - snapshot_file.stat.readable
+      tags: [upload]
+
     - name: Upload backup to S3 bucket latest
       aws_s3:
         bucket: "{{ snapshots_bucket }}"
         object: "{{ snapshots_filename_latest }}"
         src: "{{ snapshot_path }}"
+        mode: put
+        permission: "public-read"
+        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+      when:
+        - snapshot_file.stat is defined
+        - snapshot_file.stat.readable
+      tags: [latest]
+
+    - name: Upload backup hash to S3 bucket latest
+      aws_s3:
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ snapshot_hash_filename_latest }}"
+        src: "{{ snapshot_hash_path }}"
         mode: put
         permission: "public-read"
         aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
