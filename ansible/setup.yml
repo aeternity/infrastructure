@@ -135,7 +135,7 @@
         value: 24576
 
     - name: Include libsodium task for Ubuntu {{ ansible_distribution_version }}
-      include_tasks: tasks/libsodium/{{ ansible_distribution | lower }}_{{ ansible_distribution_release }}.yml
+      include_tasks: tasks/libsodium/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
       tags: vars
 
     - name: Attach additional drive if needed
