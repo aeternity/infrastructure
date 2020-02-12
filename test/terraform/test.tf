@@ -54,3 +54,32 @@ module "aws_deploy-test" {
     aws = "aws.ap-southeast-2"
   }
 }
+
+module "aws_deploy-test-ubuntu-bionic" {
+  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v2.3.1"
+  env                 = "${var.env_name}"
+  envid               = "${var.envid}"
+  bootstrap_version   = "${var.bootstrap_version}"
+  vault_role          = "ae-node"
+  vault_addr          = "${var.vault_addr}"
+  user_data_file      = "user_data.bash"
+  node_config         = "secret/aenode/config/test"
+
+  static_nodes = 1
+  spot_nodes   = 1
+
+  spot_price    = "0.04"
+  instance_type = "t3.large"
+  ami_name      = "aeternity-ubuntu-18.04"
+
+  additional_storage      = true
+  additional_storage_size = 5
+
+  aeternity = {
+    package = "${var.package}"
+  }
+
+  providers = {
+    aws = "aws.ap-southeast-2"
+  }
+}

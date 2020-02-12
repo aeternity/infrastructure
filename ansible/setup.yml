@@ -134,8 +134,8 @@
         limit_item: nofile
         value: 24576
 
-    - name: Include libsodium task for Ubuntu {{ ansible_distribution_version }}
-      include_tasks: tasks/libsodium/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
+    - name: Include task to install Ubuntu {{ ansible_distribution_version }} dependencies
+      include_tasks: tasks/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
       tags: vars
 
     - name: Attach additional drive if needed

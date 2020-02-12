@@ -1,4 +1,4 @@
-- name: Install libsodium
+- name: Install Ubuntu 18.04 dependencies
   apt:
     pkg:
     - libsodium23
