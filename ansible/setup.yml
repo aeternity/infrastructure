@@ -73,20 +73,6 @@
       tags:
         - dev-tools
 
-    - name: Install pip tools
-      pip:
-        virtualenv: /var/venv
-        virtualenv_python: python3
-        name:
-        - awscli
-        - ansible
-        - boto
-        - boto3
-        - datadog==0.28.0
-        - hvac
-      tags:
-        - dev-tools
-
     - name: Create Vault source directory
       file:
         path: /usr/src/vault-{{ vault_version }}/

@@ -68,14 +68,8 @@ fi
 cd $(dirname $0)/../ansible
 ansible-galaxy install -r requirements.yml
 
-# While Ansible is run by Python 3 because of the virtual environment
-# the "remote" (which is in this case the same) host interpreter must also be set to python3
-# in this case it's the path in the virtual environment on the controller (same as the remote)
-# thus the which command usage.
-# It must be absolute because of the virtualenv, otherwise it will use the system Python 3
 ansible-playbook \
     -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3) \
     -e env=${env} \
     -e vault_addr=${vault_addr} \
     -e "@/tmp/node_config.yml" \
@@ -85,7 +79,6 @@ ansible-playbook \
 # Keep db_version in sync with the value in file deployment/DB_VERSION from aeternity/aeternity repo!
 ansible-playbook \
     -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3) \
     --become-user aeternity -b \
     -e env=${env} \
     -e db_version=1 \
