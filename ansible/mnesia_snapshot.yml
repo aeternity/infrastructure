@@ -96,7 +96,7 @@
         - snapshot_file.stat.readable
       tags: [upload]
 
-    - name: Add hash into ({{ snapshot_checksum_path }})
+    - name: Generate a checksum file ({{ snapshot_checksum_path }})
       copy:
         dest: "{{ snapshot_checksum_path }}"
         content: "{{ snapshot_file.stat.checksum }}"
@@ -105,7 +105,7 @@
         - snapshot_file.stat.readable
       tags: [upload]
 
-    - name: Upload snapshot hash to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_filename }}.md5)
+    - name: Upload the checksum file to S3 ({{ snapshots_bucket }}/{{ snapshot_filename }}.md5)
       aws_s3:
         bucket: "{{ snapshots_bucket }}"
         object: "{{ snapshot_filename }}.md5"
@@ -135,7 +135,7 @@
         - snapshot_file.stat.readable
       tags: [latest]
 
-    - name: Upload backup hash to S3 bucket latest
+    - name: Upload the checksum file to S3 latest
       aws_s3:
         bucket: "{{ snapshots_bucket }}"
         object: "{{ snapshots_filename_latest }}.md5"
