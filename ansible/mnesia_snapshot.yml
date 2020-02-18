@@ -9,8 +9,10 @@
     snapshot_suffix: snapshot
     snapshot_filename: "mnesia_{{ env }}_v-{{ db_version }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ snapshot_suffix }}.tgz"
     snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}"
-    snapshot_hash_filename: "{{ snapshot_filename }}.md5"
-    snapshot_hash_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_hash_filename }}"
+    snapshot_hash_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}.md5"
+    aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+    aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+    security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
 
   tasks:
     - name: Include configuration variables
@@ -86,9 +88,9 @@
         src: "{{ snapshot_path }}"
         mode: put
         permission: "public-read"
-        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ security_token }}"
       when:
         - snapshot_file.stat.readable is defined
         - snapshot_file.stat.readable
@@ -103,16 +105,16 @@
         - snapshot_file.stat.readable
       tags: [upload]
 
-    - name: Upload snapshot hash to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_hash_filename }})
+    - name: Upload snapshot hash to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_filename }}.md5)
       aws_s3:
         bucket: "{{ snapshots_bucket }}"
-        object: "{{ snapshot_hash_filename }}"
+        object: "{{ snapshot_filename }}.md5"
         src: "{{ snapshot_hash_path }}"
         mode: put
         permission: "public-read"
-        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ security_token }}"
       when:
         - snapshot_file.stat.readable is defined
         - snapshot_file.stat.readable
@@ -125,26 +127,26 @@
         src: "{{ snapshot_path }}"
         mode: put
         permission: "public-read"
-        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ security_token }}"
       when:
-        - snapshot_file.stat is defined
+        - snapshot_file.stat.readable is defined
         - snapshot_file.stat.readable
       tags: [latest]
 
     - name: Upload backup hash to S3 bucket latest
       aws_s3:
         bucket: "{{ snapshots_bucket }}"
-        object: "{{ snapshot_hash_filename_latest }}"
+        object: "{{ snapshots_filename_latest }}.md5"
         src: "{{ snapshot_hash_path }}"
         mode: put
         permission: "public-read"
-        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ security_token }}"
       when:
-        - snapshot_file.stat is defined
+        - snapshot_file.stat.readable is defined
         - snapshot_file.stat.readable
       tags: [latest]
 
