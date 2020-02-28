@@ -65,11 +65,23 @@
         - python3
         - python3-yaml #aeternity.fact
         - python3-pip
-        - virtualenv
         - jq
         - unzip
         - bc
         - curl
+      tags:
+        - dev-tools
+
+    - name: Install pip tools
+      pip:
+        executable: pip3
+        name:
+        - awscli
+        - ansible
+        - boto
+        - boto3
+        - datadog==0.28.0
+        - hvac
       tags:
         - dev-tools
 
