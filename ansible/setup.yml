@@ -65,6 +65,7 @@
         - python3
         - python3-yaml #aeternity.fact
         - python3-pip
+        - libssl-dev
         - jq
         - unzip
         - bc
