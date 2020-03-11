@@ -63,9 +63,9 @@
       when: should_restore
       ignore_errors: yes
 
-    - name: Disable restoring (corrupted snapshot)
-      set_fact:
-        should_restore: false
+    - name: Check if snapshot is corrupted
+      fail:
+        msg: Stop restoring (corrupted snapshot)
       when:
         - should_restore
         - checksum_file.failed == false
