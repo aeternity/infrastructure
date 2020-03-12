@@ -65,7 +65,7 @@
         - python3
         - python3-yaml #aeternity.fact
         - python3-pip
-        - virtualenv
+        - libssl-dev
         - jq
         - unzip
         - bc
@@ -75,8 +75,7 @@
 
     - name: Install pip tools
       pip:
-        virtualenv: /var/venv
-        virtualenv_python: python3
+        executable: pip3
         name:
         - awscli
         - ansible
