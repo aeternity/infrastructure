@@ -46,6 +46,31 @@
         mode: get
       when: should_restore
 
+    - name: Stat {{ snapshot_path }}
+      stat:
+        path: "{{ snapshot_path }}"
+        checksum_algorithm: md5
+      register: snapshot_file
+      when: should_restore
+
+    - name: Download Mnesia snapshot checksum
+      aws_s3:
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ restore_snapshot_filename }}.md5"
+        dest: "{{ snapshot_path }}.md5"
+        mode: get
+      register: checksum_file
+      when: should_restore
+      ignore_errors: yes
+
+    - name: Check if snapshot is corrupted
+      fail:
+        msg: Stop restoring (corrupted snapshot)
+      when:
+        - should_restore
+        - checksum_file.failed == false
+        - snapshot_file.stat.checksum != lookup('file', snapshot_path ~ '.md5')
+
     - name: Stop node
       command: "/bin/true"
       changed_when: true
