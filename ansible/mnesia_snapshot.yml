@@ -9,6 +9,10 @@
     snapshot_suffix: snapshot
     snapshot_filename: "mnesia_{{ env }}_v-{{ db_version }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ snapshot_suffix }}.tgz"
     snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}"
+    snapshot_checksum_path: "{{ snapshot_path }}.md5"
+    aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+    aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+    security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
 
   tasks:
     - name: Include configuration variables
@@ -73,6 +77,7 @@
     - name: Stat {{ snapshot_path }}
       stat:
         path: "{{ snapshot_path }}"
+        checksum_algorithm: md5
       register: snapshot_file
       tags: [upload]
 
@@ -83,9 +88,33 @@
         src: "{{ snapshot_path }}"
         mode: put
         permission: "public-read"
-        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ security_token }}"
+      when:
+        - snapshot_file.stat.readable is defined
+        - snapshot_file.stat.readable
+      tags: [upload]
+
+    - name: Generate a checksum file ({{ snapshot_checksum_path }})
+      copy:
+        dest: "{{ snapshot_checksum_path }}"
+        content: "{{ snapshot_file.stat.checksum }}"
+      when:
+        - snapshot_file.stat.readable is defined
+        - snapshot_file.stat.readable
+      tags: [upload]
+
+    - name: Upload the checksum file to S3 ({{ snapshots_bucket }}/{{ snapshot_filename }}.md5)
+      aws_s3:
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ snapshot_filename }}.md5"
+        src: "{{ snapshot_checksum_path }}"
+        mode: put
+        permission: "public-read"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ security_token }}"
       when:
         - snapshot_file.stat.readable is defined
         - snapshot_file.stat.readable
@@ -98,11 +127,26 @@
         src: "{{ snapshot_path }}"
         mode: put
         permission: "public-read"
-        aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-        aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-        security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ security_token }}"
       when:
-        - snapshot_file.stat is defined
+        - snapshot_file.stat.readable is defined
+        - snapshot_file.stat.readable
+      tags: [latest]
+
+    - name: Upload the checksum file to S3 latest
+      aws_s3:
+        bucket: "{{ snapshots_bucket }}"
+        object: "{{ snapshots_filename_latest }}.md5"
+        src: "{{ snapshot_checksum_path }}"
+        mode: put
+        permission: "public-read"
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        security_token: "{{ security_token }}"
+      when:
+        - snapshot_file.stat.readable is defined
         - snapshot_file.stat.readable
       tags: [latest]
 
