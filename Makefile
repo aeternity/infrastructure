@@ -62,8 +62,6 @@ ansible/%.yml: cert $(DEPLOY_CONFIG)
 
 ansible/setup.yml: ANSIBLE_EXTRA_VARS=-e vault_addr="$(VAULT_ADDR)"
 
-ansible/monitoring.yml: PYTHON=/var/venv/bin/python
-
 ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
 	-e package="$(call require_env,PACKAGE)" \
 	-e downtime="$(DEPLOY_DOWNTIME)" \
@@ -74,11 +72,9 @@ ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
 
 ansible/mnesia_snapshot.yml: DEPLOY_ENV=$(call require_env,BACKUP_ENV)
 ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_kind_backup:&tag_env_$(DEPLOY_ENV)
-ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
 ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=\
 	-e snapshot_suffix="$(BACKUP_SUFFIX)"
 
-ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
 ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS=\
 	-e vault_addr="$(call require_env,VAULT_ADDR)"
 
