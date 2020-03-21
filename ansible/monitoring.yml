@@ -180,7 +180,7 @@
       apm_config:
         enabled: false
       logs_enabled: true
-      tags: "{{ datadog_tags | default(datadog_default_tags) }}"
+      tags: "{{ (datadog_tags + datadog_default_tags) if datadog_tags is defined else datadog_default_tags }}"
     datadog_checks:
       system_core:
         init_config:
