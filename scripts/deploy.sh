@@ -46,12 +46,12 @@ fi
 # Backup nodes
 read -n 1 -p "Deploy UAT backup nodes? (y/N):" backupuatchoice
 if [[ $backupuatchoice == "y" ]]; then
-    DEPLOY_ENV=uat DEPLOY_KIND=backup make deploy
+    DEPLOY_ENV=uat DEPLOY_KIND=backup CONFIG_ENV=uat_backup make deploy
 fi
 
 read -n 1 -p "Deploy MAIN backup nodes? (y/N):" backupmainchoice
 if [[ $backupmainchoice == "y" ]]; then
-    DEPLOY_ENV=main DEPLOY_KIND=backup make deploy
+    DEPLOY_ENV=main DEPLOY_KIND=backup CONFIG_ENV=main_backup make deploy
 fi
 
 # Testnet gateway nodes
