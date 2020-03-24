@@ -165,6 +165,10 @@
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
     network_id: "{{ (node_config['fork_management']|default(dict(network_id = 'unknown')))['network_id'] }}"
+    datadog_default_tags:
+      - "lsb:{{ ansible_lsb.description }}"
+      - "public_ipv4:{{ public_ipv4|default('unknown') }}"
+      - "network_id:{{ network_id }}"
     datadog_agent6: true
     datadog_config:
       log_level: warning
@@ -176,10 +180,7 @@
       apm_config:
         enabled: false
       logs_enabled: true
-      tags:
-        - "lsb:{{ ansible_lsb.description }}"
-        - "public_ipv4:{{ public_ipv4|default('unknown') }}"
-        - "network_id:{{ network_id }}"
+      tags: "{{ (datadog_tags + datadog_default_tags) if datadog_tags is defined else datadog_default_tags }}"
     datadog_checks:
       system_core:
         init_config:
