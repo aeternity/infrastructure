@@ -40,6 +40,7 @@ if [[ $mainmonchoice == "y" ]]; then
     DEPLOY_ENV=main_mon DEPLOY_REGION=eu-north-1 CONFIG_ENV=main_mon@eu-north-1 make deploy
     DEPLOY_ENV=main_mon DEPLOY_REGION=us-west-2 CONFIG_ENV=main_mon@us-west-2 make deploy
     DEPLOY_ENV=main_mon DEPLOY_REGION=us-east-2 CONFIG_ENV=main_mon@us-east-2 make deploy
+    DEPLOY_ENV=main_mon DEPLOY_REGION=cn-1 CONFIG_ENV=main_mon@cn-1 make deploy
 fi
 
 # Backup nodes
