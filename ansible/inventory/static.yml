@@ -15,6 +15,7 @@ all:
         - "color:green"
         - "region:eu-central-3"
     node1.cn.nodes.aeternity.io:
+      halon_system_timeout: 30
       datadog_tags:
         - "role:aenode"
         - "kind:peer"
