@@ -26,7 +26,6 @@ vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value
 vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
 node_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "node_config") | .Value')
 env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
-aeternity_package=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "package") | .Value')
 snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
 
 
@@ -59,7 +58,6 @@ export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$
 # Override the env defaults with ones stored in $vault_config
 if [[ -n "${node_config}" && "${node_config}" != "none" ]]; then
     vault read -field=node_config ${node_config} > /tmp/node_config.yml
-    aeternity_package=$((grep 'package:' /tmp/node_config.yml | awk '{ print $2 }') || echo $aeternity_package)
 fi
 
 ###
@@ -90,7 +88,7 @@ ansible-playbook \
     --become-user aeternity -b \
     -e env=${env} \
     -e db_version=1 \
-    -e package=${aeternity_package} \
+    -e package=$(grep 'package:' /tmp/node_config.yml | awk '{ print $2 }') \
     -e restore_snapshot_filename=${snapshot_filename} \
     -e "@/tmp/node_config.yml" \
     deploy.yml \
