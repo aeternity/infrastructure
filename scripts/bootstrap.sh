@@ -25,9 +25,6 @@ done
 vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
 vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
 node_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "node_config") | .Value')
-env=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "env") | .Value')
-snapshot_filename=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "snapshot_filename") | .Value')
-
 
 ###
 ### Vault - Authenticate the instance to CSM
@@ -75,7 +72,6 @@ ansible-galaxy install -r requirements.yml
 ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
-    -e env=${env} \
     -e vault_addr=${vault_addr} \
     -e "@/tmp/node_config.yml" \
     setup.yml \
@@ -86,10 +82,6 @@ ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
     --become-user aeternity -b \
-    -e env=${env} \
-    -e db_version=1 \
-    -e package=$(grep 'package:' /tmp/node_config.yml | awk '{ print $2 }') \
-    -e restore_snapshot_filename=${snapshot_filename} \
     -e "@/tmp/node_config.yml" \
     deploy.yml \
     mnesia_snapshot_restore.yml
