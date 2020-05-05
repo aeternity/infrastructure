@@ -186,6 +186,11 @@ vault-configs-dump: secrets
 
 vault-config-% : $(CONFIG_OUTPUT_DIR)/%.yml ;
 
+vault-config-update-%: vault-config-%
+	sed -i "s|^package:.*|package: $(call require_env,PACKAGE)|g" $(CONFIG_OUTPUT_DIR)/$*.yml
+	cat $(CONFIG_OUTPUT_DIR)/$*.yml | $(ENV) vault write $(VAULT_CONFIG_ROOT)/$* $(VAULT_CONFIG_FIELD)=-
+
+
 .PRECIOUS: $(CONFIG_OUTPUT_DIR)/%.yml
 $(CONFIG_OUTPUT_DIR)/%.yml: YML=$(CONFIG_OUTPUT_DIR)/$*.yml
 $(CONFIG_OUTPUT_DIR)/%.yml: secrets $(CONFIG_OUTPUT_DIR)
