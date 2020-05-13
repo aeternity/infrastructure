@@ -83,6 +83,7 @@
           url: "{{ package }}"
           dest: "{{ packages_path }}/{{ package|basename }}"
           checksum: "{{ package_checksum|default(omit) }}"
+          timeout: 3600
         when: "'http' in package"
         register: remote_package
         notify: "stop aeternity daemon"

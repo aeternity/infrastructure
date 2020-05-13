@@ -35,6 +35,15 @@
       tags:
         - master-user
 
+    - name: Disallow root SSH access
+      lineinfile: dest=/etc/ssh/sshd_config
+                  regexp="^PermitRootLogin"
+                  line="PermitRootLogin no"
+                  state=present
+      tags:
+        - root-user
+      notify: restart ssh
+
     - name: Download Vault public key
       get_url:
         url: "{{ vault_addr }}/v1/ssh/public_key"
