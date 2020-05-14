@@ -1,4 +1,8 @@
 ---
+- name: Wait for system to become reachable
+  wait_for_connection:
+    timeout: 60
+
 - name: Wait aeternity node API to boot
   wait_for:
     port: "{{ node_config.http.external.port }}"
