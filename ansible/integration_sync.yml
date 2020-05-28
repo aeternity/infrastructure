@@ -1,0 +1,33 @@
+---
+- name: Delete Mnesia database
+  hosts: all
+  remote_user: aeternity
+
+  vars:
+    database_dir: "{{ additional_storage_mountpoint|default(project_root) }}"
+
+  tasks:
+    - name: Get node status
+      uri:
+        url: "http://localhost:{{ node_config.http.external.port | default('3013') }}/v2/status"
+      register: status
+
+    - name: Stop node
+      command: "/bin/true"
+      changed_when: status.json.syncing == true
+      notify: "stop aeternity daemon"
+
+    - name: Delete local database ({{ database_dir }})
+      file:
+        path: "{{ database_dir }}"
+        state: absent
+      when: status.json.syncing == true
+
+    - name: Start node
+      command: /bin/true
+      changed_when: status.json.syncing == true
+      notify: "start aeternity daemon"
+
+  handlers:
+  - name: test
+    import_tasks: tasks/handlers.yml
