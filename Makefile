@@ -97,7 +97,7 @@ setup-monitoring: ansible/monitoring.yml
 setup-node: ansible/setup.yml
 deploy: ansible/deploy.yml
 mnesia_snapshot: ansible/mnesia_snapshot.yml
-integration_sync: ansible/integration_sync.yml
+mnesia-reset-once: ansible/mnesia_reset_once.yml
 setup: setup-node setup-monitoring
 
 ### Secrets
