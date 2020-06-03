@@ -1,0 +1,39 @@
+---
+- name: Delete Mnesia database
+  hosts: all
+  remote_user: aeternity
+
+  vars:
+    project_root: "{{ ansible_env.HOME }}/node"
+    aeternity_bin: "{{ project_root }}/bin/aeternity"
+
+  tasks:
+    - name: Get node status
+      uri:
+        url: "http://localhost:{{ node_config.http.external.port | default('3013') }}/v2/status"
+      register: status
+
+    - name: Reset mnesia database
+      block:
+        - name: Stop aeternity daemon
+          command: "{{ aeternity_bin }} stop"
+
+        - name:  Delete local database ({{ project_root }}/data/mnesia)
+          file:
+            path: "{{ project_root }}/data/mnesia"
+            state: absent
+          when: additional_storage is not defined or not additional_storage
+
+        - name: Delete local database ({{ node_config.chain.db_path }})
+          file:
+            path: "{{ node_config.chain.db_path }}"
+            state: absent
+          when:
+            - additional_storage is defined
+            - additional_storage
+
+        - name: Start aeternity daemon
+          command: "{{ aeternity_bin }} start"
+
+      when: status.json.sync_progress | int == 100
+      run_once: "{{ status.json.sync_progress | int == 100 }}"
