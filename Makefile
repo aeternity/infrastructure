@@ -22,16 +22,6 @@ space := $(empty) $(empty)
 make_tag=$(if $($(2)),:&tag_$(1)_$($(2)))
 require_env=$(if $($(1)),$($(1)),$(error $(1) should be provided$(2)))
 
-# prepare ansible filter
-override LIMIT += $(call make_tag,env,DEPLOY_ENV)
-override LIMIT += $(call make_tag,role,DEPLOY_ROLE)
-override LIMIT += $(call make_tag,color,DEPLOY_COLOR)
-override LIMIT += $(call make_tag,kind,DEPLOY_KIND)
-override LIMIT += $(if $(DEPLOY_REGION),:&region_$(DEPLOY_REGION),)
-# sanitize
-override LIMIT := $(subst $(space),$(empty),$(LIMIT))
-override LIMIT := $(subst -,_,$(LIMIT))
-
 # ENV defaults
 PYTHON ?= /usr/bin/python3
 DEPLOY_DOWNTIME ?= 0
@@ -45,6 +35,17 @@ CONFIG_ENV ?= $(DEPLOY_ENV)
 DEPLOY_CONFIG ?= $(if $(CONFIG_ENV),$(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml)
 ANSIBLE_EXTRA_VARS =
 ANSIBLE_EXTRA_PARAMS ?=
+
+# prepare ansible filter
+override LIMIT += $(call make_tag,env,DEPLOY_ENV)
+override LIMIT += $(call make_tag,role,DEPLOY_ROLE)
+override LIMIT += $(call make_tag,color,DEPLOY_COLOR)
+override LIMIT += $(call make_tag,kind,DEPLOY_KIND)
+override LIMIT += $(if $(DEPLOY_REGION),:&region_$(DEPLOY_REGION),)
+override TEST = $(TEST_ENV)
+# sanitize
+override LIMIT := $(subst $(space),$(empty),$(LIMIT))
+override LIMIT := $(subst -,_,$(LIMIT))
 
 .PRECIOUS: $(DEPLOY_CONFIG)
 ansible/%.yml: cert $(DEPLOY_CONFIG)
