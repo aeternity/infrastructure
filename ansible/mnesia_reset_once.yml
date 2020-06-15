@@ -26,7 +26,7 @@
         - name: Fail if no synced node found
           fail:
             msg: No synced node
-          when: found_synced_node == false
+          when: not found_synced_node
 
       run_once: true
 
