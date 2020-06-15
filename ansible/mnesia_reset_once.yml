@@ -6,7 +6,7 @@
   vars:
     project_root: "{{ ansible_env.HOME }}/node"
     aeternity_bin: "{{ project_root }}/bin/aeternity"
-    missing_synced_node: true
+    found_synced_node: false
 
   tasks:
     - name: Check for synchronized nodes
@@ -19,14 +19,14 @@
 
         - name: Check that the node is synchronized
           set_fact:
-            missing_synced_node: false
+            found_synced_node: true
           when: item.json.sync_progress | int == 100
           loop: "{{ hosts_status.results }}"
 
         - name: Fail if no synced node found
           fail:
             msg: No synced node
-          when: missing_synced_node
+          when: found_synced_node == false
 
       run_once: true
 
