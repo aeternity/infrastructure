@@ -1,5 +1,15 @@
 version: 2.1
 
+executors:
+  ubuntu-1804:
+    docker:
+      - image: aeternity/infrastructure:master
+      - image: rastasheep/ubuntu-sshd:18.04
+  ubuntu-1604:
+    docker:
+      - image: aeternity/infrastructure:master
+      - image: rastasheep/ubuntu-sshd:16.04
+
 references:
   container_config: &container_config
     docker:
@@ -71,18 +81,8 @@ commands:
             ./scripts/circleci/rocket_fail_notification.sh
           when: on_fail
 
-jobs:
   build_check:
-    docker:
-      - image: aeternity/infrastructure:master
-      - image: rastasheep/ubuntu-sshd:16.04
-    working_directory: /src
-    environment:
-      DOCKERHUB_REPO: aeternity/infrastructure
-      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
-      ANSIBLE_HOST_KEY_CHECKING: False
     steps:
-      - checkout
       - setup_remote_docker:
           version: 18.06.0-ce
           docker_layer_caching: true
@@ -135,6 +135,30 @@ jobs:
           name: Push (branch) Docker image to DockerHub
           command: |
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_}
+
+
+jobs:
+  build_check_ubuntu_1804:
+    executor: ubuntu-1804
+    working_directory: /src
+    environment:
+      DOCKERHUB_REPO: aeternity/infrastructure
+      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
+      ANSIBLE_HOST_KEY_CHECKING: False
+    steps:
+      - checkout
+      - build_check
+
+  build_check_ubuntu_1604:
+    executor: ubuntu-1604
+    working_directory: /src
+    environment:
+      DOCKERHUB_REPO: aeternity/infrastructure
+      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
+      ANSIBLE_HOST_KEY_CHECKING: False
+    steps:
+      - checkout
+      - build_check
 
   docker_push_latest:
     <<: *machine_config
@@ -194,14 +218,19 @@ jobs:
 workflows:
   check_deploy:
     jobs:
-      - build_check:
+      - build_check_ubuntu_1804:
+          context: ae-infra-manage
+          requires: []
+
+      - build_check_ubuntu_1604:
           context: ae-infra-manage
           requires: []
 
       - stable_integration_tests:
           context: ae-infra-manage
           requires:
-            - build_check
+            - build_check_ubuntu_1804
+            - build_check_ubuntu_1604
           filters:
             branches:
               ignore: /.*/
@@ -215,7 +244,8 @@ workflows:
       - docker_push_latest:
           context: ae-infra-manage
           requires:
-            - build_check
+            - build_check_ubuntu_1804
+            - build_check_ubuntu_1604
             - branch_integration_tests
           filters:
             branches:

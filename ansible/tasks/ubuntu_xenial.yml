@@ -1,0 +1,21 @@
+- name: Download libsodium
+  unarchive:
+    src: https://github.com/jedisct1/libsodium/releases/download/{{ libsodium_version }}/libsodium-{{ libsodium_version }}.tar.gz
+    dest: /usr/local/src/
+    remote_src: yes
+  tags:
+    - libsodium
+
+- name: Install libsodium
+  command: "{{ item }}"
+  with_items:
+    - ./configure
+    - make
+    - make install
+  args:
+    chdir: "/usr/local/src/libsodium-{{ libsodium_version }}"
+    creates: "/usr/local/lib/libsodium.so.{{ libsodium_module_version }}"
+  tags:
+    - libsodium
+  # ldconfig should run in separate process, thus cannot be added in the above command list
+  notify: run ldconfig
