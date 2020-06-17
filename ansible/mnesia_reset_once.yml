@@ -6,28 +6,26 @@
   vars:
     project_root: "{{ ansible_env.HOME }}/node"
     aeternity_bin: "{{ project_root }}/bin/aeternity"
-    found_synced_node: false
 
   tasks:
-    - name: Check for synchronized nodes
-      block:
-        - name: Get nodes status
-          uri:
-            url: "http://{{ item }}:{{ node_config.http.external.port | default('3013') }}/v2/status"
-          register: hosts_status
-          loop: "{{ play_hosts }}"
+    - name: Get nodes status
+      uri:
+        url: "http://{{ item }}:{{ node_config.http.external.port | default('3013') }}/v2/status"
+      register: hosts_status
+      loop: "{{ play_hosts }}"
+      delegate_to: localhost
+      run_once: true
 
-        - name: Check that the node is synchronized
-          set_fact:
-            found_synced_node: true
-          when: item.json.sync_progress | int == 100
-          loop: "{{ hosts_status.results }}"
-
-        - name: Fail if no synced node found
-          fail:
-            msg: No synced node
-          when: not found_synced_node
-
+    - name: Fail if no synced node found
+      fail:
+        msg: No synced node
+      delegate_to: localhost
+      when: >
+        hosts_status.results
+        | map(attribute='json')
+        | selectattr('sync_progress', 'equalto', 100)
+        | list
+        | length == 0
       run_once: true
 
     - name: Get node status
