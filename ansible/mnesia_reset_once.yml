@@ -8,6 +8,26 @@
     aeternity_bin: "{{ project_root }}/bin/aeternity"
 
   tasks:
+    - name: Get nodes status
+      uri:
+        url: "http://{{ item }}:{{ node_config.http.external.port | default('3013') }}/v2/status"
+      register: hosts_status
+      loop: "{{ play_hosts }}"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Fail if no synced node found
+      fail:
+        msg: No synced node
+      delegate_to: localhost
+      when: >
+        hosts_status.results
+        | map(attribute='json')
+        | selectattr('sync_progress', 'equalto', 100)
+        | list
+        | length == 0
+      run_once: true
+
     - name: Get node status
       uri:
         url: "http://localhost:{{ node_config.http.external.port | default('3013') }}/v2/status"
