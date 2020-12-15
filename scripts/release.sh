@@ -21,14 +21,14 @@ usage_exit() {
 
 #generate_post_data release commitish description
 generate_post_data() {
-BODY=${4:{$3:?}}
+BODY=${4:-${3:?}}
 
 cat <<EOF
 {
   "tag_name": "$1",
   "target_commitish": "${2}",
   "name": "$3",
-  "body": "$1",
+  "body": "$BODY",
   "draft": false,
   "prerelease": true
 }
@@ -44,7 +44,7 @@ curl_headers=(
 
 #create_release repo release commitish description
 create_release() {
-    postdata=$(generate_post_data "$2" "$3" "$4")
+    postdata=$(generate_post_data "$2" "$3" "$4" "$5")
     released=$(curl -s -X POST \
         "${curl_headers[@]}" \
         https://api.github.com/repos/${1}/releases \
@@ -123,7 +123,7 @@ if [[ -n "$1" ]]; then
             echo "Creating pre-release ${protocol_release:?} $subject in $protocol_repo from commitish $protocol_commitish"
             create_release $protocol_repo ${protocol_release:?} $protocol_commitish "$subject"
             echo "Creating pre-release ${node_release:?} $subject in $node_repo from commitish $node_commitish"
-            description="Please see the [release notes](https://github.com/$node_repo/blob/v$node_release/docs/release-notes/RELEASE-NOTES-$node_release.md)."
+            description="Please see the [release notes](https://github.com/$node_repo/blob/$node_release/docs/release-notes/RELEASE-NOTES-${node_release:1}.md)."
             create_release $node_repo ${node_release:?} $node_commitish "$subject" "$description"
             ;;
         finish)
