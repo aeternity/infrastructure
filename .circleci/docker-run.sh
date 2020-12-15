@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker run --rm --env-file ${CIRCLE_WORKING_DIRECTORY}/env.list ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_} "$@"
+docker run --rm --env-file ${CIRCLE_WORKING_DIRECTORY}/env.list ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} "$@"
