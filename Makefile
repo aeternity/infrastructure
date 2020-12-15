@@ -71,7 +71,7 @@ ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
 	-e rolling_update="$(ROLLING_UPDATE)"
 
 ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
-	-e cmd="$(call require_env,CMD, supported: start|stop|restart|ping)"
+	-e cmd="$(call require_env,CMD, supported: start|stop|restart|ping|status)"
 
 ansible/mnesia_snapshot.yml: DEPLOY_ENV=$(call require_env,BACKUP_ENV)
 ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_kind_backup:&tag_env_$(DEPLOY_ENV)

@@ -9,17 +9,20 @@ ${0} v2.4.0 start Maintenance release
 then to finish the release run:
 ${0} v2.4.0 finish"
 
-usage_exit() {
-    echo -e "$USAGE" >&2; exit 1
-}
-
 protocol_repo=${PROTOCOL_REPO:-aeternity/protocol}
 node_repo=${NODE_REPO:-aeternity/aeternity}
 protocol_commitish=master
 node_commitish=master
+github_token=${AE_GITHUB_TOKEN:-${AE_VAULT_GITHUB_TOKEN:?}}
+
+usage_exit() {
+    echo -e "$USAGE" >&2; exit 1
+}
 
 #generate_post_data release commitish description
 generate_post_data() {
+BODY=${4:{$3:?}}
+
 cat <<EOF
 {
   "tag_name": "$1",
@@ -34,7 +37,7 @@ EOF
 
 curl_headers=(
     '-H' "Accept: application/vnd.github.v3+json"
-    '-H' "Authorization: token ${GITHUB_TOKEN:?}"
+    '-H' "Authorization: token ${github_token}"
     '-H' "Content-Type: application/json"
     '-H' "cache-control: no-cache"
 )
@@ -92,7 +95,7 @@ else
 fi
 
 
-#check for action and description then create release
+#check for action and subject then create release
 if [[ -n "$1" ]]; then
     case "$1" in
         start)
@@ -109,18 +112,19 @@ if [[ -n "$1" ]]; then
                         shift
                         ;;
                     *)
-                        description+=(${arg})
+                        subject+=(${arg})
                         ;;
                 esac
             done
-            if [[ -z "$description" ]]; then
+            if [[ -z "$subject" ]]; then
                 usage_exit
             fi
-            description=${description[@]}
-            echo "Creating pre-release ${protocol_release:?} $description in $protocol_repo from commitish $protocol_commitish"
-            create_release $protocol_repo ${protocol_release:?} $protocol_commitish "$description"
-            echo "Creating pre-release ${node_release:?} $description in $node_repo from commitish $node_commitish"
-            create_release $node_repo ${node_release:?} $node_commitish "$description"
+            subject=${subject[@]}
+            echo "Creating pre-release ${protocol_release:?} $subject in $protocol_repo from commitish $protocol_commitish"
+            create_release $protocol_repo ${protocol_release:?} $protocol_commitish "$subject"
+            echo "Creating pre-release ${node_release:?} $subject in $node_repo from commitish $node_commitish"
+            description="Please see the [release notes](https://github.com/$node_repo/blob/v$node_release/docs/release-notes/RELEASE-NOTES-$node_release.md)."
+            create_release $node_repo ${node_release:?} $node_commitish "$subject" "$description"
             ;;
         finish)
             prerelease=false
