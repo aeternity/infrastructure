@@ -38,7 +38,7 @@ references:
     run:
       name: Pull current branch Docker image
       command: |
-        docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_}
+        docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
 
 commands:
   setup_secrets:
@@ -90,7 +90,7 @@ commands:
           # Used in .circleci/docker-run.sh
           name: Build docker branch image
           command: |
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_} .
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
       - run:
           name: Configuration lint
           # Secrets are auto-imported by the docker entry-point
@@ -134,7 +134,7 @@ commands:
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
-            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_}
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
 
 
 jobs:
@@ -170,7 +170,7 @@ jobs:
       - run:
           name: Tag and push Docker "latest" image to DockerHub
           command: |
-            docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH/\//_} ${DOCKERHUB_REPO:?}:latest
+            docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} ${DOCKERHUB_REPO:?}:latest
             docker push ${DOCKERHUB_REPO:?}:latest
       - fail_notification
 
