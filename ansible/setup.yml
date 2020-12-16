@@ -84,8 +84,7 @@
 
     - name: Upgrade pip
       pip:
-        name: pip
-        state: latest
+        name: pip==20.3.3
 
     - name: Install pip tools
       pip:
