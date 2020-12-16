@@ -82,6 +82,10 @@
       tags:
         - dev-tools
 
+    - name: Upgrade pip
+      pip:
+        name: pip==20.3.3
+
     - name: Install pip tools
       pip:
         executable: pip3
