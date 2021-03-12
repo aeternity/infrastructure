@@ -8,7 +8,7 @@ cd $ROOT_DIR
 pwd
 
 export DEPLOY_DB_VERSION=1
-export PACKAGE=https://releases.aeternity.io/aeternity-${DEPLOY_VERSION=latest}-ubuntu-x86_64.tar.gz
+export PACKAGE=https://releases.aeternity.io/aeternity-${DEPLOY_VERSION:-}-ubuntu-x86_64.tar.gz
 
 read -p "Deploy blue UAT nodes? (y/N):" blueuatchoice
 if [[ $blueuatchoice == "y" ]]; then
