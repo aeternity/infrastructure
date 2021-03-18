@@ -49,7 +49,7 @@
 
     - name: Deleting old database
       file:
-        path: "{{ project_root }}/{{ node_vars.chain.db_path }}/"
+        path: "{{ node_vars.chain.db_path }}"
         state: absent
       when: config_file.stat.exists
       tags: [config]
