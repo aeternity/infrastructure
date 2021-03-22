@@ -1,0 +1,65 @@
+---
+- name: Forcefully restore a node from a snapshot
+  hosts: all
+  remote_user: aeternity
+
+  vars:
+    project_root: "{{ ansible_env.HOME }}/node"
+    aeternity_bin: "{{ project_root }}/bin/aeternity"
+
+  tasks:
+    - name: Aeternity binary exists
+      stat:
+        path: "{{ aeternity_bin }}"
+      register: ae_node
+      failed_when: ae_node.stat.exists != True
+      changed_when: false
+      tags: [daemon]
+
+    - name: Ping aeternity daemon
+      command: "{{ aeternity_bin }} ping"
+      register: ping
+      failed_when: no
+      changed_when: false
+      tags: [daemon]
+
+    - name: Stop aeternity daemon
+      command: "{{ aeternity_bin }} stop"
+      when:
+        - ae_node.stat.exists
+        - ping.stdout == "pong"
+      tags: [daemon]
+
+    - name: Stat aeternity.yaml
+      stat:
+        path: "{{ project_root }}/aeternity.yaml"
+      register: config_file
+
+    - name: Read aeternity.yaml contents
+      command: "cat {{ project_root }}/aeternity.yaml"
+      register: cat_output
+      when: config_file.stat.exists
+      tags: [config]
+
+    - name: Parse YAML configuration
+      set_fact:
+        node_vars: "{{ cat_output.stdout | from_yaml }}"
+      when: config_file.stat.exists
+      tags: [config]
+
+    - name: Deleting old database
+      file:
+        path: "{{ node_vars.chain.db_path }}"
+        state: absent
+      when: config_file.stat.exists
+      tags: [config]
+
+    - name: Deleting snpashot marker
+      file:
+        path: "/data/snapshot_restore"
+        state: absent
+
+    - name: Reboot the machine
+      remote_user: master
+      become: yes
+      reboot:
