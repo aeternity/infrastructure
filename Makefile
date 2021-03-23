@@ -77,7 +77,8 @@ ansible/mnesia_snapshot.yml: DEPLOY_ENV=$(call require_env,BACKUP_ENV)
 ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_kind_backup:&tag_env_$(DEPLOY_ENV)
 ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
 ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=\
-	-e snapshot_suffix="$(BACKUP_SUFFIX)"
+	-e snapshot_suffix="$(BACKUP_SUFFIX)" \
+	-e downtime="$(DEPLOY_DOWNTIME)"
 
 ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python
 ansible/ebs-grow-volume.yml: ANSIBLE_EXTRA_VARS=\
