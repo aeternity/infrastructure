@@ -80,10 +80,9 @@
     - meta: flush_handlers
 
     - name: Restore Mnesia database to {{ restore_dir }}/
-      unarchive:
-        remote_src: yes
-        src: "{{ snapshot_path }}"
-        dest: "{{ restore_dir }}/"
+      command:
+        cmd: tar -I zstd -x -f {{ snapshot_path }} -C {{ restore_dir }}/
+        creates:  "{{ node_config.chain.db_path }}"
       notify: "start aeternity daemon"
       when: should_restore
 

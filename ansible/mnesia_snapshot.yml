@@ -7,7 +7,7 @@
 
   vars:
     snapshot_suffix: snapshot
-    snapshot_filename: "mnesia_{{ env }}_v-{{ db_version }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ snapshot_suffix }}.tgz"
+    snapshot_filename: "mnesia_{{ env }}_v-{{ db_version }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ snapshot_suffix }}.tar.zst"
     snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}"
     snapshot_checksum_path: "{{ snapshot_path }}.md5"
     aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
@@ -64,17 +64,15 @@
       - name: Start archive
         block:
           - name: Archive Mnesia Directory ({{ project_root }}/{{ node_config.chain.db_path }})
-            archive:
-              format: gz
-              path: "{{ project_root }}/{{ node_config.chain.db_path }}"
-              dest: "{{ snapshot_path }}"
+            command:
+              cmd: tar -c -I zstd -f {{ snapshot_path }} {{ project_root }}/{{ node_config.chain.db_path }}
+              creates:  "{{ snapshot_path }}"
             when: additional_storage is not defined or not additional_storage
 
           - name: Archive Mnesia Directory ({{ node_config.chain.db_path }})
-            archive:
-              format: gz
-              path: "{{ node_config.chain.db_path }}"
-              dest: "{{ snapshot_path }}"
+            command:
+              cmd: tar -c -I zstd -f {{ snapshot_path }} {{ node_config.chain.db_path }}
+              creates:  "{{ snapshot_path }}"
             when:
               - additional_storage is defined
               - additional_storage
