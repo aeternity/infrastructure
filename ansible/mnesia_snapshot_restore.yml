@@ -85,6 +85,8 @@
         creates:  "{{ node_config.chain.db_path }}"
       notify: "start aeternity daemon"
       when: should_restore
+      tags:
+        - skip_ansible_lint
 
     - name: Create restore marker
       file:
