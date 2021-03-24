@@ -30,6 +30,9 @@ node_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "node_config") | .Val
 ### Vault - Authenticate the instance to CSM
 ###
 
+# Vault requires the instance to be in running state in order to authenticate it
+aws ec2 wait instance-running --instance-ids $INSTANCE_ID --region=$AWS_REGION
+
 PKCS7=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7 | tr -d '\n')
 
 export VAULT_ADDR=$vault_addr
