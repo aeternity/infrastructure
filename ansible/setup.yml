@@ -79,6 +79,7 @@
         - unzip
         - bc
         - curl
+        - zstd
       tags:
         - dev-tools
 
