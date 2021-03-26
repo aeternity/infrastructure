@@ -6,8 +6,14 @@
   remote_user: aeternity
 
   vars:
-    snapshot_suffix: snapshot
-    snapshot_filename: "mnesia_{{ env }}_v-{{ db_version }}_{{ ansible_ssh_host|default(inventory_hostname) }}_{{ snapshot_suffix }}.tar.zst"
+    project_root: "{{ ansible_env.HOME }}/node"
+    aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
+    snapshots_bucket: aeternity-database-backups
+    snapshots_dir: "{{ additional_storage_mountpoint|default('/tmp') }}/snapshots"
+    snapshot_suffix: "{{ ansible_date_time.iso8601_basic_short }}"
+    snapshot_kind: full
+    snapshot_filename: "{{ env }}_v{{ db_version }}_{{ snapshot_kind }}_{{ snapshot_suffix }}.tar.zst"
+    snapshot_filename_latest: "{{ env }}_v{{ db_version }}_{{ snapshot_kind }}_latest.tar.zst"
     snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}"
     snapshot_checksum_path: "{{ snapshot_path }}.md5"
     aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
@@ -19,10 +25,6 @@
     downtime: "0"
 
   tasks:
-    - name: Include configuration variables
-      include_vars: vars/snapshot.yml
-      tags: [always]
-
     - block:
       - name: Get node status
         uri:
@@ -142,7 +144,7 @@
       - name: Upload backup to S3 bucket latest
         aws_s3:
           bucket: "{{ snapshots_bucket }}"
-          object: "{{ snapshots_filename_latest }}"
+          object: "{{ snapshot_filename_latest }}"
           src: "{{ snapshot_path }}"
           mode: put
           permission: "public-read"
@@ -157,7 +159,7 @@
       - name: Upload the checksum file to S3 latest
         aws_s3:
           bucket: "{{ snapshots_bucket }}"
-          object: "{{ snapshots_filename_latest }}.md5"
+          object: "{{ snapshot_filename_latest }}.md5"
           src: "{{ snapshot_checksum_path }}"
           mode: put
           permission: "public-read"
