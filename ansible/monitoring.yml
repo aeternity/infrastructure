@@ -235,8 +235,6 @@
             service: aeternity
             source: lager
             sourcecategory: sync
-    #workaround: the following var is not used but should be defined in order to environment variables file be loaded successfully
-    db_version: unused
 
   pre_tasks:
     - name: "Add dd-agent to {{ project_user }} group"
