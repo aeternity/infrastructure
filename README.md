@@ -319,21 +319,21 @@ make vault-configs-dump \
     VAULT_CONFIG_FIELD=special_config
 ```
 
-### Mnesia backups
+### Mnesia snapshots
 
-To backup a Mnesia database (snapshot) run:
+To snapshot a Mnesia database run:
 ```bash
-make mnesia_backup BACKUP_ENV=integration
+make mnesia_snapshot DEPLOY_ENV=integration
 ```
 
-To backup a specific node instance with ip 1.2.3.4:
+To snapshot a specific node instance with IP 1.2.3.4:
+
 ```bash
-make mnesia_backup BACKUP_ENV=integration HOST=1.2.3.4
+make mnesia_snapshot DEPLOY_ENV=integration HOST=1.2.3.4 SNAPSHOT_SUFFIX=1234
 ```
 
 Additional parameters:
-- BACKUP_SUFFIX - backup filename suffix, by default the destination file is overwritten (per host), suffix can be used to set unique filename
-- BACKUP_DIR - destination directory of backup files
+- SNAPSHOT_SUFFIX - snapshot filename suffix, by default is date and time of the run, suffix can be used to set unique filename
 
 ## Data share
 

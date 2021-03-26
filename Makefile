@@ -26,9 +26,8 @@ require_env=$(if $($(1)),$($(1)),$(error $(1) should be provided$(2)))
 PYTHON ?= /usr/bin/python3
 DEPLOY_DOWNTIME ?= 0
 ROLLING_UPDATE ?= 100%
-BACKUP_SUFFIX ?= backup
-BACKUP_ENV ?=
-DEPLOY_ENV ?= $(BACKUP_ENV)
+SNAPSHOT_SUFFIX ?=
+DEPLOY_ENV ?=
 DEPLOY_ROLE ?= aenode
 DEPLOY_DB_VERSION ?= 1
 CONFIG_ENV ?= $(DEPLOY_ENV)
@@ -52,7 +51,7 @@ ansible/%.yml: cert $(DEPLOY_CONFIG)
 	cd ansible && $(ENV) ansible-playbook \
 		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
 		-e ansible_python_interpreter=$(PYTHON) \
-		-e env="$(if $(BACKUP_ENV),$(BACKUP_ENV),$(DEPLOY_ENV))" \
+		-e env="$(DEPLOY_ENV)" \
 		$(if $(DEPLOY_CONFIG),-e "@$(DEPLOY_CONFIG)") \
 		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
@@ -73,11 +72,9 @@ ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
 ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
 	-e cmd="$(call require_env,CMD, supported: start|stop|restart|ping|status)"
 
-ansible/mnesia_snapshot.yml: DEPLOY_ENV=$(call require_env,BACKUP_ENV)
-ansible/mnesia_snapshot.yml: LIMIT=tag_role_aenode:&tag_kind_backup:&tag_env_$(DEPLOY_ENV)
-ansible/mnesia_snapshot.yml: PYTHON=/var/venv/bin/python
 ansible/mnesia_snapshot.yml: ANSIBLE_EXTRA_VARS=\
-	-e snapshot_suffix="$(BACKUP_SUFFIX)" \
+	$(if $(SNAPSHOT_SUFFIX),-e snapshot_suffix="$(SNAPSHOT_SUFFIX)") \
+	$(if $(DEPLOY_KIND),-e snapshot_kind="$(DEPLOY_KIND)") \
 	-e downtime="$(DEPLOY_DOWNTIME)"
 
 ansible/ebs-grow-volume.yml: PYTHON=/var/venv/bin/python

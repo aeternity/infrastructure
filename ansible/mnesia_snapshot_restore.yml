@@ -6,15 +6,18 @@
   remote_user: aeternity
 
   vars:
-    snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ restore_snapshot_filename|mandatory }}"
+    project_root: "{{ ansible_env.HOME }}/node"
+    aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
+    snapshots_bucket: aeternity-database-backups
+    snapshots_dir: "{{ additional_storage_mountpoint|default('/tmp') }}/snapshots"
+    snapshot_path: "{{ snapshots_dir }}/{{ restore_snapshot_filename|mandatory }}"
+    snapshot_checksum_algo: md5
+    snapshot_checksum_path: "{{ snapshot_path }}.{{ snapshot_checksum_algo }}"
     restore_dir: "{{ additional_storage_mountpoint|default(project_root) }}"
     should_restore: true
     force_restore: false
 
   tasks:
-    - name: Include configuration variables
-      include_vars: vars/snapshot.yml
-
     - name: Check if snapshot was restored in {{ restore_dir }}/
       stat:
         path: "{{ restore_dir }}/snapshot_restore"
@@ -49,19 +52,24 @@
     - name: Stat {{ snapshot_path }}
       stat:
         path: "{{ snapshot_path }}"
-        checksum_algorithm: md5
+        checksum_algorithm: "{{ snapshot_checksum_algo }}"
       register: snapshot_file
       when: should_restore
 
     - name: Download Mnesia snapshot checksum
       aws_s3:
         bucket: "{{ snapshots_bucket }}"
-        object: "{{ restore_snapshot_filename }}.md5"
-        dest: "{{ snapshot_path }}.md5"
+        object: "{{ restore_snapshot_filename }}.{{ snapshot_checksum_algo }}"
+        dest: "{{ snapshot_checksum_path }}"
         mode: get
       register: checksum_file
       when: should_restore
       ignore_errors: yes
+
+    - name: Read checksum file
+      command: "cat {{ snapshot_checksum_path }}"
+      register: checksum
+      when: should_restore
 
     - name: Check if snapshot is corrupted
       fail:
@@ -69,12 +77,18 @@
       when:
         - should_restore
         - checksum_file.failed == false
-        - snapshot_file.stat.checksum != lookup('file', snapshot_path ~ '.md5')
+        - snapshot_file.stat.checksum != checksum.stdout
 
     - name: Stop node
       command: "/bin/true"
       changed_when: true
       notify: "stop aeternity daemon"
+      when: should_restore
+
+    - name: Delete old database
+      file:
+        path: "{{ node_config.chain.db_path }}"
+        state: absent
       when: should_restore
 
     - meta: flush_handlers
