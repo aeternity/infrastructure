@@ -80,7 +80,6 @@ ansible-playbook \
     setup.yml \
     monitoring.yml
 
-# Keep db_version in sync with the value in file deployment/DB_VERSION from aeternity/aeternity repo!
 ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \

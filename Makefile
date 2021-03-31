@@ -53,7 +53,6 @@ ansible/%.yml: cert $(DEPLOY_CONFIG)
 		-e ansible_python_interpreter=$(PYTHON) \
 		-e env="$(DEPLOY_ENV)" \
 		$(if $(DEPLOY_CONFIG),-e "@$(DEPLOY_CONFIG)") \
-		-e db_version=$(DEPLOY_DB_VERSION) \
 		$(ANSIBLE_EXTRA_VARS) \
 		$(ANSIBLE_EXTRA_PARAMS) \
 		$*.yml
@@ -188,8 +187,8 @@ vault-config-% : $(CONFIG_OUTPUT_DIR)/%.yml ;
 
 vault-config-update-%: vault-config-%
 	sed -i "s|^package:.*|package: $(call require_env,PACKAGE)|g" $(CONFIG_OUTPUT_DIR)/$*.yml
+	sed -i "s|^db_version:.*|db_version: $(call require_env,DEPLOY_DB_VERSION)|g" $(CONFIG_OUTPUT_DIR)/$*.yml
 	cat $(CONFIG_OUTPUT_DIR)/$*.yml | $(ENV) vault write $(VAULT_CONFIG_ROOT)/$* $(VAULT_CONFIG_FIELD)=-
-
 
 .PRECIOUS: $(CONFIG_OUTPUT_DIR)/%.yml
 $(CONFIG_OUTPUT_DIR)/%.yml: YML=$(CONFIG_OUTPUT_DIR)/$*.yml
