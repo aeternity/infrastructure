@@ -67,13 +67,13 @@
         block:
           - name: Archive Mnesia Directory ({{ project_root }}/{{ node_config.chain.db_path }})
             command:
-              cmd: tar -c -I zstd -f {{ snapshot_path }} {{ project_root }}/{{ node_config.chain.db_path }}
+              cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ project_root }}/{{ node_config.chain.db_path }} .
               creates:  "{{ snapshot_path }}"
             when: additional_storage is not defined or not additional_storage
 
           - name: Archive Mnesia Directory ({{ node_config.chain.db_path }})
             command:
-              cmd: tar -c -I zstd -f {{ snapshot_path }} {{ node_config.chain.db_path }}
+              cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ node_config.chain.db_path }} .
               creates:  "{{ snapshot_path }}"
             when:
               - additional_storage is defined
