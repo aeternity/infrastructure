@@ -93,10 +93,16 @@
 
     - meta: flush_handlers
 
-    - name: Restore Mnesia database to {{ restore_dir }}/
+    - name: Make sure database dir exists
+      file:
+        path: "{{ node_config.chain.db_path }}"
+        state: directory
+      when: should_restore
+
+    - name: Restore Mnesia database to {{ node_config.chain.db_path }}/
       command:
-        cmd: tar -I zstd -x -f {{ snapshot_path }} -C {{ restore_dir }}/
-        creates:  "{{ node_config.chain.db_path }}"
+        cmd: tar -I zstd -x -f {{ snapshot_path }} -C {{ node_config.chain.db_path }}/
+        creates:  "{{ node_config.chain.db_path }}/mnesia"
       notify: "start aeternity daemon"
       when: should_restore
       tags:
