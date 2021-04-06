@@ -1,0 +1,8 @@
+ansible==2.10.7
+ansible-lint==3.5.1
+awscli==1.19.45
+boto==2.49.0
+boto3==1.17.45
+datadog==0.28.0
+envdir==1.0.1
+hvac==0.6.4

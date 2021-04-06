@@ -485,3 +485,13 @@ CircleCI provides a [CLI tool](https://circleci.com/docs/2.0/local-cli/) that ca
 However as the local jobs runner has it's limitation, to fully test a workflow it's acceptable to temporary change (as little as possible) the configuration to trigger the test. However, such changes are not accepted on `master` branch.
 
 To debug failing jobs on CircleCI, it supports [SSH debug sessions](https://circleci.com/docs/2.0/ssh-access-jobs/), one can ssh to the build container/VM and inspect the environment.
+
+## Python requirements
+
+Main requirements are kept in the requirements.txt file while freezed full list is kept in requirements-lock.txt
+It can be updated by changing requirements.txt and generating the lock file.
+
+```bash
+pip3 install -r requirements.txt
+pip3 freeze > requirements-lock.txt
+```
