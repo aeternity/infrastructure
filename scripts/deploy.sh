@@ -58,14 +58,18 @@ fi
 # Backup nodes
 read -p "Deploy UAT backup nodes? (y/N):" backupuatchoice
 if [[ $backupuatchoice == "y" ]]; then
-    make vault-config-update-uat_backup
-    DEPLOY_ENV=uat DEPLOY_KIND=backup CONFIG_ENV=uat_backup make deploy
+    make vault-config-update-uat_backup_light
+    make vault-config-update-uat_backup_full
+    DEPLOY_ENV=uat_backup DEPLOY_KIND=light CONFIG_ENV=uat_backup_light make deploy
+    DEPLOY_ENV=uat_backup DEPLOY_KIND=full CONFIG_ENV=uat_backup_full make deploy
 fi
 
 read -p "Deploy MAIN backup nodes? (y/N):" backupmainchoice
 if [[ $backupmainchoice == "y" ]]; then
-    make vault-config-update-main_backup
-    DEPLOY_ENV=main DEPLOY_KIND=backup CONFIG_ENV=main_backup make deploy
+    make vault-config-update-main_backup_light
+    make vault-config-update-main_backup_full
+    DEPLOY_ENV=main_backup DEPLOY_KIND=light CONFIG_ENV=main_backup_light make deploy
+    DEPLOY_ENV=main_backup DEPLOY_KIND=full CONFIG_ENV=main_backup_full make deploy
 fi
 
 # Testnet gateway nodes
