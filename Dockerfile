@@ -33,11 +33,11 @@ RUN curl -L https://github.com/aelsabbahy/goss/releases/download/${GOSS_VER}/gos
     -o /usr/bin/goss \
     && chmod +rx /usr/bin/goss
 
-ADD requirements.txt /infrastructure/
+ADD requirements-lock.txt /infrastructure/
 RUN apk add --no-cache --virtual build-deps \
         gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers \
     && pip3 install --upgrade pip==18.1 \
-    && pip3 install --no-cache-dir -r /infrastructure/requirements.txt \
+    && pip3 install --no-cache-dir -r /infrastructure/requirements-lock.txt \
     && apk del build-deps
 
 ADD ansible/requirements.yml /infrastructure/ansible/
