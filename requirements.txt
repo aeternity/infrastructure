@@ -1,5 +1,5 @@
 ansible==2.10.7
-ansible-lint==3.5.1
+ansible-lint==5.0.11
 awscli==1.19.45
 boto==2.49.0
 boto3==1.17.45

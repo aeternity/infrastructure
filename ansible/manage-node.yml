@@ -70,7 +70,8 @@
           uri:
             url: "http://localhost:3013/v2/status"
           register: status
-        - debug:
+        - name: Print node status
+          debug:
             var: status.json
       when:
         - node_running

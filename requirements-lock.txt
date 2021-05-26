@@ -1,6 +1,6 @@
 ansible==2.10.7
 ansible-base==2.10.7
-ansible-lint==3.5.1
+ansible-lint==5.0.11
 asn1crypto==0.24.0
 awscli==1.22.30
 bcrypt==3.1.6
@@ -11,10 +11,13 @@ certifi==2019.3.9
 cffi==1.10.0
 chardet==4.0.0
 colorama==0.4.3
+commonmark==0.9.1
 cryptography==2.1.4
+dataclasses==0.8
 datadog==0.28.0
 decorator==5.0.5
 docutils==0.15.2
+enrich==1.2.6
 envdir==1.0.1
 hvac==0.6.4
 idna==2.7

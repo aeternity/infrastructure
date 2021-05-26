@@ -1,0 +1,5 @@
+skip_list:  # or 'skip_list' to silence them completely
+  - empty-string-compare  # Don't compare to empty string
+  - experimental  # all rules tagged as experimental
+  - literal-compare  # Don't compare to literal True/False
+  - no-jinja-nesting  # Nested jinja pattern

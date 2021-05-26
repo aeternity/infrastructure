@@ -2,7 +2,7 @@
 # Playbook used create mnesia snapshot and upload it to S3
 
 - name: Backup, archive and download Mnesia database
-  hosts: "{{ ansible_play_hosts | last }}"
+  hosts: all
   remote_user: aeternity
 
   vars:
@@ -54,7 +54,8 @@
         notify: "stop aeternity daemon"
         tags: [archive]
 
-      - meta: flush_handlers
+      - name: Flush handlers
+        meta: flush_handlers
         tags: [archive]
 
       - name: Ensure Mnesia snapshots dir exists ({{ snapshots_dir }})
@@ -92,7 +93,8 @@
         notify: "start aeternity daemon"
         tags: [archive]
 
-      - meta: flush_handlers
+      - name: Flush handlers
+        meta: flush_handlers
         tags: [archive]
 
       - name: Stat {{ snapshot_path }}

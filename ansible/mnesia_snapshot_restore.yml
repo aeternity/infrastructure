@@ -91,7 +91,9 @@
         state: absent
       when: should_restore
 
-    - meta: flush_handlers
+    - name: Flush handlers
+      meta: flush_handlers
+
 
     - name: Make sure database dir exists
       file:

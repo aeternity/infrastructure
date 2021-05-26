@@ -92,6 +92,7 @@
         copy:
           src: "{{ package }}"
           dest: "{{ packages_path }}/{{ package|basename }}"
+          mode: 0644
         when: "'http' not in package"
         register: local_package
         notify: "stop aeternity daemon"
@@ -104,7 +105,8 @@
             # allow group read for integration purposes  (e.g. logs)
             mode: 0750
 
-      - meta: flush_handlers
+      - name: Flush handlers
+        meta: flush_handlers
 
       - name: Extract aeternity package
         unarchive:
@@ -120,6 +122,7 @@
         copy:
           content: "{{ env }}\n"
           dest: "{{ project_root }}/ENV"
+          mode: 0600
         notify: "restart aeternity daemon"
         tags: [package]
 
@@ -136,6 +139,7 @@
         file:
           path: "{{ project_root }}/{{ node_config.chain.db_path }}"
           state: directory
+          mode: 0700
         when: additional_storage is not defined or not additional_storage
         tags: [config]
 
@@ -143,6 +147,7 @@
         file:
           path: "{{ node_config.chain.db_path }}"
           state: directory
+          mode: 0700
         when: additional_storage is defined and additional_storage
         tags: [config]
 
@@ -186,7 +191,8 @@
         changed_when: false
         tags: [daemon]
 
-      - meta: flush_handlers
+      - name: Flush handlers
+        meta: flush_handlers
 
       - name: Run health checks
         include_tasks: tasks/health_check.yml
