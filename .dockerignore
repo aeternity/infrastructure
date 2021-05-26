@@ -8,6 +8,7 @@
 !requirements-lock.txt
 !test/goss/
 !scripts/
+!.ansible-lint
 # Copy from .gitignore
 *.retry
 ansible/inventory/*.rc.sh
