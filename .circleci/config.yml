@@ -96,6 +96,7 @@ commands:
           name: Setup ansible environment
           command: |
             apk add sshpass
+            pip3 uninstall ansible
             pip3 install -r requirements-lock.txt
             ansible-galaxy install -r ansible/requirements.yml
       - run:
