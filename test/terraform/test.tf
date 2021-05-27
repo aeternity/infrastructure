@@ -51,6 +51,6 @@ module "aws_deploy-test-ubuntu-bionic" {
   additional_storage_size = 5
 
   providers = {
-    aws = "aws.ap-southeast-2"
+    aws = aws.ap-southeast-2
   }
 }
