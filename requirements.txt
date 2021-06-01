@@ -30,4 +30,4 @@ requests==2.21.0
 rsa==3.4.2
 s3transfer==0.2.0
 six==1.11.0
-urllib3==1.24.3
+urllib3==1.26.5
