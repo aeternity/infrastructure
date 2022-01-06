@@ -71,7 +71,7 @@
         update_cache: yes
         pkg:
         - build-essential
-        - python3.9
+        - python3
         - python3-yaml #aeternity.fact
         - python3-pip
         - libssl-dev
@@ -85,7 +85,7 @@
 
     - name: Upgrade pip
       pip:
-        name: pip
+        name: pip==20.3.3
 
     - name: Install pip tools
       pip:
