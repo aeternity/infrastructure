@@ -43,9 +43,9 @@ ADD docker/ssh_config /etc/ssh/ssh_config
 ENV TFENV_VERSION=2.2.2
 RUN curl -L -o /tmp/tfenv-${TFENV_VERSION}.tar.gz \
     https://github.com/tfutils/tfenv/archive/refs/tags/v${TFENV_VERSION}.tar.gz \
-    && tar -xz -C /lib -f /tmp/tfenv-${TFENV_VERSION}.tar.gz
+    && tar -xz -C /usr/local -f /tmp/tfenv-${TFENV_VERSION}.tar.gz
 
-ENV PATH="/lib/tfenv-${TFENV_VERSION}/bin:${PATH}"
+ENV PATH="/usr/local/tfenv-${TFENV_VERSION}/bin:${PATH}"
 
 #Install last release for "old" versions of TF for purpose of migrations
 #this will be removed after migration process finished
