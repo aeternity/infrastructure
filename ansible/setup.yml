@@ -85,7 +85,7 @@
 
     - name: Upgrade pip
       pip:
-        name: pip==20.3.3
+        name: pip==20.3.4
 
     - name: Install pip tools
       pip:
