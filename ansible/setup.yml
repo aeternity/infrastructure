@@ -91,12 +91,12 @@
       pip:
         executable: pip3
         name:
-        - awscli
-        - ansible
-        - boto
-        - boto3
+        - awscli==1.22.30
+        - ansible==5.1.0
+        - boto==2.49.0
+        - boto3==1.20.30
         - datadog==0.28.0
-        - hvac
+        - hvac==0.11.2
       tags:
         - dev-tools
 
