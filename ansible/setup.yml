@@ -107,9 +107,16 @@
       tags:
         - dev-tools
 
+    - name: Download foo.conf
+      get_url:
+        url: https://bootstrap.pypa.io/get-pip.py.
+        dest: /tmp/get-pip.py
+
+    - name: Run ldconfig
+      command: python3.9 get-pip.py
+
     - name: Install pip tools
       pip:
-
         name:
         - awscli
         - ansible
