@@ -83,20 +83,20 @@
       tags:
         - dev-tools
 
-    - name: Upgrade pip
-      pip:
-        name: pip==20.3.4
+#     - name: Upgrade pip
+#       pip:
+#         name: pip==20.3.4
 
     - name: Install pip tools
       pip:
         executable: pip3
         name:
         - awscli
-        - ansible==5.1.0
-        - boto==2.49.0
-        - boto3==1.20.30
-        - datadog==0.28.0
-        - hvac==0.11.2
+        - ansible
+        - boto
+        - boto3
+        - datadog
+        - hvac
       tags:
         - dev-tools
 
