@@ -113,7 +113,7 @@
         dest: /tmp/get-pip.py
 
     - name: Run ldconfig
-      command: python3.9 get-pip.py
+      command: python3.9 /tmp/get-pip.py
 
     - name: Install pip tools
       pip:
