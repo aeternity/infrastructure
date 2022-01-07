@@ -91,11 +91,11 @@ commands:
           name: Build docker branch image
           command: |
             docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
-      - run:
-          name: Configuration lint
+#      - run:
+#          name: Configuration lint
           # Secrets are auto-imported by the docker entry-point
-          command: |
-            .circleci/docker-run.sh make lint
+#          command: |
+#            .circleci/docker-run.sh make lint
       - run:
           name: Setup ansible environment
           command: |
