@@ -65,15 +65,15 @@
         - developer-ssh-keys
       notify: restart ssh
 
+
     - name: Install dev tools
       apt:
         state: present
         update_cache: yes
         pkg:
         - build-essential
-        - python3
+        - software-properties-common
         - python3-yaml #aeternity.fact
-        - python3-pip
         - libssl-dev
         - jq
         - unzip
@@ -83,13 +83,33 @@
       tags:
         - dev-tools
 
-#     - name: Upgrade pip
-#       pip:
-#         name: pip==20.3.4
+    - name: Add nginx stable repository from PPA and install its signing key on Ubuntu target
+      ansible.builtin.apt_repository:
+        repo: ppa:deadsnakes/ppa
+        codename: bionic
+
+    - name: Install dev tools
+      apt:
+        state: present
+        update_cache: yes
+        pkg:
+        - build-essential
+        - python3.9
+        - python3.9-distutils
+        - software-properties-common
+        - python3-yaml #aeternity.fact
+        - libssl-dev
+        - jq
+        - unzip
+        - bc
+        - curl
+        - zstd
+      tags:
+        - dev-tools
 
     - name: Install pip tools
       pip:
-        executable: pip3
+
         name:
         - awscli
         - ansible
@@ -140,12 +160,12 @@
       tags:
         - ansible-facts
 
-    - name: Increase ulimit
-      pam_limits:
-        domain: "{{ project_user }}"
-        limit_type: soft
-        limit_item: nofile
-        value: 24576
+#    - name: Increase ulimit
+#      pam_limits:
+#        domain: "{{ project_user }}"
+#        limit_type: soft
+#        limit_item: nofile
+#        value: 24576
 
     - name: Include task to install Ubuntu {{ ansible_distribution_version }} dependencies
       include_tasks: tasks/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
