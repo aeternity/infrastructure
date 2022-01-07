@@ -84,7 +84,7 @@
         - dev-tools
 
     - name: Add nginx stable repository from
-      ansible.builtin.apt_repository:
+      apt_repository:
         repo: ppa:deadsnakes/ppa
         codename: bionic
 
