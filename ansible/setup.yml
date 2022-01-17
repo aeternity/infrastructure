@@ -65,25 +65,14 @@
         - developer-ssh-keys
       notify: restart ssh
 
-
-    - name: Install dev tools
+    - name: Install software-properties-common
       apt:
         state: present
         update_cache: yes
         pkg:
-        - build-essential
         - software-properties-common
-        - python3-yaml #aeternity.fact
-        - libssl-dev
-        - jq
-        - unzip
-        - bc
-        - curl
-        - zstd
-      tags:
-        - dev-tools
 
-    - name: Add nginx stable repository from
+    - name: Add repository with python 3.0
       apt_repository:
         repo: ppa:deadsnakes/ppa
         codename: bionic
@@ -94,9 +83,8 @@
         update_cache: yes
         pkg:
         - build-essential
-        - python3.9
-        - python3.9-distutils
-        - software-properties-common
+        - python3.8
+        - python3.8-distutils
         - python3-yaml #aeternity.fact
         - libssl-dev
         - jq
@@ -107,13 +95,15 @@
       tags:
         - dev-tools
 
-    - name: Download foo.conf
+    - name: Download get-pip
       get_url:
         url: https://bootstrap.pypa.io/get-pip.py
         dest: /tmp/get-pip.py
 
-    - name: Run ldconfig
-      command: python3.9 /tmp/get-pip.py
+    - name: Install pip
+      command: python3.8 /tmp/get-pip.py
+      changed_when: false
+>>>>>>> drop_1604
 
     - name: Install pip tools
       pip:

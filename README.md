@@ -383,11 +383,11 @@ Thus an Ubuntu based container should be run, a convenient image with sshd is `r
 Note the `net` and `name` parameters:
 
 ```bash
-docker pull rastasheep/ubuntu-sshd:16.04
-docker run -d --net aeternity --name aenode rastasheep/ubuntu-sshd:16.04
+docker pull rastasheep/ubuntu-sshd:18.04
+docker run -d --net aeternity --name aenode rastasheep/ubuntu-sshd:18.04
 ```
 
-The above command will run an Ubuntu 16.04 with sshd daemon running
+The above command will run an Ubuntu 18.04 with sshd daemon running
 and reachable by other hosts in the same docker network at address `aenode.aeternity`.
 
 Once the test node is running, start an infrastructure container in the same docker network:
