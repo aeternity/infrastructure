@@ -14,8 +14,10 @@ variable "bootstrap_version" {
   default = "master"
 }
 
-variable "package" {
-  default = "https://builds.aeternity.io/aeternity-latest-ubuntu-x86_64.tar.gz"
+variable "aeternity" {
+  default = {
+    package = "https://builds.aeternity.io/aeternity-latest-ubuntu-x86_64.tar.gz"
+  }
 }
 
 provider "aws" {
