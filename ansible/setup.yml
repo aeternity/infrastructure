@@ -103,7 +103,6 @@
     - name: Install pip
       command: python3.8 /tmp/get-pip.py
       changed_when: false
->>>>>>> drop_1604
 
     - name: Install pip tools
       pip:
@@ -157,12 +156,12 @@
       tags:
         - ansible-facts
 
-#    - name: Increase ulimit
-#      pam_limits:
-#        domain: "{{ project_user }}"
-#        limit_type: soft
-#        limit_item: nofile
-#        value: 24576
+    - name: Increase ulimit
+      pam_limits:
+        domain: "{{ project_user }}"
+        limit_type: soft
+        limit_item: nofile
+        value: 24576
 
     - name: Include task to install Ubuntu {{ ansible_distribution_version }} dependencies
       include_tasks: tasks/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
