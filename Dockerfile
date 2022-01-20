@@ -45,7 +45,8 @@ RUN curl -L -o /tmp/tfenv-${TFENV_VERSION}.tar.gz \
     https://github.com/tfutils/tfenv/archive/refs/tags/v${TFENV_VERSION}.tar.gz \
     && tar -xz -C /usr/local -f /tmp/tfenv-${TFENV_VERSION}.tar.gz
 
-ENV PATH="/usr/local/tfenv-${TFENV_VERSION}/bin:${PATH}"
+RUN ln -s /usr/local/tfenv-${TFENV_VERSION}/bin/tfenv /usr/local/bin/
+RUN ln -s /usr/local/tfenv-${TFENV_VERSION}/bin/terraform /usr/local/bin/
 
 #Install last release for "old" versions of TF for purpose of migrations
 #this will be removed after migration process finished
