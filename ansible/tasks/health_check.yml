@@ -13,7 +13,7 @@
 - name: Local Health check
   uri:
     url: "http://127.0.0.1:{{ node_config.http.external.port }}/v2/status"
-    timeout: 10
+    timeout: 40
     status_code: 200
   tags: [health-check]
 
