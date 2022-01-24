@@ -18,6 +18,7 @@ else
 fi
 
 declare -a targets=(ubuntu-x86_64.tar.gz macos-x86_64.tar.gz)
+declare -a prefixes=(aeternity aeternity-bundle)
 repo_name=aeternity/aeternity
 
 check_release_asset() {
@@ -26,11 +27,13 @@ check_release_asset() {
 
 check_github_release_assets() {
     for target in "${targets[@]}"; do
-        GH_ASSET=https://github.com/$repo_name/releases/download/$release/aeternity-$version-$target
-        if [[ $(check_release_asset $GH_ASSET) != "" ]]; then
-            echo $GH_ASSET check failed >&2; failed=true
-        fi
-        # TODO: compare MD5 checksum with local build
+        for prefix in "${prefixes[@]}"; do
+            GH_ASSET=https://github.com/$repo_name/releases/download/$release/$prefix-v$version-$target
+            if [[ $(check_release_asset $GH_ASSET) != "" ]]; then
+                echo $GH_ASSET check failed >&2; failed=true
+            fi
+            # TODO: compare MD5 checksum with local build
+        done
     done
 }
 
@@ -78,18 +81,25 @@ get_s3_package_etag(){
 
 check_s3_artifacts() {
     for target in "${targets[@]}"; do
-        local version_package=https://releases.aeternity.io/aeternity-$version-$target
+        local version_package=https://releases.aeternity.io/aeternity-v$version-$target
+        local bundle_package=https://releases.aeternity.io/aeternity-bundle-v$version-$target
         local latest_package=https://releases.aeternity.io/aeternity-latest-$target
         # TODO: calculate ETAG from local package MD5 sum and verify
         # https://teppen.io/2018/10/23/aws_s3_verify_etags/
-        local latest_etag=$(get_s3_package_etag $latest_package)
         local version_etag=$(get_s3_package_etag $version_package)
+        local bundle_etag=$(get_s3_package_etag $bundle_package)
+        local latest_etag=$(get_s3_package_etag $latest_package)
+
         if [[ "$version_etag" == "" ]]; then
             echo $version_package not found >&2; failed=true
         else
             if [[ "$version_etag" != "$latest_etag" ]]; then
                 echo $latest_package and $version_package checksums do not match >&2; failed=true
             fi
+        fi
+
+        if [[ "$bundle_etag" == "" ]]; then
+            echo $bundle_package not found >&2; failed=true
         fi
     done
 }
