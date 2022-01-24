@@ -12,11 +12,6 @@ RUN curl -sSO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${P
     && unzip packer_${PACKER_VERSION}_linux_amd64.zip -d /bin \
     && rm -f packer_${PACKER_VERSION}_linux_amd64.zip
 
-ENV TERRAFORM_VERSION 0.12.30
-RUN curl -sSO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-    && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /bin \
-    && rm -f terraform_${TERRAFORM_VERSION}_linux_amd64.zip
-
 ENV VAULT_VERSION=0.11.2
 RUN curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
     && unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin \
@@ -44,6 +39,27 @@ ADD ansible/requirements.yml /infrastructure/ansible/
 RUN cd /infrastructure/ansible && ansible-galaxy install -r requirements.yml
 
 ADD docker/ssh_config /etc/ssh/ssh_config
+
+ENV TFENV_VERSION=2.2.2
+RUN curl -L -o /tmp/tfenv-${TFENV_VERSION}.tar.gz \
+    https://github.com/tfutils/tfenv/archive/refs/tags/v${TFENV_VERSION}.tar.gz \
+    && tar -xz -C /usr/local -f /tmp/tfenv-${TFENV_VERSION}.tar.gz
+
+RUN ln -s /usr/local/tfenv-${TFENV_VERSION}/bin/tfenv /usr/local/bin/
+RUN ln -s /usr/local/tfenv-${TFENV_VERSION}/bin/terraform /usr/local/bin/
+
+#Install last release for "old" versions of TF for purpose of migrations
+#this will be removed after migration process finished
+
+RUN tfenv install 0.12.21
+RUN tfenv install 0.13.7
+RUN tfenv install 0.14.11
+RUN tfenv install 0.15.5
+RUN tfenv install 1.1.4
+
+ENV TERRAFORM_DEFAULT_VERSION 0.12.30
+RUN tfenv install ${TERRAFORM_DEFAULT_VERSION}
+RUN tfenv use ${TERRAFORM_DEFAULT_VERSION}
 
 ADD . /infrastructure
 WORKDIR /infrastructure
