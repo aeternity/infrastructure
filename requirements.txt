@@ -6,3 +6,4 @@ boto3==1.17.45
 datadog==0.28.0
 envdir==1.0.1
 hvac==0.6.4
+wheel==0.37.1

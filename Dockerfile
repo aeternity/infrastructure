@@ -4,7 +4,7 @@ FROM alpine:3.8
 # Some of the playbooks run on multiple hosts: local + remote.
 # If it's set in the inventory it will not work when a specific inventory is used.
 # OpenSSL required for a packer workaround: https://github.com/hashicorp/packer/issues/2526
-RUN apk add --no-cache bash curl unzip make python3 py-cryptography openssh-client openssl sshpass jq bc git\
+RUN apk add --no-cache bash curl unzip make python3 py-cryptography openssh-client openssl sshpass jq bc git \
     && ln -s /usr/bin/python3 /usr/bin/python
 
 ENV PACKER_VERSION=1.3.2
@@ -31,7 +31,7 @@ RUN curl -L https://github.com/aelsabbahy/goss/releases/download/${GOSS_VER}/gos
 ADD requirements-lock.txt /infrastructure/
 RUN apk add --no-cache --virtual build-deps \
         gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers \
-    && pip3 install --upgrade pip==18.1 \
+    && pip3 install --upgrade pip==21.3.1 \
     && pip3 install --no-cache-dir -r /infrastructure/requirements-lock.txt \
     && apk del build-deps
 
