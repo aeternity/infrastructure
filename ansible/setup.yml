@@ -115,8 +115,6 @@
           - boto3==1.17.45
           - datadog==0.28.0
           - hvac==0.6.4
-          - urllib3=1.26.8
-          - requests=2.27.1
       tags:
         - dev-tools
 
