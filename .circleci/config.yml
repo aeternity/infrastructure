@@ -112,14 +112,14 @@ commands:
             .circleci/test-ansible-playbook.sh ansible/setup.yml \
               -e "@/tmp/config/test.yml" \
               -e env=test \
-              -е supports_ssh_restart=no
+              -e supports_ssh_restart=no
       - run:
           name: Test ansible/monitoring.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
               -e "@/tmp/config/test.yml" \
               -e datadog_api_key=test \
-              -e datadog_enabled=yes \
+              -e datadog_enabled=yes
       - run:
           name: Test ansible/deploy.yml
           command: |
