@@ -120,7 +120,6 @@ commands:
               -e "@/tmp/config/test.yml" \
               -e datadog_api_key=test \
               -e datadog_enabled=yes \
-              -e env=test
       - run:
           name: Test ansible/deploy.yml
           command: |

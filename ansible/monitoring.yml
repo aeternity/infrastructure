@@ -21,13 +21,6 @@
       ec2_metadata_facts:
       when: is_aws
 
-    - name: "Load a variable files for environment: {{ env }}"
-      include_vars: "{{ item }}"
-      with_first_found:
-        - files:
-            - "vars/aeternity/{{ env }}.yml"
-          skip: true
-
 - name: Configure health check services (goss)
   hosts: all
   remote_user: master
