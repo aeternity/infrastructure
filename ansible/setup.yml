@@ -184,6 +184,7 @@
         name: ssh
         state: restarted
       listen: restart ssh
+      when: supports_ssh_restart|default(true)|bool
 
   roles:
     - { role: jasonheecs.ubuntu-fail2ban }
