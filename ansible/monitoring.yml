@@ -169,7 +169,7 @@
       - "lsb:{{ ansible_lsb.description }}"
       - "public_ipv4:{{ public_ipv4|default('unknown') }}"
       - "network_id:{{ network_id }}"
-    datadog_agent6: true
+    datadog_agent_major_version: 6
     datadog_config:
       log_level: warning
       log_to_console: false
