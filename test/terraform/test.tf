@@ -45,7 +45,7 @@ module "aws_deploy-test-ubuntu-bionic" {
 
   spot_price    = "0.04"
   instance_type = "t3.large"
-  ami_name      = "aeternity-ubuntu-18.04"
+  ami_name      = "aeternity-ubuntu-${var.ubuntu-version}"
 
   additional_storage      = true
   additional_storage_size = 5
@@ -53,4 +53,9 @@ module "aws_deploy-test-ubuntu-bionic" {
   providers = {
     aws = "aws.ap-southeast-2"
   }
+}
+
+
+variable "ubuntu-version" {
+  default = "18.04"
 }
