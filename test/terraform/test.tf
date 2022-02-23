@@ -29,7 +29,7 @@ provider "aws" {
 }
 
 module "aws_deploy-test-ubuntu-bionic" {
-  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v2.3.1"
+  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v2.6.1"
   env                 = var.env_name
   envid               = var.envid
   bootstrap_version   = var.bootstrap_version
@@ -57,7 +57,7 @@ module "aws_deploy-test-ubuntu-bionic" {
 
 
 module "aws_deploy-test-ubuntu-focal" {
-  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v2.3.1"
+  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v2.6.1"
   env                 = var.env_name
   envid               = var.envid
   bootstrap_version   = var.bootstrap_version
