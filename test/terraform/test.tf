@@ -73,7 +73,7 @@ module "aws_deploy-test-ubuntu-focal" {
 
   spot_price    = "0.04"
   instance_type = "t3.large"
-  ami_name      = "ubuntu/images/*ubuntu-focal-20.04-amd64-server*"
+  ami_name      = "ubuntu-focal-20.04-amd64-server-20211129"
 
   additional_storage      = true
   additional_storage_size = 5
