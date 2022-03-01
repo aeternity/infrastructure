@@ -17,11 +17,13 @@ RUN curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAUL
     && unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin \
     && rm -f vault_${VAULT_VERSION}_linux_amd64.zip
 
-ENV DOCKER_CLIENT_VERSION=17.09.0-ce
+ENV DOCKER_CLIENT_VERSION=20.10.11
 RUN curl -L -o /tmp/docker-${DOCKER_CLIENT_VERSION}.tgz \
     https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLIENT_VERSION}.tgz \
     && tar -xz -C /tmp -f /tmp/docker-${DOCKER_CLIENT_VERSION}.tgz \
     && mv /tmp/docker/docker /bin
+
+COPY --from=docker/buildx-bin:0.7.1 /buildx /usr/libexec/docker/cli-plugins/docker-buildx
 
 ENV GOSS_VER=v0.3.6
 RUN curl -L https://github.com/aelsabbahy/goss/releases/download/${GOSS_VER}/goss-linux-amd64 \
