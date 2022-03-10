@@ -5,6 +5,10 @@ executors:
     docker:
       - image: aeternity/infrastructure:master
       - image: rastasheep/ubuntu-sshd:18.04
+  ubuntu-2004:
+    docker:
+      - image: aeternity/infrastructure:master
+      - image: acid/ubuntu-sshd:20.04
 
 references:
   container_config: &container_config
@@ -145,6 +149,17 @@ jobs:
       - checkout
       - build_check
 
+  build_check_ubuntu_2004:
+    executor: ubuntu-2004
+    working_directory: /src
+    environment:
+      DOCKERHUB_REPO: aeternity/infrastructure
+      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
+      ANSIBLE_HOST_KEY_CHECKING: False
+    steps:
+      - checkout
+      - build_check
+
   docker_push_latest:
     <<: *machine_config
     steps:
@@ -207,10 +222,15 @@ workflows:
           context: ae-infra-manage
           requires: []
 
+      - build_check_ubuntu_2004:
+          context: ae-infra-manage
+          requires: []
+
       - stable_integration_tests:
           context: ae-infra-manage
           requires:
             - build_check_ubuntu_1804
+            - build_check_ubuntu_2004
           filters:
             branches:
               ignore: /.*/
@@ -225,6 +245,7 @@ workflows:
           context: ae-infra-manage
           requires:
             - build_check_ubuntu_1804
+            - build_check_ubuntu_2004
             - branch_integration_tests
           filters:
             branches:
