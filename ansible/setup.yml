@@ -88,10 +88,10 @@
       pip:
         name:
         - pip==21.3.1
-        - awscli==1.22.30
-        - ansible==2.7.0
-        - boto==2.49.0
-        - boto3==1.20.30
+        - awscli
+        - ansible
+        - boto
+        - boto3
         - datadog==0.28.0
         - hvac==0.6.4
         - requests==2.22.0 # https://github.com/ansible/ansible/issues/62008
