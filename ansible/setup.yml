@@ -65,26 +65,12 @@
         - developer-ssh-keys
       notify: restart ssh
 
-    - name: Install software-properties-common
-      apt:
-        state: present
-        update_cache: yes
-        pkg:
-        - software-properties-common
-
-    - name: Add repository with python 3.0
-      apt_repository:
-        repo: ppa:deadsnakes/ppa
-        codename: bionic
-
     - name: Install dev tools
       apt:
         state: present
         update_cache: yes
         pkg:
         - build-essential
-        - python3.8
-        - python3.8-distutils
         - python3-yaml #aeternity.fact
         - libssl-dev
         - jq
@@ -94,15 +80,6 @@
         - zstd
       tags:
         - dev-tools
-
-    - name: Download get-pip
-      get_url:
-        url: https://bootstrap.pypa.io/get-pip.py
-        dest: /tmp/get-pip.py
-
-    - name: Install pip
-      command: python3.8 /tmp/get-pip.py
-      changed_when: false
 
     - name: Install pip tools
       pip:

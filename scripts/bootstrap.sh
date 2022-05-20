@@ -61,6 +61,18 @@ if [[ -n "${node_config}" && "${node_config}" != "none" ]]; then
 fi
 
 ###
+### Install Python 3.8 required by Anisble playbooks
+###
+
+if ! [ command -v python3.8 &> /dev/null ]; then
+    apt update
+    apt install -y software-properties-common
+    add-apt-repository -y --update ppa:deadsnakes/ppa
+    apt install -y python3.8 python3.8-distutils
+    python3.8 -m pip install --upgrade pip
+fi
+
+###
 ### Bootstrap the instance with Ansible playbooks
 ###
 
