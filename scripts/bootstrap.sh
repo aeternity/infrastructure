@@ -61,15 +61,15 @@ if [[ -n "${node_config}" && "${node_config}" != "none" ]]; then
 fi
 
 ###
-### Install Python 3.9 required by Anisble playbooks
+### Install Python 3 required by Anisble playbooks
 ###
 
-if ! [ command -v python3.9 &> /dev/null ]; then
+if ! [ command -v python3 &> /dev/null ]; then
     apt update
-    apt install -y software-properties-common
-    add-apt-repository -y --update ppa:deadsnakes/ppa
-    apt install -y python3.9 python3.9-distutils
-    python3.9 -m pip install --upgrade pip
+    # apt install -y software-properties-common
+    # add-apt-repository -y --update ppa:deadsnakes/ppa
+    apt install -y python3 python3-distutils python3-apt
+    python3 -m pip install --upgrade pip
 fi
 
 ###
@@ -86,7 +86,7 @@ ansible-galaxy install -r requirements.yml
 # It must be absolute because of the virtualenv, otherwise it will use the system Python 3
 ansible-playbook \
     -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3.9) \
+    -e ansible_python_interpreter=$(which python3) \
     -e vault_addr=${vault_addr} \
     -e "@/tmp/node_config.yml" \
     setup.yml \
@@ -94,7 +94,7 @@ ansible-playbook \
 
 ansible-playbook \
     -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3.9) \
+    -e ansible_python_interpreter=$(which python3) \
     --become-user aeternity -b \
     -e "@/tmp/node_config.yml" \
     deploy.yml \
