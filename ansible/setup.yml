@@ -113,7 +113,6 @@
         - boto3
         - datadog==0.28.0
         - hvac
-        - requests==2.22.0 # https://github.com/ansible/ansible/issues/62008
       tags:
         - dev-tools
 

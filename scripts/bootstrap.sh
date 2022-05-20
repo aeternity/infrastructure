@@ -74,7 +74,7 @@ ansible-galaxy install -r requirements.yml
 # It must be absolute because of the virtualenv, otherwise it will use the system Python 3
 ansible-playbook \
     -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3.8) \
+    -e ansible_python_interpreter=$(which python3) \
     -e vault_addr=${vault_addr} \
     -e "@/tmp/node_config.yml" \
     setup.yml \
@@ -82,7 +82,7 @@ ansible-playbook \
 
 ansible-playbook \
     -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3.8) \
+    -e ansible_python_interpreter=$(which python3) \
     --become-user aeternity -b \
     -e "@/tmp/node_config.yml" \
     deploy.yml \
