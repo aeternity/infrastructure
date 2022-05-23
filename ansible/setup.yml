@@ -65,26 +65,15 @@
         - developer-ssh-keys
       notify: restart ssh
 
-    - name: Install software-properties-common
-      apt:
-        state: present
-        update_cache: yes
-        pkg:
-        - software-properties-common
-
-    - name: Add repository with python 3.0
-      apt_repository:
-        repo: ppa:deadsnakes/ppa
-        codename: bionic
-
     - name: Install dev tools
       apt:
         state: present
         update_cache: yes
         pkg:
         - build-essential
-        - python3.8
-        - python3.8-distutils
+        - python3-pip
+        - python3-distutils
+        - python3-apt
         - python3-yaml #aeternity.fact
         - libssl-dev
         - jq
@@ -95,24 +84,20 @@
       tags:
         - dev-tools
 
-    - name: Download get-pip
-      get_url:
-        url: https://bootstrap.pypa.io/get-pip.py
-        dest: /tmp/get-pip.py
-
-    - name: Install pip
-      command: python3.8 /tmp/get-pip.py
-      changed_when: false
-
     - name: Install pip tools
       pip:
         name:
+        - pip==21.3.1
         - awscli
         - ansible
         - boto
         - boto3
         - datadog==0.28.0
-        - hvac
+        - hvac==0.6.4
+        - requests==2.22.0 # https://github.com/ansible/ansible/issues/62008
+      # Containers workaround (CI tests)
+      environment:
+        LC_ALL: C.UTF-8
       tags:
         - dev-tools
 

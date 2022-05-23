@@ -12,34 +12,35 @@
     is_aws: "{{ aws_uri_check.status == 200 }}"
   tags: [always]
 
-- name: Check that the /dev/xvdh exists
-  stat:
-    path: /dev/xvda1
-  register: xvdh_dev
-  when:
-    - additional_storage is defined
-    - additional_storage
-    - additional_storage_mountpoint is defined
-    - is_aws
-
-- name: Detect additional storage device name
+- name: "Set /dev/nvme0n1 as additional storage device name"
   set_fact:
-    additional_storage_dev: "{{ (xvdh_dev.stat is defined and xvdh_dev.stat.exists) | ternary('/dev/xvdh', '/dev/nvme1n1') }}"
+    additional_storage_dev: "/dev/nvme0n1"
   tags: [always]
   when:
-    - xvdh_dev is defined
     - additional_storage is defined
     - additional_storage
     - additional_storage_mountpoint is defined
     - is_aws
+    - ansible_devices.nvme0n1.partitions.keys()|length|int == 0
 
-- name: "Wait for {{ additional_storage_dev }} to become present"
+- name: "Set /dev/nvme1n1 as additional storage device name"
+  set_fact:
+    additional_storage_dev: "/dev/nvme1n1"
+  tags: [always]
+  when:
+    - additional_storage is defined
+    - additional_storage
+    - additional_storage_mountpoint is defined
+    - is_aws
+    - ansible_devices.nvme1n1.partitions.keys()|length|int == 0
+
+- name: Wait for {{ additional_storage_dev }} to become present
   wait_for:
     path: "{{ additional_storage_dev }}"
     state: present
   when: additional_storage_dev is defined
 
-- name: Create a xfs filesystem on /dev/nvme1n1
+- name: Create a xfs filesystem on {{ additional_storage_dev }}
   filesystem:
     fstype: xfs
     dev: "{{ additional_storage_dev }}"
