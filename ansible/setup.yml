@@ -19,6 +19,7 @@
         port: ssh
         filter: sshd
         logpath: /var/log/auth.log
+    restart_ssh: yes
 
   tasks:
     - name: Create aeternity daemon user
@@ -165,6 +166,7 @@
         name: ssh
         state: restarted
       listen: restart ssh
+      when: restart_ssh
 
   roles:
     - { role: jasonheecs.ubuntu-fail2ban }
