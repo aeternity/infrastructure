@@ -3,6 +3,13 @@
 set -eo pipefail
 
 ###
+### Install EC2 connect
+###
+
+apt-get update
+apt-get install -y ec2-instance-connect
+
+###
 #### Receive bootstrap configuration from AWS
 ###
 
