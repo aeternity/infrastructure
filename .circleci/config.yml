@@ -107,6 +107,7 @@ commands:
           command: |
             .circleci/test-ansible-playbook.sh ansible/setup.yml \
               -e "@/tmp/config/test.yml" \
+              -e restart_ssh=no \
               -e env=test
       - run:
           name: Test ansible/monitoring.yml
