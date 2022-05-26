@@ -19,6 +19,7 @@
         port: ssh
         filter: sshd
         logpath: /var/log/auth.log
+    restart_ssh: yes
 
   tasks:
     - name: Create aeternity daemon user
@@ -94,7 +95,7 @@
         - boto3
         - datadog==0.28.0
         - hvac==0.6.4
-        - requests==2.22.0 # https://github.com/ansible/ansible/issues/62008
+        - requests
       # Containers workaround (CI tests)
       environment:
         LC_ALL: C.UTF-8
@@ -165,6 +166,7 @@
         name: ssh
         state: restarted
       listen: restart ssh
+      when: restart_ssh
 
   roles:
     - { role: jasonheecs.ubuntu-fail2ban }
