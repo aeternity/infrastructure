@@ -204,11 +204,11 @@ workflows:
   check_deploy:
     jobs:
       - build_check_ubuntu_1804:
-          context: ae-infra-manage
+          context: ae-vault-infra
           requires: []
 
       - stable_integration_tests:
-          context: ae-infra-manage
+          context: ae-vault-infra
           requires:
             - build_check_ubuntu_1804
           filters:
@@ -222,7 +222,7 @@ workflows:
           requires: []
 
       - docker_push_latest:
-          context: ae-infra-manage
+          context: ae-vault-infra
           requires:
             - build_check_ubuntu_1804
             - branch_integration_tests
@@ -231,7 +231,7 @@ workflows:
               only: master
 
       - docker_push_tag:
-          context: ae-infra-manage
+          context: ae-vault-infra
           filters:
             branches:
               ignore: /.*/
