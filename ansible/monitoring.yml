@@ -242,14 +242,6 @@
         name: dd-agent
         groups: "{{ project_user }}"
         append: yes
-    # While the datadog role manages the keys, it won't get to it because of failing apt-get update
-    - name: Add an apt keys by id from a keyserver
-      apt_key:
-        keyserver: keyserver.ubuntu.com
-        id: "{{ item }}"
-      with_items:
-        - A2923DFF56EDA6E76E55E492D3A80E30382E94DE
-        - D75CEA17048B9ACBF186794B32637D44F14F620E
 
   roles:
     - { role: Datadog.datadog }
