@@ -14,42 +14,23 @@ all:
         - "env:main"
         - "color:green"
         - "region:eu-central-3"
-    node1.cn.nodes.aeternity.io:
-      datadog_tags:
-        - "role:aenode"
-        - "kind:peer"
-        - "env:main_mon"
-        - "region:ap-east-2"
   children:
     hetzner:
       hosts:
         node1.htz.nodes.aeternity.io:
         node2.htz.nodes.aeternity.io:
-    alicloud:
-      hosts:
-        node1.cn.nodes.aeternity.io:
     tag_role_aenode:
       children:
         hetzner:
-        alicloud:
     tag_kind_seed:
       children:
         hetzner:
-    tag_kind_peer:
-      children:
-        alicloud:
     tag_env_main:
       children:
         hetzner:
-    tag_env_main_mon:
-      children:
-        alicloud:
     tag_color_green:
       children:
         hetzner:
-    region_cn_1:
-      children:
-        alicloud:
     region_eu_central_2:
       hosts:
         node1.htz.nodes.aeternity.io:
