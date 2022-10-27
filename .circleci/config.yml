@@ -218,7 +218,7 @@ workflows:
               only: /^v.*$/
 
       - branch_integration_tests:
-          context: ae-infra-manage
+          context: ae-vault-infra
           requires: []
 
       - docker_push_latest:
