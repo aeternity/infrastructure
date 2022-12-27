@@ -152,6 +152,14 @@
         - restart goss
       tags:
         - goss-install
+    
+    - name: restart statsd_exporter
+      become: true
+      systemd:
+        daemon_reload: true
+        name: statsd_exporter
+        state: restarted
+
 
 - name: Configure monitoring services (DataDog)
   hosts: all
@@ -301,3 +309,120 @@
         state: restarted
       listen:
         - restart fail2ban
+
+#### start statsd here
+- name: Configure statsd exporter
+  hosts: all
+  remote_user: master
+  become: yes
+  vars:
+    statsd_exporter_version: 0.23.0
+    statsd_exporter_web_listen_address: ":9102"
+    statsd_exporter_listen_udp: ":8125"
+    statsd_exporter_listen_tcp: ":8125"
+    statsd_architecture: "x86_64"
+
+  tasks:
+    - name: Naive assertion of proper listen address
+      assert:
+        that:
+          - "':' in statsd_exporter_web_listen_address"
+
+    - block:
+        - name: Get latest release
+          uri:
+            url: "https://api.github.com/repos/prometheus/statsd_exporter/releases/latest"
+            method: GET
+            return_content: true
+            status_code: 200
+            body_format: json
+            validate_certs: false
+            user: "{{ lookup('env', 'GH_USER') | default(omit) }}"
+            password: "{{ lookup('env', 'GH_TOKEN') | default(omit) }}"
+          no_log: true
+          register: _latest_release
+          until: _latest_release.status == 200
+          retries: 5
+
+        - name: "Set statsd_exporter version to {{ _latest_release.json.tag_name[1:] }}"
+          set_fact:
+            statsd_exporter_version: "{{ _latest_release.json.tag_name[1:] }}"
+      when: statsd_exporter_version == "latest"
+
+    - name: "Get checksum for {{ statsd_architecture }} architecture"
+      set_fact:
+        statsd_exporter_checksum: "{{ item.split(' ')[0] }}"
+      with_items:
+        - "{{ lookup('url', 'https://github.com/prometheus/statsd_exporter/releases/download/v' + statsd_exporter_version + '/sha256sums.txt', wantlist=True) | list }}"
+      when: "('linux-' + (statsd_architecture + '.tar.gz') in item"
+
+    - name: Get systemd version
+      shell: systemctl --version | awk '$1 == "systemd" {print $2}'
+      changed_when: false
+      check_mode: false
+      register: statsd_exporter_systemd_version
+      tags:
+        - skip_ansible_lint
+    
+    - name: Install dependencies
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ statsd_exporter_dependencies }}"
+
+    - name: Create the statsd_exporter group
+      group:
+        name: "{{ statsd_exporter_system_group }}"
+        state: present
+        system: true
+
+    - name: Create the statsd_exporter user
+      user:
+        name: "{{ statsd_exporter_system_user }}"
+        groups: "{{ statsd_exporter_system_group }}"
+        append: true
+        shell: /usr/sbin/nologin
+        system: true
+        createhome: false
+        home: /
+
+    - name: Download statsd_exporter binary to local folder
+      become: false
+      get_url:
+        url: "https://github.com/prometheus/statsd_exporter/releases/download/v{{ statsd_exporter_version }}/statsd_exporter-{{ statsd_exporter_version }}.linux-{{ statsd_architecture }}.tar.gz"
+        dest: "/tmp/statsd_exporter-{{ statsd_exporter_version }}.linux-{{ statsd_architecture }}.tar.gz"
+        checksum: "sha256:{{ statsd_exporter_checksum }}"
+      register: _download_binary
+      until: _download_binary is succeeded
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+      check_mode: false
+
+    - name: Unpack statsd_exporter binary
+      become: false
+      unarchive:
+        src: "/tmp/statsd_exporter-{{ statsd_exporter_version }}.linux-{{ statsd_architecture }}.tar.gz"
+        dest: "/tmp"
+        creates: "/tmp/statsd_exporter-{{ statsd_exporter_version }}.linux-{{ statsd_architecture }}/statsd_exporter"
+      delegate_to: localhost
+      check_mode: false
+
+    - name: Propagate statsd_exporter binaries
+      copy:
+        src: "/tmp/statsd_exporter-{{ statsd_exporter_version }}.linux-{{ statsd_architecture }}/statsd_exporter"
+        dest: "/usr/local/bin/statsd_exporter"
+        mode: 0750
+        owner: "{{ statsd_exporter_system_user }}"
+        group: "{{ statsd_exporter_system_group }}"
+      notify: restart statsd_exporter
+      when: not ansible_check_mode
+
+    - name: Copy the statsd_exporter systemd service file
+      template:
+        src: statsd_exporter.service.j2
+        dest: /etc/systemd/system/statsd_exporter.service
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart statsd_exporter

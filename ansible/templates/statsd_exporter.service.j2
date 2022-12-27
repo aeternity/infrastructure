@@ -1,0 +1,36 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Prometheus statsd_exporter
+After=network-online.target
+StartLimitInterval=0
+
+[Service]
+Type=simple
+User={{ statsd_exporter_system_user }}
+Group={{ statsd_exporter_system_group }}
+ExecStart=/usr/local/bin/statsd_exporter --statsd.listen-udp={{ statsd_exporter_listen_udp }} --statsd.listen-tcp={{ statsd_exporter_listen_tcp }}  --web.listen-address={{ statsd_exporter_web_listen_address }}{% for flag, flag_value in statsd_exporter_config_flags_extra.items() %} --{{ flag }}{% if flag_value %}={{ flag_value }}{% endif %} {% endfor %}
+
+PrivateTmp=true
+PrivateDevices=true
+ProtectHome=true
+NoNewPrivileges=true
+{% if statsd_exporter_systemd_version.stdout | int >= 232 %}
+ProtectSystem=strict
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+{% else %}
+ProtectSystem=full
+{% endif %}
+
+{% if http_proxy is defined %}
+Environment="HTTP_PROXY={{ http_proxy }}"{% if https_proxy is defined %} "HTTPS_PROXY={{ https_proxy }}{% endif %}"
+{% endif %}
+
+SyslogIdentifier=statsd_exporter
+Restart=always
+RestartSec=0
+
+[Install]
+WantedBy=multi-user.target
