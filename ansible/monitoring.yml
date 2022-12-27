@@ -372,14 +372,14 @@
 
     - name: Create the statsd_exporter group
       group:
-        name: "{{ statsd_exporter_system_group }}"
+        name: statsd
         state: present
         system: true
 
     - name: Create the statsd_exporter user
       user:
-        name: "{{ statsd_exporter_system_user }}"
-        groups: "{{ statsd_exporter_system_group }}"
+        name: statsd
+        groups: statsd
         append: true
         shell: /usr/sbin/nologin
         system: true
@@ -413,8 +413,8 @@
         src: "/tmp/statsd_exporter-{{ statsd_exporter_version }}.linux-{{ statsd_architecture }}/statsd_exporter"
         dest: "/usr/local/bin/statsd_exporter"
         mode: 0750
-        owner: "{{ statsd_exporter_system_user }}"
-        group: "{{ statsd_exporter_system_group }}"
+        owner: statsd
+        group: statsd
       notify: restart statsd_exporter
       when: not ansible_check_mode
 

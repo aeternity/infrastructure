@@ -7,8 +7,8 @@ StartLimitInterval=0
 
 [Service]
 Type=simple
-User={{ statsd_exporter_system_user }}
-Group={{ statsd_exporter_system_group }}
+User=statsd
+Group=statsd
 ExecStart=/usr/local/bin/statsd_exporter --statsd.listen-udp={{ statsd_exporter_listen_udp }} --statsd.listen-tcp={{ statsd_exporter_listen_tcp }}  --web.listen-address={{ statsd_exporter_web_listen_address }}{% for flag, flag_value in statsd_exporter_config_flags_extra.items() %} --{{ flag }}{% if flag_value %}={{ flag_value }}{% endif %} {% endfor %}
 
 PrivateTmp=true
