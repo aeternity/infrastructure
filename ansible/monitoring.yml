@@ -363,7 +363,7 @@
       register: statsd_exporter_systemd_version
       tags:
         - skip_ansible_lint
-    
+
     - name: Install dependencies
       package:
         name: "{{ item }}"
