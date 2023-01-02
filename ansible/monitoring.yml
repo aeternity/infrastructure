@@ -152,7 +152,7 @@
         - restart goss
       tags:
         - goss-install
-    
+
     - name: restart statsd_exporter
       become: true
       systemd:
