@@ -85,13 +85,13 @@
       notify: "stop aeternity daemon"
       when: should_restore
 
+    - meta: flush_handlers
+
     - name: Delete old database
       file:
         path: "{{ node_config.chain.db_path }}"
         state: absent
       when: should_restore
-
-    - meta: flush_handlers
 
     - name: Make sure database dir exists
       file:
