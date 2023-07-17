@@ -31,28 +31,16 @@ fi
 # Monitoring nodes
 read -p "Deploy UAT monitoring nodes? (y/N):" uatmonchoice
 if [[ $uatmonchoice == "y" ]]; then
-    make vault-config-update-uat_mon@ap-southeast-1
     make vault-config-update-uat_mon@eu-central-1
-    make vault-config-update-uat_mon@eu-north-1
-    make vault-config-update-uat_mon@us-west-2
 
-    DEPLOY_ENV=uat_mon DEPLOY_REGION=ap-southeast-1 CONFIG_ENV=uat_mon@ap-southeast-1 make deploy
     DEPLOY_ENV=uat_mon DEPLOY_REGION=eu-central-1 CONFIG_ENV=uat_mon@eu-central-1 make deploy
-    DEPLOY_ENV=uat_mon DEPLOY_REGION=eu-north-1 CONFIG_ENV=uat_mon@eu-north-1 make deploy
-    DEPLOY_ENV=uat_mon DEPLOY_REGION=us-west-2 CONFIG_ENV=uat_mon@us-west-2 make deploy
 fi
 
 read -p "Deploy MAIN monitoring nodes? (y/N):" mainmonchoice
 if [[ $mainmonchoice == "y" ]]; then
-    make vault-config-update-main_mon@ap-southeast-1
     make vault-config-update-main_mon@eu-north-1
-    make vault-config-update-main_mon@us-west-2
-    make vault-config-update-main_mon@us-east-2
 
-    DEPLOY_ENV=main_mon DEPLOY_REGION=ap-southeast-1 CONFIG_ENV=main_mon@ap-southeast-1 make deploy
     DEPLOY_ENV=main_mon DEPLOY_REGION=eu-north-1 CONFIG_ENV=main_mon@eu-north-1 make deploy
-    DEPLOY_ENV=main_mon DEPLOY_REGION=us-west-2 CONFIG_ENV=main_mon@us-west-2 make deploy
-    DEPLOY_ENV=main_mon DEPLOY_REGION=us-east-2 CONFIG_ENV=main_mon@us-east-2 make deploy
 fi
 
 # Backup nodes
