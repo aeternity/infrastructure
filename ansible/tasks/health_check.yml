@@ -5,14 +5,14 @@
 
 - name: Wait aeternity node API to boot
   wait_for:
-    port: "{{ node_config.http.external.port }}"
+    port: "{{ healthcheck_port }}"
     host: "127.0.0.1"
     timeout: 180
   tags: [health-check]
 
 - name: Local Health check
   uri:
-    url: "http://127.0.0.1:{{ node_config.http.external.port }}/v2/status"
+    url: "http://127.0.0.1:{{ healthcheck_port }}/v2/status"
     timeout: 40
     status_code: 200
   tags: [health-check]

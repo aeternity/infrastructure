@@ -8,8 +8,8 @@ VAULT_ADDR ?= $(AE_VAULT_ADDR)
 TF_COMMON_PARAMS = -var vault_addr=$(VAULT_ADDR) -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
 CONFIG_OUTPUT_DIR ?= /tmp/config
 VAULT_CONFIG_ROOT ?= secret/aenode/config
-VAULT_CONFIG_FIELD ?= node_config
-LIST_CONFIG_ENVS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
+VAULT_CONFIG_FIELD ?= ansible_vars
+LIST_CONFIG_KEYS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
 
 # char escaping
 ,:=,
@@ -30,8 +30,8 @@ SNAPSHOT_SUFFIX ?=
 DEPLOY_ENV ?=
 DEPLOY_ROLE ?= aenode
 DEPLOY_DB_VERSION ?= 1
-CONFIG_ENV ?= $(DEPLOY_ENV)
-DEPLOY_CONFIG ?= $(if $(CONFIG_ENV),$(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml)
+CONFIG_KEY ?= $(DEPLOY_ENV)
+DEPLOY_CONFIG ?= $(if $(CONFIG_KEY),$(CONFIG_OUTPUT_DIR)/$(CONFIG_KEY).yml)
 ANSIBLE_EXTRA_VARS =
 ANSIBLE_EXTRA_PARAMS ?=
 
@@ -66,7 +66,8 @@ ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
 	-e package="$(call require_env,PACKAGE)" \
 	-e downtime="$(DEPLOY_DOWNTIME)" \
-	-e rolling_update="$(ROLLING_UPDATE)"
+	-e rolling_update="$(ROLLING_UPDATE)" \
+	-e vault_config_key="$(CONFIG_KEY)"
 
 ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
 	-e cmd="$(call require_env,CMD, supported: start|stop|restart|ping|status)"
@@ -178,10 +179,10 @@ $(CONFIG_OUTPUT_DIR):
 	@mkdir -p $(CONFIG_OUTPUT_DIR)
 
 vault-configs-list: secrets
-	@$(LIST_CONFIG_ENVS)
+	@$(LIST_CONFIG_KEYS)
 
 vault-configs-dump: secrets
-	@$(MAKE) --no-print-directory $(addprefix vault-config-, $(shell $(LIST_CONFIG_ENVS)))
+	@$(MAKE) --no-print-directory $(addprefix vault-config-, $(shell $(LIST_CONFIG_KEYS)))
 
 vault-config-% : $(CONFIG_OUTPUT_DIR)/%.yml ;
 
