@@ -1,0 +1,200 @@
+---
+- name: Deploy aeternity middleware
+  hosts: all
+  remote_user: master
+  become_user: ubuntu
+  become_flags: "-i"
+  become: yes
+  serial: "{{ rolling_update | default('100%') }}"
+  max_fail_percentage: 25
+
+  vars:
+    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
+    project_root: "/home/{{ ansible_user_id }}/aemdw"
+    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
+    # datadog_api_key: ""
+    datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
+    datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
+    downtime: 20
+    health_check: yes
+    healthcheck_port: 3013
+    mdw_healthcheck_port: 4000
+    db_path: "{{ project_root }}/db"
+    logs_path: "{{ project_root }}/log"
+    docker_repository: aeternity/ae_mdw
+    docker_tag: "latest"
+
+    # Label used for datadog tagging and ENV file planting
+    env: unknown
+
+  tasks:
+    - name: Check if running on AWS instance
+      uri:
+        url: http://169.254.169.254/latest/meta-data
+        timeout: 2
+      register: aws_uri_check
+      failed_when: False
+      tags: [always]
+
+    - name: Set AWS check fact
+      set_fact:
+        is_aws: "{{ aws_uri_check.status == 200 }}"
+      tags: [always]
+
+    - name: Gather instance metadata facts
+      ec2_metadata_facts:
+      tags: [always]
+      when: is_aws
+
+    - block:
+      - name: Schedule downtime
+        run_once: yes
+        uri:
+          url: "https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}"
+          method: POST
+          status_code: 200
+          timeout: 10
+          body_format: json
+          body:
+            scope: "role:aemdw,env:{{ env }}"
+            message: "Deploy aemdw - {{ docker_repository }}:{{ docker_tag }}"
+            end: "{{ lookup('pipe', 'date +%s')|int + downtime|int }}"
+        register: datadog_downtime
+        when:
+          - downtime is defined
+          - downtime != "0"
+
+      - name: Make sure 'project_root' exists
+        file:
+            path: "{{ project_root }}"
+            state: directory
+            # allow group read for integration purposes  (e.g. logs)
+            mode: 0750
+
+      - name: Make sure database directories exists
+        file:
+          path: "{{ item }}"
+          state: directory
+        loop:
+           - "{{ db_path }}"
+           - "{{ db_path }}/mnesia"
+           - "{{ db_path }}/mdw.db"
+        tags: [config]
+
+      - name: Make sure log directories exists
+        file:
+          path: "{{ item }}"
+          state: directory
+        loop:
+          - "{{ logs_path }}"
+        tags: [config]
+
+      - name: Update configuration files
+        copy:
+          content: "{{ lookup('hashi_vault', 'secret=secret/aenode/config/{{ vault_config_key }}:{{ item.key }}') }}"
+          dest: "{{ project_root }}/{{ item.value }}"
+          mode: '0600'
+        loop: "{{ files | dict2items }}"
+        when: files is defined and vault_config_key is defined
+        register: configs
+        tags: [config]
+
+      - name: Make sure aemdw container is running
+        docker_container:
+          name: aemdw
+          image: "{{ docker_repository }}:{{ docker_tag }}"
+          pull: true
+          ignore_image: false
+          restart_policy: always
+          restart: "{{ configs.changed }}"
+          # currently it's not possible to run the container with other user than the default 1000/aeternity
+          # user: "{{ ansible_user_id }}"
+          user: 1000:1000
+          env:
+            # mount to default path?
+            AETERNITY_CONFIG: "/home/aeternity/aeternity.yaml"
+            # this is default? If the config file is mdw specific we don't need overwrite
+            AE__CHAIN__DB_PATH: "/home/aeternity/node/local/rel/aeternity/data/mnesia"
+          volumes:
+            - "{{ db_path }}/mnesia:/home/aeternity/node/local/rel/aeternity/data/mnesia"
+            - "{{ db_path }}/mdw.db:/home/aeternity/node/local/rel/aeternity/data/mdw.db"
+            - "{{ logs_path }}:/home/aeternity/node/ae_mdw/log"
+            - "{{ project_root }}/accounts.json:/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_accounts.json"
+            - "{{ project_root }}/contracts.json:/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_contracts.json"
+            - "{{ project_root }}/aeternity.yaml:/home/aeternity/aeternity.yaml"
+          ports:
+            - "3013:3013"
+            - "3113:3113"
+            - "3014:3014"
+            - "4000:4000"
+            - "4001:4001"
+          # TODO: added in ansible 2.8
+          # healthcheck:
+          #   test: ["CMD", "curl", "-f", "http://localhost:4000/status"]
+          #   start_period: 30s
+          #   interval: 30s
+          #   timeout: 10s
+          #   retries: 3
+        tags: [container]
+
+      - name: Wait middleware API to boot
+        uri:
+          url: "http://127.0.0.1:{{ mdw_healthcheck_port }}/status"
+          timeout: 1
+          status_code: 200
+        register: uri_output
+        until: uri_output.status == 200
+        retries: 5
+        delay: 5
+        tags: [health-check]
+
+      - name: Run node health checks
+        include_tasks: tasks/health_check.yml
+
+      - name: Send Datadog event
+        datadog_event:
+          host: "{{ ansible_ec2_instance_id|default(ansible_hostname ) }}"
+          alert_type: success
+          title: Middleware Deployment
+          text: |
+            %%%
+            Version: [{{ docker_tag }}](https://github.com/aeternity/ae_mdw/releases/tag/v{{ docker_tag }})
+            %%%
+          api_key: "{{ datadog_api_key }}"
+          app_key: "{{ datadog_app_key }}"
+          tags:
+            - "version:{{ docker_tag }}"
+        when:
+          - datadog_api_key != ""
+          - datadog_app_key != ""
+        become: no
+        connection: local
+        tags: [datadog-event]
+      rescue:
+        - name: Send Datadog event
+          datadog_event:
+            host: "{{ ansible_ec2_instance_id|default(ansible_hostname ) }}"
+            alert_type: error
+            title: Middleware Deployment
+            text: |
+              %%%
+              Version: [{{ docker_tag }}](https://github.com/aeternity/ae_mdw/releases/tag/v{{ docker_tag }})
+
+              Task: {{ ansible_failed_task.name }}\
+              Error Message:\
+              {{ ansible_failed_result.msg }}
+              %%%
+            api_key: "{{ datadog_api_key }}"
+            app_key: "{{ datadog_app_key }}"
+            tags:
+              - "version:{{ docker_tag }}"
+          when:
+            - datadog_api_key != ""
+            - datadog_app_key != ""
+          connection: local
+          become: no
+          tags: [datadog-event]
+        - name: Fail the playbook
+          fail:
+            msg: "Failed deploy"
+          when: true

@@ -208,9 +208,9 @@
 
       - name: Send Datadog event
         datadog_event:
-          host: "{{ public_ipv4 }}"
+          host: "{{ ansible_ec2_instance_id|default(ansible_hostname ) }}"
           alert_type: success
-          title: Deploy
+          title: Node Deployment
           text: |
             %%%
             Revision: [{{ ansible_local.aeternity.revision }}](https://github.com/aeternity/aeternity/commit/{{ ansible_local.aeternity.revision }})
@@ -229,9 +229,9 @@
       rescue:
         - name: Send Datadog event
           datadog_event:
-            host: "{{ public_ipv4 }}"
+            host: "{{ ansible_ec2_instance_id|default(ansible_hostname ) }}"
             alert_type: error
-            title: Deploy
+            title: Node Deployment
             text: |
               %%%
               Package: {{ package|default('unknown') }}

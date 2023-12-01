@@ -52,6 +52,7 @@ ansible/%.yml: cert $(DEPLOY_CONFIG)
 		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
 		-e ansible_python_interpreter=$(PYTHON) \
 		-e env="$(DEPLOY_ENV)" \
+		-e vault_config_key="$(CONFIG_KEY)" \
 		$(if $(DEPLOY_CONFIG),-e "@$(DEPLOY_CONFIG)") \
 		$(ANSIBLE_EXTRA_VARS) \
 		$(ANSIBLE_EXTRA_PARAMS) \
@@ -66,8 +67,7 @@ ansible/monitoring.yml: PYTHON=/var/venv/bin/python
 ansible/deploy.yml: ANSIBLE_EXTRA_VARS=\
 	-e package="$(call require_env,PACKAGE)" \
 	-e downtime="$(DEPLOY_DOWNTIME)" \
-	-e rolling_update="$(ROLLING_UPDATE)" \
-	-e vault_config_key="$(CONFIG_KEY)"
+	-e rolling_update="$(ROLLING_UPDATE)"
 
 ansible/manage-node.yml: ANSIBLE_EXTRA_VARS=\
 	-e cmd="$(call require_env,CMD, supported: start|stop|restart|ping|status)"
@@ -95,6 +95,7 @@ manage-node: ansible/manage-node.yml
 setup-monitoring: ansible/monitoring.yml
 setup-node: ansible/setup.yml
 deploy: ansible/deploy.yml
+deploy-aemdw: ansible/deploy-aemdw.yml
 mnesia_snapshot: ansible/mnesia_snapshot.yml
 mnesia-reset-once: ansible/mnesia_reset_once.yml
 setup: setup-node setup-monitoring
