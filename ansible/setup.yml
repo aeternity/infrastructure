@@ -106,11 +106,11 @@
           - hvac==0.6.4
           - pyyaml==5.3.1
           - wheel==0.37.1
-        # "pip3 install ansible" fails otherwise
-        # see https://github.com/pypa/pip/issues/10219#issuecomment-887337037
-        environment:
-          LANG: C.UTF-8
-          LC_ALL: C.UTF-8
+      # "pip3 install ansible" fails otherwise
+      # see https://github.com/pypa/pip/issues/10219#issuecomment-887337037
+      environment:
+        LANG: C.UTF-8
+        LC_ALL: C.UTF-8
       tags:
         - dev-tools
 
