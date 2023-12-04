@@ -169,5 +169,5 @@
       listen: restart ssh
       when: restart_ssh
 
-  roles:
-    - { role: jasonheecs.ubuntu-fail2ban }
+  # roles:
+  #   - { role: jasonheecs.ubuntu-fail2ban }
