@@ -19,7 +19,7 @@
 
 - name: Goss Health check
   uri:
-    url: "http://{{public_ipv4}}:8080/healthz"
+    url: "http://{{ public_ipv4 }}:8080/healthz"
     timeout: 10
     status_code: 200
   connection: local

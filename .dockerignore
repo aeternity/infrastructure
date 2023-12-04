@@ -3,6 +3,7 @@
 !docker-entrypoint.sh
 !import-secrets.sh
 !ansible
+!.ansible-lint
 !aws
 !Makefile
 !requirements-lock.txt
