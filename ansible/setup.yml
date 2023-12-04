@@ -167,6 +167,9 @@
 
     - name: Attach additional drive if needed
       include_tasks: tasks/additional_storage.yml
+      when:
+        - additional_storage is defined
+        - additional_storage
 
   handlers:
     - name: Run ldconfig
