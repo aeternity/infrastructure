@@ -1,4 +1,4 @@
-ansible==2.10.17
+ansible==2.10.7
 ansible-lint==3.5.1
 awscli==1.22.30
 bcrypt==4.0.1
