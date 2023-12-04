@@ -165,11 +165,8 @@
       include_tasks: tasks/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
       tags: vars
 
-    - name: Attach additional drive if needed
-      include_tasks: tasks/additional_storage.yml
-      when:
-        - additional_storage is defined
-        - additional_storage
+    # - name: Attach additional drive if needed
+    #   include_tasks: tasks/additional_storage.yml
 
   handlers:
     - name: Run ldconfig
