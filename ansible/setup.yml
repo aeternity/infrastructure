@@ -86,10 +86,17 @@
       tags:
         - dev-tools
 
+    - name: Prepare pip
+      pip:
+        name:
+          - pip==21.3.1
+          - setuptools-rust==1.1.2
+      tags:
+        - dev-tools
+
     - name: Install pip tools
       pip:
         name:
-        - pip==21.3.1
         - awscli
         - ansible==2.7.0
         - setuptools-rust==1.1.2
