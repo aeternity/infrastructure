@@ -5,7 +5,7 @@
 !ansible
 !aws
 !Makefile
-!requirements.txt
+!requirements-lock.txt
 !test/goss/
 !scripts/
 # Copy from .gitignore

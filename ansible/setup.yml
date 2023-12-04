@@ -94,20 +94,23 @@
       tags:
         - dev-tools
 
-    - name: Install pip tools
+    - name: Install pip dependencies
       pip:
         name:
-        - awscli
-        - ansible==2.7.0
-        - setuptools-rust==1.1.2
-        - boto
-        - boto3
-        - datadog==0.28.0
-        - hvac==0.6.4
-        - requests
-      # Containers workaround (CI tests)
-      environment:
-        LC_ALL: C.UTF-8
+          # This should match the same versions as in requirements.txt
+          - ansible==2.7.0
+          - awscli==1.22.30
+          - boto3==1.20.30
+          - boto==2.49.0
+          - datadog==0.28.0
+          - hvac==0.6.4
+          - pyyaml==5.3.1
+          - wheel==0.37.1
+       # "pip3 install ansible" fails otherwise
+       # see https://github.com/pypa/pip/issues/10219#issuecomment-887337037
+       environment:
+         LANG: C.UTF-8
+         LC_ALL: C.UTF-8
       tags:
         - dev-tools
 
