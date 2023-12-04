@@ -37,7 +37,7 @@ RUN apk add --no-cache --virtual build-deps \
     && pip3 install --no-cache-dir -r /infrastructure/requirements.txt \
     && apk del build-deps
 
-ADD ansible/requirements.yml /infrastructure/ansible/
+ADD ansible/requirements.yml ansible/ansible.cfg /infrastructure/ansible/
 RUN cd /infrastructure/ansible && ansible-galaxy install -r requirements.yml
 
 ADD docker/ssh_config /etc/ssh/ssh_config
