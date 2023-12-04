@@ -217,18 +217,18 @@ workflows:
             tags:
               only: /^v.*$/
 
-      - branch_integration_tests:
-          context: ae-vault-infra
-          requires: []
+      # - branch_integration_tests:
+      #     context: ae-vault-infra
+      #     requires: []
 
-      - docker_push_latest:
-          context: ae-vault-infra
-          requires:
-            - build_check_ubuntu_1804
-            - branch_integration_tests
-          filters:
-            branches:
-              only: master
+      # - docker_push_latest:
+      #     context: ae-vault-infra
+      #     requires:
+      #       - build_check_ubuntu_1804
+      #       - branch_integration_tests
+      #     filters:
+      #       branches:
+      #         only: master
 
       - docker_push_tag:
           context: ae-vault-infra
