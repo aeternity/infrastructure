@@ -90,7 +90,7 @@
         name:
         - pip==21.3.1
         - awscli
-        - ansible
+        - ansible==2.7.0
         - boto
         - boto3
         - datadog==0.28.0
