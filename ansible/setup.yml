@@ -165,8 +165,8 @@
       include_tasks: tasks/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
       tags: vars
 
-    # - name: Attach additional drive if needed
-    #   include_tasks: tasks/additional_storage.yml
+    - name: Attach additional drive if needed
+      include_tasks: tasks/additional_storage.yml
 
   handlers:
     - name: Run ldconfig
@@ -180,5 +180,5 @@
       listen: restart ssh
       when: restart_ssh
 
-  # roles:
-  #   - { role: jasonheecs.ubuntu-fail2ban }
+  roles:
+    - { role: jasonheecs.ubuntu-fail2ban }
