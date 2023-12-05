@@ -9,6 +9,7 @@
     vault_version: "0.11.3"
     libsodium_version: "1.0.16"
     libsodium_module_version: "23.1.0"
+    fail2ban_enable: true
     fail2ban_loglevel: INFO
     fail2ban_bantime: 86400
     fail2ban_maxretry: 3
@@ -181,4 +182,5 @@
       when: restart_ssh|bool
 
   roles:
-    - { role: jasonheecs.ubuntu-fail2ban }
+    - role: jasonheecs.ubuntu-fail2ban
+      when: fail2ban_enable|bool

@@ -114,6 +114,7 @@ commands:
               -e "@/tmp/config/test.yml" \
               -e additional_storage=false \
               -e restart_ssh=false \
+              -e fail2ban_enable=false \
               -e env=test
       - run:
           name: Test ansible/monitoring.yml
