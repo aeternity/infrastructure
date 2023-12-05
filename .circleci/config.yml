@@ -112,6 +112,7 @@ commands:
             .circleci/test-ansible-playbook.sh ansible/setup.yml \
               -e "@/tmp/config/test.yml" \
               -e additional_storage=false \
+              -e restart_ssh=false \
               -e env=test
       - run:
           name: Test ansible/monitoring.yml
