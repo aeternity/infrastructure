@@ -4,7 +4,8 @@ executors:
   ubuntu-1804:
     docker:
       - image: aeternity/infrastructure:master
-      - image: rastasheep/ubuntu-sshd:18.04
+      - name: aenode
+        image: rastasheep/ubuntu-sshd:18.04
 
 references:
   container_config: &container_config
