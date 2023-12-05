@@ -114,8 +114,7 @@ commands:
               -e "@/tmp/config/test.yml" \
               -e additional_storage=false \
               -e restart_ssh=false \
-              -e fail2ban_enable=false \
-              -e env=test
+              -e fail2ban_enable=false
       - run:
           name: Test ansible/monitoring.yml
           command: |
@@ -123,7 +122,7 @@ commands:
               -e "@/tmp/config/test.yml" \
               -e datadog_api_key=test \
               -e datadog_enabled=yes \
-              -e env=test
+              -e enable_aws_checks=no
       - run:
           name: Test ansible/deploy.yml
           command: |
