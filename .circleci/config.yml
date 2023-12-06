@@ -126,7 +126,8 @@ commands:
               -e "{datadog_enabled: false}" \
               -e datadog_skip_running_check=yes \
               -e enable_aws_checks=no \
-              -e service_mgr=sysvinit
+              -e service_mgr=sysvinit \
+              -e fail2ban_enable=false
       - run:
           name: Test ansible/deploy.yml
           command: |
