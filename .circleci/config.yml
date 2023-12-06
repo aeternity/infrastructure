@@ -132,6 +132,8 @@ commands:
           command: |
             .circleci/test-ansible-playbook.sh ansible/deploy.yml \
               -e "@/tmp/config/test.yml" \
+              -e enable_aws_checks=no \
+              -e service_mgr=sysvinit \
               -e datadog_api_key= \
               -e datadog_app_key= \
               -e project_root=/root/node \
