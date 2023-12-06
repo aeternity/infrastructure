@@ -121,6 +121,7 @@ commands:
           command: |
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
               -e "@/tmp/config/test.yml" \
+              -e datadog_install=false \
               -e datadog_api_key=test \
               -e "{datadog_enabled: false}" \
               -e datadog_skip_running_check=yes \
