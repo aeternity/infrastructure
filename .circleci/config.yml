@@ -6,7 +6,6 @@ executors:
       - image: aeternity/infrastructure:master
       - name: aenode
         image: rastasheep/ubuntu-sshd:18.04
-        command: ["/usr/sbin/sshd", "-D"]
 
 references:
   container_config: &container_config
