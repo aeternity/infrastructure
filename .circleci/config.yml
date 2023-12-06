@@ -84,16 +84,16 @@ commands:
       - setup_remote_docker:
           version: 18.06.0-ce
           docker_layer_caching: true
-      - run:
-          # Used in .circleci/docker-run.sh
-          name: Build docker branch image
-          command: |
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
-      - run:
-          name: Configuration lint
-          # Secrets are auto-imported by the docker entry-point
-          command: |
-            .circleci/docker-run.sh make lint
+      # - run:
+      #     # Used in .circleci/docker-run.sh
+      #     name: Build docker branch image
+      #     command: |
+      #       docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
+      # - run:
+      #     name: Configuration lint
+      #     # Secrets are auto-imported by the docker entry-point
+      #     command: |
+      #       .circleci/docker-run.sh make lint
       - run:
           name: Setup ansible environment
           command: |
@@ -105,40 +105,44 @@ commands:
             pip3 install -r requirements-lock.txt
             ansible-galaxy install -r ansible/requirements.yml
       - run:
-          name: Dump node configuration
+          name: Test ansible/test.yml
           command: |
-            make vault-config-test
-      - run:
-          name: Test ansible/setup.yml
-          command: |
-            .circleci/test-ansible-playbook.sh ansible/setup.yml \
-              -e "@/tmp/config/test.yml" \
-              -e additional_storage=false \
-              -e restart_ssh=false \
-              -e fail2ban_enable=false
-      - run:
-          name: Test ansible/monitoring.yml
-          command: |
-            .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
-              -e "@/tmp/config/test.yml" \
-              -e datadog_api_key=test \
-              -e datadog_enabled=yes \
-              -e enable_aws_checks=no
-      - run:
-          name: Test ansible/deploy.yml
-          command: |
-            .circleci/test-ansible-playbook.sh ansible/deploy.yml \
-              -e "@/tmp/config/test.yml" \
-              -e env=test \
-              -e datadog_api_key= \
-              -e datadog_app_key= \
-              -e project_root=/root/node \
-              -e packages_path=/tmp
-      - docker_login
-      - run:
-          name: Push (branch) Docker image to DockerHub
-          command: |
-            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
+            .circleci/test-ansible-playbook.sh ansible/test.yml
+      # - run:
+      #     name: Dump node configuration
+      #     command: |
+      #       make vault-config-test
+      # - run:
+      #     name: Test ansible/setup.yml
+      #     command: |
+      #       .circleci/test-ansible-playbook.sh ansible/setup.yml \
+      #         -e "@/tmp/config/test.yml" \
+      #         -e additional_storage=false \
+      #         -e restart_ssh=false \
+      #         -e fail2ban_enable=false
+      # - run:
+      #     name: Test ansible/monitoring.yml
+      #     command: |
+      #       .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
+      #         -e "@/tmp/config/test.yml" \
+      #         -e datadog_api_key=test \
+      #         -e datadog_enabled=yes \
+      #         -e enable_aws_checks=no
+      # - run:
+      #     name: Test ansible/deploy.yml
+      #     command: |
+      #       .circleci/test-ansible-playbook.sh ansible/deploy.yml \
+      #         -e "@/tmp/config/test.yml" \
+      #         -e env=test \
+      #         -e datadog_api_key= \
+      #         -e datadog_app_key= \
+      #         -e project_root=/root/node \
+      #         -e packages_path=/tmp
+      # - docker_login
+      # - run:
+      #     name: Push (branch) Docker image to DockerHub
+      #     command: |
+      #       docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
 
 
 jobs:

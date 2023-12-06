@@ -1,0 +1,18 @@
+---
+- name: Test playbook
+  hosts: all
+  remote_user: master
+  become: yes
+
+  vars:
+    ansible_service_mgr: init
+
+  tasks:
+    - name: Try set buildin fact
+      set_fact:
+        ansible_service_mgr: init
+
+    - name: SSH status
+      service:
+        name: ssh
+        state: started
