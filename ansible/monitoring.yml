@@ -167,7 +167,6 @@
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
     network_id: "{{ (node_config['fork_management']|default(dict(network_id = 'unknown')))['network_id'] }}"
     fail2ban_enable: true
-    datadog_install: true
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
     datadog_default_tags:
       - "lsb:{{ ansible_lsb.description }}"
@@ -248,8 +247,7 @@
         append: yes
 
   roles:
-    - role: Datadog.datadog
-      when: datadog_install|bool
+    - { role: Datadog.datadog }
 
   post_tasks:
     - name: Install rsyslog
