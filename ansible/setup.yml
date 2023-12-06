@@ -178,6 +178,7 @@
       service:
         name: ssh
         state: restarted
+        use: service_mgr|default(ansible_service_mgr)
       listen: restart ssh
       when: restart_ssh|bool
 
