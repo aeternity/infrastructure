@@ -84,9 +84,9 @@ commands:
 
   build_check:
     steps:
-      - setup_remote_docker:
-          version: 18.06.0-ce
-          docker_layer_caching: true
+      # - setup_remote_docker:
+      #     version: 18.06.0-ce
+      #     docker_layer_caching: true
       # - run:
       #     # Used in .circleci/docker-run.sh
       #     name: Build docker branch image
