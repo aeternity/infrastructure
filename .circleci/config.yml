@@ -108,10 +108,10 @@ commands:
       #     name: Test ansible/test.yml
       #     command: |
       #       .circleci/test-ansible-playbook.sh ansible/test.yml
-      # - run:
-      #     name: Dump node configuration
-      #     command: |
-      #       make vault-config-test
+      - run:
+          name: Dump node configuration
+          command: |
+            make vault-config-test
       # - run:
       #     name: Test ansible/setup.yml
       #     command: |
