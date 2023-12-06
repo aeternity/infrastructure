@@ -5,14 +5,15 @@
   become: yes
 
   vars:
-    ansible_service_mgr: init
+    ansible_service_mgr: sysvinit
 
   tasks:
     - name: Try set buildin fact
       set_fact:
-        ansible_service_mgr: init
+        ansible_service_mgr: sysvinit
 
     - name: SSH status
       service:
         name: ssh
         state: started
+        # use: sysvinit
