@@ -16,4 +16,4 @@
       service:
         name: ssh
         state: started
-        # use: sysvinit
+        use: sysvinit
