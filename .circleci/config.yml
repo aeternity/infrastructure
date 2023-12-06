@@ -126,6 +126,7 @@ commands:
           command: |
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
               -e "@/tmp/config/test.yml" \
+              -e datadog_api_key=test \
               -e datadog_enabled=no \
               -e enable_aws_checks=no \
               -e service_mgr=sysvinit
