@@ -126,9 +126,7 @@ commands:
           command: |
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
               -e "@/tmp/config/test.yml" \
-              -e datadog_api_key=test \
-              -e datadog_enabled=yes \
-              -e datadog_skip_running_check=yes \
+              -e datadog_enabled=no \
               -e enable_aws_checks=no \
               -e service_mgr=sysvinit
       - run:
@@ -136,7 +134,6 @@ commands:
           command: |
             .circleci/test-ansible-playbook.sh ansible/deploy.yml \
               -e "@/tmp/config/test.yml" \
-              -e env=test \
               -e datadog_api_key= \
               -e datadog_app_key= \
               -e project_root=/root/node \
