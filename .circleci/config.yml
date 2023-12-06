@@ -1,12 +1,15 @@
 version: 2.1
 
 executors:
-  ubuntu-1804:
+  ubuntu-1804-docker:
     docker:
       - image: aeternity/infrastructure:master
       - name: aenode
         image: rastasheep/ubuntu-sshd:18.04
         command: ["/usr/sbin/sshd", "-D"]
+  ubuntu-1804:
+    machine:
+      image: ubuntu-1804
 
 references:
   container_config: &container_config
