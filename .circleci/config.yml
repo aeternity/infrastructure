@@ -1,6 +1,9 @@
 version: 2.1
 
 executors:
+  infra-master:
+    docker:
+      - image: aeternity/infrastructure:master
   ubuntu-1804:
     docker:
       - image: aeternity/infrastructure:master
@@ -78,6 +81,63 @@ commands:
             ./scripts/circleci/rocket_fail_notification.sh
           when: on_fail
 
+  docker_build_branch:
+    steps:
+      - run:
+          name: Build docker branch image
+          command: |
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
+
+  lint:
+    steps:
+      - run:
+          name: Configuration lint
+          # Secrets are auto-imported by the docker entry-point
+          command: |
+            .circleci/docker-run.sh make lint
+
+  use_remote_docker:
+    steps:
+      - setup_remote_docker:
+          version: 18.06.0-ce
+          docker_layer_caching: true
+
+  playbook_run:
+    parameters:
+      playbook:
+        type: string
+    steps:
+      - run:
+          name: Run << parameters.playbook >>
+          command: |
+            .circleci/test-ansible-playbook.sh << parameters.playbook >> \
+              -e "@/tmp/config/test.yml" \
+              -e "@.circleci/ansible-vars-ci.yml"
+
+  playbook_test:
+    parameters:
+      playbook:
+        type: string
+    steps:
+      - run:
+          name: Setup ansible environment
+          command: |
+            # Keep in sync with dockerfile with additional sshpass
+            apk add sshpass \
+              gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers
+            pip3 uninstall -y ansible
+            pip3 install --upgrade pip==21.3.1 setuptools-rust==1.1.2
+            pip3 install -r requirements-lock.txt
+            ansible-galaxy install -r ansible/requirements.yml
+      - run:
+          name: Dump node configuration
+          command: |
+            make vault-config-test
+      - playbook_run:
+          playbook: ansible/setup.yml
+      - playbook_run:
+          playbook: << parameters.playbook >>
+
   build_check:
     steps:
       - setup_remote_docker:
@@ -133,16 +193,40 @@ commands:
 
 
 jobs:
-  build_check_ubuntu_1804:
-    executor: ubuntu-1804
+  build_lint:
+    executor: infra-master
     working_directory: /src
     environment:
       DOCKERHUB_REPO: aeternity/infrastructure
-      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
-      ANSIBLE_HOST_KEY_CHECKING: False
     steps:
       - checkout
-      - build_check
+      - use_remote_docker
+      # Used in lint
+      - docker_build_branch
+      - lint
+
+  playbook_test:
+    executor: ubuntu-1804
+    parameters:
+      playbook:
+        type: string
+    steps:
+      - checkout
+      - use_remote_docker
+      - playbook_test:
+          playbook: << parameters.playbook >>
+
+  docker_push_branch:
+    executor: infra-master
+    steps:
+      - checkout
+      - use_remote_docker
+      - docker_login
+      - run:
+          name: Push (branch) Docker image to DockerHub
+          command: |
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
+      - fail_notification
 
   docker_push_latest:
     <<: *machine_config
@@ -200,35 +284,46 @@ jobs:
         - fail_notification
 
 workflows:
-  check_deploy:
+  branch:
     jobs:
-      - build_check_ubuntu_1804:
-          context: ae-vault-infra
-          requires: []
-
-      - stable_integration_tests:
+      - build_lint
+      - playbook_test:
+          name: playbook-test-<< matrix.playbook >>
+          matrix:
+            parameters:
+              playbook:
+                - ansible/monitoring.yml
+                - ansible/deploy.yml
+          requires:
+            - build_lint
+      - branch_integration_tests:
           context: ae-vault-infra
           requires:
-            - build_check_ubuntu_1804
+            - build_lint
+      - docker_push_branch:
+          requires:
+            - build_lint
+            - playbook_test
+            - branch_integration_tests
+
+  master:
+    jobs:
+      - docker_push_latest:
+          context: ae-vault-infra
+          requires: []
+          filters:
+            branches:
+              only: master
+
+  release:
+    jobs:
+      - stable_integration_tests:
+          context: ae-vault-infra
           filters:
             branches:
               ignore: /.*/
             tags:
               only: /^v.*$/
-
-      - branch_integration_tests:
-          context: ae-vault-infra
-          requires: []
-
-      - docker_push_latest:
-          context: ae-vault-infra
-          requires:
-            - build_check_ubuntu_1804
-            - branch_integration_tests
-          filters:
-            branches:
-              only: master
-
       - docker_push_tag:
           context: ae-vault-infra
           filters:
