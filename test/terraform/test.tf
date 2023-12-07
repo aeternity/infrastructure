@@ -17,8 +17,6 @@ variable "bootstrap_version" {
 provider "aws" {
   region                  = "ap-southeast-2"
   alias                   = "ap-southeast-2"
-  shared_credentials_file = "/aws/credentials"
-  profile                 = "aeternity"
 }
 
 module "aws_deploy-test-aenode" {
