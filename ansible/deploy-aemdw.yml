@@ -10,17 +10,16 @@
 
   vars:
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
-    project_root: "/home/{{ ansible_user_id }}/aemdw"
+    aemdw_project_root: "/home/{{ ansible_user_id }}/aemdw"
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
-    # datadog_api_key: ""
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
-    downtime: 20
+    downtime: "0"
     health_check: yes
     healthcheck_port: 3013
     mdw_healthcheck_port: 4000
-    db_path: "{{ project_root }}/db"
-    logs_path: "{{ project_root }}/log"
+    db_path: "{{ aemdw_project_root }}/db"
+    logs_path: "{{ aemdw_project_root }}/log"
     docker_repository: aeternity/ae_mdw
     docker_tag: "latest"
 
@@ -64,9 +63,9 @@
           - downtime is defined
           - downtime != "0"
 
-      - name: Make sure 'project_root' exists
+      - name: Make sure 'aemdw_project_root' exists
         file:
-            path: "{{ project_root }}"
+            path: "{{ aemdw_project_root }}"
             state: directory
             # allow group read for integration purposes  (e.g. logs)
             mode: 0750
@@ -92,7 +91,7 @@
       - name: Update configuration files
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/config/{{ vault_config_key }}:{{ item.key }}') }}"
-          dest: "{{ project_root }}/{{ item.value }}"
+          dest: "{{ aemdw_project_root }}/{{ item.value }}"
           mode: '0600'
         loop: "{{ files | dict2items }}"
         when: files is defined and vault_config_key is defined
@@ -119,9 +118,9 @@
             - "{{ db_path }}/mnesia:/home/aeternity/node/local/rel/aeternity/data/mnesia"
             - "{{ db_path }}/mdw.db:/home/aeternity/node/local/rel/aeternity/data/mdw.db"
             - "{{ logs_path }}:/home/aeternity/node/ae_mdw/log"
-            - "{{ project_root }}/accounts.json:/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_accounts.json"
-            - "{{ project_root }}/contracts.json:/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_contracts.json"
-            - "{{ project_root }}/aeternity.yaml:/home/aeternity/aeternity.yaml"
+            - "{{ aemdw_project_root }}/accounts.json:/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_accounts.json"
+            - "{{ aemdw_project_root }}/contracts.json:/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_contracts.json"
+            - "{{ aemdw_project_root }}/aeternity.yaml:/home/aeternity/aeternity.yaml"
           ports:
             - "3013:3013"
             - "3113:3113"

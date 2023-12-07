@@ -241,6 +241,7 @@ workflows:
               playbook:
                 - ansible/monitoring.yml
                 - ansible/deploy.yml
+                - ansible/deploy-aemdw.yml
           requires:
             - build_lint
       # - branch_integration_tests:

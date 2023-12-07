@@ -67,11 +67,23 @@
         - developer-ssh-keys
       notify: restart ssh
 
-    - name: Install dev tools
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install dev and ops tools
       apt:
         state: present
         update_cache: yes
         pkg:
+        - sudo
+        - docker-ce
         - build-essential
         - python3-pip
         - python3-distutils
@@ -115,6 +127,13 @@
         LC_ALL: C.UTF-8
       tags:
         - dev-tools
+
+    - name: Add user '{{ user }}' to docker group
+      user:
+        name: '{{ item }}'
+        groups: sudo
+        append: yes
+      loop: ['ubuntu', 'master', 'aeternity']
 
     - name: Create Vault source directory
       file:
