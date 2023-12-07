@@ -67,6 +67,15 @@
         - developer-ssh-keys
       notify: restart ssh
 
+    - name: Install GPG
+      apt:
+        state: present
+        update_cache: yes
+        pkg:
+        - gnupg
+      tags:
+        - dev-tools
+
     - name: Add Docker GPG apt Key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
