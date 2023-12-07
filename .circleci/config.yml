@@ -83,16 +83,16 @@ commands:
       - setup_remote_docker:
           version: 18.06.0-ce
           docker_layer_caching: true
-      # - run:
-      #     # Used in .circleci/docker-run.sh
-      #     name: Build docker branch image
-      #     command: |
-      #       docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
-      # - run:
-      #     name: Configuration lint
-      #     # Secrets are auto-imported by the docker entry-point
-      #     command: |
-      #       .circleci/docker-run.sh make lint
+      - run:
+          # Used in .circleci/docker-run.sh
+          name: Build docker branch image
+          command: |
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
+      - run:
+          name: Configuration lint
+          # Secrets are auto-imported by the docker entry-point
+          command: |
+            .circleci/docker-run.sh make lint
       - run:
           name: Setup ansible environment
           command: |
@@ -229,18 +229,18 @@ workflows:
             tags:
               only: /^v.*$/
 
-      # - branch_integration_tests:
-      #     context: ae-vault-infra
-      #     requires: []
+      - branch_integration_tests:
+          context: ae-vault-infra
+          requires: []
 
-      # - docker_push_latest:
-      #     context: ae-vault-infra
-      #     requires:
-      #       - build_check_ubuntu_1804
-      #       - branch_integration_tests
-      #     filters:
-      #       branches:
-      #         only: master
+      - docker_push_latest:
+          context: ae-vault-infra
+          requires:
+            - build_check_ubuntu_1804
+            - branch_integration_tests
+          filters:
+            branches:
+              only: master
 
       - docker_push_tag:
           context: ae-vault-infra
