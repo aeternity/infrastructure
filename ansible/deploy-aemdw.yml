@@ -15,6 +15,7 @@
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
+    enable_aws_checks: true
     health_check: yes
     healthcheck_port: 3013
     mdw_healthcheck_port: 4000
@@ -33,17 +34,23 @@
         timeout: 2
       register: aws_uri_check
       failed_when: False
+      when:
+        - enable_aws_checks|bool
       tags: [always]
 
     - name: Set AWS check fact
       set_fact:
         is_aws: "{{ aws_uri_check.status == 200 }}"
+      when:
+        - enable_aws_checks|bool
       tags: [always]
 
     - name: Gather instance metadata facts
       ec2_metadata_facts:
       tags: [always]
-      when: is_aws
+      when:
+        - enable_aws_checks|bool
+        - is_aws
 
     - block:
       - name: Schedule downtime
