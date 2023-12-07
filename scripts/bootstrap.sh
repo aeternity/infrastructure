@@ -33,6 +33,7 @@ vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value
 vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
 node_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "node_config") | .Value')
 bootstrap_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "bootstrap_config") | .Value')
+aerole=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "role") | .Value')
 
 ###
 ### Vault - Authenticate the instance to CSM
@@ -101,10 +102,21 @@ ansible-playbook \
     setup.yml \
     monitoring.yml
 
-ansible-playbook \
-    -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3) \
-    --become-user aeternity -b \
-    -e ${ANSIBLE_VARS} \
-    deploy.yml \
-    mnesia_snapshot_restore.yml
+if [[ -n "${aerole}" && "${aerole}" = "aenode" ]]; then
+    ansible-playbook \
+        -i localhost, -c local \
+        -e ansible_python_interpreter=$(which python3) \
+        --become-user aeternity -b \
+        -e ${ANSIBLE_VARS} \
+        deploy.yml \
+        mnesia_snapshot_restore.yml
+fi
+
+if [[ -n "${aerole}" && "${aerole}" = "aemdw" ]]; then
+    ansible-playbook \
+        -i localhost, -c local \
+        -e ansible_python_interpreter=$(which python3) \
+        --become-user ubuntu -b \
+        -e ${ANSIBLE_VARS} \
+        deploy-aemdw.yml
+fi
