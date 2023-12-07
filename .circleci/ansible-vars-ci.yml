@@ -13,6 +13,3 @@ datadog_app_key: ""
 
 project_root: /root/node
 packages_path: /tmp
-
-files:
-  aeternity_yaml: aeternity.yaml
