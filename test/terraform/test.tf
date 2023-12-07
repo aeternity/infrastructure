@@ -15,7 +15,6 @@ variable "bootstrap_version" {
 }
 
 provider "aws" {
-  version                 = "2.19.0"
   region                  = "ap-southeast-2"
   alias                   = "ap-southeast-2"
   shared_credentials_file = "/aws/credentials"
@@ -23,8 +22,8 @@ provider "aws" {
 }
 
 module "aws_deploy-test-aenode" {
-  source              = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v3.0.1"
-  env                 = var.env_name
+  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v3.0.1"
+  env    = var.env_name
 
   static_nodes = 1
   spot_nodes   = 1

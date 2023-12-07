@@ -61,6 +61,7 @@ commands:
       - run:
           name: Integration Tests
           command: |
+            tfenv use 1.1.4
             make integration-tests TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
       - run:
           name: Integration env cleanup
