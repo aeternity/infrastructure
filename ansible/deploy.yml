@@ -16,8 +16,8 @@
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
     health_check: yes
-    enable_aws_checks: true
     healthcheck_port: 3013
+    enable_aws_checks: true
     db_path: data/
     keys_dir: keys/
 

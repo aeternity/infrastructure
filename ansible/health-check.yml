@@ -5,6 +5,7 @@
   gather_facts: false
 
   vars:
+    healthcheck_port: 3013
     goss_health_check: true
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
 
