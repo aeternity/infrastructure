@@ -28,6 +28,7 @@ module "aws_deploy-test-aenode" {
   static_nodes = 1
   spot_nodes   = 1
 
+  instance_type  = "t3.large"
   instance_types = ["t3.large"]
   ami_name       = "aeternity-ubuntu-18.04-*"
 
@@ -57,8 +58,9 @@ module "aws_deploy-test-aemdw" {
   env    = var.env_name
 
   static_nodes = 1
-  spot_nodes   = 1
+  spot_nodes   = 0
 
+  instance_type  = "t3.large"
   instance_types = ["t3.large"]
   ami_name       = "aeternity-ubuntu-18.04-*"
 
