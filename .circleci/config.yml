@@ -205,6 +205,9 @@ jobs:
     parameters:
       playbook:
         type: string
+    environment:
+      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
+      ANSIBLE_HOST_KEY_CHECKING: False
     steps:
       - checkout
       - use_remote_docker
@@ -213,6 +216,8 @@ jobs:
 
   docker_push_branch:
     executor: infra-master
+    environment:
+      DOCKERHUB_REPO: aeternity/infrastructure
     steps:
       - checkout
       - use_remote_docker
