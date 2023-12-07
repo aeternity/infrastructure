@@ -135,7 +135,7 @@ integration-tests-cleanup: secrets
 integration-tests-run:
 	@$(MAKE) ansible/health-check.yml DEPLOY_ENV=test LIMIT=tag_envid_$(TF_VAR_envid)
 
-integration-tests: integration-tests-init integration-tests-run
+integration-tests: integration-tests-init integration-tests-run integration-tests-cleanup
 
 lint-ansible:
 	ansible-lint ansible/*.yml --exclude ~/.ansible/roles
