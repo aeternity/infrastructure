@@ -111,6 +111,7 @@ commands:
           name: Run << parameters.playbook >>
           command: |
             .circleci/test-ansible-playbook.sh << parameters.playbook >> \
+              -e "@/tmp/config/test.yml" \
               -e "@.circleci/ansible-vars-ci.yml"
 
   playbook_test:
@@ -123,6 +124,10 @@ commands:
           command: |
             pip3 install -r requirements-lock.txt
             ansible-galaxy install -r ansible/requirements.yml
+      - run:
+          name: Dump node configuration
+          command: |
+            make vault-config-test
       - playbook_run:
           playbook: ansible/setup.yml
       - playbook_run:
