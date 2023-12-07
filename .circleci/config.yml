@@ -4,7 +4,8 @@ executors:
   ubuntu-1804:
     docker:
       - image: aeternity/infrastructure:master
-      - image: rastasheep/ubuntu-sshd:18.04
+      - name: aenode
+        image: rastasheep/ubuntu-sshd:18.04
 
 references:
   container_config: &container_config
@@ -95,8 +96,12 @@ commands:
       - run:
           name: Setup ansible environment
           command: |
-            apk add sshpass
-            pip3 install -r requirements.txt
+            # Keep in sync with dockerfile with additional sshpass
+            apk add sshpass \
+              gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers
+            pip3 uninstall -y ansible
+            pip3 install --upgrade pip==21.3.1 setuptools-rust==1.1.2
+            pip3 install -r requirements-lock.txt
             ansible-galaxy install -r ansible/requirements.yml
       - run:
           name: Dump node configuration
@@ -107,25 +112,19 @@ commands:
           command: |
             .circleci/test-ansible-playbook.sh ansible/setup.yml \
               -e "@/tmp/config/test.yml" \
-              -e env=test
+              -e "@.circleci/ansible-vars-ci.yml"
       - run:
           name: Test ansible/monitoring.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/monitoring.yml \
               -e "@/tmp/config/test.yml" \
-              -e datadog_api_key=test \
-              -e datadog_enabled=yes \
-              -e env=test
+              -e "@.circleci/ansible-vars-ci.yml"
       - run:
           name: Test ansible/deploy.yml
           command: |
             .circleci/test-ansible-playbook.sh ansible/deploy.yml \
               -e "@/tmp/config/test.yml" \
-              -e env=test \
-              -e datadog_api_key= \
-              -e datadog_app_key= \
-              -e project_root=/root/node \
-              -e packages_path=/tmp
+              -e "@.circleci/ansible-vars-ci.yml"
       - docker_login
       - run:
           name: Push (branch) Docker image to DockerHub

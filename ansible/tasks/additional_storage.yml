@@ -18,7 +18,7 @@
   tags: [always]
   when:
     - additional_storage is defined
-    - additional_storage
+    - additional_storage|bool
     - additional_storage_mountpoint is defined
     - is_aws
     - ansible_devices.nvme0n1.partitions.keys()|length|int == 0
@@ -29,7 +29,7 @@
   tags: [always]
   when:
     - additional_storage is defined
-    - additional_storage
+    - additional_storage|bool
     - additional_storage_mountpoint is defined
     - is_aws
     - ansible_devices.nvme1n1.partitions.keys()|length|int == 0

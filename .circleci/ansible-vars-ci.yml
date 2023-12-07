@@ -1,0 +1,15 @@
+---
+additional_storage: false
+restart_ssh: false
+fail2ban_enable: false
+enable_aws_checks: false
+service_mgr: sysvinit
+
+datadog_install: false
+datadog_enabled: false
+datadog_skip_running_check: true
+datadog_api_key: ""
+datadog_app_key: ""
+
+project_root: /root/node
+packages_path: /tmp

@@ -4,6 +4,8 @@
   become: yes
   gather_facts: yes
   tags: [datadog]
+  vars:
+    enable_aws_checks: true
   tasks:
     - name: Check if running on AWS instance
       uri:
@@ -11,22 +13,21 @@
         timeout: 2
       register: aws_uri_check
       failed_when: False
-      when: packer_build_name is not defined
+      when:
+        - enable_aws_checks|bool
+        - packer_build_name is not defined
 
     - name: Set AWS check fact
       set_fact:
         is_aws: "{{ packer_build_name is not defined and aws_uri_check.status == 200 }}"
+      when:
+        - enable_aws_checks|bool
 
     - name: Get instance metadata facts
       ec2_metadata_facts:
-      when: is_aws
-
-    - name: "Load a variable files for environment: {{ env }}"
-      include_vars: "{{ item }}"
-      with_first_found:
-        - files:
-            - "vars/aeternity/{{ env }}.yml"
-          skip: true
+      when:
+        - enable_aws_checks|bool
+        - is_aws
 
 - name: Configure health check services (goss)
   hosts: all
@@ -148,6 +149,7 @@
       service:
         name: goss
         state: restarted
+        use: service_mgr|default(ansible_service_mgr)
       listen:
         - restart goss
       tags:
@@ -163,8 +165,9 @@
   vars:
     project_user: aeternity
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
-    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
     network_id: "{{ (node_config['fork_management']|default(dict(network_id = 'unknown')))['network_id'] }}"
+    fail2ban_enable: true
+    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
     datadog_default_tags:
       - "lsb:{{ ansible_lsb.description }}"
       - "public_ipv4:{{ public_ipv4|default('unknown') }}"
@@ -293,11 +296,14 @@
       service:
         name: rsyslog
         state: restarted
+        use: service_mgr|default(ansible_service_mgr)
       listen:
         - restart rsyslogd
     - name: Restart fail2ban
       service:
         name: fail2ban
         state: restarted
+        use: service_mgr|default(ansible_service_mgr)
+      when: fail2ban_enable|bool
       listen:
         - restart fail2ban

@@ -3,9 +3,10 @@
 !docker-entrypoint.sh
 !import-secrets.sh
 !ansible
+!.ansible-lint
 !aws
 !Makefile
-!requirements.txt
+!requirements-lock.txt
 !test/goss/
 !scripts/
 # Copy from .gitignore

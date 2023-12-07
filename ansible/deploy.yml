@@ -16,6 +16,7 @@
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
     health_check: yes
+    enable_aws_checks: true
 
     # Label used for datadog tagging and ENV file planting
     env: unknown
@@ -27,17 +28,23 @@
         timeout: 2
       register: aws_uri_check
       failed_when: False
+      when:
+        - enable_aws_checks|bool
       tags: [always]
 
     - name: Set AWS check fact
       set_fact:
         is_aws: "{{ aws_uri_check.status == 200 }}"
+      when:
+        - enable_aws_checks|bool
       tags: [always]
 
     - name: Gather instance metadata facts
       ec2_metadata_facts:
+      when:
+        - enable_aws_checks|bool
+        - is_aws
       tags: [always]
-      when: is_aws
 
     - block:
       - name: Schedule downtime
