@@ -238,15 +238,15 @@ workflows:
                 - ansible/deploy.yml
           requires:
             - build_lint
-      # - branch_integration_tests:
-      #     context: ae-vault-infra
-      #     requires:
-      #       - build_lint
-      # - docker_push_branch:
-      #     requires:
-      #       - build_lint
-      #       - playbook_test
-      #       - branch_integration_tests
+      - branch_integration_tests:
+          context: ae-vault-infra
+          requires:
+            - build_lint
+      - docker_push_branch:
+          requires:
+            - build_lint
+            - playbook_test
+            - branch_integration_tests
 
   master:
     jobs:
