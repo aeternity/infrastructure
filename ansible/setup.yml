@@ -121,7 +121,7 @@
       pip:
         name:
           # This should match the same versions as in requirements.txt
-          - ansible==3.4.0
+          - ansible==4.10.0
           - awscli==1.22.30
           - boto3==1.20.30
           - boto==2.49.0
