@@ -178,7 +178,10 @@
           dest: "{{ project_root }}/{{ item.value }}"
           mode: '0600'
         loop: "{{ files | dict2items }}"
-        when: files is defined and vault_config_key is defined
+        when:
+          - files is defined
+          - vault_config_key is defined
+          - vault_config_key != ""
         notify: "restart aeternity daemon"
         tags: [config]
 
