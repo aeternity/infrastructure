@@ -62,10 +62,11 @@
     mode: 0744
   when: additional_storage_dev is defined
 
-- name: Make sure that node will be able to access storage
+- name: Make sure middleware storage directory exists
   file:
     path: "{{ additional_storage_mountpoint }}/aemdw"
     owner: "{{ aemdw_user }}"
     group: "{{ aemdw_user }}"
+    state: directory
     mode: 0744
   when: additional_storage_dev is defined
