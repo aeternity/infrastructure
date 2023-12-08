@@ -138,10 +138,10 @@
       tags:
         - dev-tools
 
-    - name: Add user '{{ user }}' to docker group
+    - name: Add user '{{ item }}' to docker group
       user:
         name: '{{ item }}'
-        groups: sudo
+        groups: docker
         append: yes
       loop: ['ubuntu', 'master', 'aeternity']
 
