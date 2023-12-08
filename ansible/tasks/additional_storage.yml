@@ -59,7 +59,7 @@
     path: "{{ additional_storage_mountpoint }}"
     owner: "{{ project_user }}"
     group: "{{ project_user }}"
-    mode: 0744
+    mode: 0755
   when: additional_storage_dev is defined
 
 - name: Make sure middleware storage directory exists
