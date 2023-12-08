@@ -19,8 +19,8 @@
     health_check: yes
     healthcheck_port: 3013
     mdw_healthcheck_port: 4000
-    db_path: "{{ aemdw_project_root }}/db"
-    logs_path: "{{ aemdw_project_root }}/log"
+    aemdw_db_path: "{{ aemdw_project_root }}/db"
+    aemdw_logs_path: "{{ aemdw_project_root }}/log"
     docker_repository: aeternity/ae_mdw
     docker_tag: "latest"
 
@@ -82,9 +82,9 @@
           path: "{{ item }}"
           state: directory
         loop:
-           - "{{ db_path }}"
-           - "{{ db_path }}/mnesia"
-           - "{{ db_path }}/mdw.db"
+           - "{{ aemdw_db_path }}"
+           - "{{ aemdw_db_path }}/mnesia"
+           - "{{ aemdw_db_path }}/mdw.db"
         tags: [config]
 
       - name: Make sure log directories exists
@@ -92,7 +92,7 @@
           path: "{{ item }}"
           state: directory
         loop:
-          - "{{ logs_path }}"
+          - "{{ aemdw_logs_path }}"
         tags: [config]
 
       - name: Update configuration files
@@ -122,9 +122,9 @@
             # this is default? If the config file is mdw specific we don't need overwrite
             AE__CHAIN__DB_PATH: "/home/aeternity/node/local/rel/aeternity/data/mnesia"
           volumes:
-            - "{{ db_path }}/mnesia:/home/aeternity/node/local/rel/aeternity/data/mnesia"
-            - "{{ db_path }}/mdw.db:/home/aeternity/node/local/rel/aeternity/data/mdw.db"
-            - "{{ logs_path }}:/home/aeternity/node/ae_mdw/log"
+            - "{{ aemdw_db_path }}/mnesia:/home/aeternity/node/local/rel/aeternity/data/mnesia"
+            - "{{ aemdw_db_path }}/mdw.db:/home/aeternity/node/local/rel/aeternity/data/mdw.db"
+            - "{{ aemdw_logs_path }}:/home/aeternity/node/ae_mdw/log"
             - "{{ aemdw_project_root }}/accounts.json:/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_accounts.json"
             - "{{ aemdw_project_root }}/contracts.json:/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_contracts.json"
             - "{{ aemdw_project_root }}/aeternity.yaml:/home/aeternity/aeternity.yaml"

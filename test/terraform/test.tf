@@ -43,7 +43,7 @@ module "aws_deploy-test-aenode" {
     bootstrap_version = var.bootstrap_version
     vault_addr        = var.vault_addr
     vault_role        = "ae-node"
-    node_config       = "secret/aenode/config/${var.env_name}"
+    bootstrap_config  = "secret/aenode/config/${var.env_name}"
   }
 
   providers = {
@@ -75,7 +75,7 @@ module "aws_deploy-test-aemdw" {
     bootstrap_version = var.bootstrap_version
     vault_addr        = var.vault_addr
     vault_role        = "ae-node"
-    node_config       = "secret/aenode/config/${var.env_name}"
+    bootstrap_config  = "secret/aenode/config/${var.env_name}"
   }
 
   providers = {

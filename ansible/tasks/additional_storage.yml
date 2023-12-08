@@ -61,3 +61,11 @@
     group: "{{ project_user }}"
     mode: 0744
   when: additional_storage_dev is defined
+
+- name: Make sure that node will be able to access storage
+  file:
+    path: "{{ additional_storage_mountpoint }}/aemdw"
+    owner: "{{ aemdw_user }}"
+    group: "{{ aemdw_user }}"
+    mode: 0744
+  when: additional_storage_dev is defined
