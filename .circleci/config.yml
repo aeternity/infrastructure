@@ -59,15 +59,19 @@ commands:
     description: "Integration Tests"
     steps:
       - run:
-          name: Integration Tests
+          name: Create Infrastructure
           command: |
             tfenv use 1.1.4
-            make integration-tests TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
+            make integration-tests-init TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
       - run:
-          name: Integration env cleanup
+          name: Health Checks
+          command: |
+            make integration-tests-run TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
+      - run:
+          name: Tear Down Infrastructure (cleanup)
           command: |
             make integration-tests-cleanup TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
-          when: on_fail
+          when: always
 
   fail_notification:
     description: Sends notification to RocketChat devops alert group on failure (master only)
@@ -254,6 +258,7 @@ workflows:
           requires:
             - build_lint
       - docker_push_branch:
+          context: ae-vault-infra
           requires:
             - build_lint
             - playbook_test

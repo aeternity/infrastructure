@@ -16,7 +16,7 @@
       include_tasks: tasks/health_check.yml
 
 
-- name: Health check aemdws
+- name: Health check aemdw
   hosts: tag_role_aemdw
   remote_user: aeternity
   gather_facts: false
