@@ -1,5 +1,5 @@
-ansible==3.4.0
-ansible-base==2.10.17
+ansible==4.10.0
+ansible-core==2.11.12
 ansible-lint==4.3.7
 awscli==1.22.30
 boto==2.49.0
@@ -29,11 +29,14 @@ pyparsing==3.1.1
 python-dateutil==2.8.2
 PyYAML==3.12
 requests==2.27.1
+resolvelib==0.5.4
 rich==10.16.2
 rsa==4.7.2
 ruamel.yaml==0.18.3
 ruamel.yaml.clib==0.2.8
 s3transfer==0.5.2
+semantic-version==2.10.0
+setuptools-rust==1.1.2
 six==1.16.0
 typing_extensions==4.1.1
 urllib3==1.26.18

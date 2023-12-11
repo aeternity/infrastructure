@@ -8,8 +8,8 @@ VAULT_ADDR ?= $(AE_VAULT_ADDR)
 TF_COMMON_PARAMS = -var vault_addr=$(VAULT_ADDR) -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
 CONFIG_OUTPUT_DIR ?= /tmp/config
 VAULT_CONFIG_ROOT ?= secret/aenode/config
-VAULT_CONFIG_FIELD ?= node_config
-LIST_CONFIG_ENVS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
+VAULT_CONFIG_FIELD ?= ansible_vars
+LIST_CONFIG_KEYS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
 
 # char escaping
 ,:=,
@@ -30,8 +30,8 @@ SNAPSHOT_SUFFIX ?=
 DEPLOY_ENV ?=
 DEPLOY_ROLE ?= aenode
 DEPLOY_DB_VERSION ?= 1
-CONFIG_ENV ?= $(DEPLOY_ENV)
-DEPLOY_CONFIG ?= $(if $(CONFIG_ENV),$(CONFIG_OUTPUT_DIR)/$(CONFIG_ENV).yml)
+CONFIG_KEY ?= $(DEPLOY_ENV)
+DEPLOY_CONFIG ?= $(if $(CONFIG_KEY),$(CONFIG_OUTPUT_DIR)/$(CONFIG_KEY).yml)
 ANSIBLE_EXTRA_VARS =
 ANSIBLE_EXTRA_PARAMS ?=
 
@@ -52,6 +52,7 @@ ansible/%.yml: cert $(DEPLOY_CONFIG)
 		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
 		-e ansible_python_interpreter=$(PYTHON) \
 		-e env="$(DEPLOY_ENV)" \
+		-e vault_config_key="$(CONFIG_KEY)" \
 		$(if $(DEPLOY_CONFIG),-e "@$(DEPLOY_CONFIG)") \
 		$(ANSIBLE_EXTRA_VARS) \
 		$(ANSIBLE_EXTRA_PARAMS) \
@@ -94,6 +95,7 @@ manage-node: ansible/manage-node.yml
 setup-monitoring: ansible/monitoring.yml
 setup-node: ansible/setup.yml
 deploy: ansible/deploy.yml
+deploy-aemdw: ansible/deploy-aemdw.yml
 mnesia_snapshot: ansible/mnesia_snapshot.yml
 mnesia-reset-once: ansible/mnesia_reset_once.yml
 setup: setup-node setup-monitoring
@@ -133,7 +135,7 @@ integration-tests-cleanup: secrets
 	cd test/terraform && $(ENV) terraform destroy $(TF_COMMON_PARAMS) --auto-approve
 
 integration-tests-run:
-	@$(MAKE) ansible/health-check.yml DEPLOY_ENV=test LIMIT=tag_envid_$(TF_VAR_envid)
+	@$(MAKE) ansible/health-check.yml DEPLOY_ROLE= DEPLOY_ENV=test LIMIT=tag_envid_$(TF_VAR_envid)
 
 integration-tests: integration-tests-init integration-tests-run integration-tests-cleanup
 
@@ -178,10 +180,10 @@ $(CONFIG_OUTPUT_DIR):
 	@mkdir -p $(CONFIG_OUTPUT_DIR)
 
 vault-configs-list: secrets
-	@$(LIST_CONFIG_ENVS)
+	@$(LIST_CONFIG_KEYS)
 
 vault-configs-dump: secrets
-	@$(MAKE) --no-print-directory $(addprefix vault-config-, $(shell $(LIST_CONFIG_ENVS)))
+	@$(MAKE) --no-print-directory $(addprefix vault-config-, $(shell $(LIST_CONFIG_KEYS)))
 
 vault-config-% : $(CONFIG_OUTPUT_DIR)/%.yml ;
 

@@ -13,3 +13,4 @@ datadog_app_key: ""
 
 project_root: /root/node
 packages_path: /tmp
+vault_config_key: ""

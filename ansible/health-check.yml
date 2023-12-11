@@ -1,10 +1,30 @@
 ---
-- name: Health check remote nodes
-  hosts: all
+- name: Health check aenodes
+  hosts: tag_role_aenode
   remote_user: aeternity
   gather_facts: false
 
   vars:
+    healthcheck_port: 3013
+    mdw_healthcheck_enable: false
+    mdw_healthcheck_port: 4000
+    goss_health_check: true
+    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
+
+  tasks:
+    - name: Run health checks
+      include_tasks: tasks/health_check.yml
+
+
+- name: Health check aemdw
+  hosts: tag_role_aemdw
+  remote_user: aeternity
+  gather_facts: false
+
+  vars:
+    healthcheck_port: 3013
+    mdw_healthcheck_enable: true
+    mdw_healthcheck_port: 4000
     goss_health_check: true
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
 

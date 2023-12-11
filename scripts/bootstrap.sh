@@ -32,6 +32,8 @@ done
 vault_addr=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_addr") | .Value')
 vault_role=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "vault_role") | .Value')
 node_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "node_config") | .Value')
+bootstrap_config=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "bootstrap_config") | .Value')
+aerole=$(echo $AWS_TAGS | jq -r '.[] | select(.Key == "role") | .Value')
 
 ###
 ### Vault - Authenticate the instance to CSM
@@ -65,14 +67,13 @@ export VAULT_TOKEN=$(vault write -field=token auth/aws/login pkcs7=$PKCS7 role=$
 # Override the env defaults with ones stored in $vault_config
 if [[ -n "${node_config}" && "${node_config}" != "none" ]]; then
     vault read -field=node_config ${node_config} > /tmp/node_config.yml
+    ANSIBLE_VARS="@/tmp/node_config.yml"
 fi
 
-###
-### Temporary workaround to support old AMIs that include old ansible
-###
-
-pip3 uninstall -y ansible
-pip3 install ansible==3.4.0
+if [[ -n "${bootstrap_config}" && "${bootstrap_config}" != "none" ]]; then
+    vault read -field=ansible_vars ${bootstrap_config} > /tmp/ansible_vars.yml
+    ANSIBLE_VARS="@/tmp/ansible_vars.yml"
+fi
 
 ###
 ### Bootstrap the instance with Ansible playbooks
@@ -90,14 +91,25 @@ ansible-playbook \
     -i localhost, -c local \
     -e ansible_python_interpreter=$(which python3) \
     -e vault_addr=${vault_addr} \
-    -e "@/tmp/node_config.yml" \
+    -e ${ANSIBLE_VARS} \
     setup.yml \
     monitoring.yml
 
-ansible-playbook \
-    -i localhost, -c local \
-    -e ansible_python_interpreter=$(which python3) \
-    --become-user aeternity -b \
-    -e "@/tmp/node_config.yml" \
-    deploy.yml \
-    mnesia_snapshot_restore.yml
+if [[ -n "${aerole}" && "${aerole}" = "aenode" ]]; then
+    ansible-playbook \
+        -i localhost, -c local \
+        -e ansible_python_interpreter=$(which python3) \
+        --become-user aeternity -b \
+        -e ${ANSIBLE_VARS} \
+        deploy.yml \
+        mnesia_snapshot_restore.yml
+fi
+
+if [[ -n "${aerole}" && "${aerole}" = "aemdw" ]]; then
+    ansible-playbook \
+        -i localhost, -c local \
+        -e ansible_python_interpreter=$(which python3) \
+        --become-user ubuntu -b \
+        -e ${ANSIBLE_VARS} \
+        deploy-aemdw.yml
+fi

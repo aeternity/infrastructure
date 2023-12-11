@@ -16,7 +16,10 @@
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
     health_check: yes
+    healthcheck_port: 3013
     enable_aws_checks: true
+    db_path: data/
+    keys_dir: keys/
 
     # Label used for datadog tagging and ENV file planting
     env: unknown
@@ -130,53 +133,57 @@
         notify: "restart aeternity daemon"
         tags: [package]
 
-      - name: Fail on missing 'node_config.chain.db_path' variable
-        fail:
-          msg: 'Chain persistence is enabled, but "node_config.chain.db_path" is not defined'
-        when:
-          - node_config.chain.persist is defined
-          - node_config.chain.persist
-          - node_config.chain.db_path is not defined
-        tags: [config]
-
-      - name: "Make sure chain path exists"
+      - name: "Make sure chain path exists (relative) - {{ db_path }}"
         file:
-          path: "{{ project_root }}/{{ node_config.chain.db_path }}"
+          path: "{{ project_root }}/{{ db_path }}"
           state: directory
         when: additional_storage is not defined or not additional_storage
         tags: [config]
 
-      - name: "Make sure chain path ( {{ node_config.chain.db_path }} ) exists"
+      - name: "Make sure chain path exists (absolute) - {{ db_path }}"
         file:
-          path: "{{ node_config.chain.db_path }}"
+          path: "{{ db_path }}"
           state: directory
         when: additional_storage is defined and additional_storage
         tags: [config]
 
-      - name: "Make sure keys dir ( {{ node_config['keys']['dir'] }} ) exists"
+      - name: "Make sure keys dir ( {{ keys_dir }} ) exists"
         file:
-          path: "{{ project_root }}/{{ node_config['keys']['dir'] }}"
+          path: "{{ project_root }}/{{ keys_dir }}"
           state: directory
           mode: 0700
         tags: [config, peer_keys]
 
-      - name: "Copy node public peer key to {{ node_config['keys']['dir'] }}/peer_key.pub"
+      - name: "Copy node public peer key to {{ keys_dir }}/peer_key.pub"
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
-          dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key.pub"
+          dest: "{{ project_root }}/{{ keys_dir }}/peer_key.pub"
           mode: 0600
         when: seed_peers is defined and public_ipv4 in seed_peers
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
-      - name: "Copy node private peer key to {{ node_config['keys']['dir'] }}/peer_key"
+      - name: "Copy node private peer key to {{ keys_dir }}/peer_key"
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/private:base64')|b64decode }}"
-          dest: "{{ project_root }}/{{ node_config['keys']['dir'] }}/peer_key"
+          dest: "{{ project_root }}/{{ keys_dir }}/peer_key"
           mode: 0600
         when: seed_peers is defined and public_ipv4 in seed_peers
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
+
+      - name: Update configuration files
+        copy:
+          content: "{{ lookup('hashi_vault', 'secret=secret/aenode/config/{{ vault_config_key }}:{{ item.key }}') }}"
+          dest: "{{ project_root }}/{{ item.value }}"
+          mode: '0600'
+        loop: "{{ files | dict2items }}"
+        when:
+          - files is defined
+          - vault_config_key is defined
+          - vault_config_key != ""
+        notify: "restart aeternity daemon"
+        tags: [config]
 
       - name: Update node configuration
         copy:
@@ -204,9 +211,9 @@
 
       - name: Send Datadog event
         datadog_event:
-          host: "{{ public_ipv4 }}"
+          host: "{{ ansible_ec2_instance_id|default(ansible_hostname ) }}"
           alert_type: success
-          title: Deploy
+          title: Node Deployment
           text: |
             %%%
             Revision: [{{ ansible_local.aeternity.revision }}](https://github.com/aeternity/aeternity/commit/{{ ansible_local.aeternity.revision }})
@@ -225,9 +232,9 @@
       rescue:
         - name: Send Datadog event
           datadog_event:
-            host: "{{ public_ipv4 }}"
+            host: "{{ ansible_ec2_instance_id|default(ansible_hostname ) }}"
             alert_type: error
-            title: Deploy
+            title: Node Deployment
             text: |
               %%%
               Package: {{ package|default('unknown') }}
