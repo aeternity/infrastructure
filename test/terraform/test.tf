@@ -52,7 +52,7 @@ module "aws_deploy-test-aenode" {
 }
 
 module "aws_deploy-test-aemdw" {
-  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v3.0.1"
+  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=mdw_support"
   env    = var.env_name
 
   static_nodes = 1
@@ -64,6 +64,8 @@ module "aws_deploy-test-aemdw" {
 
   additional_storage      = true
   additional_storage_size = 5
+
+  enable_mdw = true
 
   tags = {
     env   = var.env_name

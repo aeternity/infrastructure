@@ -135,7 +135,7 @@ integration-tests-cleanup: secrets
 	cd test/terraform && $(ENV) terraform destroy $(TF_COMMON_PARAMS) --auto-approve
 
 integration-tests-run:
-	@$(MAKE) ansible/health-check.yml DEPLOY_ENV=test LIMIT=tag_envid_$(TF_VAR_envid)
+	@$(MAKE) ansible/health-check.yml DEPLOY_ROLE= DEPLOY_ENV=test LIMIT=tag_envid_$(TF_VAR_envid)
 
 integration-tests: integration-tests-init integration-tests-run integration-tests-cleanup
 
