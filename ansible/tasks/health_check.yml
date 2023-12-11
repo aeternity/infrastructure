@@ -7,7 +7,7 @@
   wait_for:
     port: "{{ healthcheck_port }}"
     host: "127.0.0.1"
-    timeout: 180
+    timeout: 360
   tags: [health-check]
 
 - name: Local Node Health check
@@ -38,7 +38,9 @@
   until: mdw_uri_output.status == 200
   retries: 6
   delay: 10
-  when: mdw_healthcheck_enable|bool
+  when:
+    - mdw_healthcheck_enable is defined
+    - mdw_healthcheck_enable|bool
   tags: [health-check]
 
 - name: External Middleware Health check
@@ -46,7 +48,9 @@
     url: "http://{{ public_ipv4 }}:{{ mdw_healthcheck_port }}/status"
     timeout: 5
     status_code: 200
-  when: mdw_healthcheck_enable|bool
+  when:
+    - mdw_healthcheck_enable is defined
+    - mdw_healthcheck_enable|bool
   connection: local
   tags: [health-check]
 
