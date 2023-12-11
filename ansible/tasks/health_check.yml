@@ -10,8 +10,8 @@
     status_code: 200
   register: node_uri_output
   until: node_uri_output.status == 200
-  retries: 6
-  delay: 10
+  retries: 12
+  delay: 15
   tags: [health-check]
 
 - name: External Node Health check
