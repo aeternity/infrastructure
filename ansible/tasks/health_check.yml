@@ -3,15 +3,22 @@
   wait_for_connection:
     timeout: 180
 
+- name: Wait aeternity node API to boot
+  wait_for:
+    port: "{{ healthcheck_port }}"
+    host: "127.0.0.1"
+    timeout: 180
+  tags: [health-check]
+
 - name: Local Node Health check
   uri:
     url: "http://127.0.0.1:{{ healthcheck_port }}/v2/status"
-    timeout: 2
+    timeout: 1
     status_code: 200
   register: node_uri_output
   until: node_uri_output.status == 200
-  retries: 12
-  delay: 15
+  retries: 6
+  delay: 10
   tags: [health-check]
 
 - name: External Node Health check
