@@ -7,7 +7,7 @@ executors:
   ubuntu-1804:
     docker:
       - image: aeternity/infrastructure:master
-      - name: aenode
+      - name: aenode1804
         image: aeternity/ubuntu-sshd:18.04
 
 references:
@@ -164,6 +164,7 @@ jobs:
     environment:
       ANSIBLE_CALLBACK_WHITELIST: profile_tasks
       ANSIBLE_HOST_KEY_CHECKING: False
+      PLAYBOOK_HOST: aenode1804
     steps:
       - checkout
       - use_remote_docker
