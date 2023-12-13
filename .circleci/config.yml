@@ -4,11 +4,13 @@ executors:
   infra-master:
     docker:
       - image: aeternity/infrastructure:master
-  ubuntu-1804:
+  ubuntu-container:
     docker:
       - image: aeternity/infrastructure:master
       - name: aenode1804
         image: aeternity/ubuntu-sshd:18.04
+      - name: aenode2204
+        image: aeternity/ubuntu-sshd:22.04
 
 references:
   container_config: &container_config
@@ -157,14 +159,16 @@ jobs:
       - lint
 
   playbook_test:
-    executor: ubuntu-1804
+    executor: ubuntu-container
     parameters:
+      host:
+        type: string
       playbook:
         type: string
     environment:
       ANSIBLE_CALLBACK_WHITELIST: profile_tasks
       ANSIBLE_HOST_KEY_CHECKING: False
-      PLAYBOOK_HOST: aenode1804
+      PLAYBOOK_HOST: << parameters.host >>
     steps:
       - checkout
       - use_remote_docker
@@ -245,10 +249,13 @@ workflows:
     jobs:
       - build_lint
       - playbook_test:
-          name: playbook-test-<< matrix.playbook >>
+          name: playbook-test-<<matrix.host>>-<< matrix.playbook >>
           context: ae-vault-infra
           matrix:
             parameters:
+              host:
+                - aenode1804
+                - aenode2204
               playbook:
                 - ansible/monitoring.yml
                 - ansible/deploy.yml
