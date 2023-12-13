@@ -383,8 +383,8 @@ Thus an Ubuntu based container should be run, a convenient image with sshd is `r
 Note the `net` and `name` parameters:
 
 ```bash
-docker pull rastasheep/ubuntu-sshd:18.04
-docker run -d --net aeternity --name aenode rastasheep/ubuntu-sshd:18.04
+docker pull aeternity/ubuntu-sshd:18.04
+docker run -d --net aeternity --name aenode aeternity/ubuntu-sshd:18.04
 ```
 
 The above command will run an Ubuntu 18.04 with sshd daemon running
