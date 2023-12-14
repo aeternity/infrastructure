@@ -19,8 +19,8 @@ provider "aws" {
   alias                   = "ap-southeast-2"
 }
 
-module "aws_deploy-test-aenode" {
-  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v3.0.1"
+module "test-aenode-1804" {
+  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v3.1.0"
   env    = var.env_name
 
   static_nodes = 1
@@ -37,12 +37,13 @@ module "aws_deploy-test-aenode" {
     env   = var.env_name
     envid = var.envid
     role  = "aenode"
+    kind  = "1804"
   }
 
   config_tags = {
-    bootstrap_version = var.bootstrap_version
     vault_addr        = var.vault_addr
     vault_role        = "ae-node"
+    bootstrap_version = var.bootstrap_version
     bootstrap_config  = "secret/aenode/config/${var.env_name}"
   }
 
@@ -51,8 +52,8 @@ module "aws_deploy-test-aenode" {
   }
 }
 
-module "aws_deploy-test-aemdw" {
-  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=mdw_support"
+module "test-aemdw-1804" {
+  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v3.1.0"
   env    = var.env_name
 
   static_nodes = 1
@@ -71,12 +72,13 @@ module "aws_deploy-test-aemdw" {
     env   = var.env_name
     envid = var.envid
     role  = "aemdw"
+    kind  = "1804"
   }
 
   config_tags = {
-    bootstrap_version = var.bootstrap_version
     vault_addr        = var.vault_addr
     vault_role        = "ae-node"
+    bootstrap_version = var.bootstrap_version
     bootstrap_config  = "secret/aenode/config/${var.env_name}"
   }
 
