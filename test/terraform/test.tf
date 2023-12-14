@@ -61,7 +61,7 @@ module "test-aenode-2204" {
 
   instance_type  = "t3.large"
   instance_types = ["t3.large"]
-  ami_name       = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-arm64-server-*"
+  ami_name       = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
 
   additional_storage      = true
   additional_storage_size = 5
@@ -129,7 +129,7 @@ module "test-aemdw-2204" {
 
   instance_type  = "t3.large"
   instance_types = ["t3.large"]
-  ami_name       = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-arm64-server-*"
+  ami_name       = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
 
   additional_storage      = true
   additional_storage_size = 5
