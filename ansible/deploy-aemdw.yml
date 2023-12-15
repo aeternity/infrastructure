@@ -23,8 +23,8 @@
     aemdw_logs_path: "{{ aemdw_project_root }}/log"
     docker_repository: aeternity/ae_mdw
     docker_tag: "latest"
-    accounts_path: data/aecore/.genesis/accounts_test.json
-    contracts_path: data/aecore/.genesis/contacts_test.json
+    accounts_path: /home/aeternity/node/local/rel/aeternity/data/aecore/.genesis/accounts_test.json
+    contracts_path: /home/aeternity/node/local/rel/aeternity/data/aecore/.genesis/contacts_test.json
     # Label used for datadog tagging and ENV file planting
     env: unknown
 
