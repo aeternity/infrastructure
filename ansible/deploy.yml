@@ -172,6 +172,19 @@
         notify: "restart aeternity daemon"
         tags: [config, peer_keys]
 
+      - name: Make sure configuration files paths exists
+        file:
+          path: "{{ project_root }}/{{ item.value }}"
+          state: directory
+          mode: 0700
+        loop: "{{ files | dict2items }}"
+        when:
+          - files is defined
+          - vault_config_key is defined
+          - vault_config_key != ""
+        notify: "restart aeternity daemon"
+        tags: [config]
+
       - name: Update configuration files
         copy:
           content: "{{ lookup('hashi_vault', 'secret=secret/aenode/config/{{ vault_config_key }}:{{ item.key }}') }}"
