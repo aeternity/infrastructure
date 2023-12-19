@@ -174,7 +174,7 @@
 
       - name: Make sure configuration files paths exists
         file:
-          path: "{{ project_root }}/{{ item.value | basename }}"
+          path: "{{ project_root }}/{{ item.value | dirname }}"
           state: directory
           mode: 0700
         loop: "{{ files | dict2items }}"
