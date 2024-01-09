@@ -7,7 +7,7 @@
   wait_for:
     port: "{{ healthcheck_port }}"
     host: "127.0.0.1"
-    timeout: 360
+    timeout: 600
   tags: [health-check]
 
 - name: Local Node Health check
