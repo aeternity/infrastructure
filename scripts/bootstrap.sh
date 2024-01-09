@@ -76,6 +76,13 @@ if [[ -n "${bootstrap_config}" && "${bootstrap_config}" != "none" ]]; then
 fi
 
 ###
+### Temporary workaround to support old AMIs that include old ansible
+###
+
+pip3 uninstall -y ansible
+pip3 install ansible==4.10.0
+
+###
 ### Bootstrap the instance with Ansible playbooks
 ###
 
