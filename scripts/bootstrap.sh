@@ -79,7 +79,7 @@ fi
 ### Temporary workaround to support old AMIs that include old ansible
 ###
 
-pip3 uninstall -y ansible
+pip3 uninstall -y ansible ansible-base
 pip3 install ansible==4.10.0
 
 ###
