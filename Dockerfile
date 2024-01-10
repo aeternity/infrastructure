@@ -7,7 +7,7 @@ FROM alpine:3.8
 RUN apk add --no-cache bash curl unzip make python3 py-cryptography openssh-client openssl sshpass jq bc git\
     && ln -s /usr/bin/python3 /usr/bin/python
 
-ENV PACKER_VERSION=1.3.2
+ENV PACKER_VERSION=1.8.7
 RUN curl -sSO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip \
     && unzip packer_${PACKER_VERSION}_linux_amd64.zip -d /bin \
     && rm -f packer_${PACKER_VERSION}_linux_amd64.zip
