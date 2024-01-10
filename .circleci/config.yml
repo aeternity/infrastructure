@@ -186,6 +186,7 @@ jobs:
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
       - fail_notification
 
@@ -286,14 +287,15 @@ workflows:
 
   master:
     jobs:
-      - build_lint:
+      - docker_push_branch:
+          context: ae-vault-infra
           filters:
             branches:
               only: master
       - docker_push_latest:
           context: ae-vault-infra
           requires:
-            - build_lint
+            - docker_push_branch
           filters:
             branches:
               only: master
