@@ -154,7 +154,6 @@ jobs:
     steps:
       - checkout
       - use_remote_docker
-      # Used in lint
       - docker_build_branch
       - lint
 
@@ -182,11 +181,11 @@ jobs:
     steps:
       - checkout
       - use_remote_docker
+      - *pull_current_image
       - docker_login
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
       - fail_notification
 
@@ -248,7 +247,10 @@ jobs:
 workflows:
   branch:
     jobs:
-      - build_lint
+      - build_lint:
+          filters:
+            branches:
+              ignore: master
       - playbook_test:
           name: playbook-test-<<matrix.host>>-<< matrix.playbook >>
           context: ae-vault-infra
@@ -262,22 +264,36 @@ workflows:
                 - ansible/deploy.yml
           requires:
             - build_lint
+          filters:
+            branches:
+              ignore: master
       - branch_integration_tests:
           context: ae-vault-infra
           requires:
             - build_lint
+          filters:
+            branches:
+              ignore: master
       - docker_push_branch:
           context: ae-vault-infra
           requires:
             - build_lint
             - playbook_test
             - branch_integration_tests
+          filters:
+            branches:
+              ignore: master
 
   master:
     jobs:
+      - build_lint:
+          filters:
+            branches:
+              only: master
       - docker_push_latest:
           context: ae-vault-infra
-          requires: []
+          requires:
+            - build_lint
           filters:
             branches:
               only: master
