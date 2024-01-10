@@ -186,6 +186,7 @@ jobs:
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
       - fail_notification
 
