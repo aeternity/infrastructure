@@ -181,7 +181,6 @@ jobs:
     steps:
       - checkout
       - use_remote_docker
-      - *pull_current_image
       - docker_login
       - run:
           name: Push (branch) Docker image to DockerHub
