@@ -383,12 +383,12 @@ Thus an Ubuntu based container should be run, a convenient image with sshd is `r
 Note the `net` and `name` parameters:
 
 ```bash
-docker pull aeternity/ubuntu-sshd:18.04
-docker run -d --net aeternity --name aenode aeternity/ubuntu-sshd:18.04
+docker run -d --net aeternity --name aenode1804 aeternity/ubuntu-sshd:18.04
+docker run -d --net aeternity --name aenode2204 aeternity/ubuntu-sshd:22.04
 ```
 
-The above command will run an Ubuntu 18.04 with sshd daemon running
-and reachable by other hosts in the same docker network at address `aenode.aeternity`.
+The above command will run an Ubuntu 18.04 and Ubuntu 22.04 with sshd daemon running
+and reachable by other hosts in the same docker network at addresses `aenode1804.aeternity` and `aenode2204.aeternity`.
 
 Once the test node is running, start an infrastructure container in the same docker network:
 
@@ -396,9 +396,9 @@ Once the test node is running, start an infrastructure container in the same doc
 docker run -it --env-file env.list -v ${PWD}:/src -w /src --net aeternity aeternity/infrastructure
 ```
 
-Running an Ansible playbook against the `aenode` container requires setting [additional Ansible parameters](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#list-of-behavioral-inventory-parameters):
+Running an Ansible playbook against the `aenode1804` and `aenode2204` containers requires setting [additional Ansible parameters](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#list-of-behavioral-inventory-parameters):
 
-- inventory host - `aenode.aeternity`
+- inventory host - i.e. `aenode1804.aeternity`
 - ssh user - `root`
 - ssh password - `root`
 - python interpreter - `/usr/bin/python3`
@@ -406,7 +406,7 @@ Running an Ansible playbook against the `aenode` container requires setting [add
 For example to run the `setup.yml` playbook:
 
 ```bash
-cd ansible && ansible-playbook -i aenode.aeternity, \
+cd ansible && ansible-playbook -i aenode1804.aeternity, \
   -e ansible_user=root \
   -e ansible_ssh_pass=root \
   -e ansible_python_interpreter=/usr/bin/python3 \

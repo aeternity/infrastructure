@@ -1,5 +1,9 @@
-- name: Install Ubuntu 22.04 dependencies
+- name: Install Ubuntu 22.04 dependency packages
   apt:
     pkg:
-    - libsodium23
-    - libssl1.0.0
+      - libsodium23
+      - libtinfo5
+
+- name: Install Ubuntu 22.04 dependency debs
+  apt:
+    deb: "http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.20_amd64.deb"
