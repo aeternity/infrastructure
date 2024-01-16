@@ -137,7 +137,7 @@
           - awscli==1.22.30
           - boto3==1.20.30
           - boto==2.49.0
-          - datadog==0.47.0
+          - datadog==0.43.0
           - hvac==0.6.4
       # "pip3 install ansible" fails otherwise
       # see https://github.com/pypa/pip/issues/10219#issuecomment-887337037

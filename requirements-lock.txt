@@ -12,7 +12,7 @@ colorama==0.4.3
 commonmark==0.9.1
 cryptography==40.0.2
 dataclasses==0.8
-datadog==0.47.0
+datadog==0.43.0
 decorator==5.1.1
 docutils==0.15.2
 envdir==1.0.1

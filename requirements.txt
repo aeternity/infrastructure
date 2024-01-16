@@ -3,7 +3,7 @@ ansible==4.10.0
 awscli==1.22.30
 boto3==1.20.30
 boto==2.49.0
-datadog==0.47.0
+datadog==0.43.0
 envdir==1.0.1
 hvac==0.6.4
 pyyaml==3.12.0
