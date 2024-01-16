@@ -139,6 +139,7 @@
           - boto==2.49.0
           - datadog==0.43.0
           - hvac==0.6.4
+          - wheel==0.37.1
       # "pip3 install ansible" fails otherwise
       # see https://github.com/pypa/pip/issues/10219#issuecomment-887337037
       environment:
