@@ -7,3 +7,15 @@
 - name: Install Ubuntu 22.04 dependency debs
   apt:
     deb: "http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.20_amd64.deb"
+
+# remove once Vault is updated to support more modern algos
+- name: Enable legacy CA algos in sshd config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^CASignatureAlgorithms \\^ssh-rsa'
+    line: 'CASignatureAlgorithms ^ssh-rsa'
+  when: vault_addr is defined
+  tags:
+    - ssh-keys
+    - developer-ssh-keys
+  notify: restart ssh
