@@ -12,7 +12,7 @@ colorama==0.4.3
 commonmark==0.9.1
 cryptography==40.0.2
 dataclasses==0.8
-datadog==0.28.0
+datadog==0.43.0
 decorator==5.1.1
 docutils==0.15.2
 envdir==1.0.1
@@ -27,7 +27,6 @@ pycparser==2.21
 Pygments==2.14.0
 pyparsing==3.1.1
 python-dateutil==2.8.2
-PyYAML==3.12
 requests==2.27.1
 resolvelib==0.5.4
 rich==10.16.2
