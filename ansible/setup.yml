@@ -68,6 +68,17 @@
         - developer-ssh-keys
       notify: restart ssh
 
+    - name: Enable legacy CA algos in sshd config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^CASignatureAlgorithms \\^ssh-rsa'
+        line: 'CASignatureAlgorithms ^ssh-rsa'
+      when: vault_addr is defined
+      tags:
+        - ssh-keys
+        - developer-ssh-keys
+      notify: restart ssh
+
     - name: Install GPG
       apt:
         state: present

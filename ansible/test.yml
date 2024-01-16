@@ -1,0 +1,34 @@
+---
+- name: Test
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    aemdw_db_path: "/data/db"
+    aemdw_project_root: "/home/aeternity/node"
+    accounts_path: data/aecore/.genesis/accounts_test.json
+    contracts_path: ""
+    docker_mounts:
+      - "{{ aemdw_db_path }}/mnesia:/home/aeternity/node/local/rel/aeternity/data/mnesia"
+      - "{{ aemdw_db_path }}/mdw.db:/home/aeternity/node/local/rel/aeternity/data/mdw.db"
+      - "{{ aemdw_logs_path }}:/home/aeternity/node/ae_mdw/log"
+
+    mounts:
+      "accounts.json": "/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_account.json"
+      "contracts.json": "/home/aeternity/node/local/rel/aeternity/data/aecore/.iris/aehc_demo_contracts.json"
+
+  tasks:
+    - set_fact:
+        docker_volumes:
+          - "{{ aemdw_project_root }}/accounts.json:{{ accounts_path }}"
+          - "{{ aemdw_project_root }}/contracts.json:{{ contracts_path }}"
+          - "{{ 'xxx:ccc' if contracts_path else omit }}"
+
+    - name: Debug
+      debug:
+        var: mounts
+
+    - name: Debug
+      debug:
+        var: docker_volumes
