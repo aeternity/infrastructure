@@ -71,7 +71,7 @@ if [[ -n "${node_config}" && "${node_config}" != "none" ]]; then
 fi
 
 if [[ -n "${bootstrap_config}" && "${bootstrap_config}" != "none" ]]; then
-    vault read -field=ansible_vars ${bootstrap_config} > /tmp/ansible_vars.yml
+    vault kv get -field=ansible_vars ${bootstrap_config} > /tmp/ansible_vars.yml
     ANSIBLE_VARS="@/tmp/ansible_vars.yml"
 fi
 
