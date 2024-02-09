@@ -7,6 +7,7 @@ CONFIG_ROOT=${CONFIG_ROOT:-secret/aenode/config}
 CONFIG_FIELD=${CONFIG_FIELD:-ansible_vars}
 DEFAULT_FIELD_FILE_SUFFIX=${DEFAULT_FIELD_FILE_SUFFIX:-".yml"}
 DRY_RUN=${DRY_RUN:-""}
+KV2=${KV2:-""}
 
 if [ $DRY_RUN ]; then
     echo "### RUNNING IN DRY RUN MODE ###"
@@ -19,6 +20,7 @@ usage() {
     ${0} dump <config_key>
     ${0} dump-all
     ${0} update <config_key>
+    ${0} update-all
     "
 
     echo -e "$USAGE" >&2; exit 1
@@ -63,7 +65,11 @@ update_field() {
     echo "Updating field: $CONFIG_FILE_PATH"
 
     if [ ! $DRY_RUN ]; then
-        cat ${CONFIG_FILE_PATH} | vault write ${CONFIG_ROOT:?}/${config_key} ${config_field}=-
+        if [ $KV2 ]; then
+            cat ${CONFIG_FILE_PATH} | vault kv patch ${CONFIG_ROOT:?}/${config_key} ${config_field}=-
+        else
+            cat ${CONFIG_FILE_PATH} | vault write ${CONFIG_ROOT:?}/${config_key} ${config_field}=-
+        fi
     fi
 }
 
@@ -89,6 +95,13 @@ update_config() {
     local config_path=${CONFIG_ROOT:?}/${config_key}
 
     echo "Updating config: $config_path"
+
+    if [ $KV2 ]; then
+        if [ ! $DRY_RUN ]; then
+            vault kv delete ${config_path}
+            vault kv put ${config_path} ansible_vars=""
+        fi
+    fi
 
     local res=$(ls "${CONFIG_OUTPUT_DIR}/${config_key}")
     mapfile -t field_files <<< "$res"
