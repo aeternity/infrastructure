@@ -44,7 +44,7 @@ module "test-aenode-2204" {
     vault_addr        = var.vault_addr
     vault_role        = "ae-node"
     bootstrap_version = var.bootstrap_version
-    bootstrap_config  = "secret/aenode/config/${var.env_name}"
+    bootstrap_config  = "secret2/data/aenode/config/${var.env_name}"
   }
 
   providers = {
@@ -79,7 +79,7 @@ module "test-aemdw-2204" {
     vault_addr        = var.vault_addr
     vault_role        = "ae-node"
     bootstrap_version = var.bootstrap_version
-    bootstrap_config  = "secret/aenode/config/${var.env_name}"
+    bootstrap_config  = "secret2/data/aenode/config/${var.env_name}"
   }
 
   providers = {

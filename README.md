@@ -258,7 +258,7 @@ The playbook does:
 ### Vault node ansible configuration
 
 Node configurations are stored in YAML format by the Vault's KV store named 'secret'
-under path `secret/aenode/config/<ENV_TAG>` as field `node_config`
+under path `secret2/data/aenode/config/<ENV_TAG>` as field `node_config`
 
 `<ENV_TAG>` should be considered to be a node's "configuration" environment. 
 For instance 'terraform' setups certain nodes to look for `<env@region>`, e.g. `main_mon@us-west-1`. 
@@ -307,7 +307,7 @@ cat `make -s vault-config-test`
 
 ENV vars can control the defaults:
 - `CONFIG_OUTPUT_DIR` - To override the output path where configs are dumped (default: `/tmp/config`)
-- `VAULT_CONFIG_ROOT` - Vault root path where config envs are stored (default: `secret/aenode/config`)
+- `VAULT_CONFIG_ROOT` - Vault root path where config envs are stored (default: `secret2/data/aenode/config`)
 - `VAULT_CONFIG_FIELD` - Name of the field where the configuration YAML is stored (default: `node_config`)
 
 Example:

@@ -7,7 +7,7 @@ ENV = envdir $(SECRETS_OUTPUT_DIR)
 VAULT_ADDR ?= $(AE_VAULT_ADDR)
 TF_COMMON_PARAMS = -var vault_addr=$(VAULT_ADDR) -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
 CONFIG_OUTPUT_DIR ?= /tmp/config
-VAULT_CONFIG_ROOT ?= secret/aenode/config
+VAULT_CONFIG_ROOT ?= secret2/data/aenode/config
 VAULT_CONFIG_FIELD ?= ansible_vars
 LIST_CONFIG_KEYS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
 
