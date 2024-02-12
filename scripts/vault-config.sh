@@ -3,7 +3,7 @@
 set -eo pipefail
 
 CONFIG_OUTPUT_DIR=${CONFIG_OUTPUT_DIR:-/tmp/config}
-CONFIG_ROOT=${CONFIG_ROOT:-secret/aenode/config}
+CONFIG_ROOT=${CONFIG_ROOT:-secret2/aenode/config}
 CONFIG_FIELD=${CONFIG_FIELD:-ansible_vars}
 DEFAULT_FIELD_FILE_SUFFIX=${DEFAULT_FIELD_FILE_SUFFIX:-".yml"}
 DRY_RUN=${DRY_RUN:-""}

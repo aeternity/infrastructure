@@ -7,7 +7,7 @@ ENV = envdir $(SECRETS_OUTPUT_DIR)
 VAULT_ADDR ?= $(AE_VAULT_ADDR)
 TF_COMMON_PARAMS = -var vault_addr=$(VAULT_ADDR) -lock-timeout=$(TF_LOCK_TIMEOUT) -parallelism=20
 CONFIG_OUTPUT_DIR ?= /tmp/config
-VAULT_CONFIG_ROOT ?= secret/aenode/config
+VAULT_CONFIG_ROOT ?= secret2/aenode/config
 VAULT_CONFIG_FIELD ?= ansible_vars
 LIST_CONFIG_KEYS := $(ENV) vault list $(VAULT_CONFIG_ROOT) | tail -n +3
 
@@ -190,12 +190,12 @@ vault-config-% : $(CONFIG_OUTPUT_DIR)/%.yml ;
 vault-config-update-%: vault-config-%
 	sed -i "s|^package:.*|package: $(call require_env,PACKAGE)|g" $(CONFIG_OUTPUT_DIR)/$*.yml
 	sed -i "s|^db_version:.*|db_version: $(call require_env,DEPLOY_DB_VERSION)|g" $(CONFIG_OUTPUT_DIR)/$*.yml
-	cat $(CONFIG_OUTPUT_DIR)/$*.yml | $(ENV) vault write $(VAULT_CONFIG_ROOT)/$* $(VAULT_CONFIG_FIELD)=-
+	cat $(CONFIG_OUTPUT_DIR)/$*.yml | $(ENV) vault kv patch $(VAULT_CONFIG_ROOT)/$* $(VAULT_CONFIG_FIELD)=-
 
 .PRECIOUS: $(CONFIG_OUTPUT_DIR)/%.yml
 $(CONFIG_OUTPUT_DIR)/%.yml: YML=$(CONFIG_OUTPUT_DIR)/$*.yml
 $(CONFIG_OUTPUT_DIR)/%.yml: secrets $(CONFIG_OUTPUT_DIR)
-	@($(ENV) vault read -field=$(VAULT_CONFIG_FIELD) $(VAULT_CONFIG_ROOT)/$* > $(YML) && echo $(YML) ) || rm $(YML)
+	@($(ENV) vault kv get -field=$(VAULT_CONFIG_FIELD) $(VAULT_CONFIG_ROOT)/$* > $(YML) && echo $(YML) ) || rm $(YML)
 
 # List of all available targets
 .PHONY help:
