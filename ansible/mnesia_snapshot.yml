@@ -23,12 +23,14 @@
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
+    db_path: data/
+    healthcheck_port: 3013
 
   tasks:
     - block:
       - name: Get node status
         uri:
-          url: "http://localhost:{{ node_config.http.external.port | default('3013') }}/v2/status"
+          url: "http://localhost:{{ healthcheck_port }}/v2/status"
         register: status
         failed_when: status.json.syncing == true
 
@@ -65,15 +67,15 @@
 
       - name: Start archive
         block:
-          - name: Archive Mnesia Directory ({{ project_root }}/{{ node_config.chain.db_path }})
+          - name: Archive Mnesia Directory ({{ project_root }}/{{ db_path }})
             command:
-              cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ project_root }}/{{ node_config.chain.db_path }} .
+              cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ project_root }}/{{ db_path }} .
               creates:  "{{ snapshot_path }}"
             when: additional_storage is not defined or not additional_storage
 
-          - name: Archive Mnesia Directory ({{ node_config.chain.db_path }})
+          - name: Archive Mnesia Directory ({{ db_path }})
             command:
-              cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ node_config.chain.db_path }} .
+              cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ db_path }} .
               creates:  "{{ snapshot_path }}"
             when:
               - additional_storage is defined
