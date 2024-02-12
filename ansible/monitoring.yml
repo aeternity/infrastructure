@@ -165,13 +165,12 @@
   vars:
     project_user: aeternity
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
-    network_id: "{{ network_id|default('unknown') }}"
     fail2ban_enable: true
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
     datadog_default_tags:
       - "lsb:{{ ansible_lsb.description }}"
       - "public_ipv4:{{ public_ipv4|default('unknown') }}"
-      - "network_id:{{ network_id }}"
+      - "network_id:{{ network_id|default('unknown') }}"
     datadog_agent_major_version: 6
     datadog_config:
       log_level: warning
