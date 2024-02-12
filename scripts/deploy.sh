@@ -33,14 +33,14 @@ read -p "Deploy UAT monitoring nodes? (y/N):" uatmonchoice
 if [[ $uatmonchoice == "y" ]]; then
     make vault-config-update-uat_mon@eu-central-1
 
-    DEPLOY_ENV=uat_mon DEPLOY_REGION=eu-central-1 CONFIG_ENV=uat_mon@eu-central-1 make deploy
+    DEPLOY_ENV=uat_mon DEPLOY_REGION=eu-central-1 CONFIG_KEY=uat_mon@eu-central-1 make deploy
 fi
 
 read -p "Deploy MAIN monitoring nodes? (y/N):" mainmonchoice
 if [[ $mainmonchoice == "y" ]]; then
     make vault-config-update-main_mon@eu-north-1
 
-    DEPLOY_ENV=main_mon DEPLOY_REGION=eu-north-1 CONFIG_ENV=main_mon@eu-north-1 make deploy
+    DEPLOY_ENV=main_mon DEPLOY_REGION=eu-north-1 CONFIG_KEY=main_mon@eu-north-1 make deploy
 fi
 
 # Backup nodes
@@ -48,16 +48,16 @@ read -p "Deploy UAT backup nodes? (y/N):" backupuatchoice
 if [[ $backupuatchoice == "y" ]]; then
     make vault-config-update-uat_backup_light
     make vault-config-update-uat_backup_full
-    DEPLOY_ENV=uat_backup DEPLOY_KIND=light CONFIG_ENV=uat_backup_light make deploy
-    DEPLOY_ENV=uat_backup DEPLOY_KIND=full CONFIG_ENV=uat_backup_full make deploy
+    DEPLOY_ENV=uat_backup DEPLOY_KIND=light CONFIG_KEY=uat_backup_light make deploy
+    DEPLOY_ENV=uat_backup DEPLOY_KIND=full CONFIG_KEY=uat_backup_full make deploy
 fi
 
 read -p "Deploy MAIN backup nodes? (y/N):" backupmainchoice
 if [[ $backupmainchoice == "y" ]]; then
     make vault-config-update-main_backup_light
     make vault-config-update-main_backup_full
-    DEPLOY_ENV=main_backup DEPLOY_KIND=light CONFIG_ENV=main_backup_light make deploy
-    DEPLOY_ENV=main_backup DEPLOY_KIND=full CONFIG_ENV=main_backup_full make deploy
+    DEPLOY_ENV=main_backup DEPLOY_KIND=light CONFIG_KEY=main_backup_light make deploy
+    DEPLOY_ENV=main_backup DEPLOY_KIND=full CONFIG_KEY=main_backup_full make deploy
 fi
 
 # Testnet gateway nodes

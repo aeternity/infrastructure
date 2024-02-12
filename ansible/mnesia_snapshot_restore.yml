@@ -16,6 +16,8 @@
     restore_dir: "{{ additional_storage_mountpoint|default(project_root) }}"
     should_restore: true
     force_restore: false
+    db_path: data/
+    healthcheck_port: 3013
 
   tasks:
     - name: Check if snapshot was restored in {{ restore_dir }}/
@@ -89,20 +91,20 @@
 
     - name: Delete old database
       file:
-        path: "{{ node_config.chain.db_path }}"
+        path: "{{ db_path }}"
         state: absent
       when: should_restore
 
     - name: Make sure database dir exists
       file:
-        path: "{{ node_config.chain.db_path }}"
+        path: "{{ db_path }}"
         state: directory
       when: should_restore
 
-    - name: Restore Mnesia database to {{ node_config.chain.db_path }}/
+    - name: Restore Mnesia database to {{ db_path }}/
       command:
-        cmd: tar -I zstd -x -f {{ snapshot_path }} -C {{ node_config.chain.db_path }}/
-        creates:  "{{ node_config.chain.db_path }}/mnesia"
+        cmd: tar -I zstd -x -f {{ snapshot_path }} -C {{ db_path }}/
+        creates:  "{{ db_path }}/mnesia"
       notify: "start aeternity daemon"
       when: should_restore
       tags:

@@ -198,16 +198,6 @@
         notify: "restart aeternity daemon"
         tags: [config]
 
-      - name: Update node configuration
-        copy:
-          # node_config has default just because of ansible-lint, otherwise it crashes badly
-          content: "{{ node_config | default({}) | to_nice_yaml }}"
-          dest: "{{ project_root }}/aeternity.yaml"
-          mode: '0600'
-        when: node_config is defined
-        notify: "restart aeternity daemon"
-        tags: [config, node_config]
-
       - name: Start aeternity node
         command: "{{ project_root }}/bin/aeternity start"
         changed_when: false
