@@ -383,7 +383,6 @@ Thus an Ubuntu based container should be run, a convenient image with sshd is `r
 Note the `net` and `name` parameters:
 
 ```bash
-docker run -d --net aeternity --name aenode1804 aeternity/ubuntu-sshd:18.04
 docker run -d --net aeternity --name aenode2204 aeternity/ubuntu-sshd:22.04
 ```
 
@@ -398,7 +397,7 @@ docker run -it --env-file env.list -v ${PWD}:/src -w /src --net aeternity aetern
 
 Running an Ansible playbook against the `aenode1804` and `aenode2204` containers requires setting [additional Ansible parameters](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#list-of-behavioral-inventory-parameters):
 
-- inventory host - i.e. `aenode1804.aeternity`
+- inventory host - i.e. `aenode2204.aeternity`
 - ssh user - `root`
 - ssh password - `root`
 - python interpreter - `/usr/bin/python3`
@@ -406,7 +405,7 @@ Running an Ansible playbook against the `aenode1804` and `aenode2204` containers
 For example to run the `setup.yml` playbook:
 
 ```bash
-cd ansible && ansible-playbook -i aenode1804.aeternity, \
+cd ansible && ansible-playbook -i aenode2204.aeternity, \
   -e ansible_user=root \
   -e ansible_ssh_pass=root \
   -e ansible_python_interpreter=/usr/bin/python3 \
