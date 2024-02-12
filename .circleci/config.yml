@@ -7,8 +7,6 @@ executors:
   ubuntu-container:
     docker:
       - image: aeternity/infrastructure:master
-      - name: aenode1804
-        image: aeternity/ubuntu-sshd:18.04
       - name: aenode2204
         image: aeternity/ubuntu-sshd:22.04
 
@@ -257,7 +255,6 @@ workflows:
           matrix:
             parameters:
               host:
-                - aenode1804
                 - aenode2204
               playbook:
                 - ansible/monitoring.yml
