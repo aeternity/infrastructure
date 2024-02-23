@@ -1,10 +1,10 @@
-FROM alpine:3.8
+FROM alpine:3.13
 
 # Symlink python to python3 to workaround ansible_python_interpreter issue that need to be set per host.
 # Some of the playbooks run on multiple hosts: local + remote.
 # If it's set in the inventory it will not work when a specific inventory is used.
 # OpenSSL required for a packer workaround: https://github.com/hashicorp/packer/issues/2526
-RUN apk add --no-cache bash curl unzip make python3 py-cryptography openssh-client openssl sshpass jq bc git\
+RUN apk add --no-cache bash curl unzip make python3 py-cryptography openssh-client openssl sshpass jq bc git yq \
     && ln -s /usr/bin/python3 /usr/bin/python
 
 ENV PACKER_VERSION=1.8.7
@@ -32,7 +32,8 @@ RUN curl -L https://github.com/aelsabbahy/goss/releases/download/${GOSS_VER}/gos
 
 ADD requirements-lock.txt /infrastructure/
 RUN apk add --no-cache --virtual build-deps \
-        gcc python3-dev musl-dev openssl-dev libffi-dev linux-headers \
+        gcc musl-dev openssl-dev libffi-dev linux-headers \
+        python3-dev py3-pip \
     && pip3 install --upgrade pip==21.3.1 setuptools-rust==1.1.2 \
     && pip3 install --no-cache-dir -r /infrastructure/requirements-lock.txt \
     && apk del build-deps
