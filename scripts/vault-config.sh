@@ -7,7 +7,7 @@ CONFIG_ROOT=${CONFIG_ROOT:-secret2/aenode/config}
 CONFIG_FIELD=${CONFIG_FIELD:-ansible_vars}
 DEFAULT_FIELD_FILE_SUFFIX=${DEFAULT_FIELD_FILE_SUFFIX:-".yml"}
 DRY_RUN=${DRY_RUN:-""}
-KV2=${KV2:-""}
+KV2=${KV2:-"1"}
 
 if [ $DRY_RUN ]; then
     echo "### RUNNING IN DRY RUN MODE ###"
@@ -17,9 +17,11 @@ fi
 
 usage() {
     USAGE="Usage:
-    ${0} dump <config_key>
+    ${0} dump <config_keys>
+    ${0} dmp-yml -f <file> -p <path> <config_keys>
     ${0} dump-all
-    ${0} update <config_key>
+    ${0} update <config_keys>
+    ${0} update-yml -f <file> -p <path> -v <value> <config_keys>
     ${0} update-all
     "
 
@@ -53,7 +55,11 @@ dump_field() {
         vault read -field=${config_field} ${CONFIG_ROOT:?}/${config_key} > /dev/null
     else
         mkdir -p ${CONFIG_OUTPUT_DIR}/${config_key}
-        vault read -field=${config_field} ${CONFIG_ROOT:?}/${config_key} > ${CONFIG_FILE_PATH}
+        if [ $KV2 ]; then
+            vault kv get -field=${config_field} ${CONFIG_ROOT:?}/${config_key} > ${CONFIG_FILE_PATH}
+        else
+            vault read -field=${config_field} ${CONFIG_ROOT:?}/${config_key} > ${CONFIG_FILE_PATH}
+        fi
     fi
 }
 
@@ -80,7 +86,12 @@ dump_config() {
 
     echo "Dumping config: $config_path"
 
-    local res=$(vault read -format=json ${config_path} | jq -r '.data | keys[]')
+    if [ $KV2 ]; then
+        local res=$(vault kv get -format=json ${config_path} | jq -r '.data.data | keys[]')
+    else
+        local res=$(vault read -format=json ${config_path} | jq -r '.data | keys[]')
+    fi
+
     mapfile -t fields <<< "$res"
 
     for field in "${fields[@]}"
@@ -122,6 +133,39 @@ dump() {
     done
 }
 
+dump_yml_value() {
+    local config_path=${1:?}
+
+    yq r "${config_path}/${YAML_FILE:?}" "${YAML_PATH:?}"
+}
+
+dump_yml() {
+    local config_keys
+    read -r -a config_keys <<< "${1:?}"
+
+    for config_key in "${config_keys[@]}"
+    do
+        echo "### ${CONFIG_OUTPUT_DIR}/${config_key} ###"
+        dump_yml_value "${CONFIG_OUTPUT_DIR}/${config_key}"
+    done
+}
+
+dump_all() {
+    if [ $KV2 ]; then
+        local res=$(vault kv list ${CONFIG_ROOT:?} | tail -n +3)
+    else
+        local res=$(vault list ${CONFIG_ROOT:?} | tail -n +3)
+    fi
+
+    local config_keys
+    mapfile -t config_keys <<< "${res}"
+
+    for config_key in "${config_keys[@]}"
+    do
+       dump_config "${config_key}"
+    done
+}
+
 update() {
     local config_keys
     read -r -a config_keys <<< "${1:?}"
@@ -132,14 +176,21 @@ update() {
     done
 }
 
-dump_all() {
-    local res=$(vault list ${CONFIG_ROOT:?} | tail -n +3)
+update_yml_value() {
+    local config_path=${1:?}
+
+    yq r "${config_path}/${YAML_FILE:?}" "${YAML_PATH:?}" "${YAML_VALUE:?}"
+    yq w -i "${config_path}/${YAML_FILE:?}" "${YAML_PATH:?}" "${YAML_VALUE:?}"
+}
+
+update_yml() {
     local config_keys
-    mapfile -t config_keys <<< "${res}"
+    read -r -a config_keys <<< "${1:?}"
 
     for config_key in "${config_keys[@]}"
     do
-       dump_config "${config_key}"
+        update_yml_value "${CONFIG_OUTPUT_DIR}/${config_key}"
+        # update_config "${config_key}"
     done
 }
 
@@ -160,11 +211,50 @@ if [[ -n "$1" ]]; then
         dump)
             dump "${*:2}"
             ;;
+        dump-yml)
+            shift
+            while getopts "f:p:" option; do
+               case $option in
+                  f)
+                    YAML_FILE=$OPTARG
+                    ;;
+                  p)
+                    YAML_PATH=$OPTARG
+                    ;;
+                 \?) # not option
+                    usage
+                    ;;
+               esac
+            done
+            shift $(($OPTIND - 1))
+            dump_yml "$*"
+            ;;
         dump-all)
             dump_all
             ;;
         update)
             update "${*:2}"
+            ;;
+        update-yml)
+            shift
+            while getopts "f:p:v:" option; do
+               case $option in
+                  f)
+                    YAML_FILE=$OPTARG
+                    ;;
+                  p)
+                    YAML_PATH=$OPTARG
+                    ;;
+                  v)
+                    YAML_VALUE=$OPTARG
+                    ;;
+                 \?) # not option
+                    usage
+                    ;;
+               esac
+            done
+            shift $(($OPTIND - 1))
+            update_yml "$*"
             ;;
         update-all)
             update_all
