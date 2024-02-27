@@ -8,6 +8,7 @@ CONFIG_FIELD=${CONFIG_FIELD:-ansible_vars}
 DEFAULT_FIELD_FILE_SUFFIX=${DEFAULT_FIELD_FILE_SUFFIX:-".yml"}
 DRY_RUN=${DRY_RUN:-""}
 KV2=${KV2:-"1"}
+VERBOSE=${VERBOSE:-""}
 
 if [ $DRY_RUN ]; then
     echo "### RUNNING IN DRY RUN MODE ###"
@@ -17,6 +18,7 @@ fi
 
 usage() {
     USAGE="Usage:
+    ${0} list
     ${0} dump <config_keys>
     ${0} dmp-yml -f <file> -p <path> <config_keys>
     ${0} dump-all
@@ -26,6 +28,12 @@ usage() {
     "
 
     echo -e "$USAGE" >&2; exit 1
+}
+
+log() {
+    if [ $VERBOSE ]; then
+        echo "${1:-}"
+    fi
 }
 
 # "return value"
@@ -44,12 +52,20 @@ set_config_file_path() {
     CONFIG_FILE_PATH="${CONFIG_OUTPUT_DIR}/${config_key}/${config_field}${field_file_suffix}"
 }
 
+list() {
+    if [ $KV2 ]; then
+        vault kv list ${CONFIG_ROOT:?} | tail -n +3
+    else
+        vault list ${CONFIG_ROOT:?} | tail -n +3
+    fi
+}
+
 dump_field() {
     local config_key=${1:?}
     local config_field=${2:?}
 
     set_config_file_path $config_key $config_field
-    echo "Dumping field: $CONFIG_FILE_PATH"
+    log "Dumping field: $CONFIG_FILE_PATH"
 
     if [ $DRY_RUN ]; then
         vault read -field=${config_field} ${CONFIG_ROOT:?}/${config_key} > /dev/null
@@ -68,7 +84,7 @@ update_field() {
     local config_field=${2:?}
 
     set_config_file_path $config_key $config_field
-    echo "Updating field: $CONFIG_FILE_PATH"
+    log "Updating field: $CONFIG_FILE_PATH"
 
     if [ ! $DRY_RUN ]; then
         if [ $KV2 ]; then
@@ -84,7 +100,7 @@ dump_config() {
     local config_key=${1:?}
     local config_path=${CONFIG_ROOT:?}/${config_key}
 
-    echo "Dumping config: $config_path"
+    log "Dumping config: $config_path"
 
     if [ $KV2 ]; then
         local res=$(vault kv get -format=json ${config_path} | jq -r '.data.data | keys[]')
@@ -105,7 +121,7 @@ update_config() {
     local config_key=${1:?}
     local config_path=${CONFIG_ROOT:?}/${config_key}
 
-    echo "Updating config: $config_path"
+    log "Updating config: $config_path"
 
     if [ $KV2 ]; then
         if [ ! $DRY_RUN ]; then
@@ -145,18 +161,13 @@ dump_yml() {
 
     for config_key in "${config_keys[@]}"
     do
-        echo "### ${CONFIG_OUTPUT_DIR}/${config_key} ###"
+        log "### ${CONFIG_OUTPUT_DIR}/${config_key} ###"
         dump_yml_value "${CONFIG_OUTPUT_DIR}/${config_key}"
     done
 }
 
 dump_all() {
-    if [ $KV2 ]; then
-        local res=$(vault kv list ${CONFIG_ROOT:?} | tail -n +3)
-    else
-        local res=$(vault list ${CONFIG_ROOT:?} | tail -n +3)
-    fi
-
+    local res=$(list)
     local config_keys
     mapfile -t config_keys <<< "${res}"
 
@@ -208,6 +219,9 @@ update_all() {
 ### MAIN ###
 if [[ -n "$1" ]]; then
     case "$1" in
+        list)
+            list
+            ;;
         dump)
             dump "${*:2}"
             ;;
