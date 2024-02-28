@@ -7,13 +7,13 @@ all:
     #     - "env:main"
     #     - "color:green"
     #     - "region:eu-central-2"
-    node2.htz.nodes.aeternity.io:
-      datadog_tags:
-        - "role:aenode"
-        - "kind:seed"
-        - "env:main"
-        - "color:green"
-        - "region:eu-central-3"
+    # node2.htz.nodes.aeternity.io:
+    #   datadog_tags:
+    #     - "role:aenode"
+    #     - "kind:seed"
+    #     - "env:main"
+    #     - "color:green"
+    #     - "region:eu-central-3"
   children:
     hetzner:
       hosts:
