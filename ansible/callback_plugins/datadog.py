@@ -7,21 +7,24 @@ import logging
 import os
 import time
 
+IMPORT_ERROR = None
 try:
     import datadog
     import yaml
     from packaging import version
-    HAS_MODULES = True
-except ImportError:
-    HAS_MODULES = False
+except ImportError as e:
+    IMPORT_ERROR = str(e)
 
 
 import ansible
 from ansible.plugins.callback import CallbackBase
-from __main__ import cli
+try:
+    from __main__ import cli
+except ImportError:
+    cli = False
 
 ANSIBLE_ABOVE_28 = False
-if HAS_MODULES and version.parse(ansible.__version__) >= version.parse('2.8.0'):
+if IMPORT_ERROR is None and version.parse(ansible.__version__) >= version.parse('2.8.0'):
     ANSIBLE_ABOVE_28 = True
     from ansible.context import CLIARGS
 
@@ -29,9 +32,13 @@ DEFAULT_DD_URL = "https://api.datadoghq.com"
 
 class CallbackModule(CallbackBase):
     def __init__(self):
-        if not HAS_MODULES:
+        if IMPORT_ERROR is not None:
             self.disabled = True
-            print('Datadog callback disabled: missing "datadog", "yaml", and/or "packaging" python package.')
+            print(
+                'Datadog callback disabled because of a dependency problem: {}. '
+                'Please install requirements with "pip install -r requirements.txt"'
+                .format(IMPORT_ERROR)
+            )
         else:
             self.disabled = False
             # Set logger level - datadog api and urllib3
@@ -41,10 +48,10 @@ class CallbackModule(CallbackBase):
         self._playbook_name = None
         self._start_time = time.time()
         self._options = None
-        if HAS_MODULES and cli:
+        if IMPORT_ERROR is None:
             if ANSIBLE_ABOVE_28:
                 self._options = CLIARGS
-            else:
+            elif cli:
                 self._options = cli.options
 
         # self.playbook is set in the `v2_playbook_on_start` callback method
@@ -67,8 +74,14 @@ class CallbackModule(CallbackBase):
     def _load_conf(self, file_path):
         conf_dict = {}
         if os.path.isfile(file_path):
+            try:
+                loader = yaml.FullLoader
+            except AttributeError:
+                # on pyyaml < 5.1, there's no FullLoader,
+                # but we can still use SafeLoader
+                loader = yaml.SafeLoader
             with open(file_path, 'r') as conf_file:
-                conf_dict = yaml.load(conf_file, Loader=yaml.FullLoader)
+                conf_dict = yaml.load(conf_file, Loader=loader)
 
         api_key = os.environ.get('DATADOG_API_KEY', conf_dict.get('api_key', ''))
         dd_url = os.environ.get('DATADOG_URL', conf_dict.get('url', ''))
@@ -84,7 +97,7 @@ class CallbackModule(CallbackBase):
         try:
             datadog.api.Event.create(
                 title=title,
-                text=text,
+                text=text.replace('@','(@)'), # avoid notifying @ mentions
                 alert_type=alert_type,
                 priority=priority,
                 tags=tags,
@@ -187,8 +200,17 @@ class CallbackModule(CallbackBase):
 
         return event_text, module_name_tag
 
+    def get_dd_hostname(self, ansible_hostname):
+        """ This function allows providing custom logic that transforms an Ansible
+        inventory hostname to a Datadog hostname.
+        """
+        dd_hostname = ansible_hostname
+        # provide your code to obtain Datadog hostname from Ansible inventory hostname
+        return dd_hostname
+
     ### Ansible callbacks ###
     def runner_on_failed(self, host, res, ignore_errors=False):
+        host = self.get_dd_hostname(host)
         # don't post anything if user asked to ignore errors
         if ignore_errors:
             return
@@ -203,6 +225,7 @@ class CallbackModule(CallbackBase):
         )
 
     def runner_on_ok(self, host, res):
+        host = self.get_dd_hostname(host)
         # Only send an event when the task has changed on the host
         if res.get('changed'):
             event_text, module_name_tag = self.format_result(res)
@@ -215,6 +238,7 @@ class CallbackModule(CallbackBase):
             )
 
     def runner_on_unreachable(self, host, res):
+        host = self.get_dd_hostname(host)
         event_text = "\n$$$\n{0}\n$$$\n".format(res)
         self.send_task_event(
             'Ansible failed on unreachable host "{0}"'.format(host),
@@ -279,7 +303,7 @@ class CallbackModule(CallbackBase):
 
         # Set up API client and send a start event
         if not self.disabled:
-            datadog.initialize(api_key=api_key, api_host=dd_url)
+            datadog.initialize(api_key=str(api_key), api_host=dd_url)
 
             self.send_playbook_event(
                 'Ansible play "{0}" started in playbook "{1}" by "{2}" against "{3}"'.format(
@@ -296,6 +320,7 @@ class CallbackModule(CallbackBase):
         total_errors = 0
         error_hosts = []
         for host in stats.processed:
+            host = self.get_dd_hostname(host)
             # Aggregations for the event text
             summary = stats.summarize(host)
             total_tasks += sum([summary['ok'], summary['failures'], summary['skipped']])

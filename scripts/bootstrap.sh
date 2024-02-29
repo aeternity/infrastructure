@@ -74,7 +74,7 @@ fi
 ###
 
 pip3 uninstall -y ansible ansible-base
-pip3 install ansible==4.10.0
+pip3 install ansible==9.2.0
 
 ###
 ### Bootstrap the instance with Ansible playbooks
