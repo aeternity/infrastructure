@@ -64,32 +64,38 @@ fi
 read -p "Deploy testnet API gateway - Stockholm? (y/N):" testnetgate1
 if [[ $testnetgate1 == "y" ]]; then
     make vault-config-update-api_uat
-    DEPLOY_ENV=api_uat DEPLOY_REGION=eu_north_1 make deploy
+    DEPLOY_ENV=api_uat DEPLOY_REGION=eu_north_1 DEPLOY_KIND="peer" make deploy
+
+    make vault-config-update-api_uat_channel
+    DEPLOY_ENV=api_uat DEPLOY_REGION=eu_north_1 DEPLOY_KIND="channel" CONFIG_KEY=api_uat_channel make deploy
 fi
 
 read -p "Deploy testnet API gateway - Singapore? (y/N):" testnetgate2
 if [[ $testnetgate2 == "y" ]]; then
     make vault-config-update-api_uat
-    DEPLOY_ENV=api_uat DEPLOY_REGION=ap_southeast_1 make deploy
+    DEPLOY_ENV=api_uat DEPLOY_REGION=ap_southeast_1 DEPLOY_KIND="peer" make deploy
 fi
 
 # Mainnet gateway nodes
 read -p "Deploy mainnet API gateway - Stockholm? (y/N):" mainnetgate1
 if [[ $mainnetgate1 == "y" ]]; then
     make vault-config-update-api_main
-    DEPLOY_ENV=api_main DEPLOY_REGION=eu_north_1 make deploy
+    DEPLOY_ENV=api_main DEPLOY_REGION=eu_north_1 DEPLOY_KIND="peer" make deploy
+
+    make vault-config-update-api_main_channel
+    DEPLOY_ENV=api_main DEPLOY_REGION=eu_north_1 DEPLOY_KIND="channel" CONFIG_KEY=api_main_channel make deploy
 fi
 
 read -p "Deploy mainnet API gateway - Singapore? (y/N):" mainnetgate2
 if [[ $mainnetgate2 == "y" ]]; then
     make vault-config-update-api_main
-    DEPLOY_ENV=api_main DEPLOY_REGION=ap_southeast_1 make deploy
+    DEPLOY_ENV=api_main DEPLOY_REGION=ap_southeast_1 DEPLOY_KIND="peer" make deploy
 fi
 
 read -p "Deploy mainnet API gateway - Oregon? (y/N):" mainnetgate3
 if [[ $mainnetgate3 == "y" ]]; then
     make vault-config-update-api_main
-    DEPLOY_ENV=api_main DEPLOY_REGION=us-west-2 make deploy
+    DEPLOY_ENV=api_main DEPLOY_REGION=us-west-2 DEPLOY_KIND="peer" make deploy
 fi
 
 # restore the working dir
