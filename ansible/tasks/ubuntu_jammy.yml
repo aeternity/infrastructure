@@ -3,10 +3,7 @@
     pkg:
       - libsodium23
       - libtinfo5
-
-- name: Install Ubuntu 22.04 dependency debs
-  apt:
-    deb: "http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.21_amd64.deb"
+      - libssl1.1
 
 # remove once Vault is updated to support more modern algos
 - name: Enable legacy CA algos in sshd config
