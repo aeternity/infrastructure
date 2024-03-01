@@ -28,7 +28,7 @@ module "test-aenode-2204" {
 
   instance_type  = "t3.large"
   instance_types = ["t3.large"]
-  ami_name       = "aeternity-ubuntu-22.04-v1705404634"
+  ami_name       = "aeternity-ubuntu-22.04-v1708524781"
 
   additional_storage      = true
   additional_storage_size = 5
@@ -61,7 +61,7 @@ module "test-aemdw-2204" {
 
   instance_type  = "t3.large"
   instance_types = ["t3.large"]
-  ami_name       = "aeternity-ubuntu-22.04-v1705404634"
+  ami_name       = "aeternity-ubuntu-22.04-v1708524781"
 
   additional_storage      = true
   additional_storage_size = 5
