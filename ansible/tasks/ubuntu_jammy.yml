@@ -7,13 +7,16 @@
 # Remove once new AMIs are build
 - name: Remove old libssl deb package
   apt:
-    deb: "http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.21_amd64.deb"
+    pkg:
+      - libssl1.1
     state: absent
+  changed_when: false
 
-# Make sure it's not in the update cycle still
 - name: Install Ubuntu 22.04 dependency debs
   apt:
     deb: "http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb"
+  # Remove once new AMIs are build
+  changed_when: false
 
 # remove once Vault is updated to support more modern algos
 - name: Enable legacy CA algos in sshd config
