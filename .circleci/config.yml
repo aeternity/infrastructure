@@ -104,7 +104,7 @@ commands:
   use_remote_docker:
     steps:
       - setup_remote_docker:
-          version: docker25
+          version: docke24
           docker_layer_caching: true
 
   playbook_run:
