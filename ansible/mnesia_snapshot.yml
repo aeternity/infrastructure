@@ -9,12 +9,12 @@
     project_root: "{{ ansible_env.HOME }}/node"
     aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
     snapshots_bucket: aeternity-database-backups
-    snapshots_dir: "{{ additional_storage_mountpoint|default('/tmp') }}/snapshots"
+    snapshots_dir: "{{ additional_storage_mountpoint | default('/tmp') }}/snapshots"
     snapshot_suffix: "{{ ansible_date_time.iso8601_basic_short }}"
     snapshot_kind: full
     snapshot_filename: "{{ env }}_v{{ db_version }}_{{ snapshot_kind }}_{{ snapshot_suffix }}.tar.zst"
     snapshot_filename_latest: "{{ env }}_v{{ db_version }}_{{ snapshot_kind }}_latest.tar.zst"
-    snapshot_path: "{{ snapshots_dir|default('/tmp/snapshots') }}/{{ snapshot_filename }}"
+    snapshot_path: "{{ snapshots_dir | default('/tmp/snapshots') }}/{{ snapshot_filename }}"
     snapshot_checksum_path: "{{ snapshot_path }}.md5"
     aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
@@ -27,180 +27,184 @@
     healthcheck_port: 3013
 
   tasks:
-    - block:
-      - name: Get node status
-        uri:
-          url: "http://localhost:{{ healthcheck_port }}/v2/status"
-        register: status
-        failed_when: status.json.syncing == true
+    - name: Test
+      block:
+        - name: Get node status
+          ansible.builtin.uri:
+            url: "http://localhost:{{ healthcheck_port }}/v2/status"
+          register: status
+          failed_when: status.json.syncing == true
 
-      - name: Schedule downtime
-        run_once: yes
-        uri:
-          url: "{{ datadog_api_url }}"
-          method: POST
-          status_code: 200
-          timeout: 10
-          body_format: json
-          body:
-            scope: "env:{{ env }}"
-            message: "Snapshot"
-            end: "{{ lookup('pipe', 'date +%s')|int + downtime|int }}"
-        when:
-          - downtime is defined
-          - downtime != "0"
+        - name: Schedule downtime
+          run_once: true
+          ansible.builtin.uri:
+            url: "{{ datadog_api_url }}"
+            method: POST
+            status_code: 200
+            timeout: 10
+            body_format: json
+            body:
+              scope: "env:{{ env }}"
+              message: "Snapshot"
+              end: "{{ lookup('pipe', 'date +%s') | int + downtime | int }}"
+          when:
+            - downtime is defined
+            - downtime != "0"
 
-      - name: Stop node
-        command: "/bin/true"
-        changed_when: true
-        notify: "stop aeternity daemon"
-        tags: [archive]
+        - name: Stop node
+          ansible.builtin.command: "/bin/true"
+          changed_when: true
+          notify: "stop aeternity daemon"
+          tags: [archive]
 
-      - meta: flush_handlers
-        tags: [archive]
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
+          tags: [archive]
 
-      - name: Ensure Mnesia snapshots dir exists ({{ snapshots_dir }})
-        file:
-          path: "{{ snapshots_dir }}"
-          state: directory
-        tags: [archive]
+        - name: Ensure Mnesia snapshots dir exists ({{ snapshots_dir }})
+          ansible.builtin.file:
+            path: "{{ snapshots_dir }}"
+            state: directory
+          tags: [archive]
 
-      - name: Start archive
-        block:
-          - name: Archive Mnesia Directory ({{ project_root }}/{{ db_path }})
-            command:
-              cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ project_root }}/{{ db_path }} .
-              creates:  "{{ snapshot_path }}"
-            when: additional_storage is not defined or not additional_storage
+        - name: Start archive
+          tags: [archive]
+          block:
+            - name: Archive Mnesia Directory ({{ project_root ~ '/' ~ db_path }})
+              ansible.builtin.command:
+                cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ project_root }}/{{ db_path }} .
+                creates: "{{ snapshot_path }}"
+              when: additional_storage is not defined or not additional_storage
 
-          - name: Archive Mnesia Directory ({{ db_path }})
-            command:
-              cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ db_path }} .
-              creates:  "{{ snapshot_path }}"
-            when:
-              - additional_storage is defined
-              - additional_storage
-        rescue:
-          - name: Cleanup on fail
-            command: /bin/true
-            changed_when: true
-            notify: "clean snapshot"
-          - meta: flush_handlers
-        tags: [archive]
+            - name: Archive Mnesia Directory ({{ db_path }})
+              ansible.builtin.command:
+                cmd: tar -c -I zstd -f {{ snapshot_path }} -C {{ db_path }} .
+                creates: "{{ snapshot_path }}"
+              when:
+                - additional_storage is defined
+                - additional_storage
+          rescue:
+            - name: Cleanup on fail
+              ansible.builtin.command: /bin/true
+              changed_when: true
+              notify: "clean snapshot"
+            - name: Flush handlers
+              ansible.builtin.meta: flush_handlers
 
-      - name: Start node
-        command: /bin/true
-        changed_when: true
-        notify: "start aeternity daemon"
-        tags: [archive]
+        - name: Start node
+          ansible.builtin.command: /bin/true
+          changed_when: true
+          notify: "start aeternity daemon"
+          tags: [archive]
 
-      - meta: flush_handlers
-        tags: [archive]
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
+          tags: [archive]
 
-      - name: Stat {{ snapshot_path }}
-        stat:
-          path: "{{ snapshot_path }}"
-          checksum_algorithm: md5
-        register: snapshot_file
-        tags: [upload]
+        - name: Stat {{ snapshot_path }}
+          ansible.builtin.stat:
+            path: "{{ snapshot_path }}"
+            checksum_algorithm: md5
+          register: snapshot_file
+          tags: [upload]
 
-      - name: Upload snapshot to S3 bucket ({{ snapshots_bucket }}/{{ snapshot_filename }})
-        aws_s3:
-          bucket: "{{ snapshots_bucket }}"
-          object: "{{ snapshot_filename }}"
-          src: "{{ snapshot_path }}"
-          mode: put
-          permission: "public-read"
-          aws_access_key: "{{ aws_access_key }}"
-          aws_secret_key: "{{ aws_secret_key }}"
-          security_token: "{{ security_token }}"
-        when:
-          - snapshot_file.stat.readable is defined
-          - snapshot_file.stat.readable
-        tags: [upload]
+        - name: Upload snapshot to S3 bucket ({{ snapshots_bucket ~ '/' ~ snapshot_filename }})
+          amazon.aws.s3_object:
+            bucket: "{{ snapshots_bucket }}"
+            object: "{{ snapshot_filename }}"
+            src: "{{ snapshot_path }}"
+            mode: put
+            permission: "public-read"
+            aws_access_key: "{{ aws_access_key }}"
+            aws_secret_key: "{{ aws_secret_key }}"
+            security_token: "{{ security_token }}"
+          when:
+            - snapshot_file.stat.readable is defined
+            - snapshot_file.stat.readable
+          tags: [upload]
 
-      - name: Generate a checksum file ({{ snapshot_checksum_path }})
-        copy:
-          dest: "{{ snapshot_checksum_path }}"
-          content: "{{ snapshot_file.stat.checksum }}"
-        when:
-          - snapshot_file.stat.readable is defined
-          - snapshot_file.stat.readable
-        tags: [upload]
+        - name: Generate a checksum file ({{ snapshot_checksum_path }})
+          ansible.builtin.copy:
+            dest: "{{ snapshot_checksum_path }}"
+            content: "{{ snapshot_file.stat.checksum }}"
+          when:
+            - snapshot_file.stat.readable is defined
+            - snapshot_file.stat.readable
+          tags: [upload]
 
-      - name: Upload the checksum file to S3 ({{ snapshots_bucket }}/{{ snapshot_filename }}.md5)
-        aws_s3:
-          bucket: "{{ snapshots_bucket }}"
-          object: "{{ snapshot_filename }}.md5"
-          src: "{{ snapshot_checksum_path }}"
-          mode: put
-          permission: "public-read"
-          aws_access_key: "{{ aws_access_key }}"
-          aws_secret_key: "{{ aws_secret_key }}"
-          security_token: "{{ security_token }}"
-        when:
-          - snapshot_file.stat.readable is defined
-          - snapshot_file.stat.readable
-        tags: [upload]
+        - name: Upload the checksum file to S3 ({{ snapshots_bucket ~ '/' ~ snapshot_filename ~ '.md5' }})
+          amazon.aws.s3_object:
+            bucket: "{{ snapshots_bucket }}"
+            object: "{{ snapshot_filename }}.md5"
+            src: "{{ snapshot_checksum_path }}"
+            mode: put
+            permission: "public-read"
+            aws_access_key: "{{ aws_access_key }}"
+            aws_secret_key: "{{ aws_secret_key }}"
+            security_token: "{{ security_token }}"
+          when:
+            - snapshot_file.stat.readable is defined
+            - snapshot_file.stat.readable
+          tags: [upload]
 
-      - name: Upload backup to S3 bucket latest
-        aws_s3:
-          bucket: "{{ snapshots_bucket }}"
-          object: "{{ snapshot_filename_latest }}"
-          src: "{{ snapshot_path }}"
-          mode: put
-          permission: "public-read"
-          aws_access_key: "{{ aws_access_key }}"
-          aws_secret_key: "{{ aws_secret_key }}"
-          security_token: "{{ security_token }}"
-        when:
-          - snapshot_file.stat.readable is defined
-          - snapshot_file.stat.readable
-        tags: [latest]
+        - name: Upload backup to S3 bucket latest
+          amazon.aws.s3_object:
+            bucket: "{{ snapshots_bucket }}"
+            object: "{{ snapshot_filename_latest }}"
+            src: "{{ snapshot_path }}"
+            mode: put
+            permission: "public-read"
+            aws_access_key: "{{ aws_access_key }}"
+            aws_secret_key: "{{ aws_secret_key }}"
+            security_token: "{{ security_token }}"
+          when:
+            - snapshot_file.stat.readable is defined
+            - snapshot_file.stat.readable
+          tags: [latest]
 
-      - name: Upload the checksum file to S3 latest
-        aws_s3:
-          bucket: "{{ snapshots_bucket }}"
-          object: "{{ snapshot_filename_latest }}.md5"
-          src: "{{ snapshot_checksum_path }}"
-          mode: put
-          permission: "public-read"
-          aws_access_key: "{{ aws_access_key }}"
-          aws_secret_key: "{{ aws_secret_key }}"
-          security_token: "{{ security_token }}"
-        when:
-          - snapshot_file.stat.readable is defined
-          - snapshot_file.stat.readable
-        tags: [latest]
+        - name: Upload the checksum file to S3 latest
+          amazon.aws.s3_object:
+            bucket: "{{ snapshots_bucket }}"
+            object: "{{ snapshot_filename_latest }}.md5"
+            src: "{{ snapshot_checksum_path }}"
+            mode: put
+            permission: "public-read"
+            aws_access_key: "{{ aws_access_key }}"
+            aws_secret_key: "{{ aws_secret_key }}"
+            security_token: "{{ security_token }}"
+          when:
+            - snapshot_file.stat.readable is defined
+            - snapshot_file.stat.readable
+          tags: [latest]
 
-      - name: Cleanup
-        command: /bin/true
-        changed_when: true
-        when:
-          - snapshot_file.stat.readable is defined
-          - snapshot_file.stat.readable
-        notify: "clean snapshot"
-        tags: [clean]
+        - name: Cleanup
+          ansible.builtin.command: /bin/true
+          changed_when: true
+          when:
+            - snapshot_file.stat.readable is defined
+            - snapshot_file.stat.readable
+          notify: "clean snapshot"
+          tags: [clean]
 
-      - name: Send Datadog event
-        datadog_event:
-          host: "{{ ansible_ssh_host|default(inventory_hostname) }}"
-          alert_type: success
-          title: Snapshot
-          text: "Filename: {{ snapshot_filename }}"
-          api_key: "{{ datadog_api_key }}"
-          app_key: "{{ datadog_app_key }}"
-          tags:
-            - "env:{{ env }}"
-        when:
-          - datadog_api_key != ""
-          - datadog_app_key != ""
-        tags: [datadog-event]
+        - name: Send Datadog event
+          community.general.datadog_event:
+            host: "{{ ansible_ssh_host | default(inventory_hostname) }}"
+            alert_type: success
+            title: Snapshot
+            text: "Filename: {{ snapshot_filename }}"
+            api_key: "{{ datadog_api_key }}"
+            app_key: "{{ datadog_app_key }}"
+            tags:
+              - "env:{{ env }}"
+          when:
+            - datadog_api_key != ""
+            - datadog_app_key != ""
+          tags: [datadog-event]
 
       rescue:
         - name: Send Datadog event
-          datadog_event:
-            host: "{{ ansible_ssh_host|default(inventory_hostname) }}"
+          community.general.datadog_event:
+            host: "{{ ansible_ssh_host | default(inventory_hostname) }}"
             alert_type: error
             title: Snapshot
             text: |
@@ -217,14 +221,15 @@
             - datadog_app_key != ""
           tags: [datadog-event]
         - name: Fail the playbook
-          fail:
+          ansible.builtin.fail:
             msg: "Failed snapshot"
           when: true
 
   handlers:
-  - import_tasks: tasks/handlers.yml
-  - name: Delete local Mnesia snapshots ({{ snapshots_dir }})
-    file:
-      path: "{{ snapshots_dir }}"
-      state: absent
-    listen: "clean snapshot"
+    - name: Import handlers
+      ansible.builtin.import_tasks: tasks/handlers.yml
+    - name: Delete local Mnesia snapshots ({{ snapshots_dir }})
+      ansible.builtin.file:
+        path: "{{ snapshots_dir }}"
+        state: absent
+      listen: "clean snapshot"

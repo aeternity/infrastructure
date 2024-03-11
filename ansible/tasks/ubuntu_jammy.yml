@@ -1,26 +1,26 @@
 - name: Install Ubuntu 22.04 dependency packages
-  apt:
+  ansible.builtin.apt:
     pkg:
       - libsodium23
       - libtinfo5
 
 # Remove once new AMIs are build
 - name: Remove old libssl deb package
-  apt:
+  ansible.builtin.apt:
     pkg:
       - libssl1.1
     state: absent
   changed_when: false
 
 - name: Install Ubuntu 22.04 dependency debs
-  apt:
+  ansible.builtin.apt:
     deb: "http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb"
   # Remove once new AMIs are build
   changed_when: false
 
 # remove once Vault is updated to support more modern algos
 - name: Enable legacy CA algos in sshd config
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^CASignatureAlgorithms \\^ssh-rsa'
     line: 'CASignatureAlgorithms ^ssh-rsa'

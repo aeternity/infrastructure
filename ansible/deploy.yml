@@ -4,7 +4,7 @@
   remote_user: aeternity
   serial: "{{ rolling_update | default('100%') }}"
   # Facts are already collected in the previous playbook
-  gather_facts: no
+  gather_facts: false
   max_fail_percentage: 25
 
   vars:
@@ -15,7 +15,7 @@
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
     downtime: "0"
-    health_check: yes
+    health_check: true
     healthcheck_port: 3013
     enable_aws_checks: true
     db_path: data/
@@ -26,221 +26,224 @@
 
   tasks:
     - name: Check if running on AWS instance
-      uri:
+      ansible.builtin.uri:
         url: http://169.254.169.254/latest/meta-data
         timeout: 2
       register: aws_uri_check
-      failed_when: False
+      failed_when: false
       when:
         - enable_aws_checks|bool
       tags: [always]
 
     - name: Set AWS check fact
-      set_fact:
+      ansible.builtin.set_fact:
         is_aws: "{{ aws_uri_check.status == 200 }}"
       when:
         - enable_aws_checks|bool
       tags: [always]
 
     - name: Gather instance metadata facts
-      ec2_metadata_facts:
+      amazon.aws.ec2_metadata_facts:
       when:
         - enable_aws_checks|bool
         - is_aws
       tags: [always]
 
-    - block:
-      - name: Schedule downtime
-        run_once: yes
-        uri:
-          url: "{{ datadog_api_url }}"
-          method: POST
-          status_code: 200
-          timeout: 10
-          body_format: json
-          body:
-            scope: "env:{{ env }}"
-            message: "Deploy"
-            end: "{{ lookup('pipe', 'date +%s')|int + downtime|int }}"
-        when:
-          - downtime is defined
-          - downtime != "0"
+    - name: Deploy
+      block:
+        - name: Schedule downtime
+          run_once: true
+          ansible.builtin.uri:
+            url: "{{ datadog_api_url }}"
+            method: POST
+            status_code: 200
+            timeout: 10
+            body_format: json
+            body:
+              scope: "env:{{ env }}"
+              message: "Deploy"
+              end: "{{ lookup('pipe', 'date +%s') | int + downtime | int }}"
+          when:
+            - downtime is defined
+            - downtime != "0"
 
-      - name: Fail on missing package variable
-        fail:
-          msg: '"package" variable must be defined'
-        when: package is not defined
-        tags: [package]
+        - name: Fail on missing package variable
+          ansible.builtin.fail:
+            msg: '"package" variable must be defined'
+          when: package is not defined
+          tags: [package]
 
-      - name: Delete old downloaded pacakges glob
-        find:
-          paths: "{{ packages_path }}"
-          patterns:
-            - .*aeternity-.*ubuntu.*.tar.gz
-          exclude: "{{ package|basename }}"
-          use_regex: yes
-        register: old_packages_to_delete
+        - name: Delete old downloaded pacakges glob
+          ansible.builtin.find:
+            paths: "{{ packages_path }}"
+            patterns:
+              - .*aeternity-.*ubuntu.*.tar.gz
+            exclude: "{{ package | basename }}"
+            use_regex: true
+          register: old_packages_to_delete
 
-      - name: Delete old packages
-        file:
-          path: "{{ item.path }}"
-          state: absent
-        loop: "{{ old_packages_to_delete.files }}"
+        - name: Delete old packages
+          ansible.builtin.file:
+            path: "{{ item.path }}"
+            state: absent
+          loop: "{{ old_packages_to_delete.files }}"
 
-      - name: Download remote package
-        get_url:
-          url: "{{ package }}"
-          dest: "{{ packages_path }}/{{ package|basename }}"
-          checksum: "{{ package_checksum|default(omit) }}"
-          timeout: 3600
-        when: "'http' in package"
-        register: remote_package
-        notify: "stop aeternity daemon"
-        tags: [package]
+        - name: Download remote package
+          ansible.builtin.get_url:
+            url: "{{ package }}"
+            dest: "{{ packages_path }}/{{ package | basename }}"
+            checksum: "{{ package_checksum | default(omit) }}"
+            timeout: 3600
+          when: "'http' in package"
+          register: remote_package
+          notify: "stop aeternity daemon"
+          tags: [package]
 
-      - name: Upload local package
-        copy:
-          src: "{{ package }}"
-          dest: "{{ packages_path }}/{{ package|basename }}"
-        when: "'http' not in package"
-        register: local_package
-        notify: "stop aeternity daemon"
-        tags: [package]
+        - name: Upload local package
+          ansible.builtin.copy:
+            src: "{{ package }}"
+            dest: "{{ packages_path }}/{{ package | basename }}"
+          when: "'http' not in package"
+          register: local_package
+          notify: "stop aeternity daemon"
+          tags: [package]
 
-      - name: "Make sure 'project_root' exists"
-        file:
+        - name: "Make sure 'project_root' exists"
+          ansible.builtin.file:
             path: "{{ project_root }}"
             state: directory
             # allow group read for integration purposes  (e.g. logs)
-            mode: 0750
+            mode: '0750'
 
-      - meta: flush_handlers
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
 
-      - name: Extract aeternity package
-        unarchive:
-          remote_src: true
-          keep_newer: true
-          src: "{{ packages_path }}/{{ package|basename }}"
-          dest: "{{ project_root }}"
-        when: remote_package.changed or local_package.changed
-        notify: "start aeternity daemon"
-        tags: [package]
+        - name: Extract aeternity package
+          ansible.builtin.unarchive:
+            remote_src: true
+            keep_newer: true
+            src: "{{ packages_path }}/{{ package | basename }}"
+            dest: "{{ project_root }}"
+          when: remote_package.changed or local_package.changed
+          notify: "start aeternity daemon"
+          tags: [package]
 
-      - name: Plant ENV file
-        copy:
-          content: "{{ env }}\n"
-          dest: "{{ project_root }}/ENV"
-        notify: "restart aeternity daemon"
-        tags: [package]
+        - name: Plant ENV file
+          ansible.builtin.copy:
+            content: "{{ env }}\n"
+            dest: "{{ project_root }}/ENV"
+          notify: "restart aeternity daemon"
+          tags: [package]
 
-      - name: "Make sure chain path exists (relative) - {{ db_path }}"
-        file:
-          path: "{{ project_root }}/{{ db_path }}"
-          state: directory
-        when: additional_storage is not defined or not additional_storage
-        tags: [config]
+        - name: "Make sure chain path exists (relative) - {{ db_path }}"
+          ansible.builtin.file:
+            path: "{{ project_root }}/{{ db_path }}"
+            state: directory
+          when: additional_storage is not defined or not additional_storage
+          tags: [config]
 
-      - name: "Make sure chain path exists (absolute) - {{ db_path }}"
-        file:
-          path: "{{ db_path }}"
-          state: directory
-        when: additional_storage is defined and additional_storage
-        tags: [config]
+        - name: "Make sure chain path exists (absolute) - {{ db_path }}"
+          ansible.builtin.file:
+            path: "{{ db_path }}"
+            state: directory
+          when: additional_storage is defined and additional_storage
+          tags: [config]
 
-      - name: "Make sure keys dir ( {{ keys_dir }} ) exists"
-        file:
-          path: "{{ project_root }}/{{ keys_dir }}"
-          state: directory
-          mode: 0700
-        tags: [config, peer_keys]
+        - name: "Make sure keys dir {{ '(' ~ keys_dir ~ ') ' ~ 'exists' }}"
+          ansible.builtin.file:
+            path: "{{ project_root }}/{{ keys_dir }}"
+            state: directory
+            mode: '0700'
+          tags: [config, peer_keys]
 
-      - name: "Copy node public peer key to {{ keys_dir }}/peer_key.pub"
-        copy:
-          content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64')|b64decode }}"
-          dest: "{{ project_root }}/{{ keys_dir }}/peer_key.pub"
-          mode: 0600
-        when: seed_peers is defined and public_ipv4 in seed_peers
-        notify: "restart aeternity daemon"
-        tags: [config, peer_keys]
+        - name: "Copy node public peer key to {{ keys_dir ~ '/peer_key.pub' }}"
+          ansible.builtin.copy:
+            content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/public:base64') | b64decode }}"
+            dest: "{{ project_root }}/{{ keys_dir }}/peer_key.pub"
+            mode: '0600'
+          when: seed_peers is defined and public_ipv4 in seed_peers
+          notify: "restart aeternity daemon"
+          tags: [config, peer_keys]
 
-      - name: "Copy node private peer key to {{ keys_dir }}/peer_key"
-        copy:
-          content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/private:base64')|b64decode }}"
-          dest: "{{ project_root }}/{{ keys_dir }}/peer_key"
-          mode: 0600
-        when: seed_peers is defined and public_ipv4 in seed_peers
-        notify: "restart aeternity daemon"
-        tags: [config, peer_keys]
+        - name: "Copy node private peer key to {{ keys_dir ~ '/peer_key' }}"
+          ansible.builtin.copy:
+            content: "{{ lookup('hashi_vault', 'secret=secret/aenode/peer_keys/{{ public_ipv4 }}/private:base64') | b64decode }}"
+            dest: "{{ project_root }}/{{ keys_dir }}/peer_key"
+            mode: '0600'
+          when: seed_peers is defined and public_ipv4 in seed_peers
+          notify: "restart aeternity daemon"
+          tags: [config, peer_keys]
 
-      - name: Make sure configuration files paths exists
-        file:
-          path: "{{ project_root }}/{{ item.value | dirname }}"
-          state: directory
-          mode: 0700
-        loop: "{{ files | dict2items }}"
-        when:
-          - files is defined
-          - vault_config_key is defined
-          - vault_config_key != ""
-        notify: "restart aeternity daemon"
-        tags: [config]
+        - name: Make sure configuration files paths exists
+          ansible.builtin.file:
+            path: "{{ project_root }}/{{ item.value | dirname }}"
+            state: directory
+            mode: '0700'
+          loop: "{{ files | dict2items }}"
+          when:
+            - files is defined
+            - vault_config_key is defined
+            - vault_config_key != ""
+          notify: "restart aeternity daemon"
+          tags: [config]
 
-      - name: Update configuration files
-        copy:
-          content: "{{ lookup('hashi_vault', 'secret=secret2/data/aenode/config/{{ vault_config_key }}:{{ item.key }}') }}"
-          dest: "{{ project_root }}/{{ item.value }}"
-          mode: '0600'
-        loop: "{{ files | dict2items }}"
-        when:
-          - files is defined
-          - vault_config_key is defined
-          - vault_config_key != ""
-        notify: "restart aeternity daemon"
-        tags: [config]
+        - name: Update configuration files
+          ansible.builtin.copy:
+            content: "{{ lookup('hashi_vault', 'secret=secret2/data/aenode/config/{{ vault_config_key }}:{{ item.key }}') }}"
+            dest: "{{ project_root }}/{{ item.value }}"
+            mode: '0600'
+          loop: "{{ files | dict2items }}"
+          when:
+            - files is defined
+            - vault_config_key is defined
+            - vault_config_key != ""
+          notify: "restart aeternity daemon"
+          tags: [config]
 
-      - name: Start aeternity node
-        command: "{{ project_root }}/bin/aeternity start"
-        changed_when: false
-        tags: [daemon]
+        - name: Start aeternity node
+          ansible.builtin.command: "{{ project_root }}/bin/aeternity start"
+          changed_when: false
+          tags: [daemon]
 
-      - meta: flush_handlers
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
 
-      - name: Run health checks
-        include_tasks: tasks/health_check.yml
+        - name: Run health checks
+          ansible.builtin.include_tasks: tasks/health_check.yml
 
-      - name: Refresh aeternity facts
-        setup:
-        tags: [datadog-event]
+        - name: Refresh aeternity facts
+          ansible.builtin.setup:
+          tags: [datadog-event]
 
-      - name: Send Datadog event
-        datadog_event:
-          host: "{{ ansible_ec2_instance_id|default(ansible_hostname ) }}"
-          alert_type: success
-          title: Node Deployment
-          text: |
-            %%%
-            Revision: [{{ ansible_local.aeternity.revision }}](https://github.com/aeternity/aeternity/commit/{{ ansible_local.aeternity.revision }})
-            Package: {{ package|default('unknown') }}
-            %%%
-          api_key: "{{ datadog_api_key }}"
-          app_key: "{{ datadog_app_key }}"
-          tags:
-            - "env:{{ env }}"
-            - "version:{{ ansible_local.aeternity.version }}"
-        when:
-          - datadog_api_key != ""
-          - datadog_app_key != ""
-        connection: local
-        tags: [datadog-event]
+        - name: Send Datadog event
+          community.general.datadog_event:
+            host: "{{ ansible_ec2_instance_id | default(ansible_hostname) }}"
+            alert_type: success
+            title: Node Deployment
+            text: |
+              %%%
+              Revision: [{{ ansible_local.aeternity.revision }}](https://github.com/aeternity/aeternity/commit/{{ ansible_local.aeternity.revision }})
+              Package: {{ package | default('unknown') }}
+              %%%
+            api_key: "{{ datadog_api_key }}"
+            app_key: "{{ datadog_app_key }}"
+            tags:
+              - "env:{{ env }}"
+              - "version:{{ ansible_local.aeternity.version }}"
+          when:
+            - datadog_api_key != ""
+            - datadog_app_key != ""
+          connection: local
+        #   tags: [datadog-event]
       rescue:
         - name: Send Datadog event
-          datadog_event:
-            host: "{{ ansible_ec2_instance_id|default(ansible_hostname ) }}"
+          community.general.datadog_event:
+            host: "{{ ansible_ec2_instance_id | default(ansible_hostname) }}"
             alert_type: error
             title: Node Deployment
             text: |
               %%%
-              Package: {{ package|default('unknown') }}
+              Package: {{ package | default('unknown') }}
               Task {{ ansible_failed_task.name }} failed with error {{ ansible_failed_result.msg }}
               %%%
             api_key: "{{ datadog_api_key }}"
@@ -253,9 +256,10 @@
           connection: local
           tags: [datadog-event]
         - name: Fail the playbook
-          fail:
+          ansible.builtin.fail:
             msg: "Failed deploy"
           when: true
 
   handlers:
-  - import_tasks: tasks/handlers.yml
+    - name: Import handlers
+      ansible.builtin.import_tasks: tasks/handlers.yml

@@ -1,0 +1,26 @@
+# This file contains ignores rule violations for ansible-lint
+ansible/deploy-aemdw.yml risky-file-permissions
+ansible/deploy-aemdw.yml run-once[task]
+ansible/deploy.yml risky-file-permissions
+ansible/deploy.yml run-once[task]
+ansible/ebs-grow-volume.yml no-changed-when
+ansible/fail2ban/tasks/main.yml package-latest
+ansible/fail2ban/tasks/main.yml risky-file-permissions
+ansible/manage-node.yml literal-compare
+ansible/manage-node.yml no-changed-when
+ansible/mnesia_reset_once.yml no-changed-when
+ansible/mnesia_reset_once.yml run-once[task]
+ansible/mnesia_snapshot.yml command-instead-of-module
+ansible/mnesia_snapshot.yml risky-file-permissions
+ansible/mnesia_snapshot.yml run-once[task]
+ansible/mnesia_snapshot_restore.yml literal-compare
+ansible/mnesia_snapshot_restore.yml no-changed-when
+ansible/mnesia_snapshot_restore.yml risky-file-permissions
+ansible/monitoring.yml risky-file-permissions
+ansible/reset-net.yml no-changed-when
+ansible/reset-net.yml risky-file-permissions
+ansible/restore-node.yml no-changed-when
+ansible/setup.yml no-changed-when
+ansible/setup.yml risky-file-permissions
+ansible/tasks/handlers.yml literal-compare
+ansible/tasks/handlers.yml no-changed-when

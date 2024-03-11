@@ -1,6 +1,6 @@
 ---
 - name: Check aeternity binary
-  stat:
+  ansible.builtin.stat:
     path: "{{ project_root }}/bin/aeternity"
   register: ae_node
   tags: [daemon]
@@ -9,8 +9,8 @@
     - "restart aeternity daemon"
 
 - name: Ping aeternity node
-  command: "{{ project_root }}/bin/aeternity ping"
-  failed_when: no
+  ansible.builtin.command: "{{ project_root }}/bin/aeternity ping"
+  failed_when: false
   register: ping
   when: ae_node.stat.exists == True
   tags: [daemon]
@@ -19,7 +19,7 @@
     - "restart aeternity daemon"
 
 - name: Stop aeternity node
-  command: "{{ project_root }}/bin/aeternity stop"
+  ansible.builtin.command: "{{ project_root }}/bin/aeternity stop"
   when: ae_node.stat.exists == True and ping.stdout == "pong"
   tags: [daemon]
   listen:
@@ -27,7 +27,7 @@
     - "restart aeternity daemon"
 
 - name: Start aeternity node
-  command: "{{ project_root }}/bin/aeternity start"
+  ansible.builtin.command: "{{ project_root }}/bin/aeternity start"
   tags: [daemon]
   listen:
     - "start aeternity daemon"

@@ -10,7 +10,7 @@
 
   tasks:
     - name: Fail on unsupported command
-      fail:
+      ansible.builtin.fail:
         msg: "Invalid command. Supported commands are: ping, start, stop, restart, status"
       when:
         - aeternity_action != "ping"
@@ -21,62 +21,63 @@
       connection: local
 
     - name: Aeternity binary exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ aeternity_bin }}"
       register: ae_node
       changed_when: false
       failed_when: ae_node.stat.exists != True
 
     - name: Ping aeternity daemon
-      command: "{{ aeternity_bin }} ping"
+      ansible.builtin.command: "{{ aeternity_bin }} ping"
       register: ping
-      failed_when: no
+      failed_when: false
       changed_when: false
       when: ae_node.stat.exists == True
 
     - name: Register running aeternity daemon
-      set_fact:
+      ansible.builtin.set_fact:
         node_running: true
       when: ping.stdout == "pong"
 
     - name: Fail if not running
-      fail:
+      ansible.builtin.fail:
         msg: "Ping failed"
       when:
         - not node_running
         - aeternity_action == "ping"
 
     - name: Start aeternity deamon
-      command: "{{ aeternity_bin }} start"
+      ansible.builtin.command: "{{ aeternity_bin }} start"
       when:
         - not node_running
         - aeternity_action == "start" or aeternity_action == "restart"
 
     - name: Stop aeternity deamon
-      command: "{{ aeternity_bin }} stop"
+      ansible.builtin.command: "{{ aeternity_bin }} stop"
       when:
         - node_running
         - aeternity_action == "stop"
 
     - name: Restart aeternity deamon
-      command: "{{ aeternity_bin }} restart"
+      ansible.builtin.command: "{{ aeternity_bin }} restart"
       when:
         - node_running
         - aeternity_action == "restart"
 
     - name: Dump node status
-      block:
-        - name: Get node status
-          uri:
-            url: "http://localhost:3013/v2/status"
-          register: status
-        - debug:
-            var: status.json
       when:
         - node_running
         - aeternity_action == "status"
+      block:
+        - name: Get node status
+          ansible.builtin.uri:
+            url: "http://localhost:3013/v2/status"
+          register: status
+        - name: Debug
+          ansible.builtin.debug:
+            var: status.json
 
   post_tasks:
     - name: Prepare health checks
-      include_tasks: tasks/health_check.yml
+      ansible.builtin.include_tasks: tasks/health_check.yml
       when: aeternity_action != "stop"

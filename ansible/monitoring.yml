@@ -1,30 +1,30 @@
 - name: Collect cloud instance metadata
   hosts: all
   remote_user: master
-  become: yes
-  gather_facts: yes
+  become: true
+  gather_facts: true
   tags: [datadog]
   vars:
     enable_aws_checks: true
   tasks:
     - name: Check if running on AWS instance
-      uri:
+      ansible.builtin.uri:
         url: http://169.254.169.254/latest/meta-data
         timeout: 2
       register: aws_uri_check
-      failed_when: False
+      failed_when: false
       when:
         - enable_aws_checks|bool
         - packer_build_name is not defined
 
     - name: Set AWS check fact
-      set_fact:
+      ansible.builtin.set_fact:
         is_aws: "{{ packer_build_name is not defined and aws_uri_check.status == 200 }}"
       when:
         - enable_aws_checks|bool
 
     - name: Get instance metadata facts
-      ec2_metadata_facts:
+      amazon.aws.ec2_metadata_facts:
       when:
         - enable_aws_checks|bool
         - is_aws
@@ -32,37 +32,37 @@
 - name: Configure health check services (goss)
   hosts: all
   remote_user: master
-  become: yes
+  become: true
   vars:
     project_user: aeternity
     goss_version: "0.3.6"
 
   tasks:
     - name: Create Goss source directory
-      file:
+      ansible.builtin.file:
         path: /usr/src/goss-{{ goss_version }}/
         state: directory
       tags:
         - goss-install
 
     - name: Download and unarchive Goss binary
-      get_url:
+      ansible.builtin.get_url:
         url: "https://github.com/aelsabbahy/goss/releases/download/v{{ goss_version }}/goss-linux-amd64"
         dest: /usr/src/goss-{{ goss_version }}/goss
       tags:
         - goss-install
 
     - name: Install Goss binary
-      copy:
+      ansible.builtin.copy:
         src: /usr/src/goss-{{ goss_version }}/goss
         dest: /usr/bin/goss
-        mode: 0755
+        mode: '0755'
         remote_src: true
       tags:
         - goss-install
 
     - name: Create Goss config directory
-      file:
+      ansible.builtin.file:
         path: /etc/goss/
         state: directory
       notify: restart goss
@@ -70,46 +70,46 @@
         - goss-install
 
     - name: Check is systemd enabled
-      stat:
+      ansible.builtin.stat:
         path: /run/systemd/system
       register: systemd_run_dir
       tags:
         - goss-install
 
     - name: Copy systemd goss config
-      copy:
+      ansible.builtin.copy:
         src: files/goss/goss.service
         dest: "/etc/systemd/system"
-        mode: 0640
+        mode: '0640'
       notify: reload systemd
       when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
       tags:
         - goss-install
 
     - name: Enable goss systemd service start on boot
-      systemd:
+      ansible.builtin.systemd:
         name: goss
-        enabled: yes
+        enabled: true
       notify: reload systemd
       when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
       tags:
         - goss-install
 
     - name: Copy init.d goss config
-      copy:
+      ansible.builtin.copy:
         src: files/goss/goss.conf
         dest: "/etc/init.d/goss"
-        mode: 0750
+        mode: '0750'
       notify: restart goss
       when: not systemd_run_dir.stat.exists
       tags:
         - goss-install
 
     - name: Set goss.log correct permissions for goss
-      file:
+      ansible.builtin.file:
         path: /var/log/goss.log
         state: touch
-        mode: 0640
+        mode: '0640'
         owner: "{{ project_user }}"
         modification_time: "preserve"
         access_time: "preserve"
@@ -118,7 +118,7 @@
         - goss-install
 
     - name: Copy test files
-      copy:
+      ansible.builtin.copy:
         directory_mode: true
         src: ../test/goss/local/
         dest: "/etc/goss/"
@@ -127,18 +127,18 @@
         - goss-install
 
     - name: Copy health check script
-      copy:
+      ansible.builtin.copy:
         src: ../scripts/health_check.sh
         dest: "/etc/goss/"
-        mode: 0755
+        mode: '0755'
       notify: restart goss
       tags:
         - goss-install
 
   handlers:
     - name: Reload systemd
-      systemd:
-        daemon_reload: yes
+      ansible.builtin.systemd:
+        daemon_reload: true
       listen:
         - reload systemd
       notify: restart goss
@@ -146,7 +146,7 @@
         - goss-install
 
     - name: Restart goss
-      service:
+      ansible.builtin.service:
         name: goss
         state: restarted
         use: service_mgr|default(ansible_service_mgr)
@@ -158,8 +158,8 @@
 - name: Configure monitoring services (DataDog)
   hosts: all
   remote_user: master
-  become: yes
-  gather_facts: no
+  become: true
+  gather_facts: false
   tags: [datadog]
 
   vars:
@@ -239,44 +239,44 @@
             sourcecategory: sync
 
   pre_tasks:
-    - name: "Add dd-agent to {{ project_user }} group"
-      user:
+    - name: "Add dd-agent to {{ project_user ~ 'group' }}"
+      ansible.builtin.user:
         name: dd-agent
         groups: "{{ project_user }}"
-        append: yes
+        append: true
 
   roles:
     - { role: Datadog.datadog }
 
   post_tasks:
     - name: Install rsyslog
-      apt:
+      ansible.builtin.apt:
         state: present
-        update_cache: yes
+        update_cache: true
         pkg:
-        - rsyslog
+          - rsyslog
     - name: Copy datadog.conf to rsyslog
-      copy:
+      ansible.builtin.copy:
         src: files/rsyslog/datadog.conf
         dest: /etc/rsyslog.d/datadog.conf
-        mode: 0600
+        mode: '0600'
       notify: restart rsyslogd
     - name: Copy fail2ban.conf to rsyslog
-      copy:
+      ansible.builtin.copy:
         src: files/rsyslog/fail2ban.conf
         dest: /etc/rsyslog.d/49-fail2ban.conf
-        mode: 0600
+        mode: '0600'
       notify: restart rsyslogd
     - name: Copy fail2ban.conf to logrotate
-      copy:
+      ansible.builtin.copy:
         src: files/logrotate/fail2ban
         dest: /etc/logrotate.d/fail2ban
-        mode: 0600
+        mode: '0600'
     - name: Set fail2ban.log correct permissions for syslog
-      file:
+      ansible.builtin.file:
         path: /var/log/fail2ban.log
         state: touch
-        mode: 0640
+        mode: '0640'
         owner: syslog
         group: adm
         modification_time: "preserve"
@@ -285,24 +285,24 @@
         - restart rsyslogd
         - restart fail2ban
     - name: Remove default fail2ban conf.d from Debian/Ubuntu
-      file:
+      ansible.builtin.file:
         path: /etc/fail2ban/jail.d/defaults-debian.conf
         state: absent
       notify: restart fail2ban
 
   handlers:
     - name: Restart rsyslogd
-      service:
+      ansible.builtin.service:
         name: rsyslog
         state: restarted
         use: service_mgr|default(ansible_service_mgr)
       listen:
         - restart rsyslogd
     - name: Restart fail2ban
-      service:
+      ansible.builtin.service:
         name: fail2ban
         state: restarted
         use: service_mgr|default(ansible_service_mgr)
-      when: fail2ban_enable|bool
+      when: fail2ban_enable | bool
       listen:
         - restart fail2ban

@@ -9,7 +9,7 @@
 
   tasks:
     - name: Aeternity binary exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ aeternity_bin }}"
       register: ae_node
       failed_when: ae_node.stat.exists != True
@@ -17,83 +17,83 @@
       tags: [daemon]
 
     - name: Ping aeternity daemon
-      command: "{{ aeternity_bin }} ping"
+      ansible.builtin.command: "{{ aeternity_bin }} ping"
       register: ping
-      failed_when: no
+      failed_when: false
       changed_when: false
       tags: [daemon]
 
     - name: Stop aeternity daemon
-      command: "{{ aeternity_bin }} stop"
+      ansible.builtin.command: "{{ aeternity_bin }} stop"
       when:
         - ae_node.stat.exists
         - ping.stdout == "pong"
       tags: [daemon]
 
     - name: Stat aeternity.yaml
-      stat:
+      ansible.builtin.stat:
         path: "{{ project_root }}/aeternity.yaml"
       register: config_file
 
     - name: Read aeternity.yaml contents
-      command: "cat {{ project_root }}/aeternity.yaml"
+      ansible.builtin.command: "cat {{ project_root }}/aeternity.yaml"
       register: cat_output
       when: config_file.stat.exists
       tags: [config]
 
     - name: Parse YAML configuration
-      set_fact:
+      ansible.builtin.set_fact:
         node_vars: "{{ cat_output.stdout | from_yaml }}"
       when: config_file.stat.exists
       tags: [config]
 
     - name: Deleting old blockchain
-      file:
+      ansible.builtin.file:
         path: "{{ project_root }}/{{ node_vars.chain.db_path }}/"
         state: absent
       when: config_file.stat.exists
       tags: [config]
 
     - name: Creating new blockchain folder
-      file:
+      ansible.builtin.file:
         path: "{{ project_root }}/{{ node_vars.chain.db_path }}/"
         state: directory
       when: config_file.stat.exists
       tags: [config]
 
     - name: Deleting old keys dir
-      file:
-        path: "{{ project_root }}/{{ node_vars.keys.dir|default('keys') }}/"
+      ansible.builtin.file:
+        path: "{{ project_root }}/{{ node_vars.keys.dir | default('keys') }}/"
         state: absent
       when: config_file.stat.exists
       tags: [config]
 
     - name: Creating new keys dir
-      file:
-        path: "{{ project_root }}/{{ node_vars.keys.dir|default('keys') }}/"
+      ansible.builtin.file:
+        path: "{{ project_root }}/{{ node_vars.keys.dir | default('keys') }}/"
         state: directory
       when: config_file.stat.exists
       tags: [config]
 
     - name: Deleting old log files
-      file:
+      ansible.builtin.file:
         path: "{{ project_root }}/log/"
         state: absent
       tags: [config]
 
     - name: Creating new log folder
-      file:
+      ansible.builtin.file:
         path: "{{ project_root }}/log/"
         state: directory
       tags: [config]
 
     - name: Start aeternity daemon
-      command: "{{ aeternity_bin }} start"
+      ansible.builtin.command: "{{ aeternity_bin }} start"
       when: ae_node.stat.exists
       tags: [daemon]
 
   post_tasks:
     - name: Run health checks
-      include_tasks: tasks/health_check.yml
+      ansible.builtin.include_tasks: tasks/health_check.yml
       vars:
         healthcheck_port: "{{ node_vars.http.external.port }}"

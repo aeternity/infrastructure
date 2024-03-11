@@ -13,7 +13,7 @@
 
   tasks:
     - name: Run health checks
-      include_tasks: tasks/health_check.yml
+      ansible.builtin.include_tasks: tasks/health_check.yml
 
 
 - name: Health check aemdw
@@ -30,4 +30,4 @@
 
   tasks:
     - name: Run health checks
-      include_tasks: tasks/health_check.yml
+      ansible.builtin.include_tasks: tasks/health_check.yml

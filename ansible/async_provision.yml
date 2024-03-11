@@ -2,23 +2,23 @@
 - name: Provision node servers
   hosts: all
   remote_user: master
-  become: yes
+  become: true
 
   vars:
     bootstrap_version: master
 
   tasks:
     - name: Clone infrastructure repo
-      git:
+      ansible.builtin.git:
         repo: https://github.com/aeternity/infrastructure.git
         dest: /infrastructure
         version: "{{ bootstrap_version }}"
         depth: 1
-        force: yes
+        force: true
 
     - name: Run bootstrap.sh
-      shell: |
+      ansible.builtin.shell: |
         /infrastructure/scripts/bootstrap.sh >> /tmp/provision.log 2>&1
       async: 600
       poll: 15
-      changed_when: False
+      changed_when: false

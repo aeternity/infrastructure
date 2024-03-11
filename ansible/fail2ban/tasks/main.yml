@@ -1,29 +1,29 @@
 ---
 - name: Create auth log if it does not exist
-  command: touch /var/log/auth.log
+  ansible.builtin.command: touch /var/log/auth.log
   args:
     creates: /var/log/auth.log
 
 - name: Ensure fail2ban is installed
-  apt:
+  ansible.builtin.apt:
     name: fail2ban
     state: latest
-    update_cache: yes
+    update_cache: true
   notify:
-    - restart fail2ban
+    - Restart fail2ban
 
 - name: Ensure fail2ban is configured
-  template:
+  ansible.builtin.template:
     src: "fail2ban/templates/{{ item }}.j2"
     dest: /etc/fail2ban/{{ item }}
   with_items:
     - jail.local
     - fail2ban.local
   notify:
-    - restart fail2ban
+    - Restart fail2ban
 
 - name: Ensure fail2ban starts when machine is rebooted
-  service:
+  ansible.builtin.service:
     name: fail2ban
     state: started
-    enabled: yes
+    enabled: true

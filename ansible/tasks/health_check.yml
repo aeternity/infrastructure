@@ -1,17 +1,17 @@
 ---
 - name: Wait for system to become reachable
-  wait_for_connection:
+  ansible.builtin.wait_for_connection:
     timeout: 180
 
 - name: Wait aeternity node API to boot
-  wait_for:
+  ansible.builtin.wait_for:
     port: "{{ healthcheck_port }}"
     host: "127.0.0.1"
     timeout: 600
   tags: [health-check]
 
 - name: Local Node Health check
-  uri:
+  ansible.builtin.uri:
     url: "http://127.0.0.1:{{ healthcheck_port }}/v2/status"
     timeout: 1
     status_code: 200
@@ -22,7 +22,7 @@
   tags: [health-check]
 
 - name: External Node Health check
-  uri:
+  ansible.builtin.uri:
     url: "http://{{ public_ipv4 }}:{{ healthcheck_port }}/v2/status"
     timeout: 5
     status_code: 200
@@ -30,7 +30,7 @@
   tags: [health-check]
 
 - name: Local Middleware Health check
-  uri:
+  ansible.builtin.uri:
     url: "http://127.0.0.1:{{ mdw_healthcheck_port }}/status"
     timeout: 1
     status_code: 200
@@ -44,7 +44,7 @@
   tags: [health-check]
 
 - name: External Middleware Health check
-  uri:
+  ansible.builtin.uri:
     url: "http://{{ public_ipv4 }}:{{ mdw_healthcheck_port }}/status"
     timeout: 5
     status_code: 200
@@ -55,7 +55,7 @@
   tags: [health-check]
 
 - name: Goss Health check
-  uri:
+  ansible.builtin.uri:
     url: "http://{{ public_ipv4 }}:8080/healthz"
     timeout: 10
     status_code: 200
