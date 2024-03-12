@@ -115,7 +115,6 @@
       ansible.builtin.pip:
         name:
           - pip==21.3.1
-          - setuptools-rust==1.1.2
       tags:
         - dev-tools
 
