@@ -17,7 +17,7 @@
       block:
         - name: Get nodes status
           ansible.builtin.uri:
-            url: "http://{{ item }}:{{ healthcheck_port }}/v2/status"
+            url: "http://{{ item }}:{{ healthcheck_port }}/v3/status"
           register: hosts_status
           loop: "{{ play_hosts }}"
           delegate_to: localhost
@@ -65,7 +65,7 @@
 
     - name: Get node status
       ansible.builtin.uri:
-        url: "http://localhost:{{ healthcheck_port }}/v2/status"
+        url: "http://localhost:{{ healthcheck_port }}/v3/status"
       register: status
 
     - name: Reset mnesia database

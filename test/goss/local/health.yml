@@ -26,7 +26,7 @@ port:
     - 0.0.0.0
 
 http:
-  http://localhost:3013/v2/status:
+  http://localhost:3013/v3/status:
     status: 200
 
 command:

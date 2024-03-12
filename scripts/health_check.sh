@@ -53,7 +53,7 @@ fi
 min_height=${min_height:-0}
 
 get_node_status() {
-    curl -sS -m5 http://$HOST:3013/v2/status
+    curl -sS -m5 http://$HOST:3013/v3/status
 }
 check_genesis_hash() {
     test $(echo $node_status| jq -r '.genesis_key_block_hash') == $genesis_hash
@@ -65,7 +65,7 @@ check_sync_progress() {
     echo "$(echo $node_status| jq -r '.sync_progress')>=$min_sync_pct"|bc
 }
 check_top_min_height() {
-    test $(curl -sS -m5 http://$HOST:3013/v2/key-blocks/current | jq '.height') -ge $min_height
+    test $(curl -sS -m5 http://$HOST:3013/v3/key-blocks/current | jq '.height') -ge $min_height
 }
 check_version() {
     test $(echo $node_status| jq -r '.node_version') == $version

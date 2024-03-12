@@ -12,7 +12,7 @@
 
 - name: Local Node Health check
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ healthcheck_port }}/v2/status"
+    url: "http://127.0.0.1:{{ healthcheck_port }}/v3/status"
     timeout: 1
     status_code: 200
   register: node_uri_output
@@ -23,7 +23,7 @@
 
 - name: External Node Health check
   ansible.builtin.uri:
-    url: "http://{{ public_ipv4 }}:{{ healthcheck_port }}/v2/status"
+    url: "http://{{ public_ipv4 }}:{{ healthcheck_port }}/v3/status"
     timeout: 5
     status_code: 200
   connection: local

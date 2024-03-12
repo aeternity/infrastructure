@@ -71,7 +71,7 @@
       block:
         - name: Get node status
           ansible.builtin.uri:
-            url: "http://localhost:3013/v2/status"
+            url: "http://localhost:3013/v3/status"
           register: status
         - name: Debug
           ansible.builtin.debug:
