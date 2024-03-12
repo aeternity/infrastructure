@@ -2,7 +2,7 @@
 - name: Configure node servers
   hosts: all
   remote_user: master
-  become: yes
+  become: true
 
   vars:
     project_user: aeternity
@@ -21,34 +21,35 @@
         port: ssh
         filter: sshd
         logpath: /var/log/auth.log
-    restart_ssh: yes
+    restart_ssh: true
 
   tasks:
     - name: Create aeternity daemon user
-      user:
+      ansible.builtin.user:
         name: "{{ project_user }}"
         shell: /bin/bash
       tags:
         - project-user
 
     - name: Create master user
-      user:
+      ansible.builtin.user:
         name: master
         shell: /bin/bash
       tags:
         - master-user
 
     - name: Disallow root SSH access
-      lineinfile: dest=/etc/ssh/sshd_config
-                  regexp="^PermitRootLogin"
-                  line="PermitRootLogin no"
-                  state=present
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+        state: present
       tags:
         - root-user
       notify: restart ssh
 
     - name: Download Vault public key
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ vault_addr }}/v1/ssh/public_key"
         dest: /etc/ssh/trusted-user-ca-keys.pem
       when: vault_addr is defined
@@ -58,7 +59,7 @@
       notify: restart ssh
 
     - name: Setup trusted CA in sshd config
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         regexp: '^TrustedUserCAKeys'
         line: 'TrustedUserCAKeys /etc/ssh/trusted-user-ca-keys.pem'
@@ -69,65 +70,64 @@
       notify: restart ssh
 
     - name: Install GPG
-      apt:
+      ansible.builtin.apt:
         state: present
-        update_cache: yes
+        update_cache: true
         pkg:
-        - gnupg
+          - gnupg
       tags:
         - dev-tools
 
     - name: Add Docker GPG apt Key
-      apt_key:
+      ansible.builtin.apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
 
     - name: Add Docker Repository
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
 
     - name: Install dev and ops tools
-      apt:
+      ansible.builtin.apt:
         state: present
-        update_cache: yes
+        update_cache: true
         pkg:
-        - sudo
-        - docker-ce
-        - build-essential
-        - python3-pip
-        - python3-distutils
-        - python3-apt
-        - python3-yaml #aeternity.fact
-        - python3-docker
-        - libssl-dev
-        - libffi-dev
-        - jq
-        - unzip
-        - bc
-        - curl
-        - zstd
+          - sudo
+          - docker-ce
+          - build-essential
+          - python3-pip
+          - python3-distutils
+          - python3-apt
+          - python3-yaml # aeternity.fact
+          - python3-docker
+          - libssl-dev
+          - libffi-dev
+          - jq
+          - unzip
+          - bc
+          - curl
+          - zstd
       tags:
         - dev-tools
 
     - name: Prepare pip
-      pip:
+      ansible.builtin.pip:
         name:
           - pip==21.3.1
-          - setuptools-rust==1.1.2
       tags:
         - dev-tools
 
     - name: Install pip dependencies
-      pip:
+      ansible.builtin.pip:
         name:
           # Keep in sync with requirements.txt
-          - ansible==4.10.0
-          - awscli==1.22.30
-          - boto3==1.20.30
+          - ansible==9.2.0
+          - awscli==1.32.45
+          - boto3==1.34.45
           - boto==2.49.0
           - datadog==0.43.0
-          - hvac==0.6.4
+          - hvac==1.2.1
           - wheel==0.37.1
       # "pip3 install ansible" fails otherwise
       # see https://github.com/pypa/pip/issues/10219#issuecomment-887337037
@@ -137,22 +137,22 @@
       tags:
         - dev-tools
 
-    - name: Add user '{{ item }}' to docker group
-      user:
+    - name: Add user '{{ item ~ "to docker group" }}'
+      ansible.builtin.user:
         name: '{{ item }}'
         groups: docker
-        append: yes
+        append: true
       loop: ['ubuntu', 'master', 'aeternity']
 
     - name: Create Vault source directory
-      file:
+      ansible.builtin.file:
         path: /usr/src/vault-{{ vault_version }}/
         state: directory
       tags:
         - vault-install
 
     - name: Download and unarchive Vault binary
-      unarchive:
+      ansible.builtin.unarchive:
         src: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
         dest: /usr/src/vault-{{ vault_version }}/
         creates: /usr/src/vault-{{ vault_version }}/vault
@@ -161,56 +161,56 @@
         - vault-install
 
     - name: Install Vault binary
-      copy:
+      ansible.builtin.copy:
         src: /usr/src/vault-{{ vault_version }}/vault
         dest: /usr/bin/vault
-        mode: 0755
+        mode: '0755'
         remote_src: true
       tags:
         - vault-install
 
     - name: "Create custom fact directory"
-      file:
+      ansible.builtin.file:
         path: "/etc/ansible/facts.d"
         state: "directory"
       tags:
         - ansible-facts
 
     - name: "Install aeternity.fact file"
-      copy:
+      ansible.builtin.copy:
         src: files/aeternity.fact
         dest: /etc/ansible/facts.d/aeternity.fact
-        mode: 0755
+        mode: '0755'
       tags:
         - ansible-facts
 
     - name: Increase ulimit
-      pam_limits:
+      community.general.pam_limits:
         domain: "{{ project_user }}"
         limit_type: soft
         limit_item: nofile
         value: 24576
 
-    - name: Include task to install Ubuntu {{ ansible_distribution_version }} dependencies
-      include_tasks: tasks/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
+    - name: Include task to install Ubuntu {{ ansible_distribution_version ~ 'dependencies' }}
+      ansible.builtin.include_tasks: tasks/{{ ansible_distribution | lower }}_{{ ansible_distribution_release | lower }}.yml
       tags: vars
 
     - name: Attach additional drive if needed
-      include_tasks: tasks/additional_storage.yml
+      ansible.builtin.include_tasks: tasks/additional_storage.yml
 
   handlers:
     - name: Run ldconfig
-      command: ldconfig
+      ansible.builtin.command: ldconfig
       listen: run ldconfig
 
     - name: Restart ssh
-      service:
+      ansible.builtin.service:
         name: ssh
         state: restarted
-        use: service_mgr|default(ansible_service_mgr)
+        use: service_mgr | default(ansible_service_mgr)
       listen: restart ssh
-      when: restart_ssh|bool
+      when: restart_ssh | bool
 
   roles:
-    - role: jasonheecs.ubuntu-fail2ban
-      when: fail2ban_enable|bool
+    - role: fail2ban
+      when: fail2ban_enable | bool

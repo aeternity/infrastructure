@@ -1,5 +1,5 @@
 - name: Install Ubuntu 18.04 dependencies
-  apt:
+  ansible.builtin.apt:
     pkg:
-    - libsodium23
-    - libssl1.0.0
+      - libsodium23
+      - libssl1.0.0

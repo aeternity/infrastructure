@@ -6,46 +6,48 @@
   vars:
     project_root: "{{ ansible_env.HOME }}/node"
     aeternity_bin: "{{ project_root }}/bin/aeternity"
-    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
+    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host) | default(inventory_hostname) }}"
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     healthcheck_port: 3013
 
   tasks:
-    - block:
-      - name: Get nodes status
-        uri:
-          url: "http://{{ item }}:{{ healthcheck_port }}/v2/status"
-        register: hosts_status
-        loop: "{{ play_hosts }}"
-        delegate_to: localhost
+    - name: Get nodes info and send Datadog event
+      run_once: true
+      block:
+        - name: Get nodes status
+          ansible.builtin.uri:
+            url: "http://{{ item }}:{{ healthcheck_port }}/v2/status"
+          register: hosts_status
+          loop: "{{ play_hosts }}"
+          delegate_to: localhost
 
-      - name: Fail if no synced node found
-        fail:
-          msg: No synced node
-        delegate_to: localhost
-        when: >
-          hosts_status.results
-          | map(attribute='json')
-          | selectattr('sync_progress', 'equalto', 100)
-          | list
-          | length == 0
+        - name: Fail if no synced node found
+          ansible.builtin.fail:
+            msg: No synced node
+          delegate_to: localhost
+          when: >
+            hosts_status.results
+            | map(attribute='json')
+            | selectattr('sync_progress', 'equalto', 100)
+            | list
+            | length == 0
 
-      - name: Send Datadog event
-        datadog_event:
-          host: "{{ public_ipv4 }}"
-          alert_type: success
-          title: Reset mnesia database
-          text: "Synced node found"
-          api_key: "{{ datadog_api_key }}"
-          app_key: "{{ datadog_app_key }}"
-        when:
-          - datadog_api_key != ""
-          - datadog_app_key != ""
-        connection: local
+        - name: Send Datadog event
+          community.general.datadog_event:
+            host: "{{ public_ipv4 }}"
+            alert_type: success
+            title: Reset mnesia database
+            text: "Synced node found"
+            api_key: "{{ datadog_api_key }}"
+            app_key: "{{ datadog_app_key }}"
+          when:
+            - datadog_api_key != ""
+            - datadog_app_key != ""
+          connection: local
       rescue:
         - name: Send Datadog event
-          datadog_event:
+          community.general.datadog_event:
             host: "{{ public_ipv4 }}"
             alert_type: error
             title: Reset mnesia database
@@ -57,29 +59,30 @@
             - datadog_app_key != ""
           connection: local
         - name: Fail the playbook
-          fail:
+          ansible.builtin.fail:
             msg: "No synced node found"
           when: true
-      run_once: true
 
     - name: Get node status
-      uri:
+      ansible.builtin.uri:
         url: "http://localhost:{{ healthcheck_port }}/v2/status"
       register: status
 
     - name: Reset mnesia database
+      when: status.json.sync_progress | int == 100
+      run_once: "{{ status.json.sync_progress | int == 100 }}"
       block:
         - name: Stop aeternity daemon
-          command: "{{ aeternity_bin }} stop"
+          ansible.builtin.command: "{{ aeternity_bin }} stop"
 
-        - name:  Delete local database ({{ project_root }}/data/mnesia)
-          file:
+        - name: Delete local database ({{ project_root ~ '/data/mnesia' }})
+          ansible.builtin.file:
             path: "{{ project_root }}/data/mnesia"
             state: absent
           when: additional_storage is not defined or not additional_storage
 
         - name: Delete local database ({{ db_path }})
-          file:
+          ansible.builtin.file:
             path: "{{ db_path }}"
             state: absent
           when:
@@ -87,7 +90,4 @@
             - additional_storage
 
         - name: Start aeternity daemon
-          command: "{{ aeternity_bin }} start"
-
-      when: status.json.sync_progress | int == 100
-      run_once: "{{ status.json.sync_progress | int == 100 }}"
+          ansible.builtin.command: "{{ aeternity_bin }} start"

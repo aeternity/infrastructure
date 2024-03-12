@@ -1,4 +1,2 @@
 - src: Datadog.datadog
   version: "4.13.0"
-- src: jasonheecs.ubuntu-fail2ban
-  version: "1.1.0"
