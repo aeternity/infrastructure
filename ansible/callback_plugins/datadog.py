@@ -1,4 +1,4 @@
-# Source: https://github.com/DataDog/ansible-datadog-callback
+# Source: https://github.com/DataDog/ansible-datadog-callback/commit/6587078da426b6383675dd83f57cf82d2c79bae8
 
 from __future__ import absolute_import, print_function
 
