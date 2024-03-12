@@ -4,8 +4,8 @@ ansible/deploy-aemdw.yml run-once[task]
 ansible/deploy.yml risky-file-permissions
 ansible/deploy.yml run-once[task]
 ansible/ebs-grow-volume.yml no-changed-when
-ansible/fail2ban/tasks/main.yml package-latest
-ansible/fail2ban/tasks/main.yml risky-file-permissions
+ansible/roles/fail2ban/tasks/main.yml package-latest
+ansible/roles/fail2ban/tasks/main.yml risky-file-permissions
 ansible/manage-node.yml literal-compare
 ansible/manage-node.yml no-changed-when
 ansible/mnesia_reset_once.yml no-changed-when

@@ -14,7 +14,7 @@
 
 - name: Ensure fail2ban is configured
   ansible.builtin.template:
-    src: "fail2ban/templates/{{ item }}.j2"
+    src: "templates/{{ item }}.j2"
     dest: /etc/fail2ban/{{ item }}
   with_items:
     - jail.local
