@@ -6,7 +6,7 @@ executors:
       - image: aeternity/infrastructure:master
   ubuntu-container:
     docker:
-      - image: aeternity/infrastructure:update_ansible
+      - image: aeternity/infrastructure:master
       - name: aenode2204
         image: aeternity/ubuntu-sshd:22.04
 
