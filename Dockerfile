@@ -49,6 +49,8 @@ RUN curl -L -o /tmp/tfenv-${TFENV_VERSION}.tar.gz \
 RUN ln -s /usr/local/tfenv-${TFENV_VERSION}/bin/tfenv /usr/local/bin/
 RUN ln -s /usr/local/tfenv-${TFENV_VERSION}/bin/terraform /usr/local/bin/
 
+RUN tfenv install 1.7.4
+
 ENV TERRAFORM_DEFAULT_VERSION 1.1.4
 RUN tfenv install ${TERRAFORM_DEFAULT_VERSION}
 RUN tfenv use ${TERRAFORM_DEFAULT_VERSION}
