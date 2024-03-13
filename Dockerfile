@@ -49,16 +49,9 @@ RUN curl -L -o /tmp/tfenv-${TFENV_VERSION}.tar.gz \
 RUN ln -s /usr/local/tfenv-${TFENV_VERSION}/bin/tfenv /usr/local/bin/
 RUN ln -s /usr/local/tfenv-${TFENV_VERSION}/bin/terraform /usr/local/bin/
 
-#Install last release for "old" versions of TF for purpose of migrations
-#this will be removed after migration process finished
+RUN tfenv install 1.7.4
 
-RUN tfenv install 0.12.21
-RUN tfenv install 0.13.7
-RUN tfenv install 0.14.11
-RUN tfenv install 0.15.5
-RUN tfenv install 1.1.4
-
-ENV TERRAFORM_DEFAULT_VERSION 0.12.30
+ENV TERRAFORM_DEFAULT_VERSION 1.1.4
 RUN tfenv install ${TERRAFORM_DEFAULT_VERSION}
 RUN tfenv use ${TERRAFORM_DEFAULT_VERSION}
 
