@@ -51,7 +51,7 @@
 
     - name: Print check command
       ansible.builtin.debug:
-        msg: "curl -fs -m 5 http://{{ public_ipv4 }}:3013/v2/peers/pubkey | grep -q '{{ public_key_base58c.stdout }}'"
+        msg: "curl -fs -m 5 http://{{ public_ipv4 }}:3013/v3/peers/pubkey | grep -q '{{ public_key_base58c.stdout }}'"
       tags: [public-key, vault-cmd]
 
     - name: Get the private key

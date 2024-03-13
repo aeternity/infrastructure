@@ -1,6 +1,6 @@
 http:
 {{range $host := .Vars.hosts}}
-  http://{{$host.ip_addr}}:3013/v2/peers/pubkey:
+  http://{{$host.ip_addr}}:3013/v3/peers/pubkey:
     status: 200
     allow-insecure: true
     no-follow-redirects: true

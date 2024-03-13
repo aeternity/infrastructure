@@ -31,7 +31,7 @@
       block:
         - name: Get node status
           ansible.builtin.uri:
-            url: "http://localhost:{{ healthcheck_port }}/v2/status"
+            url: "http://localhost:{{ healthcheck_port }}/v3/status"
           register: status
           failed_when: status.json.syncing == true
 

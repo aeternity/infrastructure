@@ -1,6 +1,6 @@
 {{$host := getEnv "HOST" "127.0.0.1"}}
 http:
-    http://{{$host}}:3013/v2/status:
+    http://{{$host}}:3013/v3/status:
       status: 200
       allow-insecure: true
       no-follow-redirects: true

@@ -28,7 +28,7 @@ def print_host(host):
         host_ip = host
         if 'ansible_host' in hostvars[host]:
             host_ip = hostvars[host]['ansible_host']
-        print("    - %s (%s) [status](http://%s:3013/v2/status) [top](http://%s:3013/v2/blocks/top)" % (host, host_ip, host_ip, host_ip))
+        print("    - %s (%s) [status](http://%s:3013/v3/status) [top](http://%s:3013/v3/blocks/top)" % (host, host_ip, host_ip, host_ip))
 
 def set_hosts_regions(hosts):
     regions = []
