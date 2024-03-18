@@ -1,0 +1,124 @@
+---
+- name: Install dependencies
+  ansible.builtin.package:
+    name: tar
+    state: present
+
+- name: Create statsd_exporter user
+  ansible.builtin.user:
+    name: statsd_exporter
+    state: present
+    create_home: false
+
+- name: Create statsd_exporter directory
+  ansible.builtin.file:
+    path: /etc/statsd_exporter
+    state: directory
+    owner: statsd_exporter
+    group: statsd_exporter
+    mode: "0744"
+
+- name: Get meta data
+  block:
+    - name: Get latest release data
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/prometheus/statsd_exporter/releases/latest # yamllint disable-line rule:line-length
+        return_content: true
+        headers:
+          Accept: application/vnd.github.v3+json
+      register: json_reponse
+    - name: Get statsd_exporter version on remote
+      ansible.builtin.slurp:
+        src: /etc/statsd_exporter/statsd_exporter_version
+      register: statsd_exporter_remote_version
+      ignore_errors: true
+
+- name: Get checksum
+  when: statsd_exporter_remote_version["failed"] or statsd_exporter_remote_version["content"] | b64decode != json_reponse.json.tag_name # yamllint disable-line rule:line-length
+
+  block:
+    - name: Get sha256sums-file link
+      ansible.builtin.set_fact:
+        _sha256_uri: "{{ item.browser_download_url }}"
+      when: "'sha256sums' in item.name"
+      with_items: "{{ json_reponse.json.assets }}"
+    - name: Get checksum from github
+      ansible.builtin.set_fact:
+        _checksums: "{{ lookup('url', _sha256_uri, wantlist=True) | list }}"
+    - name: Get checksum for amd64
+      ansible.builtin.set_fact:
+        statsd_exporter_checksum: "{{ item.split(' ')[0] }}"
+      with_items: "{{ _checksums }}"
+      when: "'linux-amd64.tar.gz' in item"
+- name: Download and install statsd_exporter
+  when: statsd_exporter_remote_version["failed"] or statsd_exporter_remote_version["content"] | b64decode != json_reponse.json.tag_name # yamllint disable-line rule:line-length
+  notify: restart statsd_exporter
+
+  block:
+    - name: Get statsd_exporter download link
+      ansible.builtin.set_fact:
+        _statsd_exporter_uri: "{{ item.browser_download_url }}"
+      when: "'linux-amd64.tar.gz' in item.name"
+      with_items: "{{ json_reponse.json.assets }}"
+    - name: Download archive
+      ansible.builtin.get_url:
+        url: "{{ _statsd_exporter_uri }}"
+        dest: /tmp/statsd_exporter-linux-amd64.tar.gz
+        checksum: sha256:{{ statsd_exporter_checksum }}
+        mode: "0644"
+    - name: Unpack archive
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: /tmp/statsd_exporter-linux-amd64.tar.gz
+        dest: /tmp
+        list_files: true
+      register: _unarchived
+    - name: Register unarchived folder
+      ansible.builtin.set_fact:
+        _unarchived_folder: '{{ _unarchived.files[0].split("/")[0] }}'
+    - name: Move statsd_exporter
+      ansible.builtin.copy:
+        remote_src: true
+        src: /tmp/{{ _unarchived_folder }}/statsd_exporter
+        dest: /usr/local/bin/statsd_exporter
+        owner: root
+        group: root
+        mode: "0755"
+    - name: Clean up temp
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/statsd_exporter-linux-amd64.tar.gz
+        - /tmp/{{ _unarchived_folder }}
+    - name: Create binary version file
+      ansible.builtin.template:
+        src: statsd_exporter_version.j2
+        dest: /etc/statsd_exporter/statsd_exporter_version
+        owner: statsd_exporter
+        group: statsd_exporter
+        mode: "0644"
+- name: Copy mapping file
+  ansible.builtin.template:
+    src: "{{ statsd_exporter_mapping_config }}"
+    dest: /etc/statsd_exporter/statsd_mapping.yml
+    mode: "0644"
+    owner: statsd_exporter
+    group: statsd_exporter
+  when: statsd_exporter_mapping_config is truthy
+  notify: restart statsd_exporter
+
+- name: Copy service file
+  ansible.builtin.template:
+    src: statsd_exporter.service.j2
+    dest: /etc/systemd/system/statsd_exporter.service
+    mode: "0644"
+    owner: root
+    group: root
+  notify: restart statsd_exporter
+
+- name: Start and enable statsd_exporter
+  ansible.builtin.service:
+    name: statsd_exporter
+    state: started
+    enabled: true

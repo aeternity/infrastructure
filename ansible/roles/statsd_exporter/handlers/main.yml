@@ -1,0 +1,6 @@
+---
+- name: Restart statsd_exporter
+  ansible.builtin.systemd:
+    name: statsd_exporter
+    state: restarted
+    daemon_reload: true

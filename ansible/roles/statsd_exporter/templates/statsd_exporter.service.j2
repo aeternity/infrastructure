@@ -1,0 +1,22 @@
+[Unit]
+Description=statsd_exporter
+After=network.target
+
+[Service]
+User=statsd_exporter
+Group=statsd_exporter
+Type=simple
+ExecStart=/usr/local/bin/statsd_exporter \
+    --web.listen-address="{{ statsd_exporter_web_listen_address }}" \
+    --web.telemetry-path="{{ statsd_exporter_web_telemetry_path }}" \
+    --statsd.listen-udp="{{ statsd_exporter_listen_udp }}" \
+    --statsd.listen-tcp="{{ statsd_exporter_listen_tcp }}" \
+    {% if statsd_exporter_relay_address %}
+    --statsd.relay.address="{{ statsd_exporter_relay_address }}" \
+    {% endif %}
+    {% if statsd_exporter_mapping_config %}
+    --statsd.mapping-config="/etc/statsd_exporter/statsd_mapping.yml"
+    {% endif %}
+
+[Install]
+WantedBy=multi-user.target

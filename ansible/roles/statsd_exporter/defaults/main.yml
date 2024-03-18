@@ -1,0 +1,9 @@
+---
+statsd_exporter_version: "0.26.0"
+statsd_exporter_web_listen_address: :9102
+statsd_exporter_web_telemetry_path: /metrics
+statsd_exporter_listen_udp: :9125
+statsd_exporter_listen_tcp: :9125
+statsd_exporter_relay_address: ""
+
+statsd_exporter_mapping_config: ""
