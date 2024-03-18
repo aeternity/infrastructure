@@ -312,3 +312,17 @@
       when: fail2ban_enable | bool
       listen:
         - restart fail2ban
+
+- name: Configure monitoring services (StatsD exporter)
+  hosts: all
+  remote_user: master
+  become: true
+  gather_facts: false
+  tags: [statsd_exporter]
+
+  vars:
+    statsd_exporter_mapping_config: 'files/statsd_mapping.yaml'
+    statsd_exporter_relay_address: 'localhost:8125'
+
+  roles:
+    - statsd_exporter
