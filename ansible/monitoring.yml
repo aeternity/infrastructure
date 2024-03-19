@@ -249,6 +249,10 @@
     - { role: Datadog.datadog }
 
   post_tasks:
+    - name: Check is systemd enabled
+      ansible.builtin.stat:
+        path: /run/systemd/system
+      register: systemd_run_dir
     - name: Install rsyslog
       ansible.builtin.apt:
         state: present
@@ -290,12 +294,14 @@
         state: absent
       notify: restart fail2ban
 
+
   handlers:
     - name: Restart rsyslogd
       ansible.builtin.service:
         name: rsyslog
         state: restarted
         use: service_mgr|default(ansible_service_mgr)
+      when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
       listen:
         - restart rsyslogd
     - name: Restart fail2ban
