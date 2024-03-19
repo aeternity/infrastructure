@@ -115,10 +115,20 @@
     mode: "0644"
     owner: root
     group: root
-  notify: Restart statsd_exporter
+
+- name: Check is systemd enabled
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: systemd_run_dir
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
 
 - name: Start and enable statsd_exporter
   ansible.builtin.service:
     name: statsd_exporter
     state: started
     enabled: true
+  when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir
