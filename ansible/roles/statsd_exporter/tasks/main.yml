@@ -52,7 +52,7 @@
       when: "'linux-amd64.tar.gz' in item"
 - name: Download and install statsd_exporter
   when: statsd_exporter_remote_version["failed"] or statsd_exporter_remote_version["content"] | b64decode != json_reponse.json.tag_name # yamllint disable-line rule:line-length
-  notify: restart statsd_exporter
+  notify: Restart statsd_exporter
 
   block:
     - name: Get statsd_exporter download link
@@ -106,7 +106,7 @@
     owner: statsd_exporter
     group: statsd_exporter
   when: statsd_exporter_mapping_config is truthy
-  notify: restart statsd_exporter
+  notify: Restart statsd_exporter
 
 - name: Copy service file
   ansible.builtin.template:
@@ -115,7 +115,7 @@
     mode: "0644"
     owner: root
     group: root
-  notify: restart statsd_exporter
+  notify: Restart statsd_exporter
 
 - name: Start and enable statsd_exporter
   ansible.builtin.service:
