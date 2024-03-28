@@ -4,7 +4,7 @@ restart_ssh: false
 fail2ban_enable: false
 enable_aws_checks: false
 service_mgr: sysvinit
-
+node_exporter_enabled: false
 datadog_install: false
 datadog_enabled: false
 datadog_skip_running_check: true

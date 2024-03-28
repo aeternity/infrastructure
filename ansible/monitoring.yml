@@ -313,16 +313,18 @@
       listen:
         - restart fail2ban
 
-- name: Configure monitoring services (StatsD exporter)
+- name: Configure monitoring services (Prometheus exporters)
   hosts: all
   remote_user: master
   become: true
   gather_facts: false
-  tags: [statsd_exporter]
+  tags: [prometheus_exporters]
 
   vars:
+    node_exporter_version: '1.7.0'
     statsd_exporter_mapping_config: 'files/statsd_mapping.yaml'
     statsd_exporter_relay_address: 'localhost:8125'
 
   roles:
+    - node_exporter
     - statsd_exporter
