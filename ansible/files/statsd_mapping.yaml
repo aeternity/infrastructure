@@ -1,0 +1,131 @@
+mappings:
+### Worker Queues Metrics
+- match: "ae.epoch.aecore.queues.*.*.value"
+  name: "aecore_queues_size"
+  labels:
+    name: "$1"
+    status: "$2"
+
+- match: "ae.epoch.aecore.queues.*.*.wait.mean"
+  name: "aecore_queues_wait"
+  labels:
+    name: "$1"
+    status: "$2"
+
+### Sync Metrics
+- match: "ae.epoch.aecore.sync.progress.value"
+  name: "aecore_sync_progress"
+
+### General Info Metrics
+- match: "ae.epoch.aecore.blocks.key.info.value"
+  name: "aecore_blocks_info"
+
+### Execution Time Metrics
+- match: "ae\\.epoch\\.aecore\\.blocks\\.(\\w+)\\.(\\w+)_execution_time\\.(\\w+)\\.mean"
+  match_type: regex
+  name: "aecore_${1}_blocks_execution_time"
+  labels:
+    type: "$2"
+    status: "$3"
+
+### Peers Metrics
+- match: "ae\\.epoch\\.aecore\\.peers\\.(unverified|verified|blocked|errored)\\.value"
+  match_type: regex
+  name: "aecore_peers_bucket"
+  labels:
+    bucket: "$1"
+
+- match: "ae\\.epoch\\.aecore\\.peers\\.(inbound|outbound)\\.value"
+  match_type: regex
+  name: "aecore_peers_connection"
+  labels:
+    direction: "$1"
+
+- match: "ae.epoch.aecore.peers.ping.*.value"
+  name: "aecore_peers_ping"
+  labels:
+    status: "$1"
+
+### TX Pool Metrics
+- match: "ae.epoch.aecore.tx_pool.pending_txs"
+  name: "aecore_txpool_size"
+
+- match: "ae.epoch.aecore.tx_pool.gced.value"
+  name: "aecore_txpool_gc_total"
+  labels:
+    bucket: "memory"
+
+- match: "ae.epoch.aecore.tx_pool.origin_gced.value"
+  name: "aecore_txpool_gc_total"
+  labels:
+    bucket: "origin_cache"
+
+- match: "ae.epoch.aecore.tx_pool.push.value"
+  name: "aecore_txpool_push_total"
+  labels:
+    status: "success"
+
+- match: "ae.epoch.aecore.tx_pool.push.*.value"
+  name: "aecore_txpool_push_total"
+  labels:
+    status: "$1"
+
+### Mining Metrics
+- match: "ae.epoch.aecore.mining.retries.value"
+  name: "aecore_mining_retries_total"
+
+- match: "ae.epoch.aecore.mining.blocks_mined.value"
+  name: "aecore_mining_blocks_total"
+
+- match: "ae.epoch.aecore.mining.interval.mean"
+  name: "aecore_mining_blocks_interval"
+
+### Chain Metrics
+- match: "ae.epoch.aecore.chain.total_difficulty"
+  name: "aecore_chain_total_difficulty"
+
+- match: "ae.epoch.aecore.chain.height.value"
+  name: "aecore_chain_height"
+
+- match: "ae.epoch.aecore.chain.top_change.interval.mean"
+  name: "aecore_chain_top_interval"
+
+### Erlang System Metrics
+- match: "ae.epoch.system.io.*.value"
+  name: "erlang_system_io"
+  labels:
+    type: "$1"
+
+- match: "ae.epoch.system.monitor.*.value"
+  name: "erlang_system_monitor_${1}"
+
+- match: "ae.epoch.system.procs.value"
+  name: "erlang_system_processes"
+
+- match: "ae.epoch.system.memory.*.value"
+  name: "erlang_system_memory_allocated_bytes"
+  labels:
+    type: "$1"
+
+- match: "ae.epoch.system.memory.total.value"
+  action: drop
+  name: "dropped"
+
+- match: "ae.epoch.system.memory.system.value"
+  name: "erlang_system_memory_system_bytes"
+
+- match: "ae.epoch.system.memory.*.value"
+  name: "erlang_system_memory_allocated_bytes"
+  labels:
+    type: "$1"
+
+- match: "ae.epoch.system.memory.*.used.value"
+  name: "erlang_system_memory_used_bytes"
+  labels:
+    type: "$1"
+
+# drop all not explicitly mapped
+- match: "."
+  match_type: regex
+  action: drop
+  name: "dropped"
