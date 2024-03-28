@@ -326,5 +326,6 @@
     statsd_exporter_relay_address: 'localhost:8125'
 
   roles:
-    - node_exporter
-    - statsd_exporter
+    - role: node_exporter
+      when: node_exporter_enabled
+    - role: statsd_exporter
