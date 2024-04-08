@@ -90,6 +90,76 @@ mappings:
 - match: "ae.epoch.aecore.chain.top_change.interval.mean"
   name: "aecore_chain_top_interval"
 
+### Aemon core monitoring app
+- match: "ae.epoch.aemon.block.gas.per_tx.micro.mean"
+  name: "aecore_aemon_transaction_gas"
+
+- match: "ae.epoch.aemon.block.gas.total.micro.mean"
+  name: "aecore_aemon_microblock_gas"
+
+- match: "ae.epoch.aemon.block.propagation_time.key.mean"
+  name: "aecore_aemon_keyblock_propagation_ms"
+  help: "Time until key-blocks reached this node in milliseconds"
+
+- match: "ae.epoch.aemon.block.propagation_time.micro.mean"
+  name: "aecore_aemon_microblock_propagation_ms"
+  help: "Time until micro-blocks reached this node in milliseconds"
+
+- match: "ae.epoch.aemon.block.size.per_tx.micro.mean"
+  name: "aecore_aemon_transaction_size_bytes"
+
+- match: "ae.epoch.aemon.block.time_since_prev.key.mean"
+  name: "aecore_aemon_keyblock_interval_ms"
+  help: "Time between key-blocks in milliseconds"
+
+- match: "ae.epoch.aemon.block.time_since_prev.micro.mean"
+  name: "aecore_aemon_microblock_interval_ms"
+  help: "Time between micro-blocks in milliseconds"
+
+- match: "ae.epoch.aemon.block.tx.total.micro.mean"
+  name: "aecore_aemon_microblock_transactions"
+  help: "Number of transactions in a microblock"
+
+- match: "ae.epoch.aemon.chain.top.difficulty.value"
+  name: "aecore_aemon_chain_current_difficulty"
+
+- match: "ae.epoch.aemon.confirmation.delay.mean"
+  name: "aecore_aemon_confirmation_delay"
+  help: "Number of keyblocks bofore test/monitoring TX gets included in a generation"
+
+- match: "ae.epoch.aemon.forks.micro.count.value"
+  name: "aecore_aemon_microforks_total"
+  help: "Count of observed micro-forks"
+
+- match: "ae.epoch.aemon.forks.micro.height.mean"
+  name: "aecore_aemon_microforks_height"
+  help: "Height difference of observed micro-forks"
+
+- match: "ae.epoch.aemon.gen_stats.microblocks.total.mean"
+  name: "aecore_aemon_generation_microblocks"
+
+- match: "ae.epoch.aemon.gen_stats.tx.total.mean"
+  name: "aecore_aemon_generation_transactions"
+
+- match: "ae.epoch.aemon.gen_stats.tx.monitoring.mean"
+  name: "aecore_aemon_generation_mon_transactions"
+
+- match: "ae.epoch.aemon.publisher.queue.size.mean"
+  name: "aecore_aemon_publisher_queue_size"
+  help: "Number of monitoring transactions posted but not wet on chain"
+
+- match: "ae.epoch.aemon.publisher.queue.ttl_expired.mean"
+  name: "aecore_aemon_publisher_queue_expired"
+  help: "Number of expired monitoring transactions"
+
+- match: "ae.epoch.aemon.publisher.post_tx.*"
+  name: "aecore_aemon_publisher_transactions_total"
+  help: "Number of monitoring transactions posted by their status"
+  labels:
+    status: "$1"
+
+#TODO - piblisher balances
+
 ### Erlang System Metrics
 - match: "ae.epoch.system.io.*.value"
   name: "erlang_system_io"
