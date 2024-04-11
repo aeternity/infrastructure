@@ -33,7 +33,7 @@ read -p "Deploy UAT monitoring nodes? (y/N):" uatmonchoice
 if [[ $uatmonchoice == "y" ]]; then
     make vault-config-update-uat_mon@eu-central-1
 
-    DEPLOY_ENV=uat_mon DEPLOY_REGION=eu-central-1 CONFIG_KEY=uat_mon@eu-central-1 make deploy
+    DEPLOY_ENV=uat_mon DEPLOY_REGION=eu-north-1 CONFIG_KEY=uat_mon@eu-central-1 make deploy
 fi
 
 read -p "Deploy MAIN monitoring nodes? (y/N):" mainmonchoice
