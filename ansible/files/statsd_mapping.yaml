@@ -152,7 +152,7 @@ mappings:
   name: "aecore_aemon_publisher_queue_expired"
   help: "Number of expired monitoring transactions"
 
-- match: "ae.epoch.aemon.publisher.post_tx.*"
+- match: "ae.epoch.aemon.publisher.post_tx.*.value"
   name: "aecore_aemon_publisher_transactions_total"
   help: "Number of monitoring transactions posted by their status"
   labels:
