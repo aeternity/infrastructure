@@ -13,7 +13,7 @@
     snapshot_path: "{{ snapshots_dir }}/{{ restore_snapshot_filename|mandatory }}"
     snapshot_checksum_algo: md5
     snapshot_checksum_path: "{{ snapshot_path }}.{{ snapshot_checksum_algo }}"
-    restore_dir: "{{ additional_storage_mountpoint|default(project_root) }}"
+    restore_dir: "{{ additional_storage_mountpoint|default(ansible_env.HOME) }}"
     should_restore: true
     force_restore: false
     db_path: data/
@@ -100,6 +100,7 @@
       ansible.builtin.file:
         path: "{{ db_path }}"
         state: directory
+        recurse: true
       when: should_restore
 
     - name: Restore Mnesia database to {{ db_path }}/
