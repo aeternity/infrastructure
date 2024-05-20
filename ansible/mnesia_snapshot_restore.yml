@@ -100,7 +100,7 @@
       ansible.builtin.file:
         path: "{{ db_path }}"
         state: directory
-        recurse: yes
+        recurse: true
       when: should_restore
 
     - name: Restore Mnesia database to {{ db_path }}/
