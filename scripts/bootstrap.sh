@@ -102,8 +102,8 @@ if [[ -n "${aerole}" && "${aerole}" = "aenode" ]]; then
         -e ansible_python_interpreter=$(which python3) \
         --become-user aeternity -b \
         -e ${ANSIBLE_VARS} \
-        deploy.yml \
-        mnesia_snapshot_restore.yml
+        mnesia_snapshot_restore.yml \
+        deploy.yml
 fi
 
 if [[ -n "${aerole}" && "${aerole}" = "aemdw" ]]; then

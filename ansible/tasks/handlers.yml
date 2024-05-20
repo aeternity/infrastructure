@@ -28,6 +28,7 @@
 
 - name: Start aeternity node
   ansible.builtin.command: "{{ project_root }}/bin/aeternity start"
+  when: ae_node.stat.exists == True
   tags: [daemon]
   listen:
     - "start aeternity daemon"
