@@ -93,8 +93,7 @@ ansible-playbook \
     -e ansible_python_interpreter=$(which python3) \
     -e vault_addr=${vault_addr} \
     -e ${ANSIBLE_VARS} \
-    setup.yml \
-    monitoring.yml
+    setup.yml
 
 if [[ -n "${aerole}" && "${aerole}" = "aenode" ]]; then
     ansible-playbook \
@@ -114,3 +113,10 @@ if [[ -n "${aerole}" && "${aerole}" = "aemdw" ]]; then
         -e ${ANSIBLE_VARS} \
         deploy-aemdw.yml
 fi
+
+ansible-playbook \
+    -i localhost, -c local \
+    -e ansible_python_interpreter=$(which python3) \
+    -e vault_addr=${vault_addr} \
+    -e ${ANSIBLE_VARS} \
+    monitoring.yml
