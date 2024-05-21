@@ -129,6 +129,8 @@
           - datadog==0.43.0
           - hvac==1.2.1
           - wheel==0.37.1
+          # temporary fix for https://github.com/docker/docker-py/issues/3256
+          - requests==2.31.0
       # "pip3 install ansible" fails otherwise
       # see https://github.com/pypa/pip/issues/10219#issuecomment-887337037
       environment:

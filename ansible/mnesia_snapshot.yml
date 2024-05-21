@@ -15,7 +15,6 @@
     snapshot_filename: "{{ env }}_v{{ db_version }}_{{ snapshot_kind }}_{{ snapshot_suffix }}.tar.zst"
     snapshot_filename_latest: "{{ env }}_v{{ db_version }}_{{ snapshot_kind }}_latest.tar.zst"
     snapshot_path: "{{ snapshots_dir | default('/tmp/snapshots') }}/{{ snapshot_filename }}"
-    snapshot_checksum_path: "{{ snapshot_path }}.md5"
     aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
     security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
@@ -104,7 +103,6 @@
         - name: Stat {{ snapshot_path }}
           ansible.builtin.stat:
             path: "{{ snapshot_path }}"
-            checksum_algorithm: md5
           register: snapshot_file
           tags: [upload]
 
@@ -123,50 +121,11 @@
             - snapshot_file.stat.readable
           tags: [upload]
 
-        - name: Generate a checksum file ({{ snapshot_checksum_path }})
-          ansible.builtin.copy:
-            dest: "{{ snapshot_checksum_path }}"
-            content: "{{ snapshot_file.stat.checksum }}"
-          when:
-            - snapshot_file.stat.readable is defined
-            - snapshot_file.stat.readable
-          tags: [upload]
-
-        - name: Upload the checksum file to S3 ({{ snapshots_bucket ~ '/' ~ snapshot_filename ~ '.md5' }})
-          amazon.aws.s3_object:
-            bucket: "{{ snapshots_bucket }}"
-            object: "{{ snapshot_filename }}.md5"
-            src: "{{ snapshot_checksum_path }}"
-            mode: put
-            permission: "public-read"
-            aws_access_key: "{{ aws_access_key }}"
-            aws_secret_key: "{{ aws_secret_key }}"
-            security_token: "{{ security_token }}"
-          when:
-            - snapshot_file.stat.readable is defined
-            - snapshot_file.stat.readable
-          tags: [upload]
-
         - name: Upload backup to S3 bucket latest
           amazon.aws.s3_object:
             bucket: "{{ snapshots_bucket }}"
             object: "{{ snapshot_filename_latest }}"
             src: "{{ snapshot_path }}"
-            mode: put
-            permission: "public-read"
-            aws_access_key: "{{ aws_access_key }}"
-            aws_secret_key: "{{ aws_secret_key }}"
-            security_token: "{{ security_token }}"
-          when:
-            - snapshot_file.stat.readable is defined
-            - snapshot_file.stat.readable
-          tags: [latest]
-
-        - name: Upload the checksum file to S3 latest
-          amazon.aws.s3_object:
-            bucket: "{{ snapshots_bucket }}"
-            object: "{{ snapshot_filename_latest }}.md5"
-            src: "{{ snapshot_checksum_path }}"
             mode: put
             permission: "public-read"
             aws_access_key: "{{ aws_access_key }}"
