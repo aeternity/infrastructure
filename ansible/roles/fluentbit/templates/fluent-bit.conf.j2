@@ -1,0 +1,68 @@
+{{ ansible_managed | comment }}
+
+[SERVICE]
+  Flush {{ fluentbit_svc_flush }}
+  Grace {{ fluentbit_svc_grace }}
+  Daemon {{ fluentbit_svc_daemon }}
+{% if fluentbit_svc_logfile | length > 0 %}
+  Log_File {{ fluentbit_svc_logfile }}
+{% endif %}
+  Log_Level {{ fluentbit_svc_loglevel }}
+
+{% if fluentbit_svc_parsers_file | length > 0 %}
+{% for path in fluentbit_svc_parsers_file %}
+  Parsers_File {{ path }}
+{% endfor%}
+{% endif %}
+{% if fluentbit_managed_parsers_enable | bool %}
+  Parsers_File {{ fluentbit_managed_parsers_file }}
+{% endif %}
+
+{% if fluentbit_svc_plugins_file | length > 0 %}
+{% for path in fluentbit_svc_plugins_file %}
+  Plugins_File {{ path }}
+{% endfor%}
+{% endif %}
+{% if fluentbit_svc_streams_file | length > 0 %}
+{% for path in fluentbit_svc_streams_file %}
+  Streams_File {{ path }}
+{% endfor%}
+{% endif %}
+
+{% if fluentbit_svc_storage is defined and fluentbit_svc_storage | length > 0 %}
+  # Storage configuration
+{% for key, value in fluentbit_svc_storage.items() %}
+  Storage.{{ key }} {{ value }}
+{% endfor %}
+{% endif %}
+
+{% if fluentbit_svc_http is defined and fluentbit_svc_http | length > 0 %}
+  # HTTP Server (Monitoring related)
+{% for key, value in fluentbit_svc_http.items() %}
+  HTTP_{{ key }} {{ value }}
+{% endfor %}
+{% endif %}
+
+{% for _input in _fluentbit_inputs %}
+[INPUT]
+{% for key, value in _input.items() %}
+  {{ key | regex_replace ('^[0-9]+__', '') }} {{ value }}
+{% endfor %}
+
+{% endfor -%}
+
+{% for _filter in _fluentbit_filters %}
+[FILTER]
+{% for key, value in _filter.items() %}
+  {{ key | regex_replace ('^[0-9]+__', '') }} {{ value }}
+{% endfor %}
+
+{% endfor -%}
+
+{% for _output in _fluentbit_outputs %}
+[OUTPUT]
+{% for key, value in _output.items() %}
+  {{ key | regex_replace ('^[0-9]+__', '') }} {{ value }}
+{% endfor %}
+
+{% endfor -%}

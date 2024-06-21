@@ -1,0 +1,54 @@
+---
+# Installation
+fluentbit_prerequisites:
+  - apt-transport-https
+  - curl
+  - gnupg
+
+fluentbit_apt_key_url: "https://packages.fluentbit.io/fluentbit.key"
+fluentbit_apt_key_path: "/usr/share/keyrings/fluentbit-keyring.gpg"
+
+fluentbit_apt_repos_url: "https://packages.fluentbit.io/{{ ansible_distribution | lower }}/{{ ansible_distribution_release | lower }}"
+fluentbit_apt_repos_component: "main"
+
+fluentbit_pkg_name: "fluent-bit"
+fluentbit_pkg_version: "{{ fluentbit_version | default('') }}"  # For retro-compatibility
+fluentbit_pkg_version_hold: "{{ fluentbit_pkg_version | default(False) | ternary(True, False) }}"
+
+fluentbit_svc_name: "fluent-bit"
+
+fluentbit_conf_directory: "/etc/fluent-bit"
+fluentbit_conf_file_path: "{{ fluentbit_conf_directory }}/fluent-bit.conf"
+
+# Main configuration
+fluentbit_svc_flush: "5"
+fluentbit_svc_grace: "5"
+fluentbit_svc_daemon: "off"  # Need to be Off when using the provided systemd unit.
+fluentbit_svc_logfile: ""
+fluentbit_svc_loglevel: "info"
+fluentbit_svc_parsers_file:
+  - parsers.conf
+fluentbit_svc_plugins_file:
+  - plugins.conf
+fluentbit_svc_streams_file: []
+
+# Enable ansible managed parser if there are some defined
+fluentbit_managed_parsers_enable: "{{ ((_fluentbit_parsers | length) or (_fluentbit_mlparsers | length)) | bool }}"
+fluentbit_managed_parsers_file: "{{ fluentbit_conf_directory }}/managed-parsers.conf"
+
+fluentbit_svc_http:
+  server: "off"
+fluentbit_svc_storage:
+  metrics: "on"
+
+# fluentbit_svc_limit_open_files: 65536
+
+# Log processing
+_fluentbit_parsers: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='parser')) }}"
+_fluentbit_mlparsers: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='mlparser')) }}"
+_fluentbit_inputs: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='input')) }}"
+_fluentbit_filters: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='filter')) }}"
+_fluentbit_outputs: "{{ lookup('template', 'get_vars.j2', template_vars=dict(var_type='output')) }}"
+
+# Others
+fluentbit_dbs_path: ""

@@ -1,0 +1,11 @@
+---
+- name: Check is systemd enabled
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: systemd_run_dir
+
+- name: "Restart Fluentbit."
+  service:
+    name: "{{ fluentbit_svc_name }}"
+    state: restarted
+  when: systemd_run_dir.stat.exists and systemd_run_dir.stat.isdir

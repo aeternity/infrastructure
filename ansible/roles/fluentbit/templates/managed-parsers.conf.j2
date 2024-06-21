@@ -1,0 +1,17 @@
+{{ ansible_managed | comment }}
+
+{% for _parser in _fluentbit_parsers %}
+[PARSER]
+{% for key, value in _parser.items() %}
+  {{ key | regex_replace ('^[0-9]+__', '') }} {{ value }}
+{% endfor %}
+
+{% endfor -%}
+
+{% for _parser in _fluentbit_mlparsers %}
+[MULTILINE_PARSER]
+{% for key, value in _parser.items() %}
+  {{ key | regex_replace ('^[0-9]+__', '') }} {{ value }}
+{% endfor %}
+
+{% endfor -%}

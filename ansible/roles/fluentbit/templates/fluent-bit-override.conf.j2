@@ -1,0 +1,4 @@
+{{ ansible_managed | comment }}
+
+[Service]
+LimitNOFILE="{{ fluentbit_svc_limit_open_files }}"

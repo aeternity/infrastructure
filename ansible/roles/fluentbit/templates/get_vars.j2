@@ -1,0 +1,18 @@
+#jinja2: lstrip_blocks: True
+[
+{% for varname in lookup('varnames', '^fluentbit_.+_'+var_type+'(s)?$', wantlist=True) %}
+  {% set var=lookup('vars', varname) %}
+  {% if var | length %}
+    {% if var is mapping %}
+      {{ var }}
+    {% else -%}
+      {% if var is iterable %}
+        {% for item in var %}
+          {{ item }}{% if not loop.last %}, {% endif %}
+        {% endfor -%}
+      {% endif -%}
+    {% endif -%}
+    {% if not loop.last %}, {% endif %}
+  {% endif %}
+{% endfor %}
+]

@@ -329,3 +329,52 @@
     - role: node_exporter
       when: node_exporter_enabled
     - role: statsd_exporter
+
+- name: Configure logging services (fluent-bit)
+  hosts: all
+  remote_user: master
+  become: true
+  gather_facts: false
+  tags: [fluentbit]
+
+  vars:
+    loki_http_user: "{{ lookup('hashi_vault', 'secret=secret/loki/http_auth:user') }}"
+    loki_http_password: "{{ lookup('hashi_vault', 'secret=secret/loki/http_auth:password') }}"
+    fluentbit_pkg_version: 3.0.7
+    fluentbit_dbs_path: /var/lib/flb-storage
+    fluentbit_svc_storage:
+      path: /var/lib/flb-storage/
+      sync: full
+      checksum: "off"
+    fluentbit_systemd_input:
+      - name: systemd
+        tag: host.*
+        lowercase: "on"
+        strip_underscores: "on"
+        read_from_tail: "on"
+    fluentbit_aenode_input:
+      - name: tail
+        tag: aenode
+        path: /home/aeternity/node/log/*.log
+        path_key: filepath
+    fluentbit_service_filter:
+      - name: record_modifier
+        match: "host.*"
+        record: service_name systemd
+      - name: record_modifier
+        match: aenode
+        record: service_name aenode
+    fluentbit_loki_output:
+      - name: loki
+        match: '*'
+        host: loki.dev.aeternity.io
+        port: 443
+        tls: "on"
+        http_user: "{{ loki_http_user }}"
+        http_passwd: "{{ loki_http_password }}"
+        labels: source=aenode
+        label_keys: $service_name
+        remove_keys: $service_name
+
+  roles:
+    - role: fluentbit
