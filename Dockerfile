@@ -6,10 +6,12 @@ FROM alpine:3.17
 # OpenSSL required for a packer workaround: https://github.com/hashicorp/packer/issues/2526
 RUN apk add --no-cache bash curl unzip make python3 py3-pip py-cryptography openssh-client openssl sshpass jq bc git
 
-ENV PACKER_VERSION=1.8.7
+ENV PACKER_VERSION=1.11.1
 RUN curl -sSO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip \
     && unzip packer_${PACKER_VERSION}_linux_amd64.zip -d /bin \
-    && rm -f packer_${PACKER_VERSION}_linux_amd64.zip
+    && rm -f packer_${PACKER_VERSION}_linux_amd64.zip \
+    && packer plugins install github.com/hashicorp/amazon \
+    && packer plugins install github.com/hashicorp/ansible
 
 ENV VAULT_VERSION=0.11.2
 RUN curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
