@@ -338,6 +338,7 @@
   tags: [fluentbit]
 
   vars:
+    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
     loki_http_user: "{{ lookup('hashi_vault', 'secret=secret/loki/http_auth:user') }}"
     loki_http_password: "{{ lookup('hashi_vault', 'secret=secret/loki/http_auth:password') }}"
     fluentbit_pkg_version: 3.0.7
@@ -357,13 +358,28 @@
         tag: aenode
         path: /home/aeternity/node/log/*.log
         path_key: filepath
-    fluentbit_service_filter:
+    fluentbit_records_filter:
       - name: record_modifier
         match: "host.*"
         record: service_name systemd
       - name: record_modifier
         match: aenode
         record: service_name aenode
+      - name: record_modifier
+        match: "*"
+        record: "public_ipv4 {{ public_ipv4 }}"
+    fluentbit_aws_filter:
+      - name: aws
+        match: '*'
+        imds_version: v2
+        az: "true"
+        ec2_instance_id: "true"
+        ec2_instance_type: "true"
+        private_ip: "true"
+        ami_id: "true"
+        hostname: "true"
+        tags_enabled: "true"
+        tags_include: Name,role,env,kind,color
     fluentbit_loki_output:
       - name: loki
         match: '*'
