@@ -13,7 +13,7 @@ RUN curl -sSO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${P
     && packer plugins install github.com/hashicorp/amazon \
     && packer plugins install github.com/hashicorp/ansible
 
-ENV VAULT_VERSION=0.11.2
+ENV VAULT_VERSION=1.17.5
 RUN curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
     && unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin \
     && rm -f vault_${VAULT_VERSION}_linux_amd64.zip
