@@ -8,14 +8,14 @@ RUN apk add --no-cache bash curl unzip make python3 py3-pip py-cryptography open
 
 ENV PACKER_VERSION=1.11.1
 RUN curl -sSO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip \
-    && unzip packer_${PACKER_VERSION}_linux_amd64.zip -d /bin \
+    && unzip -o packer_${PACKER_VERSION}_linux_amd64.zip -d /bin \
     && rm -f packer_${PACKER_VERSION}_linux_amd64.zip \
     && packer plugins install github.com/hashicorp/amazon \
     && packer plugins install github.com/hashicorp/ansible
 
 ENV VAULT_VERSION=1.17.5
 RUN curl -sSO https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip \
-    && unzip vault_${VAULT_VERSION}_linux_amd64.zip -d /bin \
+    && unzip -o vault_${VAULT_VERSION}_linux_amd64.zip -d /bin \
     && rm -f vault_${VAULT_VERSION}_linux_amd64.zip
 
 ENV DOCKER_CLIENT_VERSION=20.10.11
