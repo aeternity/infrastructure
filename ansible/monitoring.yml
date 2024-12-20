@@ -349,22 +349,22 @@
       checksum: "off"
     fluentbit_systemd_input:
       - name: systemd
-        tag: host.*
+        tag: systemd.*
         lowercase: "on"
         strip_underscores: "on"
         read_from_tail: "on"
     fluentbit_aenode_input:
       - name: tail
-        tag: aenode
+        tag: aenode.*
         path: /home/aeternity/node/log/*.log
         path_key: filepath
     fluentbit_records_filter:
-      - name: record_modifier
-        match: "host.*"
-        record: service_name systemd
-      - name: record_modifier
-        match: aenode
-        record: service_name aenode
+      # - name: record_modifier
+      #   match: systemd.*
+      #   record: job fluentbit.host.systemd
+      # - name: record_modifier
+      #   match: aenode.*
+      #   record: job fluentbit.host.aenode
       - name: record_modifier
         match: "*"
         record: "public_ipv4 {{ public_ipv4 }}"
@@ -380,7 +380,7 @@
         hostname: "true"
         tags_enabled: "true"
         tags_include: Name,role,env,kind,color
-    fluentbit_loki_output:
+    fluentbit_loki_systemd_output:
       - name: loki
         match: '*'
         host: loki.dev.aeternity.io
@@ -388,9 +388,18 @@
         tls: "on"
         http_user: "{{ loki_http_user }}"
         http_passwd: "{{ loki_http_password }}"
-        labels: source=aenode
-        label_keys: $service_name
-        remove_keys: $service_name
+        labels: job=fluentbit.host.systemd
+        label_keys: $role, $env, $kind, $ec2_instance_id, $systemd_unit, $priority
+    fluentbit_loki_aenode_output:
+      - name: loki
+        match: '*'
+        host: loki.dev.aeternity.io
+        port: 443
+        tls: "on"
+        http_user: "{{ loki_http_user }}"
+        http_passwd: "{{ loki_http_password }}"
+        labels: job=fluentbit.host.aenode
+        label_keys: $role, $env, $kind, $ec2_instance_id
 
   roles:
     - role: fluentbit
