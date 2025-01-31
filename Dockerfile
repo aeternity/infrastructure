@@ -4,7 +4,7 @@ FROM alpine:3.17
 # Some of the playbooks run on multiple hosts: local + remote.
 # If it's set in the inventory it will not work when a specific inventory is used.
 # OpenSSL required for a packer workaround: https://github.com/hashicorp/packer/issues/2526
-RUN apk add --no-cache bash curl unzip make python3 py3-pip py-cryptography openssh-client openssl sshpass jq bc git
+RUN apk add --no-cache bash curl unzip make python3 py3-pip py-cryptography openssh-client openssl sshpass jq yq bc git
 
 ENV PACKER_VERSION=1.11.1
 RUN curl -sSO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip \
