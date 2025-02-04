@@ -61,7 +61,7 @@ commands:
       - run:
           name: Create Infrastructure
           command: |
-            tfenv use 1.1.4
+            tfenv use 1.9.6
             make integration-tests-init TF_VAR_envid="tf_test_${CIRCLE_JOB}_${CIRCLE_SHA1}"
       - run:
           name: Health Checks

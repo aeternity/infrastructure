@@ -20,7 +20,7 @@ provider "aws" {
 }
 
 module "test-aenode-2204" {
-  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v3.1.0"
+  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v4.0.0"
   env    = var.env_name
 
   static_nodes = 1
@@ -53,7 +53,7 @@ module "test-aenode-2204" {
 }
 
 module "test-aemdw-2204" {
-  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v3.1.0"
+  source = "github.com/aeternity/terraform-aws-aenode-deploy?ref=v4.0.0"
   env    = var.env_name
 
   static_nodes = 1

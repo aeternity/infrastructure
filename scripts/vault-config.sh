@@ -152,7 +152,7 @@ dump() {
 dump_yml_value() {
     local config_path=${1:?}
 
-    yq r "${config_path}/${YAML_FILE:?}" "${YAML_PATH:?}"
+    yq "${YAML_PATH:?}" "${config_path}/${YAML_FILE:?}"
 }
 
 dump_yml() {
@@ -190,8 +190,8 @@ update() {
 update_yml_value() {
     local config_path=${1:?}
 
-    yq r "${config_path}/${YAML_FILE:?}" "${YAML_PATH:?}" "${YAML_VALUE:?}"
-    yq w -i "${config_path}/${YAML_FILE:?}" "${YAML_PATH:?}" "${YAML_VALUE:?}"
+    yq "${YAML_PATH:?}" "${config_path}/${YAML_FILE:?}"
+    yq -i "${YAML_PATH:?}"' = "'"${YAML_VALUE:?}"'"' "${config_path}/${YAML_FILE:?}"
 }
 
 update_yml() {
