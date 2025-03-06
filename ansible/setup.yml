@@ -94,6 +94,7 @@
         update_cache: true
         pkg:
           - sudo
+          - acl
           - docker-ce
           - build-essential
           - python3-pip
