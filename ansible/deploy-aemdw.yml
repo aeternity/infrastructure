@@ -126,11 +126,12 @@
               AETERNITY_CONFIG: "/home/aeternity/aeternity.yaml"
               # this is default? If the config file is mdw specific we don't need overwrite
               AE__CHAIN__DB_PATH: "/home/aeternity/node/data/mnesia"
-              ENABLE_CONSOLE_LOG: "true"
+              ENABLE_CONSOLE_LOG: "false"
+              LOG_LEVEL: "error"
             volumes:
               - "{{ aemdw_db_path }}/mnesia:/home/aeternity/node/data/mnesia"
               - "{{ aemdw_db_path }}/mdw.db:/home/aeternity/node/data/mdw.db"
-              - "{{ aemdw_logs_path }}:/home/aeternity/node/ae_mdw/log"
+              - "{{ aemdw_logs_path }}:/home/aeternity/ae_mdw/log"
               - "{{ aemdw_project_root }}/accounts.json:{{ accounts_path }}"
               - "{{ aemdw_project_root }}/contracts.json:{{ contracts_path }}"
               - "{{ aemdw_project_root }}/aeternity.yaml:/home/aeternity/aeternity.yaml"
