@@ -18,10 +18,6 @@
     aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
     security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
-    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
-    datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
-    datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
-    downtime: "0"
     db_path: data/
     healthcheck_port: 3013
 
@@ -33,22 +29,6 @@
             url: "http://localhost:{{ healthcheck_port }}/v3/status"
           register: status
           failed_when: status.json.syncing == true
-
-        - name: Schedule downtime
-          run_once: true
-          ansible.builtin.uri:
-            url: "{{ datadog_api_url }}"
-            method: POST
-            status_code: 200
-            timeout: 10
-            body_format: json
-            body:
-              scope: "env:{{ env }}"
-              message: "Snapshot"
-              end: "{{ lookup('pipe', 'date +%s') | int + downtime | int }}"
-          when:
-            - downtime is defined
-            - downtime != "0"
 
         - name: Stop node
           ansible.builtin.command: "/bin/true"
@@ -145,40 +125,7 @@
           notify: "clean snapshot"
           tags: [clean]
 
-        - name: Send Datadog event
-          community.general.datadog_event:
-            host: "{{ ansible_ssh_host | default(inventory_hostname) }}"
-            alert_type: success
-            title: Snapshot
-            text: "Filename: {{ snapshot_filename }}"
-            api_key: "{{ datadog_api_key }}"
-            app_key: "{{ datadog_app_key }}"
-            tags:
-              - "env:{{ env }}"
-          when:
-            - datadog_api_key != ""
-            - datadog_app_key != ""
-          tags: [datadog-event]
-
       rescue:
-        - name: Send Datadog event
-          community.general.datadog_event:
-            host: "{{ ansible_ssh_host | default(inventory_hostname) }}"
-            alert_type: error
-            title: Snapshot
-            text: |
-              %%%
-              Filename: {{ snapshot_filename }}
-              Task {{ ansible_failed_task.name }} failed with error {{ ansible_failed_result.msg }}
-              %%%
-            api_key: "{{ datadog_api_key }}"
-            app_key: "{{ datadog_app_key }}"
-            tags:
-              - "env:{{ env }}"
-          when:
-            - datadog_api_key != ""
-            - datadog_app_key != ""
-          tags: [datadog-event]
         - name: Fail the playbook
           ansible.builtin.fail:
             msg: "Failed snapshot"

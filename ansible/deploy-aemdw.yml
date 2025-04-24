@@ -11,10 +11,6 @@
   vars:
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host) | default(ansible_host)|default(inventory_hostname) }}"
     aemdw_project_root: "/home/{{ ansible_user_id }}/aemdw"
-    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
-    datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
-    datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
-    downtime: "0"
     enable_aws_checks: true
     health_check: true
     healthcheck_port: 3013
@@ -25,7 +21,7 @@
     docker_tag: "latest"
     accounts_path: /home/aeternity/node/data/aecore/.genesis/accounts_test.json
     contracts_path: /home/aeternity/node/data/aecore/.genesis/contacts_test.json
-    # Label used for datadog tagging and ENV file planting
+    # Label used for ENV file planting
     env: unknown
 
   tasks:
@@ -55,23 +51,6 @@
 
     - name: Deploy
       block:
-        - name: Schedule downtime
-          run_once: true
-          ansible.builtin.uri:
-            url: "https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}"
-            method: POST
-            status_code: 200
-            timeout: 10
-            body_format: json
-            body:
-              scope: "role:aemdw,env:{{ env }}"
-              message: "Deploy aemdw - {{ docker_repository }}:{{ docker_tag }}"
-              end: "{{ lookup('pipe', 'date +%s') | int + downtime | int }}"
-          register: datadog_downtime
-          when:
-            - downtime is defined
-            - downtime != "0"
-
         - name: Make sure 'aemdw_project_root' exists
           ansible.builtin.file:
             path: "{{ aemdw_project_root }}"
@@ -164,50 +143,7 @@
 
         - name: Run node health checks
           ansible.builtin.include_tasks: tasks/health_check.yml
-
-        - name: Send Datadog event
-          community.general.datadog_event:
-            host: "{{ ansible_ec2_instance_id | default(ansible_hostname) }}"
-            alert_type: success
-            title: Middleware Deployment
-            text: |
-              %%%
-              Version: [{{ docker_tag }}](https://github.com/aeternity/ae_mdw/releases/tag/v{{ docker_tag }})
-              %%%
-            api_key: "{{ datadog_api_key }}"
-            app_key: "{{ datadog_app_key }}"
-            tags:
-              - "version:{{ docker_tag }}"
-          when:
-            - datadog_api_key != ""
-            - datadog_app_key != ""
-          become: false
-          connection: local
-          tags: [datadog-event]
       rescue:
-        - name: Send Datadog event
-          community.general.datadog_event:
-            host: "{{ ansible_ec2_instance_id | default(ansible_hostname) }}"
-            alert_type: error
-            title: Middleware Deployment
-            text: |
-              %%%
-              Version: [{{ docker_tag }}](https://github.com/aeternity/ae_mdw/releases/tag/v{{ docker_tag }})
-
-              Task: {{ ansible_failed_task.name }}\
-              Error Message:\
-              {{ ansible_failed_result.msg }}
-              %%%
-            api_key: "{{ datadog_api_key }}"
-            app_key: "{{ datadog_app_key }}"
-            tags:
-              - "version:{{ docker_tag }}"
-          when:
-            - datadog_api_key != ""
-            - datadog_app_key != ""
-          connection: local
-          become: false
-          tags: [datadog-event]
         - name: Fail the playbook
           ansible.builtin.fail:
             msg: "Failed deploy"
