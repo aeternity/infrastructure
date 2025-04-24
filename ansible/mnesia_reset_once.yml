@@ -7,12 +7,10 @@
     project_root: "{{ ansible_env.HOME }}/node"
     aeternity_bin: "{{ project_root }}/bin/aeternity"
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host) | default(inventory_hostname) }}"
-    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
-    datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     healthcheck_port: 3013
 
   tasks:
-    - name: Get nodes info and send Datadog event
+    - name: Check synced nodes
       run_once: true
       block:
         - name: Get nodes status
@@ -32,32 +30,7 @@
             | selectattr('sync_progress', 'equalto', 100)
             | list
             | length == 0
-
-        - name: Send Datadog event
-          community.general.datadog_event:
-            host: "{{ public_ipv4 }}"
-            alert_type: success
-            title: Reset mnesia database
-            text: "Synced node found"
-            api_key: "{{ datadog_api_key }}"
-            app_key: "{{ datadog_app_key }}"
-          when:
-            - datadog_api_key != ""
-            - datadog_app_key != ""
-          connection: local
       rescue:
-        - name: Send Datadog event
-          community.general.datadog_event:
-            host: "{{ public_ipv4 }}"
-            alert_type: error
-            title: Reset mnesia database
-            text: "No synced node found"
-            api_key: "{{ datadog_api_key }}"
-            app_key: "{{ datadog_app_key }}"
-          when:
-            - datadog_api_key != ""
-            - datadog_app_key != ""
-          connection: local
         - name: Fail the playbook
           ansible.builtin.fail:
             msg: "No synced node found"

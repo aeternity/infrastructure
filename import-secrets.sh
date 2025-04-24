@@ -48,7 +48,6 @@ if [ -n "$VAULT_TOKEN" ]; then
         export DOCKER_USER=$(echo $DOCKERHUB_CREDS | grep -o 'username [^ ]*' | awk '{print $2}')
         export DOCKER_PASS=$(echo $DOCKERHUB_CREDS | grep -o 'password [^ ]*' | awk '{print $2}')
 
-        export DATADOG_API_KEY=$(vault read -field=api_key secret/datadog/deploy)
         export ROCKET_HOOK_URL=$(vault read -field=core-alerts secret/rocketchat/prod/hooks)
         export ROCKET_HOOK_DEVOPS_URL=$(vault read -field=core-alerts-devops secret/rocketchat/prod/hooks)
     fi

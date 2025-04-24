@@ -9,8 +9,6 @@ DOCKERHUB_CREDS=$(vault read secret/dockerhub/prod)
 DOCKER_USER=$(echo $DOCKERHUB_CREDS | grep -o 'username [^ ]*' | awk '{print $2}')
 DOCKER_PASS=$(echo $DOCKERHUB_CREDS | grep -o 'password [^ ]*' | awk '{print $2}')
 
-DATADOG_API_KEY=$(vault read -field=api_key secret/datadog/deploy)
-
 dump_var "VAULT_ADDR"
 dump_var "VAULT_TOKEN"
 dump_var "AWS_ACCESS_KEY_ID"
@@ -18,4 +16,3 @@ dump_var "AWS_SECRET_ACCESS_KEY"
 dump_var "AWS_SESSION_TOKEN"
 dump_var "DOCKER_USER"
 dump_var "DOCKER_PASS"
-dump_var "DATADOG_API_KEY"
