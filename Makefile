@@ -51,11 +51,11 @@ ansible/%.yml: cert $(DEPLOY_CONFIG)
 	cd ansible && $(ENV) ansible-playbook \
 		$(if $(HOST),-i $(HOST)$(,),--limit="$(LIMIT)") \
 		-e ansible_python_interpreter=$(PYTHON) \
-		-e env="$(DEPLOY_ENV)" \
-		-e vault_config_key="$(CONFIG_KEY)" \
 		$(if $(DEPLOY_CONFIG),-e "@$(DEPLOY_CONFIG)") \
 		$(ANSIBLE_EXTRA_VARS) \
 		$(ANSIBLE_EXTRA_PARAMS) \
+		-e env="$(DEPLOY_ENV)" \
+		-e vault_config_key="$(CONFIG_KEY)" \
 		$*.yml
 
 ### Ansible playbook specific rquirements
