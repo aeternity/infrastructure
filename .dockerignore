@@ -12,7 +12,6 @@
 # Copy from .gitignore
 *.retry
 ansible/inventory/*.rc.sh
-ansible/callback_plugins/datadog_callback.yml
 .virtualenv/
 .DS_Store
 *.pyc

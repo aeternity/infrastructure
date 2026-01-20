@@ -11,17 +11,13 @@
     public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
     project_root: "/home/aeternity/node"
     packages_path: "/home/aeternity"
-    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
-    datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
-    datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
-    downtime: "0"
     health_check: true
     healthcheck_port: 3013
     enable_aws_checks: true
     db_path: data/
     keys_dir: keys/
 
-    # Label used for datadog tagging and ENV file planting
+    # Label used ENV file planting
     env: unknown
 
   tasks:
@@ -51,22 +47,6 @@
 
     - name: Deploy
       block:
-        - name: Schedule downtime
-          run_once: true
-          ansible.builtin.uri:
-            url: "{{ datadog_api_url }}"
-            method: POST
-            status_code: 200
-            timeout: 10
-            body_format: json
-            body:
-              scope: "env:{{ env }}"
-              message: "Deploy"
-              end: "{{ lookup('pipe', 'date +%s') | int + downtime | int }}"
-          when:
-            - downtime is defined
-            - downtime != "0"
-
         - name: Fail on missing package variable
           ansible.builtin.fail:
             msg: '"package" variable must be defined'
@@ -210,51 +190,7 @@
 
         - name: Run health checks
           ansible.builtin.include_tasks: tasks/health_check.yml
-
-        - name: Refresh aeternity facts
-          ansible.builtin.setup:
-          tags: [datadog-event]
-
-        - name: Send Datadog event
-          community.general.datadog_event:
-            host: "{{ ansible_ec2_instance_id | default(ansible_hostname) }}"
-            alert_type: success
-            title: Node Deployment
-            text: |
-              %%%
-              Revision: [{{ ansible_local.aeternity.revision }}](https://github.com/aeternity/aeternity/commit/{{ ansible_local.aeternity.revision }})
-              Package: {{ package | default('unknown') }}
-              %%%
-            api_key: "{{ datadog_api_key }}"
-            app_key: "{{ datadog_app_key }}"
-            tags:
-              - "env:{{ env }}"
-              - "version:{{ ansible_local.aeternity.version }}"
-          when:
-            - datadog_api_key != ""
-            - datadog_app_key != ""
-          connection: local
-        #   tags: [datadog-event]
       rescue:
-        - name: Send Datadog event
-          community.general.datadog_event:
-            host: "{{ ansible_ec2_instance_id | default(ansible_hostname) }}"
-            alert_type: error
-            title: Node Deployment
-            text: |
-              %%%
-              Package: {{ package | default('unknown') }}
-              Task {{ ansible_failed_task.name }} failed with error {{ ansible_failed_result.msg }}
-              %%%
-            api_key: "{{ datadog_api_key }}"
-            app_key: "{{ datadog_app_key }}"
-            tags:
-              - "env:{{ env }}"
-          when:
-            - datadog_api_key != ""
-            - datadog_app_key != ""
-          connection: local
-          tags: [datadog-event]
         - name: Fail the playbook
           ansible.builtin.fail:
             msg: "Failed deploy"

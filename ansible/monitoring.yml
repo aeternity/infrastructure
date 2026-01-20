@@ -1,34 +1,3 @@
-- name: Collect cloud instance metadata
-  hosts: all
-  remote_user: master
-  become: true
-  gather_facts: true
-  tags: [datadog]
-  vars:
-    enable_aws_checks: true
-  tasks:
-    - name: Check if running on AWS instance
-      ansible.builtin.uri:
-        url: http://169.254.169.254/latest/meta-data
-        timeout: 2
-      register: aws_uri_check
-      failed_when: false
-      when:
-        - enable_aws_checks|bool
-        - packer_build_name is not defined
-
-    - name: Set AWS check fact
-      ansible.builtin.set_fact:
-        is_aws: "{{ packer_build_name is not defined and aws_uri_check.status == 200 }}"
-      when:
-        - enable_aws_checks|bool
-
-    - name: Get instance metadata facts
-      amazon.aws.ec2_metadata_facts:
-      when:
-        - enable_aws_checks|bool
-        - is_aws
-
 - name: Configure health check services (goss)
   hosts: all
   remote_user: master
@@ -155,98 +124,15 @@
       tags:
         - goss-install
 
-- name: Configure monitoring services (DataDog)
+- name: Configure monitoring services (Rsyslog)
   hosts: all
   remote_user: master
   become: true
   gather_facts: false
-  tags: [datadog]
+  tags: [rsyslog]
 
   vars:
-    project_user: aeternity
-    public_ipv4: "{{ ansible_ec2_public_ipv4|default(ansible_ssh_host)|default(ansible_host)|default(inventory_hostname) }}"
     fail2ban_enable: true
-    datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/agent:api_key') }}"
-    datadog_default_tags:
-      - "lsb:{{ ansible_lsb.description }}"
-      - "public_ipv4:{{ public_ipv4|default('unknown') }}"
-      - "network_id:{{ network_id|default('unknown') }}"
-    datadog_agent_major_version: 6
-    datadog_config:
-      log_level: warning
-      log_to_console: false
-      apm_enabled: false
-      use_dogstatsd: true
-      process_config:
-        enabled: "true" # has to be set as a string
-      apm_config:
-        enabled: false
-      logs_enabled: true
-      tags: "{{ (datadog_tags + datadog_default_tags) if datadog_tags is defined else datadog_default_tags }}"
-    datadog_checks:
-      system_core:
-        init_config:
-        instances:
-          # The Agent just needs one item in instances in order to enable the check.
-          # The content of the item doesn’t matter.
-          - foo: bar
-      process:
-        init_config:
-        instances:
-          - name: ssh
-            search_string: ['sshd']
-          - name: aeternity
-            search_string: ['beam.smp']
-          - name: epmd
-            search_string: ['epmd']
-            thresholds:
-              warning: [1, 1]
-      http_check:
-        init_config:
-        instances:
-          - name: API
-            url: "http://localhost:8080/healthz"
-            # Default is false, i.e. emit events instead of service checks.
-            # Recommend to set to true.
-            skip_event: true
-      logs_agent:
-        init_config:
-        instances:
-        logs:
-          - type: tcp
-            port: 10518
-            service: aeternity
-            source: syslog
-          - type: file
-            path: "/home/{{ project_user }}/node/log/aeternity.log"
-            service: aeternity
-            source: lager
-            sourcecategory: aeternity
-          - type: file
-            path: "/home/{{ project_user }}/node/log/aeternity_mining.log"
-            service: aeternity
-            source: lager
-            sourcecategory: mining
-          - type: file
-            path: "/home/{{ project_user }}/node/log/aeternity_pow_cuckoo.log"
-            service: aeternity
-            source: lager
-            sourcecategory: pow
-          - type: file
-            path: "/home/{{ project_user }}/node/log/aeternity_sync.log"
-            service: aeternity
-            source: lager
-            sourcecategory: sync
-
-  pre_tasks:
-    - name: "Add dd-agent to {{ project_user ~ 'group' }}"
-      ansible.builtin.user:
-        name: dd-agent
-        groups: "{{ project_user }}"
-        append: true
-
-  roles:
-    - { role: Datadog.datadog }
 
   post_tasks:
     - name: Check is systemd enabled
@@ -259,12 +145,6 @@
         update_cache: true
         pkg:
           - rsyslog
-    - name: Copy datadog.conf to rsyslog
-      ansible.builtin.copy:
-        src: files/rsyslog/datadog.conf
-        dest: /etc/rsyslog.d/datadog.conf
-        mode: '0600'
-      notify: restart rsyslogd
     - name: Copy fail2ban.conf to rsyslog
       ansible.builtin.copy:
         src: files/rsyslog/fail2ban.conf

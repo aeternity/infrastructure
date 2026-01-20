@@ -1,5 +1,3 @@
-- src: Datadog.datadog
-  version: "4.13.0"
 - src: https://github.com/geerlingguy/ansible-role-node_exporter.git
   version: "2.1.0"
   name: node_exporter
