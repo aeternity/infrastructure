@@ -244,9 +244,11 @@
         name: dd-agent
         groups: "{{ project_user }}"
         append: true
+      when: datadog_enabled | default(false) | bool
 
   roles:
-    - { role: Datadog.datadog }
+    - role: Datadog.datadog
+      when: datadog_enabled | default(false) | bool
 
   post_tasks:
     - name: Check is systemd enabled
@@ -265,6 +267,7 @@
         dest: /etc/rsyslog.d/datadog.conf
         mode: '0600'
       notify: restart rsyslogd
+      when: datadog_enabled | default(false) | bool
     - name: Copy fail2ban.conf to rsyslog
       ansible.builtin.copy:
         src: files/rsyslog/fail2ban.conf
