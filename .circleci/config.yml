@@ -38,7 +38,7 @@ references:
     run:
       name: Pull current branch Docker image
       command: |
-        docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
+        docker pull ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH//\//_}
 
 commands:
   setup_secrets:
@@ -91,7 +91,7 @@ commands:
       - run:
           name: Build docker branch image
           command: |
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH//\//_} .
 
   lint:
     steps:
@@ -183,8 +183,8 @@ jobs:
       - run:
           name: Push (branch) Docker image to DockerHub
           command: |
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} .
-            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_}
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH//\//_} .
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH//\//_}
       - fail_notification
 
   docker_push_latest:
@@ -197,7 +197,7 @@ jobs:
       - run:
           name: Tag and push Docker "latest" image to DockerHub
           command: |
-            docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH///\//_} ${DOCKERHUB_REPO:?}:latest
+            docker tag ${DOCKERHUB_REPO:?}:${CIRCLE_BRANCH//\//_} ${DOCKERHUB_REPO:?}:latest
             docker push ${DOCKERHUB_REPO:?}:latest
       - fail_notification
 
