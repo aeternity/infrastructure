@@ -11,3 +11,5 @@ test/terraform/terraform.tfstate*
 test/terraform/.terraform
 ansible/inventory-list.json
 secrets/*
+# Personal/local reference notes (not for version control)
+*.local.md
