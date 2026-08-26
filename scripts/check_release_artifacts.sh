@@ -17,7 +17,7 @@ else
     version=$release
 fi
 
-declare -a targets=(ubuntu-x86_64.tar.gz macos-x86_64.tar.gz)
+declare -a targets=(ubuntu-x86_64.tar.gz)
 declare -a prefixes=(aeternity aeternity-bundle)
 repo_name=aeternity/aeternity
 
