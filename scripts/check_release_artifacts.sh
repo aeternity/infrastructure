@@ -47,12 +47,15 @@ get_docker_image_digest() {
     local image=$1
     local tag=$2
     local token=$3
+    # Release images are pushed as multi-arch manifest lists (see docker-manifest
+    # job), which have no top-level .config.digest - use the sorted per-platform
+    # manifest digests instead so this also works for single-arch legacy tags.
    curl \
     --silent \
-    --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+    --header "Accept: application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json" \
     --header "Authorization: Bearer $token" \
     "https://index.docker.io/v2/$image/manifests/$tag" \
-    | jq -r '.config.digest'
+    | jq -r 'if .manifests then ([.manifests[].digest] | sort | join(",")) else .config.digest end'
 }
 
 check_dockerhub_assets() {
@@ -62,7 +65,7 @@ check_dockerhub_assets() {
     else
         version_digest=$(get_docker_image_digest $repo_name $release $token)
         latest_digest=$(get_docker_image_digest $repo_name latest $token)
-        if [[ "$version_digest" == "null" ]]; then
+        if [[ -z "$version_digest" || "$version_digest" == "null" ]]; then
             echo docker image tag $release not found >&2; failed=true
         else
             if [[ "$version_digest" != "$latest_digest" ]]; then
