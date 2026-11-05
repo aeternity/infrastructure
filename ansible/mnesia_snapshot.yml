@@ -9,6 +9,7 @@
     project_root: "{{ ansible_env.HOME }}/node"
     aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
     snapshots_bucket: aeternity-database-backups
+    snapshots_bucket_region: eu-central-1
     snapshots_dir: "{{ additional_storage_mountpoint | default('/tmp') }}/snapshots"
     snapshot_suffix: "{{ ansible_date_time.iso8601_basic_short }}"
     snapshot_kind: full
@@ -166,20 +167,26 @@
             - snapshot_file.stat.readable
           tags: [upload]
 
-        - name: Refresh the AWS credentials for the latest upload
+        - name: Refresh the AWS credentials for the latest copy
           ansible.builtin.import_tasks: tasks/aws_fresh_credentials.yml
           tags: [latest]
 
-        - name: Upload backup to S3 bucket latest
-          amazon.aws.s3_object:
-            bucket: "{{ snapshots_bucket }}"
-            object: "{{ snapshot_filename_latest }}"
-            src: "{{ snapshot_path }}"
-            mode: put
-            permission: "public-read"
-            aws_access_key: "{{ aws_access_key }}"
-            aws_secret_key: "{{ aws_secret_key }}"
-            security_token: "{{ security_token }}"
+        # Server-side multipart copy inside S3: no re-upload and no local disk. The s3_object copy
+        # mode is a single CopyObject call, which S3 caps at 5 GB.
+        - name: Copy the snapshot to S3 bucket latest ({{ snapshots_bucket ~ '/' ~ snapshot_filename_latest }})
+          delegate_to: localhost
+          become: false
+          ansible.builtin.command: >-
+            aws s3 cp
+            s3://{{ snapshots_bucket }}/{{ snapshot_filename }}
+            s3://{{ snapshots_bucket }}/{{ snapshot_filename_latest }}
+            --acl public-read --only-show-errors
+          environment:
+            AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+            AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+            AWS_SESSION_TOKEN: "{{ security_token }}"
+            AWS_DEFAULT_REGION: "{{ snapshots_bucket_region }}"
+          changed_when: true
           when:
             - snapshot_file.stat.readable is defined
             - snapshot_file.stat.readable
