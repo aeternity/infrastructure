@@ -19,7 +19,7 @@
     aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
     security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
-    aws_credentials_role: "{{ lookup('env', 'VAULT_SECRETS_ROLE') | default('ae-fleet-manager', true) }}"
+    aws_credentials_role: ae-fleet-manager
     aws_credentials_ttl: 2h
     snapshot_db_dir: "{{ db_path if (additional_storage is defined and additional_storage) else project_root ~ '/' ~ db_path }}"
     snapshot_min_free_ratio: 0.75
