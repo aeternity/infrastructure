@@ -18,6 +18,10 @@
     aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
     security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+    aws_credentials_role: "{{ lookup('env', 'VAULT_SECRETS_ROLE') | default('ae-fleet-manager', true) }}"
+    aws_credentials_ttl: 2h
+    snapshot_db_dir: "{{ db_path if (additional_storage is defined and additional_storage) else project_root ~ '/' ~ db_path }}"
+    snapshot_min_free_ratio: 0.75
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
@@ -49,6 +53,43 @@
           when:
             - downtime is defined
             - downtime != "0"
+
+        - name: Find stale snapshot archives ({{ snapshots_dir }})
+          ansible.builtin.find:
+            paths: "{{ snapshots_dir }}"
+            patterns: "*.tar.zst"
+          register: stale_snapshots
+          tags: [archive]
+
+        - name: Remove stale snapshot archives
+          ansible.builtin.file:
+            path: "{{ item.path }}"
+            state: absent
+          loop: "{{ stale_snapshots.files }}"
+          loop_control:
+            label: "{{ item.path }}"
+          tags: [archive]
+
+        - name: Measure the database size ({{ snapshot_db_dir }})
+          ansible.builtin.command: du -sb {{ snapshot_db_dir }}
+          register: db_size
+          changed_when: false
+          tags: [archive]
+
+        - name: Get the free space of {{ additional_storage_mountpoint | default('/tmp') }}
+          ansible.builtin.command: df --output=avail -B1 {{ additional_storage_mountpoint | default('/tmp') }}
+          register: free_space
+          changed_when: false
+          tags: [archive]
+
+        - name: Check there is enough free space for the archive
+          ansible.builtin.assert:
+            that: (free_bytes | int) >= ((db_bytes | int) * (snapshot_min_free_ratio | float)) | int
+            fail_msg: "Not enough free space for the snapshot: {{ free_bytes }} bytes free, database is {{ db_bytes }} bytes"
+          vars:
+            db_bytes: "{{ db_size.stdout.split()[0] }}"
+            free_bytes: "{{ free_space.stdout_lines[-1] | trim }}"
+          tags: [archive]
 
         - name: Stop node
           ansible.builtin.command: "/bin/true"
@@ -106,6 +147,10 @@
           register: snapshot_file
           tags: [upload]
 
+        - name: Refresh the AWS credentials
+          ansible.builtin.import_tasks: tasks/aws_fresh_credentials.yml
+          tags: [upload]
+
         - name: Upload snapshot to S3 bucket ({{ snapshots_bucket ~ '/' ~ snapshot_filename }})
           amazon.aws.s3_object:
             bucket: "{{ snapshots_bucket }}"
@@ -120,6 +165,10 @@
             - snapshot_file.stat.readable is defined
             - snapshot_file.stat.readable
           tags: [upload]
+
+        - name: Refresh the AWS credentials for the latest upload
+          ansible.builtin.import_tasks: tasks/aws_fresh_credentials.yml
+          tags: [latest]
 
         - name: Upload backup to S3 bucket latest
           amazon.aws.s3_object:
