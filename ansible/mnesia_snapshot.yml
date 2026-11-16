@@ -9,6 +9,7 @@
     project_root: "{{ ansible_env.HOME }}/node"
     aeternity_bin: "{{ ansible_env.HOME }}/node/bin/aeternity"
     snapshots_bucket: aeternity-database-backups
+    snapshots_bucket_region: eu-central-1
     snapshots_dir: "{{ additional_storage_mountpoint | default('/tmp') }}/snapshots"
     snapshot_suffix: "{{ ansible_date_time.iso8601_basic_short }}"
     snapshot_kind: full
@@ -18,6 +19,10 @@
     aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
     security_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+    aws_credentials_role: ae-fleet-manager
+    aws_credentials_ttl: 2h
+    snapshot_db_dir: "{{ db_path if (additional_storage is defined and additional_storage) else project_root ~ '/' ~ db_path }}"
+    snapshot_min_free_ratio: 0.75
     datadog_api_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:api_key') }}"
     datadog_app_key: "{{ lookup('hashi_vault', 'secret=secret/datadog/deploy:app_key') }}"
     datadog_api_url: https://api.datadoghq.com/api/v1/downtime?api_key={{ datadog_api_key }}&application_key={{ datadog_app_key }}
@@ -49,6 +54,43 @@
           when:
             - downtime is defined
             - downtime != "0"
+
+        - name: Find stale snapshot archives ({{ snapshots_dir }})
+          ansible.builtin.find:
+            paths: "{{ snapshots_dir }}"
+            patterns: "*.tar.zst"
+          register: stale_snapshots
+          tags: [archive]
+
+        - name: Remove stale snapshot archives
+          ansible.builtin.file:
+            path: "{{ item.path }}"
+            state: absent
+          loop: "{{ stale_snapshots.files }}"
+          loop_control:
+            label: "{{ item.path }}"
+          tags: [archive]
+
+        - name: Measure the database size ({{ snapshot_db_dir }})
+          ansible.builtin.command: du -sb {{ snapshot_db_dir }}
+          register: db_size
+          changed_when: false
+          tags: [archive]
+
+        - name: Get the free space of {{ additional_storage_mountpoint | default('/tmp') }}
+          ansible.builtin.command: df --output=avail -B1 {{ additional_storage_mountpoint | default('/tmp') }}
+          register: free_space
+          changed_when: false
+          tags: [archive]
+
+        - name: Check there is enough free space for the archive
+          ansible.builtin.assert:
+            that: (free_bytes | int) >= ((db_bytes | int) * (snapshot_min_free_ratio | float)) | int
+            fail_msg: "Not enough free space for the snapshot: {{ free_bytes }} bytes free, database is {{ db_bytes }} bytes"
+          vars:
+            db_bytes: "{{ db_size.stdout.split()[0] }}"
+            free_bytes: "{{ free_space.stdout_lines[-1] | trim }}"
+          tags: [archive]
 
         - name: Stop node
           ansible.builtin.command: "/bin/true"
@@ -106,6 +148,10 @@
           register: snapshot_file
           tags: [upload]
 
+        - name: Refresh the AWS credentials
+          ansible.builtin.import_tasks: tasks/aws_fresh_credentials.yml
+          tags: [upload]
+
         - name: Upload snapshot to S3 bucket ({{ snapshots_bucket ~ '/' ~ snapshot_filename }})
           amazon.aws.s3_object:
             bucket: "{{ snapshots_bucket }}"
@@ -121,16 +167,26 @@
             - snapshot_file.stat.readable
           tags: [upload]
 
-        - name: Upload backup to S3 bucket latest
-          amazon.aws.s3_object:
-            bucket: "{{ snapshots_bucket }}"
-            object: "{{ snapshot_filename_latest }}"
-            src: "{{ snapshot_path }}"
-            mode: put
-            permission: "public-read"
-            aws_access_key: "{{ aws_access_key }}"
-            aws_secret_key: "{{ aws_secret_key }}"
-            security_token: "{{ security_token }}"
+        - name: Refresh the AWS credentials for the latest copy
+          ansible.builtin.import_tasks: tasks/aws_fresh_credentials.yml
+          tags: [latest]
+
+        # Server-side multipart copy inside S3: no re-upload and no local disk. The s3_object copy
+        # mode is a single CopyObject call, which S3 caps at 5 GB.
+        - name: Copy the snapshot to S3 bucket latest ({{ snapshots_bucket ~ '/' ~ snapshot_filename_latest }})
+          delegate_to: localhost
+          become: false
+          ansible.builtin.command: >-
+            aws s3 cp
+            s3://{{ snapshots_bucket }}/{{ snapshot_filename }}
+            s3://{{ snapshots_bucket }}/{{ snapshot_filename_latest }}
+            --acl public-read --only-show-errors
+          environment:
+            AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+            AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+            AWS_SESSION_TOKEN: "{{ security_token }}"
+            AWS_DEFAULT_REGION: "{{ snapshots_bucket_region }}"
+          changed_when: true
           when:
             - snapshot_file.stat.readable is defined
             - snapshot_file.stat.readable
